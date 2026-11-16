@@ -10,6 +10,7 @@ import { getDefaultPlacement, getSidebarLinkKey } from './sidebar-visibility';
 import { DropdownMenu } from '@/ds/components/DropdownMenu';
 import { IconDotGrid1x3Horizontal } from '@/ds/icons/central/IconDotGrid1x3Horizontal';
 import { IconSettingsSliderHor } from '@/ds/icons/central/IconSettingsSliderHor';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SidebarMoreLinksProps = {
   links: OptionalSidebarLink[];
@@ -28,6 +29,7 @@ export function SidebarMoreLinks({
   onPlacementChange,
   onCustomize,
 }: SidebarMoreLinksProps) {
+  useLocale();
   const context = useMaybeSidebarState();
   const Link = context?.LinkComponent ?? 'a';
   const linkIsActive = (link: SidebarLink) => isActive?.(link, activeCandidates) ?? link.isActive ?? false;
@@ -77,18 +79,18 @@ export function SidebarMoreLinks({
           <SidebarNavLink
             link={{ name: 'More', url: '', icon: <IconDotGrid1x3Horizontal /> }}
             render={
-              <DropdownMenu.Trigger ref={moreTriggerRef} render={<button type="button" />} aria-label="More">
+              <DropdownMenu.Trigger ref={moreTriggerRef} render={<button type="button" />} aria-label={studioT('More')}>
                 <IconDotGrid1x3Horizontal aria-hidden="true" />
-                <SidebarNavLabel>More</SidebarNavLabel>
+                <SidebarNavLabel>{studioT('More')}</SidebarNavLabel>
               </DropdownMenu.Trigger>
             }
           />
-          <DropdownMenu.Content align="start" aria-label="More navigation" className="min-w-44">
+          <DropdownMenu.Content align="start" aria-label={studioT('More navigation')} className="min-w-44">
             {moreMenuLinks.map(link => renderMenuLink(link))}
             {moreMenuLinks.length > 0 && <DropdownMenu.Separator />}
             <DropdownMenu.Item onClick={() => onCustomize(moreTriggerRef.current, () => moreTriggerRef.current)}>
               <IconSettingsSliderHor />
-              Customize sidebar
+              {studioT('Customize sidebar')}
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu>

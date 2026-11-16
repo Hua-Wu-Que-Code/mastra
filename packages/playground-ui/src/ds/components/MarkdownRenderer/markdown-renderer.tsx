@@ -13,6 +13,8 @@ import { MarkdownTable } from './markdown-table';
 import { remarkTableMarkdown } from './table-markdown';
 import { useSettledWords } from './use-settled';
 import { CodeBlock } from '@/ds/components/CodeBlock';
+
+import { useLocale, t as studioT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './markdown-renderer.css';
@@ -266,6 +268,7 @@ function MarkdownCodeBlock({
   children?: ReactNode;
   className?: string;
 }) {
+  useLocale();
   const fenced = fencedCode(node);
   if (!fenced) return <pre className={className}>{children}</pre>;
 
@@ -275,7 +278,7 @@ function MarkdownCodeBlock({
       lang={fenced.language}
       overflow="scroll"
       className={cn('my-3 bg-sidebar', className)}
-      copyMessage="Copied code to clipboard"
+      copyMessage={studioT('Copied code to clipboard')}
     />
   );
 }

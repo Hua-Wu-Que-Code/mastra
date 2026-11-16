@@ -18,6 +18,7 @@ import { WidgetError } from './widget-error';
 import { ErrorBoundary } from '@/ds/components/ErrorBoundary';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import type { MetricsCardDragHandleProps } from '@/ds/components/MetricsCard';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type DashboardRendererProps = {
   definition: DashboardDefinition;
@@ -75,6 +76,7 @@ export function DashboardRenderer({
   alert,
   className,
 }: DashboardRendererProps) {
+  useLocale();
   // A widget that threw renders again once the page's range or filters change, or the widget does.
   const { datePreset, customRange, filterTokens } = useMetrics();
   const pageKey = JSON.stringify([datePreset, customRange, filterTokens]);
@@ -82,7 +84,13 @@ export function DashboardRenderer({
 
   const envelope = dashboardDefinitionEnvelopeSchema.safeParse(definition);
   if (!envelope.success) {
-    return <MetricsCard.Error message={`This dashboard can't be shown. ${describeIssue(envelope.error.issues[0])}`} />;
+    return (
+      <MetricsCard.Error
+        message={studioT("This dashboard can't be shown. {value0}", {
+          value0: describeIssue(envelope.error.issues[0]),
+        })}
+      />
+    );
   }
   // Each widget is parsed on its own below, so one that doesn't fit the current version shows its own error.
   const { rows } = migrateDashboardDefinition(envelope.data);

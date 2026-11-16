@@ -8,6 +8,8 @@ import type {
   KnowledgeExplorerSource,
   KnowledgeExplorerView,
 } from '@mastra/playground-ui/domains/knowledge/components/KnowledgePageExplorer';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router';
@@ -29,9 +31,10 @@ import { navCrumb } from '@/domains/navigation/crumbs';
 const crumbs = [navCrumb('/knowledge')];
 
 function Shell({ children }: { children: React.ReactNode }) {
+  useLocale();
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Knowledge</h1>
+      <h1 className="sr-only">{studioT('Knowledge')}</h1>
       {children}
     </PageLayout>
   );
@@ -109,6 +112,7 @@ function Explorer({
 }
 
 export default function KnowledgePage() {
+  useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const instances = useKnowledgeInstances();
   const knowledgeKey = searchParams.get('instance') ?? instances.data?.[0]?.key;
@@ -137,8 +141,10 @@ export default function KnowledgePage() {
       <Shell>
         <EmptyState
           variant="fill"
-          titleSlot="Knowledge browsing is not enabled"
-          descriptionSlot="This server does not register the Knowledge routes. Add KNOWLEDGE_ROUTES from @mastra/server/server-adapter to server.apiRoutes, then reload."
+          titleSlot={studioT('Knowledge browsing is not enabled')}
+          descriptionSlot={studioT(
+            'This server does not register the Knowledge routes. Add KNOWLEDGE_ROUTES from @mastra/server/server-adapter to server.apiRoutes, then reload.',
+          )}
         />
       </Shell>
     );
@@ -149,7 +155,7 @@ export default function KnowledgePage() {
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load Knowledge"
+          titleSlot={studioT('Failed to load Knowledge')}
           descriptionSlot={instances.error.message}
         />
       </Shell>
@@ -160,8 +166,8 @@ export default function KnowledgePage() {
       <Shell>
         <EmptyState
           variant="fill"
-          titleSlot="No Knowledge instances"
-          descriptionSlot="Register one on your Mastra instance with the knowledge option to browse it here."
+          titleSlot={studioT('No Knowledge instances')}
+          descriptionSlot={studioT('Register one on your Mastra instance with the knowledge option to browse it here.')}
         />
       </Shell>
     );
@@ -172,7 +178,7 @@ export default function KnowledgePage() {
       <div className="flex h-full min-h-0 flex-1 flex-col gap-3">
         {instances.data && instances.data.length > 1 ? (
           <select
-            aria-label="Knowledge instance"
+            aria-label={studioT('Knowledge instance')}
             className="text-ui-md h-8 w-fit rounded border border-border bg-card px-2"
             value={knowledgeKey}
             onChange={event => setSearchParams(new URLSearchParams({ instance: event.target.value }))}
@@ -185,19 +191,19 @@ export default function KnowledgePage() {
           </select>
         ) : null}
         {!knowledgeKey || graph.isPending ? (
-          <p className="text-ui-md p-4 text-muted-foreground">Loading knowledge…</p>
+          <p className="text-ui-md p-4 text-muted-foreground">{studioT('Loading knowledge…')}</p>
         ) : !graph.data ? (
           <EmptyState
             tone="error"
             variant="fill"
-            titleSlot="Failed to load Knowledge"
+            titleSlot={studioT('Failed to load Knowledge')}
             descriptionSlot={graph.error?.message}
           />
         ) : graph.data.pages.length === 0 ? (
           <EmptyState
             variant="fill"
-            titleSlot="No pages yet"
-            descriptionSlot="Agents add pages and notes to Knowledge as they run. They will appear here."
+            titleSlot={studioT('No pages yet')}
+            descriptionSlot={studioT('Agents add pages and notes to Knowledge as they run. They will appear here.')}
           />
         ) : (
           <Explorer knowledgeKey={knowledgeKey} live={live} graph={graph.data} />

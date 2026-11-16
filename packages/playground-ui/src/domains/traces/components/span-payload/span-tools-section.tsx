@@ -12,6 +12,7 @@ import { MessageRow } from '@/domains/chat/messages/message-row';
 import { Txt } from '@/ds/components/Txt';
 import { ToolsIcon } from '@/ds/icons/ToolsIcon';
 import { useLinkComponent } from '@/lib/framework';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /**
  * Registered tool ids by the names a span may record them under: the tool id,
@@ -95,13 +96,14 @@ export function SpanToolCallList({ toolCalls }: { toolCalls: ReturnType<typeof u
 
 /** The tools the model called, each opening on its input and the result its tool span recorded. */
 export function SpanToolCallsSection({ span, layout }: SpanToolsSectionProps) {
+  useLocale();
   const toolCalls = useSpanToolCalls(span);
   // Only tools the chat never draws (task tools, working memory) were called; the Output JSON keeps them.
   if (toolCalls.length === 0) return null;
 
   return (
     <SpanPayloadSection
-      title={`Tool calls (${toolCalls.length})`}
+      title={studioT('Tool calls ({value0})', { value0: toolCalls.length })}
       icon={<ToolsIcon />}
       raw={getRequestedToolCalls(span)}
       hasPreview
@@ -116,12 +118,13 @@ export function SpanToolCallsSection({ span, layout }: SpanToolsSectionProps) {
 
 /** The tools the span offered the model, linking to their pages when registered. */
 export function SpanAvailableToolsSection({ span, layout }: SpanToolsSectionProps) {
+  useLocale();
   const spanTools = getSpanTools(span);
   if (!spanTools) return null;
 
   return (
     <SpanPayloadSection
-      title={`Available tools (${spanTools.tools.length})`}
+      title={studioT('Available tools ({value0})', { value0: spanTools.tools.length })}
       icon={<ToolsIcon />}
       raw={spanTools.raw}
       layout={layout}

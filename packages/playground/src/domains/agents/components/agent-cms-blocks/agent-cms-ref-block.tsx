@@ -13,6 +13,10 @@ import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/Ico
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 
@@ -58,6 +62,7 @@ const RefBlockContent = ({
   schema,
   readOnly = false,
 }: RefBlockContentProps) => {
+  useLocale();
   const { data: promptBlock, isLoading } = useStoredPromptBlock({
     blockId: block.promptBlockId,
     queryOptions: { enabled: Boolean(block.promptBlockId) },
@@ -128,7 +133,7 @@ const RefBlockContent = ({
                   <IconDotGrid2x3 />
                 </Icon>
               </TooltipTrigger>
-              <TooltipContent side="left">Drag to reorder</TooltipContent>
+              <TooltipContent side="left">{studioT('Drag to reorder')}</TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -139,7 +144,7 @@ const RefBlockContent = ({
         {isLoading ? (
           <div className="flex items-center gap-2 py-3 text-muted-foreground">
             <Spinner className="h-4 w-4" />
-            <Txt variant="caption">Loading prompt block...</Txt>
+            <Txt variant="caption">{studioT('Loading prompt block...')}</Txt>
           </div>
         ) : promptBlock ? (
           <>
@@ -149,13 +154,13 @@ const RefBlockContent = ({
                 {promptBlock.name}
               </Txt>
               {isDraft && (
-                <Badge size="xs" variant="warning" aria-label="Draft prompt block">
-                  Draft
+                <Badge size="xs" variant="warning" aria-label={studioT('Draft prompt block')}>
+                  {studioT('Draft')}
                 </Badge>
               )}
               {hasUnpublishedEdits && (
-                <Badge size="xs" variant="warning" aria-label="Unpublished prompt block edits">
-                  Unpublished edits
+                <Badge size="xs" variant="warning" aria-label={studioT('Unpublished prompt block edits')}>
+                  {studioT('Unpublished edits')}
                 </Badge>
               )}
               {onRulesChange && (
@@ -173,7 +178,7 @@ const RefBlockContent = ({
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      aria-label={`Open actions for ${promptBlock.name}`}
+                      aria-label={studioT('Open actions for {value0}', { value0: promptBlock.name })}
                       className={cn(
                         'rounded p-0.5 hover:bg-fill-subtle',
                         !onRulesChange && 'ml-auto',
@@ -210,7 +215,7 @@ const RefBlockContent = ({
                           <IconSquareArrowTopRight />
                         </Icon>
                         <Txt as="span" variant="meta" className="block">
-                          Open original
+                          {studioT('Open original')}
                         </Txt>
                       </button>
                       {onDereference && (
@@ -229,7 +234,7 @@ const RefBlockContent = ({
                             <IconCrossMedium />
                           </Icon>
                           <Txt as="span" variant="meta" className="block">
-                            De-reference block
+                            {studioT('De-reference block')}
                           </Txt>
                         </button>
                       )}
@@ -243,7 +248,7 @@ const RefBlockContent = ({
                             <IconCrossMedium />
                           </Icon>
                           <Txt as="span" variant="meta" className="block">
-                            Remove block
+                            {studioT('Remove block')}
                           </Txt>
                         </button>
                       )}
@@ -251,7 +256,13 @@ const RefBlockContent = ({
                     {usedByAgents.length > 0 && (
                       <div className="border-t border-border p-3">
                         <Txt variant="meta" tone="muted" className="mb-1.5">
-                          Used by {usedByAgents.length} agent{usedByAgents.length !== 1 ? 's' : ''}
+                          <Trans
+                            id="Used by {part0} agent {part1}"
+                            values={{
+                              part0: usedByAgents.length,
+                              part1: usedByAgents.length !== 1 ? studioT('English plural suffix') : '',
+                            }}
+                          />
                         </Txt>
                         <div className="flex flex-col gap-1">
                           {usedByAgents.map(agent => (
@@ -272,8 +283,8 @@ const RefBlockContent = ({
                 <IconExclamationTriangle className="mt-0.5 size-icon-sm shrink-0" aria-hidden="true" />
                 <Txt as="span" variant="meta">
                   {isDraft
-                    ? 'This block is skipped at runtime until it is published.'
-                    : 'Runtime uses the last published version until these edits are published.'}
+                    ? studioT('This block is skipped at runtime until it is published.')
+                    : studioT('Runtime uses the last published version until these edits are published.')}
                 </Txt>
               </div>
             )}
@@ -282,7 +293,7 @@ const RefBlockContent = ({
             <CodeEditor
               value={localContent}
               onChange={handleContentChange}
-              placeholder="Referenced block is empty"
+              placeholder={studioT('Referenced block is empty')}
               variant="embedded"
               className="min-h-12"
               language="markdown"
@@ -295,7 +306,9 @@ const RefBlockContent = ({
           </>
         ) : (
           <div className="flex items-center gap-2 py-3 text-warning-foreground">
-            <Txt variant="caption">Prompt block not found (ID: {block.promptBlockId})</Txt>
+            <Txt variant="caption">
+              <Trans id="Prompt block not found (ID: {part0})" values={{ part0: block.promptBlockId }} />
+            </Txt>
           </div>
         )}
       </div>

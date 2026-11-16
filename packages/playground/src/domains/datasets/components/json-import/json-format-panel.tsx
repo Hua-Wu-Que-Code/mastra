@@ -7,6 +7,8 @@ import { useCopyToClipboard } from '@mastra/playground-ui/hooks/use-copy-to-clip
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { IconSquareBehindSquare1 } from '@mastra/playground-ui/icons/central/IconSquareBehindSquare1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { textStyle } from '@mastra/playground-ui/primitives/text';
 
 const DOCS_URL = 'https://mastra.ai/docs/evals/datasets';
@@ -20,18 +22,37 @@ export const EXAMPLE_JSON = `[
 ]`;
 
 const FIELDS = [
-  { name: 'input', description: 'What the agent receives. A string or any JSON value.', required: true },
-  { name: 'groundTruth', description: 'Expected answer used by scorers.', required: false },
-  { name: 'metadata', description: 'Any object, useful for filtering and grouping.', required: false },
+  {
+    name: 'input',
+    get description() {
+      return studioT('What the agent receives. A string or any JSON value.');
+    },
+    required: true,
+  },
+  {
+    name: 'groundTruth',
+    get description() {
+      return studioT('Expected answer used by scorers.');
+    },
+    required: false,
+  },
+  {
+    name: 'metadata',
+    get description() {
+      return studioT('Any object, useful for filtering and grouping.');
+    },
+    required: false,
+  },
 ];
 
 export function JSONFormatPanel() {
+  useLocale();
   const { isCopied, handleCopy } = useCopyToClipboard({ text: EXAMPLE_JSON, showToast: false });
 
   return (
     <div className="flex flex-col gap-4">
       <Txt variant="column" tone="ink" className="flex h-8 items-center">
-        Each item looks like this
+        {studioT('Each item looks like this')}
       </Txt>
 
       <dl className="divide-y divide-border rounded-lg border border-border">
@@ -46,11 +67,11 @@ export function JSONFormatPanel() {
               </Txt>
               {field.required ? (
                 <Badge variant="success" size="xs">
-                  required
+                  {studioT('required')}
                 </Badge>
               ) : (
                 <Badge variant="neutral" emphasis="subtle" size="xs">
-                  optional
+                  {studioT('optional')}
                 </Badge>
               )}
             </dd>
@@ -69,7 +90,7 @@ export function JSONFormatPanel() {
             size="sm"
             onClick={handleCopy}
           >
-            {isCopied ? 'Copied' : 'Copy'}
+            {isCopied ? studioT('Copied') : studioT('Copy')}
           </Button>
         </div>
         <CodeEditor
@@ -90,7 +111,7 @@ export function JSONFormatPanel() {
         className="self-start"
         icon={<IconSquareArrowTopRight />}
       >
-        Datasets documentation
+        {studioT('Datasets documentation')}
       </Button>
     </div>
   );

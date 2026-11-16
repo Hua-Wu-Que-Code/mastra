@@ -1,4 +1,6 @@
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { Fragment } from 'react';
 import type { ReactNode } from 'react';
@@ -23,11 +25,12 @@ export interface ComparisonMetric {
 
 /** Scorer key: links out to the scorer page. */
 export function ScorerLabel({ scorerId }: { scorerId: string }) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   return (
     <Link
       href={paths.scorerLink(scorerId)}
-      aria-label={`Open ${scorerId}`}
+      aria-label={studioT('Open {value0}', { value0: scorerId })}
       className="min-w-0 truncate hover:text-foreground hover:underline"
     >
       {scorerId}

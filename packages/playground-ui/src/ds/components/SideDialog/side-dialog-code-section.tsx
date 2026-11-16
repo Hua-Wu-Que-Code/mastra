@@ -10,6 +10,7 @@ import { Section } from '@/ds/components/Section';
 import { IconAlignmentJustify } from '@/ds/icons/central/IconAlignmentJustify';
 import { IconAlignmentLeft } from '@/ds/icons/central/IconAlignmentLeft';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SideDialogCodeSectionProps = {
   title: React.ReactNode;
@@ -19,6 +20,7 @@ export type SideDialogCodeSectionProps = {
 };
 
 export function SideDialogCodeSection({ codeStr = '', title, icon, simplified = false }: SideDialogCodeSectionProps) {
+  useLocale();
   const theme = useCodemirrorTheme();
   const [showAsMultilineText, setShowAsMultilineText] = useState(false);
   const hasMultilineText = useMemo(() => {
@@ -44,7 +46,7 @@ export function SideDialogCodeSection({ codeStr = '', title, icon, simplified = 
           {hasMultilineText && (
             <Button
               size="icon-md"
-              aria-label={showAsMultilineText ? 'Show escaped newlines' : 'Show multiline text'}
+              aria-label={showAsMultilineText ? studioT('Show escaped newlines') : studioT('Show multiline text')}
               onClick={() => setShowAsMultilineText(!showAsMultilineText)}
             >
               {showAsMultilineText ? <IconAlignmentLeft /> : <IconAlignmentJustify />}

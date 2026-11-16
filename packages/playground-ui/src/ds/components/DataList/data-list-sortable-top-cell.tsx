@@ -5,6 +5,8 @@ import { Button } from '@/ds/components/Button';
 import { IconArrowDown } from '@/ds/icons/central/IconArrowDown';
 import { IconArrowsUpDown } from '@/ds/icons/central/IconArrowsUpDown';
 import { IconArrowUp } from '@/ds/icons/central/IconArrowUp';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type DataListSort = 'asc' | 'desc';
@@ -16,8 +18,12 @@ const sortIcons = {
 };
 
 const sortLabels = {
-  asc: 'ascending',
-  desc: 'descending',
+  get asc() {
+    return studioT('ascending');
+  },
+  get desc() {
+    return studioT('descending');
+  },
 };
 
 const sortAnimations = {
@@ -26,9 +32,15 @@ const sortAnimations = {
 };
 
 const sortTooltips = {
-  asc: 'Asc',
-  desc: 'Desc',
-  none: 'Sort',
+  get asc() {
+    return studioT('Asc');
+  },
+  get desc() {
+    return studioT('Desc');
+  },
+  get none() {
+    return studioT('Sort');
+  },
 };
 
 export type DataListSortableTopCellProps<K extends string = string> = Omit<
@@ -54,9 +66,10 @@ export function DataListSortableTopCell<K extends string = string>({
   className,
   ...props
 }: DataListSortableTopCellProps<K>) {
+  useLocale();
   const next: DataListSort = sort === 'asc' ? 'desc' : 'asc';
   const SortIcon = sortIcons[sort ?? 'none'];
-  const current = sort ? `sorted ${sortLabels[sort]}` : 'not sorted';
+  const current = sort ? studioT('sorted {direction}', { direction: sortLabels[sort] }) : studioT('not sorted');
 
   return (
     <DataListTopCell
@@ -68,7 +81,11 @@ export function DataListSortableTopCell<K extends string = string>({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label={`${label}, ${current}, sort ${sortLabels[next]}`}
+        aria-label={studioT('{value0}, {value1}, sort {value2}', {
+          value0: label,
+          value1: current,
+          value2: sortLabels[next],
+        })}
         tooltip={sortTooltips[sort ?? 'none']}
         onClick={() => onSortChange(next, sortKey)}
         className={cn('shrink-0', sort ? 'text-foreground' : 'text-muted-foreground')}

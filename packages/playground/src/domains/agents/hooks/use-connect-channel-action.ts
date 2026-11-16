@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useConnectChannel } from '@mastra/react/hooks/agents';
 import { useCallback } from 'react';
@@ -75,6 +76,7 @@ function openConnectUrl(url: string, tab: Window | null, sameTab: boolean): void
  * after a `deep_link` or `immediate` result (used by the publish dialog).
  */
 export const useConnectChannelAction = (platform: string, opts: { onClose?: () => void } = {}) => {
+  const studioLocale = useLocale();
   const { mutateAsync, isPending } = useConnectChannel({ platform: platform });
   const { onClose } = opts;
 
@@ -103,10 +105,10 @@ export const useConnectChannelAction = (platform: string, opts: { onClose?: () =
         })
         .catch((err: Error & { body?: { error?: string } }) => {
           if (tab && !tab.closed) tab.close();
-          toast.error(err.body?.error || err.message || 'Failed to connect channel');
+          toast.error(err.body?.error || err.message || studioT('Failed to connect channel'));
         });
     },
-    [mutateAsync, onClose, platform],
+    [mutateAsync, onClose, platform, studioLocale],
   );
 
   return { connect, isConnecting: isPending };

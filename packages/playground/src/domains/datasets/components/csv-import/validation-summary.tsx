@@ -2,6 +2,7 @@
 
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface ValidationError {
   row: number;
@@ -18,16 +19,24 @@ export interface ValidationSummaryProps {
  * Returns null if no errors.
  */
 export function ValidationSummary({ errors }: ValidationSummaryProps) {
+  useLocale();
   if (errors.length === 0) {
     return null;
   }
 
   return (
-    <Notice variant="destructive" title={`${errors.length} validation error${errors.length !== 1 ? 's' : ''} found`}>
+    <Notice
+      variant="destructive"
+      title={studioT('{value0} validation error{value1} found', {
+        value0: errors.length,
+        value1: errors.length !== 1 ? studioT('English plural suffix') : '',
+      })}
+    >
       <div className="max-h-[120px] space-y-1 overflow-y-auto">
         {errors.map((error: ValidationError, index: number) => (
           <Txt as="p" variant="body" key={index}>
-            Row {error.row}{' '}
+            {studioT('Row') + ' '}
+            {error.row}{' '}
             <Txt as="span" variant="subheading">
               [{error.column}]
             </Txt>

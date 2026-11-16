@@ -7,6 +7,8 @@ import { IconLibrary } from '@mastra/playground-ui/icons/central/IconLibrary';
 import { IconServer } from '@mastra/playground-ui/icons/central/IconServer';
 import { IconStar } from '@mastra/playground-ui/icons/central/IconStar';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import { useLocation } from 'react-router';
 import { useBuilderAgentAccess } from '@/domains/agent-builder/hooks/use-builder-agent-access';
@@ -50,6 +52,7 @@ type AgentBuilderSidebarProps = {
 };
 
 export function AgentBuilderSidebar({ forceExpanded = false }: AgentBuilderSidebarProps = {}) {
+  useLocale();
   const { Link } = useLinkComponent();
   const { state: contextState, isMobile } = useSidebar();
   const { pathname } = useLocation();
@@ -66,7 +69,7 @@ export function AgentBuilderSidebar({ forceExpanded = false }: AgentBuilderSideb
   if (canUseFavorites) links.push(favoritesLink);
   links.push(libraryLink);
   const backToStudio = (
-    <Link href="/agents" aria-label="Back to Mastra Studio">
+    <Link href="/agents" aria-label={studioT('Back to Mastra Studio')}>
       <LogoWithoutText className="size-6" />
     </Link>
   );
@@ -75,7 +78,7 @@ export function AgentBuilderSidebar({ forceExpanded = false }: AgentBuilderSideb
     <Sidebar className="h-full" mobileMode="drawer">
       {!forceExpanded && (
         <Sidebar.Header collapsedLogo={backToStudio} actions={isUserAuthenticated && <AuthStatus />}>
-          <Link href="/agents" aria-label="Back to Mastra Studio" className="min-w-0 flex-1">
+          <Link href="/agents" aria-label={studioT('Back to Mastra Studio')} className="min-w-0 flex-1">
             <Sidebar.Brand logo={<LogoWithoutText className="size-6" />} title="Mastra Studio" />
           </Link>
           {!isMobile && <Sidebar.Trigger />}

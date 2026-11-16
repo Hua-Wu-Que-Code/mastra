@@ -1,13 +1,47 @@
 import type { DatasetRecord } from '@mastra/client-js';
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 
 export const EXPERIMENT_STATUS_OPTIONS = [
-  { value: 'all', label: 'All statuses' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'running', label: 'Running' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'pending', label: 'Pending' },
+  {
+    value: 'all',
+    get label() {
+      return studioT('All statuses');
+    },
+  },
+  {
+    value: 'completed',
+    get label() {
+      return studioT('Completed');
+    },
+  },
+  {
+    value: 'running',
+    get label() {
+      return studioT('Running');
+    },
+  },
+  {
+    value: 'failed',
+    get label() {
+      return studioT('Failed');
+    },
+  },
+  {
+    value: 'pending',
+    get label() {
+      return studioT('Pending');
+    },
+  },
 ] as const;
 
 export function getExperimentDatasetOptions(datasets?: DatasetRecord[]) {
-  return [{ value: 'all', label: 'All datasets' }, ...(datasets ?? []).map(ds => ({ value: ds.id, label: ds.name }))];
+  return [
+    {
+      value: 'all',
+      get label() {
+        return studioT('All datasets');
+      },
+    },
+    ...(datasets ?? []).map(ds => ({ value: ds.id, label: ds.name })),
+  ];
 }

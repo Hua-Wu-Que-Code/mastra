@@ -11,6 +11,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
 import { focusRing } from '@/ds/primitives/transitions';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { formatModelName } from '@/utils/model';
 
@@ -72,6 +74,7 @@ export function ModelPicker({
   triggerClassName,
   'aria-label': ariaLabel,
 }: ModelPickerProps) {
+  useLocale();
   const sheet = useIsMobile(DIALOG_DRAWER_BREAKPOINT_PX);
   const [open, setOpen] = useState(false);
   const selectedProvider = providers.find(provider => provider.id === value?.provider);
@@ -93,10 +96,10 @@ export function ModelPicker({
     <>
       {children ?? (
         <>
-          <span className="sr-only">Model: </span>
+          <span className="sr-only">{studioT('Model:') + ' '}</span>
           {value?.provider ? <span className="flex shrink-0">{renderProviderIcon(value.provider)}</span> : null}
           <span className="truncate max-sm:max-w-28">
-            {value?.model ? formatModelName(value.model) : 'Select model'}
+            {value?.model ? formatModelName(value.model) : studioT('Select model')}
           </span>
         </>
       )}
@@ -182,7 +185,7 @@ export function ModelPicker({
           // handle is muted too, so it takes the side handle's stronger fill to stay visible on the frame.
           className="bg-muted pb-[max(0.75rem,env(safe-area-inset-bottom))] **:data-[slot=drawer-handle]:bg-border-strong"
         >
-          <DrawerTitle className="sr-only">Choose a model</DrawerTitle>
+          <DrawerTitle className="sr-only">{studioT('Choose a model')}</DrawerTitle>
           {panel}
           {/* Fills the drawer's 3rem swipe bleed below the screen edge, as Dialog does. */}
           <div aria-hidden className="h-12 shrink-0" />

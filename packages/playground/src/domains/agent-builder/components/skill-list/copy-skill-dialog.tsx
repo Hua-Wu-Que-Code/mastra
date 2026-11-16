@@ -1,6 +1,8 @@
 import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
 import { Field, FieldError, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Input } from '@mastra/playground-ui/components/Input';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useEffect, useState } from 'react';
 
 export interface CopySkillDialogProps {
@@ -34,6 +36,7 @@ export function CopySkillDialog({
   isPending,
   onConfirm,
 }: CopySkillDialogProps) {
+  useLocale();
   const [name, setName] = useState('');
 
   useEffect(() => {
@@ -48,26 +51,31 @@ export function CopySkillDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content>
         <AlertDialog.Header>
-          <AlertDialog.Title>Copy "{sourceName}"</AlertDialog.Title>
+          <AlertDialog.Title>
+            {studioT('Copy "')}
+            {sourceName}"
+          </AlertDialog.Title>
           <AlertDialog.Description>
-            Creates a private copy in your skills that you can edit. The original stays untouched.
+            {studioT('Creates a private copy in your skills that you can edit. The original stays untouched.')}
           </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Body>
           <Field invalid={collides}>
-            <FieldLabel>New skill name</FieldLabel>
+            <FieldLabel>{studioT('New skill name')}</FieldLabel>
             <Input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="my-skill-copy"
+              placeholder={studioT('my-skill-copy')}
               autoFocus
               data-testid="copy-skill-name-input"
             />
-            <FieldError>{collides ? `You already have a skill named "${trimmed}".` : undefined}</FieldError>
+            <FieldError>
+              {collides ? studioT('You already have a skill named "{value0}".', { value0: trimmed }) : undefined}
+            </FieldError>
           </Field>
         </AlertDialog.Body>
         <AlertDialog.Footer>
-          <AlertDialog.Cancel disabled={isPending}>Cancel</AlertDialog.Cancel>
+          <AlertDialog.Cancel disabled={isPending}>{studioT('Cancel')}</AlertDialog.Cancel>
           <AlertDialog.Action
             disabled={!canSubmit}
             onClick={e => {
@@ -79,7 +87,7 @@ export function CopySkillDialog({
             }}
             data-testid="copy-skill-confirm"
           >
-            {isPending ? 'Copying...' : 'Copy skill'}
+            {isPending ? studioT('Copying...') : studioT('Copy skill')}
           </AlertDialog.Action>
         </AlertDialog.Footer>
       </AlertDialog.Content>

@@ -39,6 +39,8 @@ import { MENU_SIDE_OFFSET } from '@/ds/primitives/menu-item';
 import { passwordManagerOptOutProps } from '@/ds/primitives/password-manager-autofill';
 import { usePortalContainer } from '@/ds/primitives/portal-container';
 import { useIsApplePlatform } from '@/hooks/use-keyboard-shortcut-label';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // A filter bar is a dense row: it sits above a list, carries many chips at once, and never
@@ -176,6 +178,7 @@ export function FilterBarChip({
   className,
   children,
 }: FilterBarChipProps) {
+  useLocale();
   const ctx = useFilterBarContext();
   const [initial] = useState(() => !ctx.mounted);
   const [openSegment, setOpenSegment] = useState<FilterBarSegment | null>(null);
@@ -286,7 +289,7 @@ export function FilterBarChip({
         {readOnly && (
           <span
             className={cn(segmentClass, 'pr-0 text-muted-foreground [--filter-bar-segment-padding:0.5rem_0]')}
-            title="This filter is locked"
+            title={studioT('This filter is locked')}
           >
             <IconLock />
           </span>
@@ -465,6 +468,7 @@ const operatorLabel = (operator: FilterBarOperator) => operator.label;
 const optionLabel = (option: FilterBarOption) => option.label ?? option.value;
 
 function FieldEditor() {
+  useLocale();
   const ctx = useFilterBarContext();
   const chip = useChip();
   const [query, setQuery] = useState('');
@@ -493,7 +497,7 @@ function FieldEditor() {
   return (
     <SegmentCombobox<FilterBarField>
       segment="field"
-      ariaLabel="Field"
+      ariaLabel={studioT('Field')}
       label={chip.field?.label ?? chip.item.fieldId}
       items={fields}
       itemToString={fieldLabel}
@@ -503,18 +507,19 @@ function FieldEditor() {
       onQueryChange={setQuery}
       onSelect={onSelect}
     >
-      <SegmentSearchInput placeholder="Change field" />
+      <SegmentSearchInput placeholder={studioT('Change field')} />
       <FilterBarOptionList<FilterBarField>
-        aria-label="Fields"
+        aria-label={studioT('Fields')}
         getKey={f => f.id}
         renderOption={f => <FilterBarFieldLabel field={f} />}
-        emptyText="No matching field."
+        emptyText={studioT('No matching field.')}
       />
     </SegmentCombobox>
   );
 }
 
 function OperatorEditor() {
+  useLocale();
   const ctx = useFilterBarContext();
   const chip = useChip();
   const [query, setQuery] = useState('');
@@ -535,7 +540,7 @@ function OperatorEditor() {
   return (
     <SegmentCombobox<FilterBarOperator>
       segment="operator"
-      ariaLabel="Operator"
+      ariaLabel={studioT('Operator')}
       label={chip.operator?.label ?? chip.item.operatorId}
       items={options}
       itemToString={operatorLabel}
@@ -545,18 +550,19 @@ function OperatorEditor() {
       onQueryChange={setQuery}
       onSelect={onSelect}
     >
-      <SegmentSearchInput placeholder="Change operator" />
+      <SegmentSearchInput placeholder={studioT('Change operator')} />
       <FilterBarOptionList<FilterBarOperator>
-        aria-label="Operators"
+        aria-label={studioT('Operators')}
         getKey={o => o.id}
         renderOption={o => o.label}
-        emptyText="No matching operator."
+        emptyText={studioT('No matching operator.')}
       />
     </SegmentCombobox>
   );
 }
 
 function ValueEditor() {
+  useLocale();
   const ctx = useFilterBarContext();
   const chip = useChip();
   const open = chip.openSegment === 'value';
@@ -586,7 +592,7 @@ function ValueEditor() {
   return (
     <SegmentCombobox<FilterBarOption>
       segment="value"
-      ariaLabel="Value"
+      ariaLabel={studioT('Value')}
       label={formatValueCompact(chip.item.value, chip.field) || '…'}
       fullLabel={formatValue(chip.item.value, chip.field) || '…'}
       items={step.options}
@@ -612,6 +618,7 @@ type ValueInputProps = {
 
 /** Suggestion list + multi-select footer, shared by every value input. */
 function ValueOptions({ step, onCancel }: ValueInputProps) {
+  useLocale();
   const chip = useChip();
   const modEnterLabel = useIsApplePlatform() ? '⌘↵' : 'Ctrl ↵';
   return (
@@ -621,23 +628,27 @@ function ValueOptions({ step, onCancel }: ValueInputProps) {
       )}
       {step.hasOptions && (
         <FilterBarOptionList<FilterBarOption>
-          aria-label="Values"
+          aria-label={studioT('Values')}
           aria-multiselectable={step.isMany || undefined}
           getKey={o => o.value}
           renderOption={option => <FilterBarOptionLabel option={option} />}
           isSelected={o => (step.isMany ? step.selected.includes(o.value) : String(chip.item.value) === o.value)}
           isLoading={step.isLoading}
           error={step.error}
-          emptyText={step.allowFreeText ? 'No suggestions. Press Enter to use your text.' : 'No matching value.'}
+          emptyText={
+            step.allowFreeText
+              ? studioT('No suggestions. Press Enter to use your text.')
+              : studioT('No matching value.')
+          }
         />
       )}
       {step.isMany && (
         <div className="flex items-center justify-end gap-1 border-t border-border p-1">
           <Button size="sm" variant="ghost" onClick={onCancel}>
-            Cancel
+            {studioT('Cancel')}
           </Button>
           <Button size="sm" variant="default" onClick={() => step.commitDone()}>
-            Done
+            {studioT('Done')}
             <Kbd size="xs">{modEnterLabel}</Kbd>
           </Button>
         </div>

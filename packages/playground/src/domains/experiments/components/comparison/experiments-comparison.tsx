@@ -2,6 +2,8 @@ import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useTraceQueryAvailable } from '@mastra/playground-ui/domains/capabilities';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { focusRingInset } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import {
@@ -89,6 +91,7 @@ export function ExperimentsComparison({
   contenderIds,
   onSetBaseline,
 }: ExperimentsComparisonProps) {
+  useLocale();
   const experimentIds = useMemo(() => [baselineId, ...contenderIds], [baselineId, contenderIds]);
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const [featuredTraceId, setFeaturedTraceId] = useState<string>();
@@ -183,8 +186,8 @@ export function ExperimentsComparison({
 
   if (error) {
     return (
-      <Notice variant="warning" title="Error loading comparison">
-        <Notice.Message>{error instanceof Error ? error.message : 'Unknown error'}</Notice.Message>
+      <Notice variant="warning" title={studioT('Error loading comparison')}>
+        <Notice.Message>{error instanceof Error ? error.message : studioT('Unknown error')}</Notice.Message>
       </Notice>
     );
   }
@@ -192,7 +195,7 @@ export function ExperimentsComparison({
   if (!comparison || comparison.items.length === 0) {
     return (
       <Txt as="p" variant="body" tone="muted" className="py-5 text-center">
-        No comparison data
+        {studioT('No comparison data')}
       </Txt>
     );
   }
@@ -203,14 +206,14 @@ export function ExperimentsComparison({
     <>
       <div
         role="table"
-        aria-label="Experiments comparison"
+        aria-label={studioT('Experiments comparison')}
         // The column minimums set the width: max-content would stretch columns to the unwrapped text.
         className="grid min-w-[calc(22rem_+_var(--compare-cols)_*_32rem)]"
         style={{ '--compare-cols': experimentIds.length } as CSSProperties}
       >
         {/* Titles stay pinned while scrolling down, so every column still says which experiment it is. */}
         <div role="row" className={cn(gridRow, 'sticky top-0 z-20 bg-background')}>
-          <div role="columnheader" aria-label="Items" className={cell} />
+          <div role="columnheader" aria-label={studioT('Items')} className={cell} />
           {experimentIds.map((experimentId, index) => (
             <div
               key={experimentId}
@@ -228,8 +231,8 @@ export function ExperimentsComparison({
           ))}
         </div>
 
-        <div role="row" aria-label="Summary" className={cn(gridRow, 'border-b')}>
-          <div role="cell" aria-label="Items" className={cell} />
+        <div role="row" aria-label={studioT('Summary')} className={cn(gridRow, 'border-b')}>
+          <div role="cell" aria-label={studioT('Items')} className={cell} />
           {experimentIds.map((experimentId, index) => {
             const experiment = experimentsById[experimentId] ?? undefined;
             return (
@@ -287,6 +290,7 @@ interface ComparisonRowViewProps {
 
 /** One item of the comparison. Expanding a section expands the same section in every column of the row. */
 function ComparisonRowView({ row, isLoading, showUsage, onOpen, onShowTrace }: ComparisonRowViewProps) {
+  useLocale();
   const [expanded, setExpanded] = useState<Record<ExpandableSection, boolean>>({
     input: false,
     groundTruth: false,
@@ -319,8 +323,12 @@ function ComparisonRowView({ row, isLoading, showUsage, onOpen, onShowTrace }: C
       )}
     >
       <div role="cell" className={cn(cell, sectionStackClass)}>
-        <ComparisonItemPayload label="Input" value={row.input} {...expandedProps('input')} />
-        <ComparisonItemPayload label="Ground truth" value={row.groundTruth} {...expandedProps('groundTruth')} />
+        <ComparisonItemPayload label={studioT('Input')} value={row.input} {...expandedProps('input')} />
+        <ComparisonItemPayload
+          label={studioT('Ground truth')}
+          value={row.groundTruth}
+          {...expandedProps('groundTruth')}
+        />
       </div>
 
       {row.sides.map((side, index) => (

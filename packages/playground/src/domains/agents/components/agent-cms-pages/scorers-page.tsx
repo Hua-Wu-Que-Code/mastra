@@ -7,6 +7,8 @@ import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Section, SubSectionRoot } from '@mastra/playground-ui/components/Section';
 import { Switch } from '@mastra/playground-ui/components/Switch';
 import { JudgeIcon } from '@mastra/playground-ui/icons/JudgeIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { passwordManagerOptOutProps } from '@mastra/playground-ui/primitives/password-manager-autofill';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { RuleGroup } from '@mastra/playground-ui/utils/rule-engine';
@@ -20,6 +22,7 @@ import { SubSectionHeader } from '@/domains/cms/components/section/section-heade
 import { useScorers } from '@/domains/scores/hooks/use-scorers';
 
 export function ScorersPage() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const { data: scorers } = useScorers();
@@ -104,17 +107,24 @@ export function ScorersPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <SectionHeader
-            title="Scorers"
-            subtitle={`Configure scorers for evaluating agent responses.${count > 0 ? ` (${count} selected)` : ''}`}
+            title={studioT('Scorers')}
+            subtitle={studioT('Configure scorers for evaluating agent responses.{value0}', {
+              value0: count > 0 ? ` (${count} selected)` : '',
+            })}
           />
         </div>
 
         <SubSectionRoot>
           <Section.Header>
-            <SubSectionHeader title="Available Scorers" icon={<JudgeIcon />} />
+            <SubSectionHeader title={studioT('Available Scorers')} icon={<JudgeIcon />} />
           </Section.Header>
 
-          <SearchInput label="Search scorers" placeholder="Search scorers" value={search} onValueChange={setSearch} />
+          <SearchInput
+            label={studioT('Search scorers')}
+            placeholder={studioT('Search scorers')}
+            value={search}
+            onValueChange={setSearch}
+          />
 
           {filteredOptions.length > 0 && (
             <div className="flex flex-col gap-1">
@@ -187,6 +197,7 @@ interface ScorerConfigPanelProps {
 }
 
 function ScorerConfigPanel({ samplingConfig, onSamplingChange, readOnly = false }: ScorerConfigPanelProps) {
+  useLocale();
   const samplingType = samplingConfig?.type || 'none';
 
   const handleTypeChange = (type: string) => {
@@ -208,21 +219,21 @@ function ScorerConfigPanel({ samplingConfig, onSamplingChange, readOnly = false 
       <div className="flex flex-col gap-2">
         <Field disabled={readOnly}>
           <Fieldset className="gap-2" render={<RadioGroup value={samplingType} onValueChange={handleTypeChange} />}>
-            <FieldsetLegend className="text-muted-foreground">Sampling</FieldsetLegend>
+            <FieldsetLegend className="text-muted-foreground">{studioT('Sampling')}</FieldsetLegend>
             <FieldItem>
               <RadioGroupItem value="none" />
-              <FieldLabel>None (evaluate all)</FieldLabel>
+              <FieldLabel>{studioT('None (evaluate all)')}</FieldLabel>
             </FieldItem>
             <FieldItem>
               <RadioGroupItem value="ratio" />
-              <FieldLabel>Ratio (percentage)</FieldLabel>
+              <FieldLabel>{studioT('Ratio (percentage)')}</FieldLabel>
             </FieldItem>
           </Fieldset>
         </Field>
 
         {samplingType === 'ratio' && (
           <Field disabled={readOnly} className="mt-2 gap-1.5">
-            <FieldLabel>Sample Rate (0-1)</FieldLabel>
+            <FieldLabel>{studioT('Sample Rate (0-1)')}</FieldLabel>
             <Input
               type="number"
               min="0"

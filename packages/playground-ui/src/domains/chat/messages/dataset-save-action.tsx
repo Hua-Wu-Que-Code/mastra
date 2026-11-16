@@ -23,6 +23,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconServer1 } from '@/ds/icons/central/IconServer1';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { toast } from '@/utils/toast';
 
@@ -41,6 +43,7 @@ function DatasetSaveDialog({
   requestContext?: Record<string, unknown>;
   initialGroundTruth?: string;
 }) {
+  const studioLocale = useLocale();
   const [groundTruth, setGroundTruth] = useState(initialGroundTruth);
   const [selectedDatasetId, setSelectedDatasetId] = useState('');
 
@@ -56,7 +59,7 @@ function DatasetSaveDialog({
 
   const handleSubmit = useCallback(async () => {
     if (!selectedDatasetId) {
-      toast.error('Please select a dataset');
+      toast.error(studioT('Please select a dataset'));
       return;
     }
 
@@ -64,7 +67,7 @@ function DatasetSaveDialog({
     try {
       parsedInput = JSON.parse(input);
     } catch {
-      toast.error('Input must be valid JSON');
+      toast.error(studioT('Input must be valid JSON'));
       return;
     }
 
@@ -73,7 +76,7 @@ function DatasetSaveDialog({
       try {
         parsedGroundTruth = JSON.parse(groundTruth);
       } catch {
-        toast.error('Ground Truth must be valid JSON');
+        toast.error(studioT('Ground Truth must be valid JSON'));
         return;
       }
     }
@@ -87,38 +90,50 @@ function DatasetSaveDialog({
         ...(hasRequestContext ? { requestContext } : {}),
       });
       const targetDataset = datasets.find(d => d.id === selectedDatasetId);
-      toast.success(`Item saved to "${targetDataset?.name}"`);
+      toast.success(studioT('Item saved to "{value0}"', { value0: targetDataset?.name }));
       onOpenChange(false);
       setSelectedDatasetId('');
       onInputChange('');
       setGroundTruth('');
     } catch (error) {
-      toast.error(`Failed to save item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to save item: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
     }
-  }, [input, groundTruth, selectedDatasetId, requestContext, addItem, datasets, onOpenChange, onInputChange]);
+  }, [
+    input,
+    groundTruth,
+    selectedDatasetId,
+    requestContext,
+    addItem,
+    datasets,
+    onOpenChange,
+    onInputChange,
+    studioLocale,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} pending={addItem.isPending}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save to Dataset</DialogTitle>
-          <DialogDescription>Save as a dataset item for evaluation.</DialogDescription>
+          <DialogTitle>{studioT('Save to Dataset')}</DialogTitle>
+          <DialogDescription>{studioT('Save as a dataset item for evaluation.')}</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <Field>
-            <FieldLabel>Dataset</FieldLabel>
+            <FieldLabel>{studioT('Dataset')}</FieldLabel>
             <Select
               value={selectedDatasetId}
               onValueChange={setSelectedDatasetId}
               disabled={addItem.isPending || isDatasetsLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder={isDatasetsLoading ? 'Loading...' : 'Select a dataset'} />
+                <SelectValue placeholder={isDatasetsLoading ? studioT('Loading...') : studioT('Select a dataset')} />
               </SelectTrigger>
               <SelectContent>
                 {datasets.length === 0 ? (
                   <Txt as="p" variant="body" tone="muted" className="px-2 py-4 text-center">
-                    No datasets available
+                    {studioT('No datasets available')}
                   </Txt>
                 ) : (
                   datasets.map(dataset => (
@@ -132,12 +147,12 @@ function DatasetSaveDialog({
           </Field>
 
           <Field>
-            <FieldLabel>Input (JSON)</FieldLabel>
+            <FieldLabel>{studioT('Input (JSON)')}</FieldLabel>
             <CodeEditor value={input} onChange={onInputChange} showCopyButton={false} className="max-h-60 min-h-30" />
           </Field>
 
           <Field>
-            <FieldLabel>Ground Truth (JSON, optional)</FieldLabel>
+            <FieldLabel>{studioT('Ground Truth (JSON, optional)')}</FieldLabel>
             <CodeEditor
               value={groundTruth}
               onChange={setGroundTruth}
@@ -147,9 +162,9 @@ function DatasetSaveDialog({
           </Field>
         </DialogBody>
         <DialogFooter>
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
           <DialogAction onConfirm={handleSubmit} disabled={!selectedDatasetId || datasets.length === 0}>
-            {addItem.isPending ? 'Saving...' : 'Save item'}
+            {addItem.isPending ? studioT('Saving...') : studioT('Save item')}
           </DialogAction>
         </DialogFooter>
       </DialogContent>
@@ -173,6 +188,7 @@ export function DatasetSaveAction({ messageText }: DatasetSaveActionProps) {
 }
 
 function DatasetSaveActionInner({ messageText }: DatasetSaveActionProps) {
+  useLocale();
   const ctx = useDatasetSaveContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -187,7 +203,7 @@ function DatasetSaveActionInner({ messageText }: DatasetSaveActionProps) {
       <Button
         variant="default"
         size="icon-md"
-        tooltip="Save to dataset"
+        tooltip={studioT('Save to dataset')}
         className={cn(quietTextHover, 'bg-transparent')}
         onClick={handleClick}
       >
@@ -215,6 +231,7 @@ export function SaveFullConversationAction() {
 }
 
 function SaveFullConversationInner({ ctx }: { ctx: DatasetSaveContextValue }) {
+  const studioLocale = useLocale();
   const client = useMastraClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -242,11 +259,15 @@ function SaveFullConversationInner({ ctx }: { ctx: DatasetSaveContextValue }) {
 
       setDialogOpen(true);
     } catch (error) {
-      toast.error(`Failed to fetch thread messages: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to fetch thread messages: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     } finally {
       setIsFetching(false);
     }
-  }, [client, ctx.threadId, ctx.agentId]);
+  }, [client, ctx.threadId, ctx.agentId, studioLocale]);
 
   return (
     <>
@@ -262,7 +283,7 @@ function SaveFullConversationInner({ ctx }: { ctx: DatasetSaveContextValue }) {
       >
         {isFetching ? <Spinner className="size-3.5" /> : <IconServer1 className="size-icon-sm" />}
         <Txt as="span" variant="meta" className="block">
-          Save full conversation to dataset
+          {studioT('Save full conversation to dataset')}
         </Txt>
       </button>
       <DatasetSaveDialog

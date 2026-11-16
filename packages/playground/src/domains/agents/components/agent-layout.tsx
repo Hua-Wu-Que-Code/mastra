@@ -1,4 +1,6 @@
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { CollapsiblePanel } from '@mastra/playground-ui/resize/collapsible-panel';
 import { PanelDrawer } from '@mastra/playground-ui/resize/panel-drawer';
 import { PanelGroup } from '@mastra/playground-ui/resize/panel-group';
@@ -28,10 +30,11 @@ export const AgentLayout = ({
   children,
   leftSlot,
   rightSlot,
-  leftDrawerLabel = 'Open left panel',
-  rightDrawerLabel = 'Open right panel',
+  leftDrawerLabel = studioT('Open left panel'),
+  rightDrawerLabel = studioT('Open right panel'),
   browserOverlay,
 }: AgentLayoutProps) => {
+  useLocale();
   const isMobile = useIsMobile();
   const { isPanelOpen: isMemoryTimelineOpen } = useMemoryTimeline();
   const threadsPanel = useThreadsPanel();

@@ -3,6 +3,8 @@ import { useEffect, useRef } from 'react';
 import { ScrollArea, ScrollAreaViewport } from '../../ScrollArea';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface ComposerSuggestionItem {
@@ -29,6 +31,7 @@ export function ComposerSuggestions({
   onBack,
   onSelect,
 }: ComposerSuggestionsProps) {
+  useLocale();
   const activeOption = useRef<HTMLButtonElement>(null);
   const activeItemId = items[activeIndex]?.id;
   const label = contextLabel ? `${contextLabel} options` : 'Slash commands';
@@ -46,7 +49,7 @@ export function ComposerSuggestions({
               <button
                 type="button"
                 className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-caption text-muted-foreground transition-colors duration-normal ease-out-custom hover:bg-fill-subtle hover:text-foreground motion-reduce:transition-none"
-                aria-label="Back to slash commands"
+                aria-label={studioT('Back to slash commands')}
                 onMouseDown={event => event.preventDefault()}
                 onClick={onBack}
               >
@@ -89,8 +92,8 @@ export function ComposerSuggestions({
                         )}
                         {item.active && (
                           <span className="flex shrink-0 items-center gap-1">
-                            <IconCheckmark2Medium className="size-icon-sm" aria-hidden />
-                            Current
+                            <IconCheckmark2Medium aria-hidden />
+                            {studioT('Current')}
                           </span>
                         )}
                       </span>

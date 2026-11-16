@@ -3,6 +3,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
 import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconSettingsSliderHor';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { CSSProperties, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -40,6 +42,7 @@ export const AgentStepContainer = ({
   panelClassName,
   panelOverlay,
 }: AgentStepContainerProps) => {
+  useLocale();
   const agentColor = useAgentColor();
   const isStreaming = useStreamRunning();
   const { isLast, next, prev, step, steps } = useWizard();
@@ -62,7 +65,7 @@ export const AgentStepContainer = ({
       icon={<IconArrowLeft />}
     >
       {' '}
-      Back
+      {studioT('Back')}
     </Button>
   ) : null;
 
@@ -103,7 +106,7 @@ export const AgentStepContainer = ({
               onClick={() => startViewTransition(() => next())}
               disabled={isStreaming}
             >
-              See agent configuration
+              {studioT('See agent configuration')}
             </Button>
             <Button
               icon={<AgentIcon />}
@@ -111,7 +114,7 @@ export const AgentStepContainer = ({
               onClick={() => navigate(`/agent-builder/agents/${agentId}/view`, { viewTransition: true })}
               disabled={isStreaming}
             >
-              Try agent
+              {studioT('Try agent')}
             </Button>
           </div>
         ) : (

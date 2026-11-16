@@ -2,6 +2,7 @@ import { buildTraceListColumns, DEFAULT_TRACE_COLUMN_PREFERENCES } from '../trac
 import type { TraceColumnPreferences } from '../trace-list-columns';
 import { DataListSkeleton } from '@/ds/components/DataList';
 import { Skeleton } from '@/ds/components/Skeleton';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TracesPageSkeletonProps = {
   columnPreferences?: TraceColumnPreferences;
@@ -13,12 +14,13 @@ export type TracesPageSkeletonProps = {
  * for the action row, spaced from the list skeleton as the action row is from the list.
  */
 export function TracesPageSkeleton({ columnPreferences = DEFAULT_TRACE_COLUMN_PREFERENCES }: TracesPageSkeletonProps) {
+  useLocale();
   const columns = buildTraceListColumns(columnPreferences);
   return (
     <div
       className="flex h-full min-h-0 flex-col gap-4"
       role="status"
-      aria-label="Loading traces"
+      aria-label={studioT('Loading traces')}
       data-testid="traces-page-skeleton"
     >
       <div className="flex min-h-control-md flex-wrap items-center justify-between gap-2">

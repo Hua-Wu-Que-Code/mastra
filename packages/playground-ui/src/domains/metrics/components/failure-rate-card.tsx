@@ -13,8 +13,17 @@ import type { ChartCardProps } from './chart-card';
 import { ChartCardError } from './chart-card-error';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import { MetricsLineChart, MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
-const SERIES = [{ dataKey: 'failureRate', label: 'Failed runs', color: CHART_COLORS.error }];
+const SERIES = [
+  {
+    dataKey: 'failureRate',
+    get label() {
+      return studioT('Failed runs');
+    },
+    color: CHART_COLORS.error,
+  },
+];
 
 const axisPercent = (ratio: number) => `${Math.round(ratio * 100)}%`;
 
@@ -33,6 +42,7 @@ export function FailureRateCard<V extends string = string>({
   onTimeRangeClick,
   titleMenu,
 }: FailureRateCardProps<V>) {
+  useLocale();
   const { data = [], isLoading, isError, isPlaceholderData } = useMetricsActivity();
   const { timestamp } = useMetricsFilters();
   const { stepHours } = bucketPlan(timestamp.start, timestamp.end);
@@ -42,7 +52,7 @@ export function FailureRateCard<V extends string = string>({
   const yDomain: [number, number] | undefined = failed === 0 ? [0, 1] : undefined;
 
   const layout = {
-    title: 'Failure rate',
+    title: studioT('Failure rate'),
     titleMenu,
     actions: onViewErrors && <OpenErrorsInLogsButton onClick={onViewErrors} />,
     toolbar: (

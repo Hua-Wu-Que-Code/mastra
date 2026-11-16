@@ -7,6 +7,8 @@ import { KeyValueList } from '@mastra/playground-ui/components/KeyValueList';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemoryConfig } from '@mastra/react/hooks/memory';
 import { z } from 'zod';
 
@@ -30,7 +32,7 @@ function formatRecallMessageRange(messageRange: z.infer<typeof semanticRecallDis
   if (typeof messageRange === 'string') return messageRange;
   const before = typeof messageRange === 'object' ? messageRange.before : messageRange;
   const after = typeof messageRange === 'object' ? messageRange.after : messageRange;
-  return `${before ?? 1} before, ${after ?? 1} after`;
+  return studioT('{before} before, {after} after', { before: before ?? 1, after: after ?? 1 });
 }
 
 function formatThreshold(threshold: number | { min: number; max: number } | undefined) {
@@ -42,11 +44,28 @@ function formatThreshold(threshold: number | { min: number; max: number } | unde
 function getMemorySections(config: NonNullable<GetMemoryConfigResponse['config']>) {
   const sections: MemoryConfigSection[] = [
     {
-      title: 'General',
+      get title() {
+        return studioT('General');
+      },
       items: [
-        { label: 'Status', value: true },
-        { label: 'Last Messages', value: config.lastMessages ?? 'Default' },
-        { label: 'Auto-generate Titles', value: 'generateTitle' in config && Boolean(config.generateTitle) },
+        {
+          get label() {
+            return studioT('Status');
+          },
+          value: true,
+        },
+        {
+          get label() {
+            return studioT('Last Messages');
+          },
+          value: config.lastMessages ?? 'Default',
+        },
+        {
+          get label() {
+            return studioT('Auto-generate Titles');
+          },
+          value: 'generateTitle' in config && Boolean(config.generateTitle),
+        },
       ],
     },
   ];
@@ -57,33 +76,103 @@ function getMemorySections(config: NonNullable<GetMemoryConfigResponse['config']
     );
     if (semanticRecall.success) {
       sections.push({
-        title: 'Semantic Recall',
+        get title() {
+          return studioT('Semantic Recall');
+        },
         items: [
-          { label: 'Status', value: true },
-          { label: 'Scope', value: semanticRecall.data.scope ?? 'resource' },
-          { label: 'Top K Results', value: semanticRecall.data.topK ?? 4 },
-          { label: 'Message Range', value: formatRecallMessageRange(semanticRecall.data.messageRange) },
+          {
+            get label() {
+              return studioT('Status');
+            },
+            value: true,
+          },
+          {
+            get label() {
+              return studioT('Scope');
+            },
+            value: semanticRecall.data.scope ?? 'resource',
+          },
+          {
+            get label() {
+              return studioT('Top K Results');
+            },
+            value: semanticRecall.data.topK ?? 4,
+          },
+          {
+            get label() {
+              return studioT('Message Range');
+            },
+            value: formatRecallMessageRange(semanticRecall.data.messageRange),
+          },
         ],
       });
     } else {
-      sections.push({ title: 'Semantic Recall', items: [{ label: 'Configuration', value: 'Unavailable' }] });
+      sections.push({
+        get title() {
+          return studioT('Semantic Recall');
+        },
+        items: [
+          {
+            get label() {
+              return studioT('Configuration');
+            },
+            value: 'Unavailable',
+          },
+        ],
+      });
     }
   }
 
   const observationalMemory = config.observationalMemory;
   if (observationalMemory?.enabled) {
     sections.push({
-      title: 'Observational Memory',
+      get title() {
+        return studioT('Observational Memory');
+      },
       items: [
-        { label: 'Status', value: true },
-        { label: 'Scope', value: observationalMemory.scope ?? 'thread' },
-        { label: 'Message Tokens', value: formatThreshold(observationalMemory.messageTokens) },
-        { label: 'Observation Tokens', value: formatThreshold(observationalMemory.observationTokens) },
+        {
+          get label() {
+            return studioT('Status');
+          },
+          value: true,
+        },
+        {
+          get label() {
+            return studioT('Scope');
+          },
+          value: observationalMemory.scope ?? 'thread',
+        },
+        {
+          get label() {
+            return studioT('Message Tokens');
+          },
+          value: formatThreshold(observationalMemory.messageTokens),
+        },
+        {
+          get label() {
+            return studioT('Observation Tokens');
+          },
+          value: formatThreshold(observationalMemory.observationTokens),
+        },
         ...(observationalMemory.observationModel
-          ? [{ label: 'Observation Model', value: observationalMemory.observationModel }]
+          ? [
+              {
+                get label() {
+                  return studioT('Observation Model');
+                },
+                value: observationalMemory.observationModel,
+              },
+            ]
           : []),
         ...(observationalMemory.reflectionModel
-          ? [{ label: 'Reflection Model', value: observationalMemory.reflectionModel }]
+          ? [
+              {
+                get label() {
+                  return studioT('Reflection Model');
+                },
+                value: observationalMemory.reflectionModel,
+              },
+            ]
           : []),
       ],
     });
@@ -93,7 +182,7 @@ function getMemorySections(config: NonNullable<GetMemoryConfigResponse['config']
 }
 
 function formatMemoryValue(value: string | number | boolean) {
-  if (typeof value === 'boolean') return value ? 'Enabled' : 'Disabled';
+  if (typeof value === 'boolean') return value ? studioT('Enabled') : studioT('Disabled');
   return value;
 }
 
@@ -123,6 +212,7 @@ function MemoryConfigFields({ items }: Pick<MemoryConfigSection, 'items'>) {
 }
 
 export function AgentMemoryConfig({ agentId }: { agentId: string }) {
+  useLocale();
   const { data, isLoading, isError, isFetching, refetch } = useMemoryConfig({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -135,10 +225,10 @@ export function AgentMemoryConfig({ agentId }: { agentId: string }) {
     return (
       <div role="alert" className="flex flex-col items-start gap-2">
         <Txt variant="caption" tone="muted">
-          Unable to load memory configuration
+          {studioT('Unable to load memory configuration')}
         </Txt>
         <Button size="sm" disabled={isFetching} onClick={() => void refetch()}>
-          Retry
+          {studioT('Retry')}
         </Button>
       </div>
     );
@@ -147,7 +237,7 @@ export function AgentMemoryConfig({ agentId }: { agentId: string }) {
   if (!data?.config)
     return (
       <Txt variant="caption" tone="muted">
-        No memory configuration available
+        {studioT('No memory configuration available')}
       </Txt>
     );
 

@@ -4,6 +4,8 @@ import { IconInputForm } from '@/ds/icons/central/IconInputForm';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { controlStateColorTransition, focusRing } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export type WorkflowInputType = 'simple' | 'form' | 'json';
@@ -29,17 +31,18 @@ export function WorkflowInputTypeToggle({
   includeSimple,
   compact,
 }: WorkflowInputTypeToggleProps) {
+  useLocale();
   const iconClassName = compact ? 'h-3 w-3' : 'h-4 w-4';
   const options: InputTypeOption[] = [
-    ...(includeSimple ? [{ value: 'simple' as const, label: 'Simple' }] : []),
-    { value: 'form', label: 'Form', icon: <IconInputForm className={iconClassName} /> },
+    ...(includeSimple ? [{ value: 'simple' as const, label: studioT('Simple') }] : []),
+    { value: 'form', label: studioT('Form'), icon: <IconInputForm className={iconClassName} /> },
     { value: 'json', label: 'JSON', icon: <IconCodeBrackets className={iconClassName} /> },
   ];
 
   return (
     <div
       role="radiogroup"
-      aria-label="Input view"
+      aria-label={studioT('Input view')}
       className={cn(
         raisedSurfaceStyle,
         'grid auto-cols-fr grid-flow-col gap-1',

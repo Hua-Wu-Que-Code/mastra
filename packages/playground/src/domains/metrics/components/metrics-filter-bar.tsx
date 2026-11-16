@@ -12,11 +12,13 @@ import {
   METRICS_FILTER_BAR_OPERATORS,
   metricsTokensToFilterBarItems,
 } from '@mastra/playground-ui/domains/metrics/metrics-filters';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 const isTimeRangeItem = (item: FilterBarItem) => item.fieldId === FILTER_BAR_TIME_RANGE_FIELD_ID;
 
 /** Typeahead filter bar for the metrics dashboard: the time range, then one chip per dimension. */
 export function MetricsFilterBar({ fields }: { fields: FilterBarField[] }) {
+  useLocale();
   const { filterTokens, setFilterTokens } = useMetrics();
 
   // The time range is a synthetic, always-present item, as on Traces. Its state lives in the
@@ -33,13 +35,13 @@ export function MetricsFilterBar({ fields }: { fields: FilterBarField[] }) {
       }
       // Items are rebuilt from URL tokens with `id: fieldId`; keep the draft on the same id so the chip survives.
       createItemId={fieldId => fieldId}
-      aria-label="Metrics filters"
+      aria-label={studioT('Metrics filters')}
       className="min-w-64 flex-1"
     >
       <FilterBar.Chips
         renderChip={item => (isTimeRangeItem(item) ? <MetricsTimeRangeChip /> : <FilterBar.Chip item={item} />)}
       />
-      <FilterBar.Input placeholder="Filter metrics" />
+      <FilterBar.Input placeholder={studioT('Filter metrics')} />
     </FilterBar>
   );
 }

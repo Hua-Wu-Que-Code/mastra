@@ -9,13 +9,32 @@ import { Txt } from '@/ds/components/Txt';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconShieldCheck } from '@/ds/icons/central/IconShieldCheck';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type ToolApprovalDecision = 'approved' | 'declined';
 
 const approvalStates = {
-  pending: { label: 'Approval required', variant: 'warning', icon: IconShieldCheck },
-  approved: { label: 'Approved', variant: 'success', icon: IconCheckmark2Medium },
-  declined: { label: 'Declined', variant: 'neutral', icon: IconCrossMedium },
+  pending: {
+    get label() {
+      return studioT('Approval required');
+    },
+    variant: 'warning',
+    icon: IconShieldCheck,
+  },
+  approved: {
+    get label() {
+      return studioT('Approved');
+    },
+    variant: 'success',
+    icon: IconCheckmark2Medium,
+  },
+  declined: {
+    get label() {
+      return studioT('Declined');
+    },
+    variant: 'neutral',
+    icon: IconCrossMedium,
+  },
 } satisfies Record<'pending' | ToolApprovalDecision, { label: string; variant: BadgeVariant; icon: LucideIcon }>;
 
 export interface ToolApprovalStatusProps {
@@ -48,6 +67,7 @@ export function ToolApprovalActions({
   toolName,
   autoFocus = false,
 }: ToolApprovalActionsProps) {
+  useLocale();
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button
@@ -55,22 +75,22 @@ export function ToolApprovalActions({
         variant="primary"
         size="sm"
         icon={<IconCheckmark2Medium aria-hidden />}
-        aria-label={toolName ? `Approve ${toolName}` : undefined}
+        aria-label={toolName ? studioT('Approve {value0}', { value0: toolName }) : undefined}
         autoFocus={autoFocus}
         disabled={disabled}
         onClick={onApprove}
       >
-        Approve
+        {studioT('Approve')}
       </Button>
       <Button
         type="button"
         size="sm"
         icon={<IconCrossMedium aria-hidden />}
-        aria-label={toolName ? `Decline ${toolName}` : undefined}
+        aria-label={toolName ? studioT('Decline {value0}', { value0: toolName }) : undefined}
         disabled={disabled}
         onClick={onDecline}
       >
-        Decline
+        {studioT('Decline')}
       </Button>
     </div>
   );
@@ -84,10 +104,16 @@ export interface ToolApprovalProps extends ToolApprovalActionsProps, ToolApprova
 }
 
 export function ToolApproval({ toolName, args, status, children, ...actions }: ToolApprovalProps) {
+  useLocale();
   const { icon: ToolIcon } = presentTool(toolName, args);
 
   return (
-    <Activity open foldable={false} className="my-2" aria-label={`Tool approval for ${toolName}`}>
+    <Activity
+      open
+      foldable={false}
+      className="my-2"
+      aria-label={studioT('Tool approval for {value0}', { value0: toolName })}
+    >
       <ActivityTrigger>
         <ActivityHeader className="flex-wrap">
           <ActivityIcon>

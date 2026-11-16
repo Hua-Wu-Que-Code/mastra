@@ -1,12 +1,13 @@
 import { createElement } from 'react';
 import type { ElementType, MouseEvent, ReactNode } from 'react';
-
 import { cn } from '../../../lib/utils';
 import { raisedSurfaceStyle } from '../../primitives/raised-surface';
+
 import { Button } from '../Button';
 import type { ButtonProps } from '../Button';
 import { Txt } from '../Txt';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface ThreadListProps {
   children: ReactNode;
@@ -18,7 +19,12 @@ export interface ThreadListProps {
   embedded?: boolean;
 }
 
-export const ThreadList = ({ children, 'aria-label': ariaLabel = 'Threads', embedded = false }: ThreadListProps) => {
+export const ThreadList = ({
+  children,
+  'aria-label': ariaLabel = studioT('Threads'),
+  embedded = false,
+}: ThreadListProps) => {
+  useLocale();
   return (
     <div className={cn('size-full', !embedded && 'pb-2 pl-2')}>
       <nav
@@ -82,11 +88,12 @@ export const ThreadListItem = ({
   isActive,
   onClick,
   onDelete,
-  deleteLabel = 'delete',
+  deleteLabel = studioT('delete'),
   actions,
   className,
   children,
 }: ThreadListItemProps) => {
+  useLocale();
   return (
     <li className="group relative">
       <Button

@@ -1,5 +1,7 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgents, useStoredSkills } from '@mastra/react/hooks/agents';
 import { useTools } from '@mastra/react/hooks/tools';
 import { useWorkflows } from '@mastra/react/hooks/workflows';
@@ -11,6 +13,7 @@ import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-
 const AGENT_BUILDER_AGENTS_ROUTE = '/agent-builder/agents';
 
 export default function AgentBuilderCreate() {
+  useLocale();
   const { canWrite } = useBuilderAgentAccess();
   const navigate = useNavigate();
   // Warm the ['tools'], ['agents', requestContext], ['workflows', requestContext], and
@@ -40,7 +43,7 @@ export default function AgentBuilderCreate() {
               viewTransition: true,
             })
           }
-          tooltip="Agents list"
+          tooltip={studioT('Agents list')}
           data-testid="agent-builder-back-to-list"
         >
           <IconArrowLeft />

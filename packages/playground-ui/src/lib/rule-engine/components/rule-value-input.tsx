@@ -1,12 +1,14 @@
 import * as React from 'react';
-
 import type { RuleValueInputProps } from './types';
 import { Input } from '@/ds/components/Input/input';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select/select';
 import { Icon } from '@/ds/icons';
 import { IconFontStyle } from '@/ds/icons/central/IconFontStyle';
 import { IconHashtag } from '@/ds/icons/central/IconHashtag';
 import { IconToggle } from '@/ds/icons/central/IconToggle';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -78,6 +80,7 @@ type BaseInputProps = {
  * Boolean value input using a Select dropdown with icon inside
  */
 const BooleanValueInput: React.FC<BaseInputProps> = ({ value, onChange, className }) => {
+  useLocale();
   const stringValue = booleanToString(value);
 
   const handleChange = React.useCallback(
@@ -97,11 +100,11 @@ const BooleanValueInput: React.FC<BaseInputProps> = ({ value, onChange, classNam
       </Icon>
       <Select value={stringValue} onValueChange={handleChange}>
         <SelectTrigger className="bg-muted pl-7" size="sm">
-          <SelectValue placeholder="Select value" />
+          <SelectValue placeholder={studioT('Select value')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="true">true</SelectItem>
-          <SelectItem value="false">false</SelectItem>
+          <SelectItem value="true">{studioT('true')}</SelectItem>
+          <SelectItem value="false">{studioT('false')}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -112,6 +115,7 @@ const BooleanValueInput: React.FC<BaseInputProps> = ({ value, onChange, classNam
  * Number value input with icon inside
  */
 const NumberValueInput: React.FC<BaseInputProps> = ({ value, onChange, placeholder, className }) => {
+  useLocale();
   const displayValue = value === undefined || value === '' ? '' : String(value);
 
   const handleChange = React.useCallback(
@@ -136,7 +140,7 @@ const NumberValueInput: React.FC<BaseInputProps> = ({ value, onChange, placehold
         type="number"
         value={displayValue}
         onChange={handleChange}
-        placeholder={placeholder || 'Enter number'}
+        placeholder={placeholder || studioT('Enter number')}
         className="min-w-35 bg-muted pl-7"
         size="sm"
       />
@@ -148,6 +152,7 @@ const NumberValueInput: React.FC<BaseInputProps> = ({ value, onChange, placehold
  * Text value input with icon inside
  */
 const TextValueInput: React.FC<BaseInputProps> = ({ value, onChange, placeholder, className }) => {
+  useLocale();
   const displayValue = valueToString(value);
 
   const handleChange = React.useCallback(
@@ -165,7 +170,7 @@ const TextValueInput: React.FC<BaseInputProps> = ({ value, onChange, placeholder
       <Input
         value={displayValue}
         onChange={handleChange}
-        placeholder={placeholder || 'Enter value'}
+        placeholder={placeholder || studioT('Enter value')}
         className="min-w-35 bg-muted pl-7"
         size="sm"
       />
@@ -177,6 +182,7 @@ const TextValueInput: React.FC<BaseInputProps> = ({ value, onChange, placeholder
  * Array value input (for "in" and "not_in" operators)
  */
 const ArrayValueInput: React.FC<BaseInputProps> = ({ value, onChange, placeholder, className }) => {
+  useLocale();
   const displayValue = React.useMemo(() => {
     if (Array.isArray(value)) {
       return value.map(valueToString).join(', ');
@@ -195,7 +201,7 @@ const ArrayValueInput: React.FC<BaseInputProps> = ({ value, onChange, placeholde
     <Input
       value={displayValue}
       onChange={handleChange}
-      placeholder={placeholder || 'Enter values (comma-separated)'}
+      placeholder={placeholder || studioT('Enter values (comma-separated)')}
       className={cn('min-w-40 bg-muted', className)}
       size="sm"
     />

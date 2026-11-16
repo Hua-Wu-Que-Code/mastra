@@ -1,4 +1,5 @@
 import '@/test/english-locale';
+import { locale } from '@mastra/playground-ui/lib/i18n';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -17,6 +18,26 @@ import { server } from '@/test/msw-server';
 import { renderWithProviders, TEST_BASE_URL } from '@/test/render';
 
 describe('AgentMemoryConfig', () => {
+  describe('when the interface uses Chinese', () => {
+    it('localizes enabled and disabled memory values', async () => {
+      locale.setLocale('zh');
+      try {
+        server.use(
+          http.get(`${TEST_BASE_URL}/api/memory/config`, () => HttpResponse.json(memoryConfigWithDisabledFeatures)),
+        );
+        renderWithProviders(<AgentMemoryConfig agentId="agent-1" />);
+        await screen.findByText('最后消息');
+        expect(screen.getAllByRole('definition').map(value => value.textContent)).toEqual([
+          '已启用',
+          '已禁用',
+          '已禁用',
+        ]);
+      } finally {
+        locale.setLocale('en');
+      }
+    });
+  });
+
   describe('when memory includes explicit context limits', () => {
     it('keeps every general, recall, and observational setting visible', async () => {
       server.use(http.get(`${TEST_BASE_URL}/api/memory/config`, () => HttpResponse.json(memoryConfigWithThresholds)));

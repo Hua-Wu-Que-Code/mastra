@@ -2,6 +2,8 @@ import { useMaybeSidebarState } from './sidebar-context';
 import type { SidebarPanelProps } from './sidebar-panel';
 import { SidebarPanel } from './sidebar-panel';
 import { frameSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SidebarRootProps = SidebarPanelProps & {
@@ -10,12 +12,13 @@ export type SidebarRootProps = SidebarPanelProps & {
 };
 
 export function SidebarRoot({
-  'aria-label': ariaLabel = 'Sidebar',
+  'aria-label': ariaLabel = studioT('Sidebar'),
   mobileMode = 'takeover',
   variant = 'default',
   children,
   ...props
 }: SidebarRootProps) {
+  useLocale();
   const sidebar = useMaybeSidebarState();
   const isRaised = variant === 'raised' && !sidebar?.isMobile;
 

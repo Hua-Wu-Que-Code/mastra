@@ -10,6 +10,8 @@ import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconQuestionmarkCircle } from '@/ds/icons/central/IconQuestionmarkCircle';
 import { Icon } from '@/ds/icons/Icon';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export const AskUserContainer = ({ className, ...props }: ComponentProps<'div'>) => (
@@ -115,18 +117,21 @@ export interface AskUserOutputProps extends ComponentProps<'div'> {
   result: AskUserResult;
 }
 
-export const AskUserOutput = ({ result, className, ...props }: AskUserOutputProps) => (
-  <div
-    data-slot="ask-user-output"
-    role={result.isError ? 'alert' : 'status'}
-    className={cn('grid gap-2 rounded-lg bg-fill p-3', className)}
-    {...props}
-  >
-    <Badge size="xs" variant={result.isError ? 'destructive' : 'success'} className="justify-self-start">
-      {result.isError ? 'Error' : 'Answered'}
-    </Badge>
-    <Txt as="p" variant="body" tone="ink" className={cn(result.isError && 'text-destructive-foreground')}>
-      {result.content}
-    </Txt>
-  </div>
-);
+export const AskUserOutput = ({ result, className, ...props }: AskUserOutputProps) => {
+  useLocale();
+  return (
+    <div
+      data-slot="ask-user-output"
+      role={result.isError ? 'alert' : 'status'}
+      className={cn('grid gap-2 rounded-lg bg-fill p-3', className)}
+      {...props}
+    >
+      <Badge size="xs" variant={result.isError ? 'destructive' : 'success'} className="justify-self-start">
+        {result.isError ? studioT('Error') : studioT('Answered')}
+      </Badge>
+      <Txt as="p" variant="body" tone="ink" className={cn(result.isError && 'text-destructive-foreground')}>
+        {result.content}
+      </Txt>
+    </div>
+  );
+};

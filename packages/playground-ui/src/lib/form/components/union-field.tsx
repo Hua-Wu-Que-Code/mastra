@@ -2,8 +2,10 @@ import type { ParsedField } from '@autoform/core';
 import type { AutoFormFieldProps } from '@autoform/react';
 import { CustomAutoFormField } from './custom-auto-form-field';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export const UnionField: React.FC<AutoFormFieldProps> = ({ field, inputProps }) => {
+  useLocale();
   const path = inputProps.name?.split('.') ?? [];
   return field.schema?.map((schema: ParsedField, index: number) => {
     return (
@@ -11,7 +13,7 @@ export const UnionField: React.FC<AutoFormFieldProps> = ({ field, inputProps }) 
         <CustomAutoFormField key={path.join('.')} field={schema} path={path} />
         {index < (field.schema?.length ?? 0) - 1 && (
           <Txt variant="meta" className="text-center">
-            OR
+            {studioT('OR')}
           </Txt>
         )}
       </div>

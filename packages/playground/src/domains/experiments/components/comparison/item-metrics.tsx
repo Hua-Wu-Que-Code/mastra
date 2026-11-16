@@ -3,6 +3,8 @@ import { IconCoins } from '@mastra/playground-ui/icons/central/IconCoins';
 import { IconGauge } from '@mastra/playground-ui/icons/central/IconGauge';
 import { IconHashtag } from '@mastra/playground-ui/icons/central/IconHashtag';
 import { ScorersIcon } from '@mastra/playground-ui/icons/ScorersIcon';
+
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { formatDuration } from '@mastra/playground-ui/utils/duration';
 import type { ExperimentItemUsage } from '@mastra/react/hooks/experiments';
 import type { ReactNode } from 'react';
@@ -59,7 +61,9 @@ export function itemMetrics({
         {
           id: 'cost',
           icon: <IconCoins />,
-          label: 'Cost',
+          get label() {
+            return studioT('Cost');
+          },
           value: formatCostValue(usage?.estimatedCost, costUnit),
           rawValue: usage?.estimatedCost,
           delta: costDelta ?? null,
@@ -74,7 +78,9 @@ export function itemMetrics({
         {
           id: 'tokens',
           icon: <IconHashtag />,
-          label: 'Tokens',
+          get label() {
+            return studioT('Tokens');
+          },
           value: formatTokenCount(totalTokens(usage)),
           rawValue: totalTokens(usage),
           delta: tokenDelta ?? null,
@@ -91,7 +97,9 @@ export function itemMetrics({
           {
             id: 'duration',
             icon: <IconClock />,
-            label: 'Duration',
+            get label() {
+              return studioT('Duration');
+            },
             value: formatDuration(durationMs) ?? '-',
             rawValue: durationMs,
             delta: durationDeltaMs ?? null,
@@ -105,7 +113,9 @@ export function itemMetrics({
         {
           id: 'avg-score',
           icon: <IconGauge />,
-          label: 'Avg score',
+          get label() {
+            return studioT('Avg score');
+          },
           value: formatScore(averageScore.value),
           rawValue: averageScore.value,
           delta: averageScore.delta ?? null,

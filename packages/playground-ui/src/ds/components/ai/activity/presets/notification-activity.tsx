@@ -6,6 +6,7 @@ import type { BadgeVariant } from '@/ds/components/Badge';
 import { Txt } from '@/ds/components/Txt';
 import { IconBell2 } from '@/ds/icons/central/IconBell2';
 import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRight';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface NotificationActivityProps {
   label: string;
@@ -42,6 +43,7 @@ export function NotificationActivity({
   extraBadges,
   messageLabel,
 }: NotificationActivityProps) {
+  useLocale();
   const lineHoldsMessage = messagePreviewShowsAll(message) && !messageLabel;
   const hasBadges = Boolean(priority || status || pending || extraBadges);
 
@@ -59,14 +61,14 @@ export function NotificationActivity({
               </Badge>
             )}
             {status && <Badge size="xs">{status}</Badge>}
-            {pending && <Badge size="xs">{pending} pending</Badge>}
+            {pending && <Badge size="xs">{studioT('{count} pending', { count: pending })}</Badge>}
             {extraBadges}
           </>
         )
       }
       defaultOpen={defaultOpen}
       data-notification-state={state}
-      aria-label={`Notification: ${label}`}
+      aria-label={studioT('Notification: {value0}', { value0: label })}
     >
       {(!lineHoldsMessage || link) && (
         <div className="flex flex-col gap-2">

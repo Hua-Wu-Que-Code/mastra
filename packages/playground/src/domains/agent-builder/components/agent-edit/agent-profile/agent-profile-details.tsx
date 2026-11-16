@@ -1,5 +1,7 @@
 import { Input } from '@mastra/playground-ui/components/Input';
 import { Textarea } from '@mastra/playground-ui/components/Textarea';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { AgentBuilderEditFormValues } from '../../../schemas';
@@ -14,6 +16,7 @@ const HIGHLIGHTED_CLASSNAME =
   'px-24 justify-center items-center text-center [&_input]:text-center [&_textarea]:text-center';
 
 export const AgentProfileDetails = ({ disabled = false, className, mode = 'default' }: AgentProfileDetailsProps) => {
+  useLocale();
   const { setValue, control } = useFormContext<AgentBuilderEditFormValues>();
   const draftName = useWatch({ control, name: 'name' }) ?? '';
   const draftDescription = useWatch({ control, name: 'description' }) ?? '';
@@ -42,8 +45,8 @@ export const AgentProfileDetails = ({ disabled = false, className, mode = 'defau
         type="text"
         value={draftName}
         onChange={e => handleDraftNameChange(e.target.value)}
-        placeholder="Untitled agent"
-        aria-label="Agent name"
+        placeholder={studioT('Untitled agent')}
+        aria-label={studioT('Agent name')}
         disabled={disabled}
         data-testid="agent-configure-name"
         className="w-full max-w-sm rounded-lg px-3 py-1.5 text-subheading text-foreground placeholder:text-placeholder hover:bg-fill-subtle focus:bg-fill-subtle focus:outline-none disabled:cursor-not-allowed"
@@ -53,8 +56,8 @@ export const AgentProfileDetails = ({ disabled = false, className, mode = 'defau
         variant="unstyled"
         value={draftDescription}
         onChange={e => handleDraftDescriptionChange(e.target.value)}
-        placeholder="What is this agent for?"
-        aria-label="Description"
+        placeholder={studioT('What is this agent for?')}
+        aria-label={studioT('Description')}
         disabled={disabled}
         data-testid="agent-configure-description"
         rows={2}

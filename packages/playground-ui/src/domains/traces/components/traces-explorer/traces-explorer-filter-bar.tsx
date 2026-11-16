@@ -8,6 +8,7 @@ import { FilterBar } from '@/ds/components/FilterBar';
 import type { FilterBarItem } from '@/ds/components/FilterBar';
 import { FILTER_BAR_TIME_RANGE_FIELD_ID } from '@/ds/components/FilterBar/filter-bar-time-range';
 import type { FilterBarTimeRangeProps } from '@/ds/components/FilterBar/filter-bar-time-range';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const TIME_RANGE_PRESETS: readonly TraceDatePreset[] = [
   'last-24h',
@@ -33,6 +34,7 @@ export type TracesExplorerFilterBarProps = {
  * themselves from `useTracesFilterBarFields()` / `useTracesFilterBar()` and reuse `FilterChips`.
  */
 export function TracesExplorerFilterBar({ children }: TracesExplorerFilterBarProps) {
+  useLocale();
   const { withQueryTrace } = useTracesConfig();
   const filterBarFields = useTracesFilterBarFields();
   const { filterBarValue, flatFilterBarValue, onFilterBarChange, onFlatFilterBarChange } = useTracesFilterBar();
@@ -46,13 +48,13 @@ export function TracesExplorerFilterBar({ children }: TracesExplorerFilterBarPro
         : { value: flatFilterBarValue, onValueChange: onFlatFilterBarChange })}
       createItemId={createItemId}
       maxDepth={3}
-      aria-label="Trace filters"
+      aria-label={studioT('Trace filters')}
       className="min-w-64 flex-1"
     >
       {children ?? (
         <>
           <TracesExplorerFilterChips />
-          <FilterBar.Input placeholder="Filter traces" />
+          <FilterBar.Input placeholder={studioT('Filter traces')} />
         </>
       )}
     </FilterBar>

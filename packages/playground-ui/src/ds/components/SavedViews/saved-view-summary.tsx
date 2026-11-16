@@ -3,6 +3,8 @@ import { FilterBarFieldLabel, formatValue } from '@/ds/components/FilterBar/filt
 import type { FilterBarField, FilterBarItem, FilterBarOperator } from '@/ds/components/FilterBar/types';
 import { Txt } from '@/ds/components/Txt';
 import { iconSizeClasses } from '@/ds/icons/icon-size-classes';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type SavedViewSummaryProps = {
@@ -13,14 +15,15 @@ type SavedViewSummaryProps = {
 };
 
 export function SavedViewSummary({ filters, fields, operators, settings }: SavedViewSummaryProps) {
+  useLocale();
   return (
     <div className="flex min-w-48 flex-col gap-2">
       {filters.length === 0 ? (
         <Txt variant="caption" tone="muted">
-          No filters
+          {studioT('No filters')}
         </Txt>
       ) : (
-        <ul aria-label="Filters" className="flex flex-col gap-1.5">
+        <ul aria-label={studioT('Filters')} className="flex flex-col gap-1.5">
           {filters.map(filter => {
             const field = fields.find(candidate => candidate.id === filter.fieldId);
             const operatorStated = (field?.operators?.length ?? operators.length) > 1;

@@ -7,8 +7,10 @@ import type { ToolApprovalRequest } from '@/domains/chat/tools/badges/tool-appro
 import { ToolApprovalBadge } from '@/domains/chat/tools/badges/tool-approval-badge';
 import type { ActivityStatus } from '@/ds/components/ai/activity';
 import { presentTool, ToolCallArguments, ToolCallOutput } from '@/ds/components/ai/tool-call';
+import { toolLabel } from '@/ds/components/ai/tool-call/tool-phrases';
 import { Txt } from '@/ds/components/Txt';
 import { IconStorage } from '@/ds/icons/central/IconStorage';
+import { useLocale } from '@/lib/i18n';
 
 export interface FileTreeBadgeProps extends Omit<ToolApprovalRequest, 'toolCalled'> {
   toolName: string;
@@ -71,7 +73,7 @@ export const FileTreeBadge = ({
       }}
       data-testid="file-tree-badge"
       icon={<ToolIcon aria-hidden />}
-      title={label}
+      title={toolLabel(label)}
       detail={options.length > 0 ? `${detail} (${options.join(', ')})` : detail}
       status={status}
       extraInfo={

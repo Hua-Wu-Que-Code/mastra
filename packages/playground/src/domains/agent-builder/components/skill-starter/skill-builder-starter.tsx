@@ -8,6 +8,8 @@ import { IconBook } from '@mastra/playground-ui/icons/central/IconBook';
 import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
 import { IconGraduateCap } from '@mastra/playground-ui/icons/central/IconGraduateCap';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover, quietTextHoverInGroup } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -22,25 +24,33 @@ import { useDefaultVisibility } from '@/domains/auth/hooks/use-default-visibilit
 
 const EXAMPLES = [
   {
-    title: 'Code reviewer',
+    get title() {
+      return studioT('Code reviewer');
+    },
     icon: IconMaintenance,
     prompt:
       'Build a skill that reviews TypeScript code for type-safety issues, missing tests, and inconsistent patterns. Leave concrete suggestions with examples.',
   },
   {
-    title: 'Doc summarizer',
+    get title() {
+      return studioT('Doc summarizer');
+    },
     icon: IconFileText,
     prompt:
       'Build a skill that summarizes long technical documents into a one-page brief with the key points, action items, and open questions.',
   },
   {
-    title: 'Onboarding tutor',
+    get title() {
+      return studioT('Onboarding tutor');
+    },
     icon: IconGraduateCap,
     prompt:
       'Build a skill that onboards new engineers to a codebase. Explain the architecture, point to the right docs, and answer questions in plain English with code examples.',
   },
   {
-    title: 'Research notes',
+    get title() {
+      return studioT('Research notes');
+    },
     icon: IconBook,
     prompt:
       'Build a skill that turns messy research notes into structured findings with sources, methodology, and a tl;dr at the top.',
@@ -50,6 +60,7 @@ const EXAMPLES = [
 const truncateName = (prompt: string): string => (prompt.length <= 20 ? prompt : prompt.slice(0, 20) + '…');
 
 export const SkillBuilderStarter = () => {
+  useLocale();
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -92,7 +103,7 @@ export const SkillBuilderStarter = () => {
         files: [],
       });
     } catch {
-      toast.error('Failed to start a new skill');
+      toast.error(studioT('Failed to start a new skill'));
       return;
     }
     void navigate(`/agent-builder/skills/${id}/edit`, {
@@ -118,7 +129,7 @@ export const SkillBuilderStarter = () => {
     <div className="starter-aurora flex min-h-full flex-col items-center justify-center bg-sidebar px-4 py-16">
       <div className="relative z-10 flex w-full max-w-3xl flex-col gap-6">
         <Txt font="display" as="h1" variant="title" tone="ink" className="starter-heading text-center">
-          What skill do you want to build?
+          {studioT('What skill do you want to build?')}
         </Txt>
 
         <Form onSubmit={handleSubmit}>
@@ -131,7 +142,7 @@ export const SkillBuilderStarter = () => {
               testId="skill-builder-starter-input"
               size="md"
               variant="unstyled"
-              placeholder="Describe the skill you want to build"
+              placeholder={studioT('Describe the skill you want to build')}
               value={message}
               onChange={e => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -144,7 +155,7 @@ export const SkillBuilderStarter = () => {
                 type="submit"
                 variant="default"
                 size="icon-md"
-                tooltip="Start building"
+                tooltip={studioT('Start building')}
                 disabled={trimmed.length === 0 || isCreating}
                 data-testid="skill-builder-starter-submit"
               >

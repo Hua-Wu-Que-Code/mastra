@@ -3,6 +3,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Card, CardContent, CardTitle } from '@mastra/playground-ui/components/Card';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconPlugin1 } from '@mastra/playground-ui/icons/central/IconPlugin1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMastraClient } from '@mastra/react';
 import { useChannelPlatforms } from '@mastra/react/hooks/agents';
 import type { ChannelPlatformInfo } from '@mastra/react/hooks/agents';
@@ -12,6 +14,7 @@ import { useConnectChannelAction } from '@/domains/agents/hooks/use-connect-chan
 import { useReconcilePendingInstallOnFocus } from '@/domains/agents/hooks/use-reconcile-pending-install-on-focus';
 
 export const AgentChannelsCard = ({ agentId }: { agentId: string }) => {
+  useLocale();
   const client = useMastraClient();
   const { data: platforms = [] } = useChannelPlatforms();
   const configured = platforms.filter(platform => platform.isConfigured);
@@ -38,7 +41,9 @@ export const AgentChannelsCard = ({ agentId }: { agentId: string }) => {
   return (
     <Card elevation="flat" data-testid="agent-channels-card">
       <CardContent className="flex flex-col gap-1">
-        <CardTitle>{hasConnection ? 'Finish connecting your channels' : 'Connect your channels'}</CardTitle>
+        <CardTitle>
+          {hasConnection ? studioT('Finish connecting your channels') : studioT('Connect your channels')}
+        </CardTitle>
         <ul className="divide-y divide-border">
           {actions.map(({ platform, isPending }) => (
             <ChannelAction key={platform.id} platform={platform} agentId={agentId} isPending={isPending} />
@@ -58,6 +63,7 @@ function ChannelAction({
   agentId: string;
   isPending: boolean;
 }) {
+  useLocale();
   const { connect, isConnecting } = useConnectChannelAction(platform.id);
   useReconcilePendingInstallOnFocus({ platform: platform.id, agentId, hasPendingInstall: isPending });
 
@@ -69,7 +75,7 @@ function ChannelAction({
       </Txt>
       {isPending ? (
         <Badge variant="warning" size="sm" indicator="dot">
-          Pending
+          {studioT('Pending')}
         </Badge>
       ) : null}
       <Button
@@ -79,7 +85,7 @@ function ChannelAction({
         onClick={() => connect(agentId)}
         disabled={isConnecting}
       >
-        {isConnecting ? 'Connecting...' : 'Connect'}
+        {isConnecting ? studioT('Connecting...') : studioT('Connect')}
       </Button>
     </li>
   );

@@ -6,10 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Textarea } from '@mastra/playground-ui/components/Textarea';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
-
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Controller, useWatch } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import { MCPServerCombobox } from '../mcp-server-combobox';
@@ -42,10 +44,11 @@ export function MCPClientFormSidebar({
   containerRef,
   readOnly,
   showSubmit,
-  submitLabel = 'Create MCP Client',
+  submitLabel = studioT('Create MCP Client'),
   onTryConnect,
   isTryingConnect,
 }: MCPClientFormSidebarProps) {
+  useLocale();
   const {
     register,
     control,
@@ -75,18 +78,21 @@ export function MCPClientFormSidebar({
     <div className="flex h-full flex-col">
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-4 p-4">
-          <SectionHeader title="Identity" subtitle="Define the MCP client name and description." />
+          <SectionHeader
+            title={studioT('Identity')}
+            subtitle={studioT('Define the MCP client name and description.')}
+          />
 
           <Field invalid={Boolean(errors.name)} disabled={readOnly}>
-            <FieldLabel required>Name</FieldLabel>
-            <Input placeholder="My MCP Client" className={SOLID_FIELD} {...register('name')} />
+            <FieldLabel required>{studioT('Name')}</FieldLabel>
+            <Input placeholder={studioT('My MCP Client')} className={SOLID_FIELD} {...register('name')} />
             <FieldError>{errors.name?.message}</FieldError>
           </Field>
 
           <Field disabled={readOnly}>
-            <FieldLabel>Description</FieldLabel>
+            <FieldLabel>{studioT('Description')}</FieldLabel>
             <Textarea
-              placeholder="Describe what this MCP client connects to"
+              placeholder={studioT('Describe what this MCP client connects to')}
               className={SOLID_FIELD}
               {...register('description')}
             />
@@ -95,32 +101,35 @@ export function MCPClientFormSidebar({
           {!readOnly && (
             <>
               <SectionHeader
-                title="Pre-fill from server"
-                subtitle="Select an existing MCP server to pre-fill settings."
+                title={studioT('Pre-fill from server')}
+                subtitle={studioT('Select an existing MCP server to pre-fill settings.')}
               />
 
               <div className="flex flex-col gap-1.5">
                 <MCPServerCombobox
                   onValueChange={onPreFillFromServer}
-                  placeholder="Select a server"
-                  searchPlaceholder="Search servers"
-                  emptyText="No servers found"
+                  placeholder={studioT('Select a server')}
+                  searchPlaceholder={studioT('Search servers')}
+                  emptyText={studioT('No servers found')}
                   container={containerRef}
                 />
               </div>
             </>
           )}
 
-          <SectionHeader title="Server Configuration" subtitle="Configure the MCP server connection details." />
+          <SectionHeader
+            title={studioT('Server Configuration')}
+            subtitle={studioT('Configure the MCP server connection details.')}
+          />
 
           <Field invalid={Boolean(errors.serverName)} disabled={readOnly}>
-            <FieldLabel required>Server Name</FieldLabel>
-            <Input placeholder="default" className={SOLID_FIELD} {...register('serverName')} />
+            <FieldLabel required>{studioT('Server Name')}</FieldLabel>
+            <Input placeholder={studioT('default')} className={SOLID_FIELD} {...register('serverName')} />
             <FieldError>{errors.serverName?.message}</FieldError>
           </Field>
 
           <Field disabled={readOnly}>
-            <FieldLabel>Server Type</FieldLabel>
+            <FieldLabel>{studioT('Server Type')}</FieldLabel>
             <Controller
               name="serverType"
               control={control}
@@ -130,8 +139,8 @@ export function MCPClientFormSidebar({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="http">HTTP</SelectItem>
-                    <SelectItem value="stdio">Stdio</SelectItem>
+                    <SelectItem value="http">{studioT('HTTP')}</SelectItem>
+                    <SelectItem value="stdio">{studioT('Stdio')}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -151,7 +160,7 @@ export function MCPClientFormSidebar({
               </Field>
 
               <Field disabled={readOnly}>
-                <FieldLabel>Timeout (ms)</FieldLabel>
+                <FieldLabel>{studioT('Timeout (ms)')}</FieldLabel>
                 <Input
                   type="number"
                   placeholder="30000"
@@ -165,33 +174,33 @@ export function MCPClientFormSidebar({
           {serverType === 'stdio' && (
             <>
               <Field invalid={Boolean(errors.command)} disabled={readOnly}>
-                <FieldLabel required>Command</FieldLabel>
+                <FieldLabel required>{studioT('Command')}</FieldLabel>
                 <Input placeholder="npx" className={SOLID_FIELD} {...register('command')} />
                 <FieldError>{errors.command?.message}</FieldError>
               </Field>
 
               <Field disabled={readOnly}>
-                <FieldLabel>Arguments (one per line)</FieldLabel>
+                <FieldLabel>{studioT('Arguments (one per line)')}</FieldLabel>
                 <Textarea
-                  placeholder={'-y\n@modelcontextprotocol/server'}
+                  placeholder={studioT('-y\n@modelcontextprotocol/server')}
                   className={SOLID_FIELD}
                   {...register('args')}
                 />
               </Field>
 
               <Fieldset disabled={readOnly} className="gap-1.5">
-                <FieldsetLegend>Environment Variables</FieldsetLegend>
+                <FieldsetLegend>{studioT('Environment Variables')}</FieldsetLegend>
                 <div className="flex flex-col gap-2">
                   {env.map((_, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <Input
-                        placeholder="KEY"
+                        placeholder={studioT('KEY')}
                         className={`${SOLID_FIELD} flex-1`}
                         disabled={readOnly}
                         {...register(`env.${index}.key`)}
                       />
                       <Input
-                        placeholder="VALUE"
+                        placeholder={studioT('VALUE')}
                         className={`${SOLID_FIELD} flex-1`}
                         disabled={readOnly}
                         {...register(`env.${index}.value`)}
@@ -200,7 +209,7 @@ export function MCPClientFormSidebar({
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          aria-label="Remove variable"
+                          aria-label={studioT('Remove variable')}
                           onClick={() => removeEnvVar(index)}
                         >
                           <IconCrossMedium />
@@ -210,7 +219,7 @@ export function MCPClientFormSidebar({
                   ))}
                   {!readOnly && (
                     <Button size="sm" onClick={addEnvVar} className="w-fit" icon={<IconPlusMedium />}>
-                      Add variable
+                      {studioT('Add variable')}
                     </Button>
                   )}
                 </div>
@@ -237,10 +246,10 @@ export function MCPClientFormSidebar({
                   {isTryingConnect ? (
                     <>
                       <Spinner className="h-4 w-4" />
-                      Connecting...
+                      {studioT('Connecting...')}
                     </>
                   ) : (
-                    'Try to connect'
+                    studioT('Try to connect')
                   )}
                 </Button>
               ) : (
@@ -248,10 +257,10 @@ export function MCPClientFormSidebar({
                   {isTryingConnect ? (
                     <>
                       <Spinner className="h-4 w-4" />
-                      Connecting...
+                      {studioT('Connecting...')}
                     </>
                   ) : (
-                    'Try to connect'
+                    studioT('Try to connect')
                   )}
                 </Button>
               );
@@ -260,7 +269,7 @@ export function MCPClientFormSidebar({
             {isSubmitting ? (
               <>
                 <Spinner className="h-4 w-4" />
-                Creating...
+                {studioT('Creating...')}
               </>
             ) : (
               <>

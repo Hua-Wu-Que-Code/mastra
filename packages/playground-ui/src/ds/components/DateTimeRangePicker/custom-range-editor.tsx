@@ -9,6 +9,7 @@ import { Txt } from '@/ds/components/Txt';
 import { IconArrowRight } from '@/ds/icons/central/IconArrowRight';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconChevronLeftMedium } from '@/ds/icons/central/IconChevronLeftMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 function formatDays(ms: number): string {
   const days = Math.round(ms / (24 * 60 * 60 * 1000));
@@ -79,6 +80,7 @@ export function CustomRangeEditor({
   onApply,
   onShowPresets,
 }: CustomRangeEditorProps) {
+  useLocale();
   const [range, setRange] = useState<DateRange | undefined>(
     dateFrom || dateTo ? { from: dateFrom, to: dateTo } : undefined,
   );
@@ -108,7 +110,7 @@ export function CustomRangeEditor({
     <div className="flex flex-col">
       <div
         role="group"
-        aria-label="Custom date range"
+        aria-label={studioT('Custom date range')}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
       >
@@ -128,7 +130,7 @@ export function CustomRangeEditor({
           the arrow centres on the values whatever the labels do. */}
         <div className="grid grid-cols-[1fr_auto_1fr] gap-x-2 gap-y-1 px-3 pb-3">
           <RangeEnd
-            label="Start"
+            label={studioT('Start')}
             date={range?.from}
             time={draftTimeFrom}
             onTimeChange={setDraftTimeFrom}
@@ -138,7 +140,13 @@ export function CustomRangeEditor({
             aria-hidden
             className="col-start-2 row-start-2 size-icon-md self-center text-muted-foreground"
           />
-          <RangeEnd label="End" date={range?.to} time={draftTimeTo} onTimeChange={setDraftTimeTo} disabled={disabled} />
+          <RangeEnd
+            label={studioT('End')}
+            date={range?.to}
+            time={draftTimeTo}
+            onTimeChange={setDraftTimeTo}
+            disabled={disabled}
+          />
         </div>
       </div>
       <Field invalid={Boolean(error)}>
@@ -148,7 +156,7 @@ export function CustomRangeEditor({
       </Field>
       <div className="flex items-center gap-2 border-t border-border px-3 py-2">
         <Button icon={<IconChevronLeftMedium />} variant="ghost" size="sm" disabled={disabled} onClick={onShowPresets}>
-          Presets
+          {studioT('Presets')}
         </Button>
         <Button
           className="ml-auto"
@@ -158,7 +166,7 @@ export function CustomRangeEditor({
           onClick={apply}
           disabled={disabled}
         >
-          Apply
+          {studioT('Apply')}
         </Button>
       </div>
     </div>
@@ -178,6 +186,7 @@ function RangeEnd({
   onTimeChange: (value: string) => void;
   disabled?: boolean;
 }) {
+  useLocale();
   return (
     <div className="row-span-2 grid min-w-0 grid-rows-subgrid">
       <Txt as="span" variant="column" tone="muted" className="px-1">
@@ -185,12 +194,12 @@ function RangeEnd({
       </Txt>
       <div className="flex items-center gap-1">
         <Txt as="span" variant="label" tone={date ? undefined : 'muted'} className="min-w-0 flex-1 truncate px-1">
-          {date ? format(date, 'MMM d, yyyy') : 'Select a day'}
+          {date ? format(date, 'MMM d, yyyy') : studioT('Select a day')}
         </Txt>
         <Input
           type="time"
           size="sm"
-          aria-label={`${label} time`}
+          aria-label={studioT('{value0} time', { value0: label })}
           value={time}
           onChange={e => onTimeChange(e.target.value)}
           disabled={disabled}

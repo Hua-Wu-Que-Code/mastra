@@ -8,6 +8,8 @@ import type { ThemeSnapshot, TraceSignalName } from './types';
 import { Txt } from '@/ds/components/Txt';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHoverInGroup } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const TRACK_HEIGHT = 28;
@@ -51,6 +53,7 @@ export function LifelineRow({
   positions: number[];
   onThemeSelect: (selection: ThemeSelection, snapshotIndex: number) => void;
 }) {
+  useLocale();
   const isPersistent = row.points.length * 2 >= snapshots.length;
   const connectors = lifelineConnectors(row.points);
   const segments = lifelineSegments(row.points);
@@ -58,7 +61,11 @@ export function LifelineRow({
 
   return (
     <li
-      aria-label={`${row.label}: present in ${row.points.length} of ${snapshots.length} landmarks`}
+      aria-label={studioT('{value0}: present in {value1} of {value2} landmarks', {
+        value0: row.label,
+        value1: row.points.length,
+        value2: snapshots.length,
+      })}
       className={`group flex items-center gap-3 rounded-md hover:bg-fill-subtle ${isPersistent ? '' : 'opacity-55 hover:opacity-100'}`}
     >
       <Txt

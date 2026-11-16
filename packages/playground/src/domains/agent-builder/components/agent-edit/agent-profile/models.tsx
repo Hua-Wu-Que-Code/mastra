@@ -3,6 +3,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { ProviderLogo, cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { compareModelReleaseDates } from '@mastra/playground-ui/utils/model';
@@ -52,6 +54,7 @@ interface ProviderEntry {
 }
 
 const ModelPicker = ({ disabled = false }: ModelPickerProps) => {
+  useLocale();
   const { setValue, control } = useFormContext<AgentBuilderEditFormValues>();
   const model = useWatch({ control, name: 'model' });
   const policy = useBuilderModelPolicy();
@@ -128,7 +131,7 @@ const ModelPicker = ({ disabled = false }: ModelPickerProps) => {
       >
         {providerOptions.length > 0 && (
           <FilterableList
-            title="Providers"
+            title={studioT('Providers')}
             items={providerFilterItems}
             isChecked={isProviderChecked}
             onToggle={handleToggleProvider}
@@ -141,11 +144,11 @@ const ModelPicker = ({ disabled = false }: ModelPickerProps) => {
 
         <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 px-4 py-4">
           <SearchInput
-            label="Search models"
+            label={studioT('Search models')}
             size="md"
             className="max-w-[30ch] shrink-0"
             data-testid="model-card-picker-search"
-            placeholder="Search models or providers"
+            placeholder={studioT('Search models or providers')}
             value={search}
             onValueChange={setSearch}
           />
@@ -154,10 +157,10 @@ const ModelPicker = ({ disabled = false }: ModelPickerProps) => {
             <div className="flex min-h-0 items-center justify-center">
               <Txt variant="body" tone="muted">
                 {search.trim()
-                  ? `No models match "${search.trim()}"`
+                  ? studioT('No models match "{value0}"', { value0: search.trim() })
                   : allProvidersUnchecked
-                    ? 'Select at least one provider to see models'
-                    : 'No models available'}
+                    ? studioT('Select at least one provider to see models')
+                    : studioT('No models available')}
               </Txt>
             </div>
           ) : (
@@ -241,6 +244,7 @@ interface StaleWarningProps {
 }
 
 const StaleWarning = ({ provider, modelId }: StaleWarningProps) => {
+  useLocale();
   return (
     <div
       className="mx-4 mb-4 flex items-start gap-2 rounded-md border border-warning-edge bg-warning-subtle px-3 py-2 text-warning-subtle-foreground"
@@ -252,7 +256,7 @@ const StaleWarning = ({ provider, modelId }: StaleWarningProps) => {
         <Txt as="span" variant="meta">
           {provider}/{modelId}
         </Txt>{' '}
-        is no longer allowed by the admin policy. Pick a different model to save changes.
+        {studioT('is no longer allowed by the admin policy. Pick a different model to save changes.')}
       </Txt>
     </div>
   );
@@ -263,20 +267,23 @@ interface LockedModelChipProps {
   modelId?: string;
 }
 
-const LockedModelChip = ({ provider, modelId }: LockedModelChipProps) => (
-  <div
-    className={cn(raisedSurfaceStyle, 'flex items-center gap-2 rounded-md px-3 py-2')}
-    data-testid="model-detail-locked-chip"
-  >
-    <IconLock className="size-icon-md shrink-0 text-muted-foreground" />
-    <Txt variant="column" tone="ink" className="truncate">
-      {provider && modelId ? `${provider}/${modelId}` : 'Locked by admin'}
-    </Txt>
-    <Txt variant="meta" tone="muted" className="ml-auto shrink-0">
-      Set by admin
-    </Txt>
-  </div>
-);
+const LockedModelChip = ({ provider, modelId }: LockedModelChipProps) => {
+  useLocale();
+  return (
+    <div
+      className={cn(raisedSurfaceStyle, 'flex items-center gap-2 rounded-md px-3 py-2')}
+      data-testid="model-detail-locked-chip"
+    >
+      <IconLock className="size-icon-md shrink-0 text-muted-foreground" />
+      <Txt variant="column" tone="ink" className="truncate">
+        {provider && modelId ? `${provider}/${modelId}` : studioT('Locked by admin')}
+      </Txt>
+      <Txt variant="meta" tone="muted" className="ml-auto shrink-0">
+        {studioT('Set by admin')}
+      </Txt>
+    </div>
+  );
+};
 
 function groupModelsByProvider(
   modelInfo: ModelInfo[],

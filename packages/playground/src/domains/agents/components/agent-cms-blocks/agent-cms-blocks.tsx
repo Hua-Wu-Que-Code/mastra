@@ -4,6 +4,8 @@ import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
 import { IconPencilLine } from '@mastra/playground-ui/icons/central/IconPencilLine';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { focusRing } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -30,6 +32,7 @@ interface AddBlockButtonProps {
 }
 
 const AddBlockButton = ({ onAddInline, onPickRef, className }: AddBlockButtonProps) => {
+  useLocale();
   return (
     <div className={cn('group/add flex items-center gap-2 py-0.5', className)}>
       <div className="h-px flex-1 bg-border opacity-0 transition-opacity duration-150 group-hover/add:opacity-100" />
@@ -53,13 +56,13 @@ const AddBlockButton = ({ onAddInline, onPickRef, className }: AddBlockButtonPro
             <Icon>
               <IconPencilLine />
             </Icon>
-            Write inline block
+            {studioT('Write inline block')}
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={onPickRef}>
             <Icon>
               <IconFileText />
             </Icon>
-            Reference saved prompt block
+            {studioT('Reference saved prompt block')}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu>

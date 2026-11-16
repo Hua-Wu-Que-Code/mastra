@@ -5,6 +5,7 @@ import { IconImages1 } from '@/ds/icons/central/IconImages1';
 import { IconTable } from '@/ds/icons/central/IconTable';
 import { IconVideoClip } from '@/ds/icons/central/IconVideoClip';
 import { isRemoteUrl } from '@/lib/file';
+import { t as studioT } from '@/lib/i18n';
 
 export function attachmentName(name: string | undefined, src: string | undefined, fallback: string) {
   const value = name || src;
@@ -26,15 +27,21 @@ export function attachmentInfo(name: string, contentType?: string) {
     mime === 'application/vnd.ms-excel' ||
     ['XLS', 'XLSX', 'CSV', 'TSV', 'ODS'].includes(extension ?? '')
   ) {
-    return { Icon: IconTable, label: extension || 'Spreadsheet' };
+    return { Icon: IconTable, label: extension || studioT('Spreadsheet') };
   }
   if (mime?.startsWith('image/'))
-    return { Icon: IconImages1, label: extension || mime.slice(6).split('+')[0]?.toUpperCase() || 'Image' };
-  if (mime === 'application/pdf' || extension === 'PDF') return { Icon: IconFileText, label: 'PDF' };
-  if (mime?.startsWith('audio/')) return { Icon: IconAudio, label: extension || 'Audio' };
-  if (mime?.startsWith('video/')) return { Icon: IconVideoClip, label: extension || 'Video' };
-  if (mime?.startsWith('text/')) return { Icon: IconFileText, label: extension || 'Text' };
-  return { Icon: IconFileBend, label: extension || 'File' };
+    return { Icon: IconImages1, label: extension || mime.slice(6).split('+')[0]?.toUpperCase() || studioT('Image') };
+  if (mime === 'application/pdf' || extension === 'PDF')
+    return {
+      Icon: IconFileText,
+      get label() {
+        return studioT('PDF');
+      },
+    };
+  if (mime?.startsWith('audio/')) return { Icon: IconAudio, label: extension || studioT('Audio') };
+  if (mime?.startsWith('video/')) return { Icon: IconVideoClip, label: extension || studioT('Video') };
+  if (mime?.startsWith('text/')) return { Icon: IconFileText, label: extension || studioT('Text') };
+  return { Icon: IconFileBend, label: extension || studioT('File') };
 }
 
 export function textAttachment(data: string, name?: string) {

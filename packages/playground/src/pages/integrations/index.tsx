@@ -1,5 +1,7 @@
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import {
   useAuthorize,
   useDisconnectConnection,
@@ -15,7 +17,14 @@ import { PageBreadcrumbs } from '@/components/ui/page-breadcrumbs';
 import type { CrumbDef } from '@/domains/navigation/crumbs';
 import { useIsToolProviderAdmin } from '@/domains/tool-providers/hooks/use-is-tool-provider-admin';
 
-const crumbs: CrumbDef[] = [{ id: 'integrations', label: 'Integrations' }];
+const crumbs: CrumbDef[] = [
+  {
+    id: 'integrations',
+    get label() {
+      return studioT('Integrations');
+    },
+  },
+];
 
 /**
  * Minimal MVP page to exercise the v1 ToolProvider backend end-to-end:
@@ -23,6 +32,7 @@ const crumbs: CrumbDef[] = [{ id: 'integrations', label: 'Integrations' }];
  * Intentionally unstyled — verifies wiring, not UX.
  */
 export default function IntegrationsPage() {
+  useLocale();
   const [providerId, setProviderId] = useState<string>('');
   const [toolkit, setToolkit] = useState<string>('');
   const [label, setLabel] = useState<string>('');
@@ -63,10 +73,10 @@ export default function IntegrationsPage() {
 
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Integrations</h1>
+      <h1 className="sr-only">{studioT('Integrations')}</h1>
       <div className="max-w-3xl space-y-6">
         <Txt as="p" variant="body" tone="muted">
-          Minimal page to verify the ToolProvider backend. Pick a provider and toolkit, then connect.
+          {studioT('Minimal page to verify the ToolProvider backend. Pick a provider and toolkit, then connect.')}
         </Txt>
 
         <ProviderToolkitSelector

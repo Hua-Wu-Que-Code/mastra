@@ -4,8 +4,10 @@ import { CopyButton } from '@/ds/components/CopyButton';
 import { Txt } from '@/ds/components/Txt';
 import { Icon } from '@/ds/icons/Icon';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function InitialWorkflowHeader({ workflow, workflowId }: { workflow: GetWorkflowResponse; workflowId: string }) {
+  useLocale();
   const stepsCount = Object.keys(workflow.steps ?? {}).length;
 
   return (
@@ -18,7 +20,8 @@ export function InitialWorkflowHeader({ workflow, workflowId }: { workflow: GetW
       </Txt>
       <CopyButton content={workflow.name ?? workflowId} variant="ghost" className="shrink-0" />
       <Badge className="ml-auto shrink-0">
-        {stepsCount} step{stepsCount === 1 ? '' : 's'}
+        {stepsCount} {' ' + studioT('step')}
+        {stepsCount === 1 ? '' : studioT('English plural suffix')}
       </Badge>
     </div>
   );

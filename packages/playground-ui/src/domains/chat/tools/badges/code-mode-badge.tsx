@@ -8,6 +8,8 @@ import { agentGlyph } from '@/ds/components/AgentIndicator';
 import { Code } from '@/ds/components/Code';
 import { CodeBlock } from '@/ds/components/CodeBlock';
 import { CodeEditor } from '@/ds/components/CodeEditor';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatTypeScript } from '@/utils/formatting';
 
 const CodeToolIcon = agentGlyph('inspecting');
@@ -30,6 +32,7 @@ export const CodeModeBadge = ({
   isNetwork,
   toolCalled: toolCalledProp,
 }: CodeModeBadgeProps) => {
+  useLocale();
   const logs = result?.logs ?? [];
   const error = result?.error;
   const resultValue = result?.result;
@@ -72,7 +75,7 @@ export const CodeModeBadge = ({
     >
       <div className="space-y-4">
         <div>
-          <SectionLabel>Program</SectionLabel>
+          <SectionLabel>{studioT('Program')}</SectionLabel>
           <div data-testid="code-mode-program">
             <CodeBlock code={formattedCode} lang="typescript" />
           </div>
@@ -80,7 +83,7 @@ export const CodeModeBadge = ({
 
         {error && (
           <div>
-            <SectionLabel>Error</SectionLabel>
+            <SectionLabel>{studioT('Error')}</SectionLabel>
             <Code
               data-testid="code-mode-error"
               className="rounded-md bg-muted px-3 py-2 text-caption break-words whitespace-pre-wrap text-destructive-foreground"
@@ -91,7 +94,7 @@ export const CodeModeBadge = ({
 
         {hasResultValue && (
           <div>
-            <SectionLabel>Result</SectionLabel>
+            <SectionLabel>{studioT('Result')}</SectionLabel>
             {typeof resultValue === 'string' ? (
               <Code
                 className="max-h-60 overflow-auto rounded-md bg-muted px-3 py-2 text-caption break-words whitespace-pre-wrap"
@@ -106,7 +109,7 @@ export const CodeModeBadge = ({
 
         {logs.length > 0 && (
           <div>
-            <SectionLabel>Logs</SectionLabel>
+            <SectionLabel>{studioT('Logs')}</SectionLabel>
             <Code
               data-testid="code-mode-logs"
               className="max-h-60 overflow-auto rounded-md bg-muted px-3 py-2 text-caption break-words whitespace-pre-wrap"

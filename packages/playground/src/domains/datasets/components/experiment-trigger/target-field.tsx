@@ -11,13 +11,30 @@ import {
   ComboboxSeparator,
 } from '@mastra/playground-ui/components/Combobox';
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { sameValue } from './experiment-trigger-options';
 import type { FieldPopupContainer, TargetOption } from './experiment-trigger-options';
 
 const TARGET_GROUPS: { type: TargetOption['type']; label: string }[] = [
-  { type: 'agent', label: 'Agents' },
-  { type: 'workflow', label: 'Workflows' },
-  { type: 'scorer', label: 'Scorers' },
+  {
+    type: 'agent',
+    get label() {
+      return studioT('Agents');
+    },
+  },
+  {
+    type: 'workflow',
+    get label() {
+      return studioT('Workflows');
+    },
+  },
+  {
+    type: 'scorer',
+    get label() {
+      return studioT('Scorers');
+    },
+  },
 ];
 
 type TargetGroup = { value: string; items: TargetOption[] };
@@ -47,10 +64,14 @@ export function TargetField({
   container,
   className,
 }: TargetFieldProps) {
+  useLocale();
   return (
     <Field className={className}>
-      <FieldLabel required info="What runs on each item: an agent, a workflow, or a scorer you want to test.">
-        Target
+      <FieldLabel
+        required
+        info={studioT('What runs on each item: an agent, a workflow, or a scorer you want to test.')}
+      >
+        {studioT('Target')}
       </FieldLabel>
       <ComboboxRoot
         items={groupTargets(options)}
@@ -60,9 +81,9 @@ export function TargetField({
         disabled={isLoading}
         autoHighlight
       >
-        <ComboboxInput placeholder="Pick an agent, workflow or scorer" />
+        <ComboboxInput placeholder={studioT('Pick an agent, workflow or scorer')} />
         <ComboboxContent container={container}>
-          <ComboboxEmpty>Nothing to run</ComboboxEmpty>
+          <ComboboxEmpty>{studioT('Nothing to run')}</ComboboxEmpty>
           <ComboboxList>
             {(group: TargetGroup, index: number) => (
               <ComboboxGroup key={group.value} items={group.items}>

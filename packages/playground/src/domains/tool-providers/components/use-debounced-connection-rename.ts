@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useUpdateConnection } from '@mastra/react/hooks/tool-providers';
 import { useEffect, useRef } from 'react';
@@ -19,6 +20,7 @@ export const useDebouncedConnectionRename = ({
   connectionId: string;
   initialLabel: string;
 }) => {
+  useLocale();
   const updateConnection = useUpdateConnection();
   const savedLabelRef = useRef(normalizeLabel(initialLabel));
 
@@ -29,7 +31,7 @@ export const useDebouncedConnectionRename = ({
       {
         onSuccess: () => {
           savedLabelRef.current = label;
-          toast.success('Connection renamed');
+          toast.success(studioT('Connection renamed'));
         },
       },
     );

@@ -1,12 +1,14 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { forwardRef } from 'react';
-
 import { useCommentVariant } from './comment-context';
 import type { CommentVariant } from './comment-context';
+
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/ds/components/InputGroup';
 import type { InputGroupButtonProps, InputGroupInputProps } from '@/ds/components/InputGroup';
 import { IconArrowUp } from '@/ds/icons/central/IconArrowUp';
 import type { ControlSize } from '@/ds/primitives/control-size';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type CommentComposerProps = ComponentPropsWithoutRef<'form'>;
@@ -45,12 +47,15 @@ CommentComposerInput.displayName = 'CommentComposerInput';
 export type CommentComposerSendProps = Omit<InputGroupButtonProps, 'children'>;
 
 export const CommentComposerSend = forwardRef<HTMLButtonElement, CommentComposerSendProps>(
-  ({ 'aria-label': ariaLabel = 'Send comment', type = 'submit', ...props }, ref) => (
-    <InputGroupAddon align="inline-end">
-      <InputGroupButton ref={ref} data-slot="comment-composer-send" type={type} aria-label={ariaLabel} {...props}>
-        <IconArrowUp />
-      </InputGroupButton>
-    </InputGroupAddon>
-  ),
+  ({ 'aria-label': ariaLabel = studioT('Send comment'), type = 'submit', ...props }, ref) => {
+    useLocale();
+    return (
+      <InputGroupAddon align="inline-end">
+        <InputGroupButton ref={ref} data-slot="comment-composer-send" type={type} aria-label={ariaLabel} {...props}>
+          <IconArrowUp />
+        </InputGroupButton>
+      </InputGroupAddon>
+    );
+  },
 );
 CommentComposerSend.displayName = 'CommentComposerSend';

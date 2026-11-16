@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { Combobox } from '@/ds/components/Combobox';
 import type { ComboboxProps } from '@/ds/components/Combobox';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/utils/toast';
 
 export interface WorkflowComboboxProps {
@@ -24,9 +26,9 @@ export interface WorkflowComboboxProps {
 export function WorkflowCombobox({
   value,
   onValueChange,
-  placeholder = 'Select a workflow',
-  searchPlaceholder = 'Search workflows',
-  emptyText = 'No workflows found.',
+  placeholder = studioT('Select a workflow'),
+  searchPlaceholder = studioT('Search workflows'),
+  emptyText = studioT('No workflows found.'),
   className,
   disabled = false,
   variant,
@@ -36,15 +38,16 @@ export function WorkflowCombobox({
   align,
   requestContext,
 }: WorkflowComboboxProps) {
+  const studioLocale = useLocale();
   const { data: workflows = {}, isLoading, isError, error } = useWorkflows({ requestContext });
   const { navigate, paths } = useLinkComponent();
 
   useEffect(() => {
     if (isError) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load workflows';
-      toast.error(`Error loading workflows: ${errorMessage}`);
+      toast.error(studioT('Error loading workflows: {value0}', { value0: errorMessage }));
     }
-  }, [isError, error]);
+  }, [isError, error, studioLocale]);
 
   const workflowOptions = Object.keys(workflows).map(key => ({
     label: workflows[key]?.name || key,
@@ -64,7 +67,7 @@ export function WorkflowCombobox({
       options={workflowOptions}
       value={value}
       onValueChange={handleValueChange}
-      placeholder={isLoading ? 'Loading workflows...' : placeholder}
+      placeholder={isLoading ? studioT('Loading workflows...') : placeholder}
       searchPlaceholder={searchPlaceholder}
       emptyText={emptyText}
       className={className}

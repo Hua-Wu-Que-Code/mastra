@@ -19,6 +19,10 @@ import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { quietTextHover } from '@/ds/primitives/typography';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { jsonSchemaToZodRuntime } from '@/lib/form/json-schema-to-zod-runtime';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/utils/cn';
 import { formatJSON, isValidJson } from '@/utils/formatting';
 
@@ -58,6 +62,7 @@ const JsonField = ({
   helperText?: string;
   exampleCode?: string;
 }) => {
+  useLocale();
   const { handleCopy } = useCopyToClipboard({ text: value });
   const { handleCopy: handleCopyExample } = useCopyToClipboard({ text: exampleCode ?? '{}' });
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -89,7 +94,7 @@ const JsonField = ({
         <div className={cn(raisedSurfaceStyle, 'space-y-2 rounded-lg p-3')}>
           <div className="flex items-center gap-2">
             <Txt as="p" variant="caption" tone="muted">
-              Example {label}
+              <Trans id="Example {part0}" values={{ part0: label }} />
             </Txt>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -97,14 +102,14 @@ const JsonField = ({
                   type="button"
                   onClick={handleCopyExample}
                   className={buttonClass}
-                  aria-label="Copy example JSON"
+                  aria-label={studioT('Copy example JSON')}
                 >
                   <Icon>
                     <IconSquareBehindSquare1 />
                   </Icon>
                 </button>
               </TooltipTrigger>
-              <TooltipContent>Copy example JSON</TooltipContent>
+              <TooltipContent>{studioT('Copy example JSON')}</TooltipContent>
             </Tooltip>
           </div>
           <CodeEditor
@@ -112,7 +117,7 @@ const JsonField = ({
             language="json"
             editable={false}
             showCopyButton={false}
-            aria-label={`Example ${label}`}
+            aria-label={studioT('Example {value0}', { value0: label })}
             className="h-[150px] w-full"
           />
         </div>
@@ -131,23 +136,28 @@ const JsonField = ({
             <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button" onClick={handleFormat} className={buttonClass} aria-label="Format JSON">
+                  <button
+                    type="button"
+                    onClick={handleFormat}
+                    className={buttonClass}
+                    aria-label={studioT('Format JSON')}
+                  >
                     <Icon>
                       <IconCodeBrackets />
                     </Icon>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Format JSON</TooltipContent>
+                <TooltipContent>{studioT('Format JSON')}</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button" onClick={handleCopy} className={buttonClass} aria-label="Copy JSON">
+                  <button type="button" onClick={handleCopy} className={buttonClass} aria-label={studioT('Copy JSON')}>
                     <Icon>
                       <IconSquareBehindSquare1 />
                     </Icon>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Copy JSON</TooltipContent>
+                <TooltipContent>{studioT('Copy JSON')}</TooltipContent>
               </Tooltip>
               {exampleCode && (
                 <Tooltip>
@@ -156,19 +166,23 @@ const JsonField = ({
                       type="button"
                       onClick={() => setIsExampleOpen(!isExampleOpen)}
                       className={buttonClass}
-                      aria-label={isExampleOpen ? `Hide example JSON` : `View example JSON`}
+                      aria-label={isExampleOpen ? studioT('Hide example JSON') : studioT('View example JSON')}
                     >
                       <Icon>{isExampleOpen ? <IconEyeSlash /> : <IconEyeOpen />}</Icon>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>View example JSON</TooltipContent>
+                  <TooltipContent>{studioT('View example JSON')}</TooltipContent>
                 </Tooltip>
               )}
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
                   className={buttonClass}
-                  aria-label={isOpen ? `Collapse ${label}` : `Expand ${label}`}
+                  aria-label={
+                    isOpen
+                      ? studioT('Collapse {value0}', { value0: label })
+                      : studioT('Expand {value0}', { value0: label })
+                  }
                 >
                   <Icon>
                     <DisclosureChevron direction="right" />
@@ -198,6 +212,7 @@ export const WorkflowTimeTravelForm = ({
   inputData,
   requestContext,
 }: WorkflowTimeTravelFormProps) => {
+  useLocale();
   const {
     result,
     workflow,
@@ -284,10 +299,10 @@ export const WorkflowTimeTravelForm = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Txt as="p" variant="heading" tone="muted">
-            Input data
+            {studioT('Input data')}
           </Txt>
           <Txt variant="meta" tone="muted">
-            Step: {stepKey}
+            <Trans id="Step: {part0}" values={{ part0: stepKey }} />
           </Txt>
         </div>
 
@@ -302,16 +317,18 @@ export const WorkflowTimeTravelForm = ({
             {isPerStepRun || isContinueRun ? null : (
               <>
                 <JsonField
-                  label="Resume Data (JSON)"
+                  label={studioT('Resume Data (JSON)')}
                   value={resumeData}
                   onChange={setResumeData}
-                  helperText="Provide any resume payloads that should be passed to the step."
+                  helperText={studioT('Provide any resume payloads that should be passed to the step.')}
                 />
                 <JsonField
-                  label="Context (JSON)"
+                  label={studioT('Context (JSON)')}
                   value={contextValue}
                   onChange={setContextValue}
-                  helperText="Only include top level steps (no nested workflow steps) that are required in the time travel execution."
+                  helperText={studioT(
+                    'Only include top level steps (no nested workflow steps) that are required in the time travel execution.',
+                  )}
                   exampleCode={prettyJson({
                     stepId: {
                       status: 'success',
@@ -325,10 +342,10 @@ export const WorkflowTimeTravelForm = ({
                   })}
                 />
                 <JsonField
-                  label="Nested Step Context (JSON)"
+                  label={studioT('Nested Step Context (JSON)')}
                   value={nestedContextValue}
                   onChange={setNestedContextValue}
-                  helperText="Includes nested workflow steps that are required in the time travel execution."
+                  helperText={studioT('Includes nested workflow steps that are required in the time travel execution.')}
                   exampleCode={prettyJson({
                     nestedWorkflowId: {
                       stepId: {

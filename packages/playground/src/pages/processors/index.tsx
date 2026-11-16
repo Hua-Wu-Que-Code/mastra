@@ -4,6 +4,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useProcessors } from '@mastra/react/hooks/processors';
 import { useState } from 'react';
@@ -16,6 +18,7 @@ import type { ProcessorsSort } from '@/domains/processors/components/processors-
 const crumbs = [navCrumb('/processors')];
 
 export function Processors() {
+  useLocale();
   const { data: processors = {}, isLoading, error } = useProcessors();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<ProcessorsSort>();
@@ -23,7 +26,7 @@ export function Processors() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Processors</h1>
+        <h1 className="sr-only">{studioT('Processors')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -32,7 +35,7 @@ export function Processors() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Processors</h1>
+        <h1 className="sr-only">{studioT('Processors')}</h1>
         <PermissionDenied variant="fill" resource="processors" />
       </PageLayout>
     );
@@ -41,8 +44,13 @@ export function Processors() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Processors</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load processors" descriptionSlot={error.message} />
+        <h1 className="sr-only">{studioT('Processors')}</h1>
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load processors')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -50,7 +58,7 @@ export function Processors() {
   if (Object.keys(processors).length === 0 && !isLoading) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Processors</h1>
+        <h1 className="sr-only">{studioT('Processors')}</h1>
         <NoProcessorsInfo />
       </PageLayout>
     );
@@ -66,15 +74,15 @@ export function Processors() {
               <SearchInput
                 {...listSearchProps}
                 onValueChange={setSearch}
-                label="Search processors"
-                placeholder="Search by name"
+                label={studioT('Search processors')}
+                placeholder={studioT('Search by name')}
               />
             </div>
           </ActionRow.Start>
         </ActionRow>
       }
     >
-      <h1 className="sr-only">Processors</h1>
+      <h1 className="sr-only">{studioT('Processors')}</h1>
       <ProcessorsList
         processors={processors}
         isLoading={isLoading}

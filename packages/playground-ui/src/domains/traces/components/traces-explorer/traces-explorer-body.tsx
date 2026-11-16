@@ -12,6 +12,7 @@ import {
 import type { TracesListContextValue } from './traces-explorer-context';
 import { useTracesBodyLoading } from './use-traces-discovery';
 import { ObservabilityListBody } from '@/domains/observability/components/observability-list-body';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TracesExplorerErrorRenderArgs = Pick<TracesListContextValue, 'refetch'> & {
   error: NonNullable<TracesListContextValue['error']>;
@@ -30,6 +31,7 @@ export type TracesExplorerBodyProps = {
 
 /** The traces page body without its page frame, for hosts that own the header (e.g. a shared router layout). */
 export function TracesExplorerBody({ toolbar, chart, children, renderError }: TracesExplorerBodyProps) {
+  useLocale();
   const isBodyLoading = useTracesBodyLoading();
   const { rows, isLoading, error, refetch } = useTracesList();
   const { filters, dateFrom, dateTo, contentFiltersApplied } = useTracesFilters();
@@ -42,7 +44,7 @@ export function TracesExplorerBody({ toolbar, chart, children, renderError }: Tr
   if (isBodyLoading) {
     return (
       <>
-        <h1 className="sr-only">Traces</h1>
+        <h1 className="sr-only">{studioT('Traces')}</h1>
         <div>
           <TracesPageSkeleton columnPreferences={displayedPreferences} />
         </div>
@@ -55,7 +57,7 @@ export function TracesExplorerBody({ toolbar, chart, children, renderError }: Tr
     errorNode = renderError ? (
       <HostTracesError renderError={renderError} error={error} refetch={refetch} />
     ) : (
-      <TracesErrorContent error={error} resource="traces" errorTitle="Failed to load traces" />
+      <TracesErrorContent error={error} resource="traces" errorTitle={studioT('Failed to load traces')} />
     );
   }
   const empty =
@@ -65,7 +67,7 @@ export function TracesExplorerBody({ toolbar, chart, children, renderError }: Tr
 
   return (
     <>
-      <h1 className="sr-only">Traces</h1>
+      <h1 className="sr-only">{studioT('Traces')}</h1>
       {/* Spaced like the skeleton's toolbar placeholder, so nothing moves when loading ends. */}
       <ObservabilityListBody toolbar={toolbar} chart={chart} error={errorNode} empty={empty}>
         {children}

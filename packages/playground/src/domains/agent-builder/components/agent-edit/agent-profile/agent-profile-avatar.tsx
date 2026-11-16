@@ -1,5 +1,7 @@
 import { Avatar } from '@mastra/playground-ui/components/Avatar';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { focusRing } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { toast } from '@mastra/playground-ui/utils/toast';
@@ -15,6 +17,7 @@ export interface AgentProfileAvatarProps {
 }
 
 export const AgentProfileAvatar = ({ disabled = false }: AgentProfileAvatarProps) => {
+  useLocale();
   const features = useBuilderAgentFeatures();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setValue, control } = useFormContext<AgentBuilderEditFormValues>();
@@ -35,7 +38,7 @@ export const AgentProfileAvatar = ({ disabled = false }: AgentProfileAvatarProps
       const { dataUrl } = await downscaleImageToDataUrl(file);
       setValue('avatarUrl', dataUrl, { shouldDirty: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to process avatar image');
+      toast.error(error instanceof Error ? error.message : studioT('Failed to process avatar image'));
     }
   };
 
@@ -48,7 +51,7 @@ export const AgentProfileAvatar = ({ disabled = false }: AgentProfileAvatarProps
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled}
             className={cn('relative rounded-full disabled:cursor-not-allowed disabled:opacity-60', focusRing)}
-            aria-label="Upload avatar"
+            aria-label={studioT('Upload avatar')}
             data-testid="agent-configure-avatar-trigger"
           >
             <Avatar

@@ -8,6 +8,7 @@ import { SkillIcon } from '@/ds/icons/SkillIcon';
 import { ToolsIcon } from '@/ds/icons/ToolsIcon';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
 import { WorkspacesIcon } from '@/ds/icons/WorkspacesIcon';
+import { t as studioT } from '@/lib/i18n';
 
 export const spanTypePrefixes = [
   'agent',
@@ -27,19 +28,25 @@ const spanTypeToUiElements: Record<string, UISpanStyle> = {
   agent: {
     icon: <AgentIcon />,
     color: 'var(--span-agent)',
-    label: 'Agent',
+    get label() {
+      return studioT('Agent');
+    },
     typePrefix: 'agent',
   },
   workflow: {
     icon: <WorkflowIcon />,
     color: 'var(--span-workflow)',
-    label: 'Workflow',
+    get label() {
+      return studioT('Workflow');
+    },
     typePrefix: 'workflow',
   },
   model: {
     icon: <IconBrain />,
     color: 'var(--span-model)',
-    label: 'Model',
+    get label() {
+      return studioT('Model');
+    },
     typePrefix: 'model',
   },
   mcp: {
@@ -51,44 +58,58 @@ const spanTypeToUiElements: Record<string, UISpanStyle> = {
   tool: {
     icon: <ToolsIcon />,
     color: 'var(--span-tool)',
-    label: 'Tool',
+    get label() {
+      return studioT('Tool');
+    },
     typePrefix: 'tool',
   },
   provider: {
     icon: <ToolsIcon />,
     color: 'var(--span-provider)',
-    label: 'Provider Tool',
+    get label() {
+      return studioT('Provider Tool');
+    },
     typePrefix: 'provider',
   },
   memory: {
     icon: <MemoryIcon />,
     color: 'var(--span-memory)',
-    label: 'Memory',
+    get label() {
+      return studioT('Memory');
+    },
     typePrefix: 'memory',
   },
   workspace: {
     icon: <WorkspacesIcon />,
     color: 'var(--span-workspace)',
-    label: 'Workspace',
+    get label() {
+      return studioT('Workspace');
+    },
     typePrefix: 'workspace',
   },
   skill: {
     icon: <SkillIcon />,
     color: 'var(--span-skill)',
-    label: 'Skill',
+    get label() {
+      return studioT('Skill');
+    },
     typePrefix: 'skill',
   },
   scorer: {
     icon: <ScorersIcon />,
     color: 'var(--span-scorer)',
-    label: 'Scorer',
+    get label() {
+      return studioT('Scorer');
+    },
     typePrefix: 'scorer',
   },
 };
 
 const otherSpanType: UISpanStyle = {
   color: 'var(--span-other)',
-  label: 'Other',
+  get label() {
+    return studioT('Other');
+  },
   typePrefix: 'other',
 };
 

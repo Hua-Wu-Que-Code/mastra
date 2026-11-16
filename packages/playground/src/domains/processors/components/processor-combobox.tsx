@@ -1,6 +1,8 @@
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useProcessors } from '@mastra/react/hooks/processors';
 import { useEffect } from 'react';
@@ -23,9 +25,9 @@ export interface ProcessorComboboxProps {
 export function ProcessorCombobox({
   value,
   onValueChange,
-  placeholder = 'Select a processor',
-  searchPlaceholder = 'Search processors',
-  emptyText = 'No processors found.',
+  placeholder = studioT('Select a processor'),
+  searchPlaceholder = studioT('Search processors'),
+  emptyText = studioT('No processors found.'),
   className,
   disabled = false,
   variant,
@@ -34,15 +36,16 @@ export function ProcessorCombobox({
   'aria-label': ariaLabel,
   align,
 }: ProcessorComboboxProps) {
+  const studioLocale = useLocale();
   const { data: processors = {}, isLoading, isError, error } = useProcessors();
   const { navigate, paths } = useLinkComponent();
 
   useEffect(() => {
     if (isError) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load processors';
-      toast.error(`Error loading processors: ${errorMessage}`);
+      toast.error(studioT('Error loading processors: {value0}', { value0: errorMessage }));
     }
-  }, [isError, error]);
+  }, [isError, error, studioLocale]);
 
   const processorOptions = Object.keys(processors)
     .filter(key => {
@@ -72,7 +75,7 @@ export function ProcessorCombobox({
       options={processorOptions}
       value={value}
       onValueChange={handleValueChange}
-      placeholder={isLoading ? 'Loading processors...' : placeholder}
+      placeholder={isLoading ? studioT('Loading processors...') : placeholder}
       searchPlaceholder={searchPlaceholder}
       emptyText={emptyText}
       className={className}

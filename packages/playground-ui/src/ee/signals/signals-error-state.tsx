@@ -3,6 +3,7 @@ import { Txt } from '@/ds/components/Txt';
 import { IconArrowRotateCounterClockwise } from '@/ds/icons/central/IconArrowRotateCounterClockwise';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconExclamationTriangle } from '@/ds/icons/central/IconExclamationTriangle';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function SignalsErrorState({
   message,
@@ -13,6 +14,7 @@ export function SignalsErrorState({
   onRetry: () => void;
   onClear?: () => void;
 }) {
+  useLocale();
   return (
     <section className="m-4 rounded-lg border border-border bg-background p-6 lg:m-6" role="alert">
       <div className="flex items-start gap-3">
@@ -25,15 +27,15 @@ export function SignalsErrorState({
             {message}
           </Txt>
           <Txt variant="caption" tone="muted" className="mt-1">
-            Check the connection and try again.
+            {studioT('Check the connection and try again.')}
           </Txt>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button icon={<IconArrowRotateCounterClockwise />} onClick={onRetry} size="sm" type="button">
-              Retry
+              {studioT('Retry')}
             </Button>
             {onClear ? (
               <Button icon={<IconCrossMedium />} onClick={onClear} size="sm" type="button" variant="ghost">
-                Clear filter
+                {studioT('Clear filter')}
               </Button>
             ) : null}
           </div>

@@ -7,6 +7,8 @@ import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft
 import { IconEyeOpen } from '@mastra/playground-ui/icons/central/IconEyeOpen';
 import type { LinkComponentProviderProps } from '@mastra/playground-ui/lib/framework';
 import { LinkComponentProvider } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router';
 import { useBuilderAgentAccess } from '../hooks/use-builder-agent-access';
@@ -39,6 +41,7 @@ export const AgentBuilderRootLayout = ({ paths }: AgentBuilderRootLayoutProps) =
 };
 
 const AgentBuilderPermissionsGuard = ({ paths }: AgentBuilderRootLayoutProps) => {
+  useLocale();
   const navigate = useNavigate();
   const { isLoading, denialReason, hasAgentFeature } = useBuilderAgentAccess();
 
@@ -57,7 +60,10 @@ const AgentBuilderPermissionsGuard = ({ paths }: AgentBuilderRootLayoutProps) =>
   if (denialReason === 'error') {
     return (
       <div className="flex h-screen items-center justify-center">
-        <EmptyState titleSlot="Error" descriptionSlot="Failed to load Agent Builder configuration." />
+        <EmptyState
+          titleSlot={studioT('Error')}
+          descriptionSlot={studioT('Failed to load Agent Builder configuration.')}
+        />
       </div>
     );
   }
@@ -66,8 +72,8 @@ const AgentBuilderPermissionsGuard = ({ paths }: AgentBuilderRootLayoutProps) =>
     return (
       <div className="flex h-screen items-center justify-center">
         <EmptyState
-          titleSlot="Agent Builder Not Configured"
-          descriptionSlot="Agent Builder is not enabled. Contact your administrator to enable this feature."
+          titleSlot={studioT('Agent Builder Not Configured')}
+          descriptionSlot={studioT('Agent Builder is not enabled. Contact your administrator to enable this feature.')}
         />
       </div>
     );
@@ -77,7 +83,10 @@ const AgentBuilderPermissionsGuard = ({ paths }: AgentBuilderRootLayoutProps) =>
   if (!hasAgentFeature) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <EmptyState titleSlot="No Features Enabled" descriptionSlot="No Agent Builder features are configured." />
+        <EmptyState
+          titleSlot={studioT('No Features Enabled')}
+          descriptionSlot={studioT('No Agent Builder features are configured.')}
+        />
       </div>
     );
   }
@@ -93,22 +102,24 @@ const AgentBuilderPermissionsGuard = ({ paths }: AgentBuilderRootLayoutProps) =>
 };
 
 function AccessDeniedScreen() {
+  useLocale();
   const { isImpersonating, impersonatedRole, stopImpersonation } = useRoleImpersonation();
 
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <EmptyState
-          titleSlot="Access Denied"
-          descriptionSlot="You don't have permission to access the Agent Builder."
+          titleSlot={studioT('Access Denied')}
+          descriptionSlot={studioT("You don't have permission to access the Agent Builder.")}
         />
         <div className="flex items-center gap-2">
           <Button render={<Link href="/agents" />} size="sm" icon={<IconArrowLeft />}>
-            Back to Studio
+            {studioT('Back to Studio')}
           </Button>
           {isImpersonating && (
             <Button variant="default" size="sm" onClick={stopImpersonation} icon={<IconEyeOpen />}>
-              Exit {impersonatedRole?.name} preview
+              {studioT('Exit') + ' '}
+              {impersonatedRole?.name} {' ' + studioT('preview')}
             </Button>
           )}
         </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import type { DatasetItem } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useEffect } from 'react';
@@ -80,6 +82,7 @@ export function DatasetItems({
   sort,
   onSortChange,
 }: DatasetItemsProps) {
+  useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const { activeVersion: activeDatasetVersion, handleVersionChange } = useDatasetItemsUrlState(
     searchParams,
@@ -105,10 +108,10 @@ export function DatasetItems({
   const handleExportCsv = () => {
     try {
       exportItemsToCSV(getSelectedItems(), `${datasetName || 'dataset'}-items.csv`);
-      toast.success(`Exported ${selection.selectedCount} items to CSV`);
+      toast.success(studioT('Exported {value0} items to CSV', { value0: selection.selectedCount }));
       selection.clearSelection();
     } catch (error) {
-      toast.error('Failed to export items to CSV');
+      toast.error(studioT('Failed to export items to CSV'));
       console.error('CSV export error:', error);
     }
   };
@@ -116,20 +119,20 @@ export function DatasetItems({
   const handleExportJson = () => {
     try {
       exportItemsToJSON(getSelectedItems(), `${datasetName || 'dataset'}-items.json`);
-      toast.success(`Exported ${selection.selectedCount} items to JSON`);
+      toast.success(studioT('Exported {value0} items to JSON', { value0: selection.selectedCount }));
       selection.clearSelection();
     } catch (error) {
-      toast.error('Failed to export items to JSON');
+      toast.error(studioT('Failed to export items to JSON'));
       console.error('JSON export error:', error);
     }
   };
 
   const itemsListColumns = [
     { name: 'id', label: 'ID', size: '7rem' },
-    { name: 'input', label: 'Input', size: 'minmax(10rem,1fr)' },
-    { name: 'groundTruth', label: 'Ground Truth', size: 'minmax(10rem,1fr)' },
-    { name: 'trajectory', label: 'Trajectory', size: '8rem' },
-    { name: 'date', label: 'Created', size: '10rem', sortKey: 'createdAt' as const },
+    { name: 'input', label: studioT('Input'), size: 'minmax(10rem,1fr)' },
+    { name: 'groundTruth', label: studioT('Ground Truth'), size: 'minmax(10rem,1fr)' },
+    { name: 'trajectory', label: studioT('Trajectory'), size: '8rem' },
+    { name: 'date', label: studioT('Created'), size: '10rem', sortKey: 'createdAt' as const },
   ];
 
   // Checkboxes are always available on the current version; older versions are read-only.

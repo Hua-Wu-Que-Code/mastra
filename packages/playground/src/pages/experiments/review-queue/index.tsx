@@ -6,6 +6,8 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { useTraceQueryAvailable } from '@mastra/playground-ui/domains/capabilities';
 import { IconArrowUpRight } from '@mastra/playground-ui/icons/central/IconArrowUpRight';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useExperimentsForDatasetFilter } from '@mastra/react/hooks/experiments';
 import { useSearchParams } from 'react-router';
@@ -29,6 +31,7 @@ const REVIEW_PARAM = 'review';
  * experiment and `?review=<resultId>` features one of its results.
  */
 function ReviewQueuePage() {
+  useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawType = searchParams.get(TARGET_TYPE_PARAM);
   const targetType = isDatasetTargetType(rawType) ? rawType : '';
@@ -71,7 +74,7 @@ function ReviewQueuePage() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Review Queue</h1>
+        <h1 className="sr-only">{studioT('Review Queue')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -80,7 +83,7 @@ function ReviewQueuePage() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Review Queue</h1>
+        <h1 className="sr-only">{studioT('Review Queue')}</h1>
         <PermissionDenied variant="fill" resource="experiments" />
       </PageLayout>
     );
@@ -89,11 +92,11 @@ function ReviewQueuePage() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Review Queue</h1>
+        <h1 className="sr-only">{studioT('Review Queue')}</h1>
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load experiments"
+          titleSlot={studioT('Failed to load experiments')}
           descriptionSlot={error.message}
         />
       </PageLayout>
@@ -125,7 +128,7 @@ function ReviewQueuePage() {
       toolbarEnd={
         selectedId ? (
           <Button render={<Link href={paths.experimentLink(selectedId)} />} icon={<IconArrowUpRight />}>
-            See experiment
+            {studioT('See experiment')}
           </Button>
         ) : undefined
       }

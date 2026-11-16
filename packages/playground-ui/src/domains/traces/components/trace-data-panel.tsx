@@ -7,6 +7,7 @@ import { TraceDataPanelView } from '@/domains/traces/components/trace-data-panel
 import type { TraceSideView } from '@/domains/traces/components/trace-data-panel-view';
 import { getSignalLabel, getSpanSignal } from '@/domains/traces/utils/span-signal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ds/components/Dialog';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type TraceDataPanelProps = Omit<
   ComponentProps<typeof TraceDataPanelView>,
@@ -18,6 +19,7 @@ type TraceDataPanelProps = Omit<
  * `key` on the trace (and anchor span) so a view picked on a previous trace never leaks into the next one.
  */
 export function TraceDataPanel(props: TraceDataPanelProps) {
+  useLocale();
   const [sideView, setSideView] = useState<TraceSideView>();
   const [isScoringOpen, setIsScoringOpen] = useState(false);
   const { data: scorers, isLoading: isLoadingScorers } = useScorers();
@@ -56,7 +58,7 @@ export function TraceDataPanel(props: TraceDataPanelProps) {
       <Dialog open={isScoringOpen} onOpenChange={setIsScoringOpen}>
         <DialogContent size="lg">
           <DialogHeader>
-            <DialogTitle>Score trace</DialogTitle>
+            <DialogTitle>{studioT('Score trace')}</DialogTitle>
           </DialogHeader>
 
           {isScoringOpen && rootSpan && (

@@ -1,12 +1,18 @@
 import type { BuiltInTraceSignalName, SignalCatalogEntry, TraceSignalName } from '@mastra/client-js';
+
+import { t as studioT } from '@/lib/i18n';
 import { formatDate, formatDateRange, formatShortDate } from '@/utils/date-format';
 
 /** Catalog used with older servers that do not return signal metadata. */
 export const BUILT_IN_SIGNAL_CATALOG: SignalCatalogEntry[] = [
   {
     name: 'goal',
-    label: 'Goal',
-    description: 'What the user wanted from the interaction.',
+    get label() {
+      return studioT('Goal');
+    },
+    get description() {
+      return studioT('What the user wanted from the interaction.');
+    },
     order: 0,
     builtIn: true,
     enabled: true,
@@ -14,8 +20,12 @@ export const BUILT_IN_SIGNAL_CATALOG: SignalCatalogEntry[] = [
   },
   {
     name: 'sentiment',
-    label: 'Sentiment',
-    description: 'The tone the user expressed during the interaction.',
+    get label() {
+      return studioT('Sentiment');
+    },
+    get description() {
+      return studioT('The tone the user expressed during the interaction.');
+    },
     order: 1,
     builtIn: true,
     enabled: true,
@@ -23,8 +33,12 @@ export const BUILT_IN_SIGNAL_CATALOG: SignalCatalogEntry[] = [
   },
   {
     name: 'behavior',
-    label: 'Behavior',
-    description: 'What the agent did in response.',
+    get label() {
+      return studioT('Behavior');
+    },
+    get description() {
+      return studioT('What the agent did in response.');
+    },
     order: 2,
     builtIn: true,
     enabled: true,
@@ -32,8 +46,12 @@ export const BUILT_IN_SIGNAL_CATALOG: SignalCatalogEntry[] = [
   },
   {
     name: 'outcome',
-    label: 'Outcome',
-    description: 'How the interaction ended.',
+    get label() {
+      return studioT('Outcome');
+    },
+    get description() {
+      return studioT('How the interaction ended.');
+    },
     order: 3,
     builtIn: true,
     enabled: true,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-
 import { EXAMPLES_PAGE_SIZE, ExamplesPager } from './examples-pager';
 import { useThemeDetail, useThemeExamples, useThemeHistory } from './hooks';
+
 import { getSignalColor } from './signal-colors';
 import { formatSnapshotDate, shareSentence, signalDescription, signalLabel } from './signal-formatting';
 import type { SelectedTheme, ThemeSelection, ThemeSelectionStats } from './theme-drilldown-data';
@@ -21,6 +21,8 @@ import { Metadata } from '@/ds/components/Metadata';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { Txt } from '@/ds/components/Txt';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface ThemeDetailPanelProps {
@@ -44,6 +46,7 @@ export function ThemeDetailPanel({
   filteredStats,
   onClose,
 }: ThemeDetailPanelProps) {
+  useLocale();
   const { signalCatalog } = useTraceIntelligence();
   const filterKey = filters
     .map(filter => `${filter.signalName}:${filter.kind === 'theme' ? filter.themeId : 'noise'}`)
@@ -119,7 +122,9 @@ export function ThemeDetailPanel({
           )}
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription className="sr-only">
-            Details for the {signalName ?? 'selected'} theme {title}
+            {studioT('Details for the') + ' '}
+            {signalName ?? studioT('selected')} {' ' + studioT('theme') + ' '}
+            {title}
           </DrawerDescription>
         </DrawerHeader>
         <DrawerBody className="grid content-start gap-6 overflow-y-auto p-6">
@@ -128,15 +133,17 @@ export function ThemeDetailPanel({
           )}
           {insightTraceId === undefined && (
             <>
-              {detailQuery.isPending && <Txt tone="muted">Loading theme details…</Txt>}
-              {detailQuery.isError && <Txt className="text-destructive-foreground">Unable to load theme details.</Txt>}
+              {detailQuery.isPending && <Txt tone="muted">{studioT('Loading theme details…')}</Txt>}
+              {detailQuery.isError && (
+                <Txt className="text-destructive-foreground">{studioT('Unable to load theme details.')}</Txt>
+              )}
               {detailQuery.data && !detailQuery.data.theme && (
                 <section>
                   <Txt as="h2" variant="subheading" tone="ink">
-                    Not present in this snapshot
+                    {studioT('Not present in this snapshot')}
                   </Txt>
                   <Txt tone="muted" className="mt-2">
-                    This theme has no data in the selected snapshot.
+                    {studioT('This theme has no data in the selected snapshot.')}
                   </Txt>
                 </section>
               )}
@@ -144,10 +151,10 @@ export function ThemeDetailPanel({
                 <>
                   <section aria-labelledby="theme-summary-heading">
                     <Txt as="h2" variant="eyebrow" tone="muted" id="theme-summary-heading">
-                      Summary
+                      {studioT('Summary')}
                     </Txt>
                     <Txt tone="ink" className="mt-3">
-                      {detailQuery.data.theme.description ?? 'No description available.'}
+                      {detailQuery.data.theme.description ?? studioT('No description available.')}
                     </Txt>
                     <Txt tone="ink" className="mt-3 tabular-nums">
                       {shareSentence(
@@ -159,21 +166,21 @@ export function ThemeDetailPanel({
 
                   <section aria-labelledby="theme-examples-heading">
                     <Txt as="h2" variant="eyebrow" tone="muted" id="theme-examples-heading">
-                      Examples
+                      {studioT('Examples')}
                     </Txt>
                     {examplesQuery.isPending && (
                       <Txt tone="muted" className="mt-3">
-                        Loading examples…
+                        {studioT('Loading examples…')}
                       </Txt>
                     )}
                     {examplesQuery.isError && (
-                      <Txt className="mt-3 text-destructive-foreground">Unable to load examples.</Txt>
+                      <Txt className="mt-3 text-destructive-foreground">{studioT('Unable to load examples.')}</Txt>
                     )}
                     {examplesQuery.data && (
                       <>
                         {examplesQuery.data.examples.length === 0 ? (
                           <Txt tone="muted" className="mt-3">
-                            No examples in this snapshot.
+                            {studioT('No examples in this snapshot.')}
                           </Txt>
                         ) : (
                           <ul className="mt-3 space-y-3">
@@ -181,7 +188,9 @@ export function ThemeDetailPanel({
                               <li key={example.traceId}>
                                 <button
                                   type="button"
-                                  aria-label={`View trace insight for ${example.signalText}`}
+                                  aria-label={studioT('View trace insight for {value0}', {
+                                    value0: example.signalText,
+                                  })}
                                   onClick={() => setInsightTraceId(example.traceId)}
                                   className={cn(
                                     'text-foreground',
@@ -209,15 +218,15 @@ export function ThemeDetailPanel({
                   {snapshotTotal > 1 && (
                     <section aria-labelledby="theme-trend-heading">
                       <Txt as="h2" variant="eyebrow" tone="muted" id="theme-trend-heading">
-                        Trend
+                        {studioT('Trend')}
                       </Txt>
                       {historyQuery.isPending && (
                         <Txt tone="muted" className="mt-3">
-                          Loading trend…
+                          {studioT('Loading trend…')}
                         </Txt>
                       )}
                       {historyQuery.isError && (
-                        <Txt className="mt-3 text-destructive-foreground">Unable to load the trend.</Txt>
+                        <Txt className="mt-3 text-destructive-foreground">{studioT('Unable to load the trend.')}</Txt>
                       )}
                       {oldestHistoryPoint !== undefined && (
                         <>
@@ -228,15 +237,26 @@ export function ThemeDetailPanel({
                               {historyQuery.data?.nextCursor ? (
                                 <>
                                   <Metadata.Item>
-                                    {`Active since at least ${formatSnapshotDate(oldestHistoryPoint.startedAt)}`}
+                                    {studioT('Active since at least {value0}', {
+                                      value0: formatSnapshotDate(oldestHistoryPoint.startedAt),
+                                    })}
                                   </Metadata.Item>
-                                  <Metadata.Item>{`in ${historyPoints.length}+ snapshots`}</Metadata.Item>
+                                  <Metadata.Item>
+                                    {studioT('in {value0}+ snapshots', { value0: historyPoints.length })}
+                                  </Metadata.Item>
                                 </>
                               ) : (
                                 <>
-                                  <Metadata.Item>{`First seen ${formatSnapshotDate(oldestHistoryPoint.startedAt)}`}</Metadata.Item>
                                   <Metadata.Item>
-                                    {`in ${historyPoints.length} ${historyPoints.length === 1 ? 'snapshot' : 'snapshots'}`}
+                                    {studioT('First seen {value0}', {
+                                      value0: formatSnapshotDate(oldestHistoryPoint.startedAt),
+                                    })}
+                                  </Metadata.Item>
+                                  <Metadata.Item>
+                                    {studioT('in {value0} {value1}', {
+                                      value0: historyPoints.length,
+                                      value1: historyPoints.length === 1 ? 'snapshot' : 'snapshots',
+                                    })}
                                   </Metadata.Item>
                                 </>
                               )}

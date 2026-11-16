@@ -3,6 +3,8 @@ import { CodeEditor } from '@mastra/playground-ui/components/CodeEditor';
 import { EmptyState } from '@mastra/playground-ui/components/EmptyState';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { IconSend } from '@mastra/playground-ui/icons/central/IconSend';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { ToolRun } from '../utils/tool-run';
 import { getRunCode } from '../utils/tool-run';
 
@@ -12,9 +14,14 @@ export interface ToolResponseBodyProps {
 }
 
 export function ToolResponseBody({ isRunning, lastRun }: ToolResponseBodyProps) {
+  useLocale();
   if (isRunning) {
     return (
-      <EmptyState iconSlot={<Spinner />} titleSlot="Running…" descriptionSlot="Waiting for the tool to respond." />
+      <EmptyState
+        iconSlot={<Spinner />}
+        titleSlot={studioT('Running…')}
+        descriptionSlot={studioT('Waiting for the tool to respond.')}
+      />
     );
   }
 
@@ -22,8 +29,8 @@ export function ToolResponseBody({ isRunning, lastRun }: ToolResponseBodyProps) 
     return (
       <EmptyState
         iconSlot={<IconSend />}
-        titleSlot="No response yet"
-        descriptionSlot="Run the tool to see its output here."
+        titleSlot={studioT('No response yet')}
+        descriptionSlot={studioT('Run the tool to see its output here.')}
       />
     );
   }
@@ -40,7 +47,7 @@ export function ToolResponseBody({ isRunning, lastRun }: ToolResponseBodyProps) 
       lineNumbers={false}
       showCopyButton={false}
       variant="embedded"
-      aria-label="Tool response"
+      aria-label={studioT('Tool response')}
       className="p-4"
     />
   );

@@ -1,4 +1,5 @@
 import type { DatasetExperimentResult } from '@mastra/client-js';
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 
 /** Minimal shape needed to read output text and errors; review items may omit target info. */
 export type ResultOutputSource = {
@@ -33,8 +34,22 @@ export function getResultOutputPreview(result: ResultOutputSource): string | und
 /** Output/Error list columns, each included only when some result has a value for it. */
 export function getOptionalResultColumns(results: ResultOutputSource[]) {
   const columns: { name: string; label: string; size: string }[] = [];
-  if (results.some(r => getResultOutputPreview(r))) columns.push({ name: 'output', label: 'Output', size: '20rem' });
-  if (results.some(r => getResultErrorMessage(r))) columns.push({ name: 'error', label: 'Error', size: '20rem' });
+  if (results.some(r => getResultOutputPreview(r)))
+    columns.push({
+      name: 'output',
+      get label() {
+        return studioT('Output');
+      },
+      size: '20rem',
+    });
+  if (results.some(r => getResultErrorMessage(r)))
+    columns.push({
+      name: 'error',
+      get label() {
+        return studioT('Error');
+      },
+      size: '20rem',
+    });
   return columns;
 }
 

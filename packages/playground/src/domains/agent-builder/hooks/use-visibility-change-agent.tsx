@@ -1,4 +1,6 @@
 import { DialogBody } from '@mastra/playground-ui/components/Dialog';
+
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { useStoredAgentDependents, useStoredAgentMutations } from '@mastra/react/hooks/agents';
 import { useFormContext } from 'react-hook-form';
 
@@ -11,15 +13,25 @@ type Visibility = NonNullable<AgentBuilderEditFormValues['visibility']>;
 
 const COPY: Record<Visibility, VisibilityCopy> = {
   public: {
-    title: 'Add this agent to your library?',
-    description:
-      'Adding this agent to the library means your teammates will be able to discover, view, and chat with it.',
+    get title() {
+      return studioT('Add this agent to your library?');
+    },
+    get description() {
+      return studioT(
+        'Adding this agent to the library means your teammates will be able to discover, view, and chat with it.',
+      );
+    },
     toast: 'Agent added to the library',
   },
   private: {
-    title: 'Remove this agent from your library?',
-    description:
-      'Removing this agent from the library means your teammates will no longer be able to discover, view, or chat with it. You will be the only person with access.',
+    get title() {
+      return studioT('Remove this agent from your library?');
+    },
+    get description() {
+      return studioT(
+        'Removing this agent from the library means your teammates will no longer be able to discover, view, or chat with it. You will be the only person with access.',
+      );
+    },
     toast: 'Agent removed from the library',
   },
 };

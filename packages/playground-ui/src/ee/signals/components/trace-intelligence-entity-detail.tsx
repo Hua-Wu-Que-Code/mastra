@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-
 import { useEntityLearningProgress, useThemeEntities, useThemeSnapshots } from '../hooks';
 import { SankeySignals } from '../sankey-signals';
+
 import { orderedSignals } from '../signal-formatting';
 import { SignalsErrorState } from '../signals-error-state';
 import { SignalsLoadingSkeleton } from '../signals-loading-skeleton';
@@ -10,6 +10,7 @@ import { TraceIntelligenceProvider } from '../trace-intelligence-provider';
 import { useTraceIntelligence } from '../use-trace-intelligence';
 import { SignalsEmptyState } from './signals-empty-state';
 import { EmptyState } from '@/ds/components/EmptyState';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface TraceIntelligenceEntityDetailProps {
   entityId: string;
@@ -26,6 +27,7 @@ export function TraceIntelligenceEntityDetail({
   dateTo,
   dateRangePicker,
 }: TraceIntelligenceEntityDetailProps) {
+  useLocale();
   const [selectedThemeId, setSelectedThemeId] = useState<string>();
   const [selectedFrameId, setSelectedFrameId] = useState<string>();
   const context = useTraceIntelligence();
@@ -52,14 +54,17 @@ export function TraceIntelligenceEntityDetail({
   if (entitiesQuery.isPending) return <SignalsLoadingSkeleton />;
   if (entitiesQuery.isError) {
     return (
-      <SignalsErrorState message="Unable to load trace signal entity." onRetry={() => void entitiesQuery.refetch()} />
+      <SignalsErrorState
+        message={studioT('Unable to load trace signal entity.')}
+        onRetry={() => void entitiesQuery.refetch()}
+      />
     );
   }
   if (!entity) {
     return (
       <EmptyState
-        titleSlot="Trace Intelligence entity not found"
-        descriptionSlot="The requested entity is unavailable in this project."
+        titleSlot={studioT('Trace Intelligence entity not found')}
+        descriptionSlot={studioT('The requested entity is unavailable in this project.')}
         variant="fill"
       />
     );
@@ -94,7 +99,10 @@ export function TraceIntelligenceEntityDetail({
     return (
       <>
         {pickerRow}
-        <SignalsErrorState message="Unable to load trace signal flow." onRetry={() => void snapshotsQuery.refetch()} />
+        <SignalsErrorState
+          message={studioT('Unable to load trace signal flow.')}
+          onRetry={() => void snapshotsQuery.refetch()}
+        />
       </>
     );
   }

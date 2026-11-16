@@ -1,4 +1,6 @@
 import type { CSSProperties } from 'react';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 interface ProviderLogoMonogramProps {
@@ -8,13 +10,14 @@ interface ProviderLogoMonogramProps {
 }
 
 export const ProviderLogoMonogram = ({ providerId, className, style }: ProviderLogoMonogramProps) => {
+  useLocale();
   const letter = providerId.match(/[a-z0-9]/i)?.[0]?.toUpperCase();
 
   return (
     <svg
       data-slot="provider-monogram"
       role={providerId ? 'img' : undefined}
-      aria-label={providerId ? `${providerId} logo` : undefined}
+      aria-label={providerId ? studioT('{value0} logo', { value0: providerId }) : undefined}
       aria-hidden={providerId ? undefined : true}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"

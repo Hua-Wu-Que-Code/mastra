@@ -1,4 +1,6 @@
 import { createTool } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { z } from 'zod-v4';
@@ -8,14 +10,16 @@ import type { AgentBuilderEditFormValues } from '@/domains/agent-builder/schemas
 export const SET_AGENT_NAME_TOOL_NAME = 'set-agent-name';
 
 export function useSetAgentNameTool() {
+  const studioLocale = useLocale();
   const formMethods = useFormContext<AgentBuilderEditFormValues>();
 
   return useMemo(
     () =>
       createTool({
         id: SET_AGENT_NAME_TOOL_NAME,
-        description:
+        description: studioT(
           'Set the agent name. Use this when the user provides or revises a short, human-readable name for the agent being built.',
+        ),
         inputSchema: z.object({
           name: z.string().min(1).describe('The new agent name. Keep it short and Title Case where appropriate.'),
         }),
@@ -27,6 +31,6 @@ export function useSetAgentNameTool() {
           return { success: true };
         },
       }),
-    [formMethods],
+    [formMethods, studioLocale],
   );
 }

@@ -4,6 +4,8 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useUpdateThread } from '@mastra/react/hooks/memory';
 import { useState } from 'react';
@@ -16,6 +18,7 @@ export interface RenameThreadDialogProps {
 }
 
 export function RenameThreadDialog({ agentId, threadId, initialTitle, onOpenChange }: RenameThreadDialogProps) {
+  useLocale();
   const [requestContext] = useEntityRequestContext('agent', agentId);
   const { mutate, isPending } = useUpdateThread(requestContext);
   const [title, setTitle] = useState(initialTitle);
@@ -31,10 +34,10 @@ export function RenameThreadDialog({ agentId, threadId, initialTitle, onOpenChan
       { threadId, agentId, title: trimmed },
       {
         onSuccess: () => {
-          toast.success('Chat renamed');
+          toast.success(studioT('Chat renamed'));
           onOpenChange(false);
         },
-        onError: () => toast.error('Failed to rename chat'),
+        onError: () => toast.error(studioT('Failed to rename chat')),
       },
     );
   };
@@ -43,26 +46,26 @@ export function RenameThreadDialog({ agentId, threadId, initialTitle, onOpenChan
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Rename thread</DialogTitle>
+          <DialogTitle>{studioT('Rename thread')}</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <Form onSubmit={handleSubmit}>
             <Field>
-              <FieldLabel>Title</FieldLabel>
+              <FieldLabel>{studioT('Title')}</FieldLabel>
               <Input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder="Enter a chat title"
+                placeholder={studioT('Enter a chat title')}
                 autoFocus
               />
             </Field>
 
             <div className="flex justify-end gap-2">
               <Button type="button" onClick={() => onOpenChange(false)} disabled={isPending}>
-                Cancel
+                {studioT('Cancel')}
               </Button>
               <Button type="submit" variant="primary" disabled={!canSave}>
-                Save
+                {studioT('Save')}
               </Button>
             </div>
           </Form>

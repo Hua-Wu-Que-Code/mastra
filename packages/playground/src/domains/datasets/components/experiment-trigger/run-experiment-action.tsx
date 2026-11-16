@@ -1,5 +1,6 @@
 import { DialogAction } from '@mastra/playground-ui/components/Dialog';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface RunExperimentActionProps {
   onRun: () => void;
@@ -16,12 +17,13 @@ export function RunExperimentAction({ onRun, canRun, isRunning }: RunExperimentA
 }
 
 function RunExperimentLabel({ isRunning }: { isRunning: boolean }) {
+  useLocale();
   if (!isRunning) return 'Run experiment';
 
   return (
     <>
       <Spinner className="h-4 w-4" />
-      Starting…
+      {studioT('Starting…')}
     </>
   );
 }

@@ -1,4 +1,6 @@
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 
 export interface ComparisonDatasetVersionProps {
@@ -10,17 +12,19 @@ export interface ComparisonDatasetVersionProps {
 
 /** Dataset version one experiment ran on, linked to the dataset at that version. */
 export function ComparisonDatasetVersion({ datasetId, version, differsFromBaseline }: ComparisonDatasetVersionProps) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   return (
     <span className={cn('flex min-w-0 items-center gap-2', differsFromBaseline && 'text-warning-foreground')}>
-      {differsFromBaseline && <span className="min-w-0 truncate">differs from baseline</span>}
+      {differsFromBaseline && <span className="min-w-0 truncate">{studioT('differs from baseline')}</span>}
       <Link
         href={`${paths.datasetLink(datasetId)}?version=${version}`}
-        aria-label={`Open dataset v${version}`}
+        aria-label={studioT('Open dataset v{value0}', { value0: version })}
         className="shrink-0 hover:underline"
       >
-        v{version}
+        {studioT('v')}
+        {version}
       </Link>
     </span>
   );

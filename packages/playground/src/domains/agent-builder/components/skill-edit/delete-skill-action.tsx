@@ -2,6 +2,8 @@ import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -12,6 +14,7 @@ interface UseDeleteSkillActionParams {
 }
 
 const useDeleteSkillAction = ({ skillId }: UseDeleteSkillActionParams) => {
+  useLocale();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const deleteSkill = useDeleteSkill(skillId);
@@ -19,11 +22,11 @@ const useDeleteSkillAction = ({ skillId }: UseDeleteSkillActionParams) => {
   const confirm = async () => {
     try {
       await deleteSkill.mutateAsync();
-      toast.success('Skill deleted');
+      toast.success(studioT('Skill deleted'));
       setOpen(false);
       void navigate('/agent-builder/skills', { viewTransition: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete skill');
+      toast.error(err instanceof Error ? err.message : studioT('Failed to delete skill'));
     }
   };
 
@@ -43,36 +46,41 @@ interface DeleteSkillDialogProps {
   onConfirm: () => void;
 }
 
-const DeleteSkillDialog = ({ open, onOpenChange, skillName, isPending, onConfirm }: DeleteSkillDialogProps) => (
-  <AlertDialog open={open} onOpenChange={onOpenChange}>
-    <AlertDialog.Content data-testid="skill-builder-delete-skill-dialog">
-      <AlertDialog.Header>
-        <AlertDialog.Title>Delete skill?</AlertDialog.Title>
-        <AlertDialog.Description>
-          This permanently deletes &quot;{skillName}&quot;. This cannot be undone.
-        </AlertDialog.Description>
-      </AlertDialog.Header>
-      <AlertDialog.Footer>
-        <AlertDialog.Cancel data-testid="skill-builder-delete-skill-cancel" disabled={isPending}>
-          Cancel
-        </AlertDialog.Cancel>
-        <Button
-          icon={<TrashIcon />}
-          variant="destructive"
-          data-testid="skill-builder-delete-skill-confirm"
-          disabled={isPending}
-          onClick={() => {
-            // Use a plain button (not AlertDialog.Close) so the dialog stays
-            // open while the request is in flight and on error.
-            onConfirm();
-          }}
-        >
-          {isPending ? 'Deleting…' : 'Delete skill'}
-        </Button>
-      </AlertDialog.Footer>
-    </AlertDialog.Content>
-  </AlertDialog>
-);
+const DeleteSkillDialog = ({ open, onOpenChange, skillName, isPending, onConfirm }: DeleteSkillDialogProps) => {
+  useLocale();
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialog.Content data-testid="skill-builder-delete-skill-dialog">
+        <AlertDialog.Header>
+          <AlertDialog.Title>{studioT('Delete skill?')}</AlertDialog.Title>
+          <AlertDialog.Description>
+            {studioT('This permanently deletes "')}
+            {skillName}
+            {studioT('". This cannot be undone.')}
+          </AlertDialog.Description>
+        </AlertDialog.Header>
+        <AlertDialog.Footer>
+          <AlertDialog.Cancel data-testid="skill-builder-delete-skill-cancel" disabled={isPending}>
+            {studioT('Cancel')}
+          </AlertDialog.Cancel>
+          <Button
+            icon={<TrashIcon />}
+            variant="destructive"
+            data-testid="skill-builder-delete-skill-confirm"
+            disabled={isPending}
+            onClick={() => {
+              // Use a plain button (not AlertDialog.Close) so the dialog stays
+              // open while the request is in flight and on error.
+              onConfirm();
+            }}
+          >
+            {isPending ? studioT('Deleting…') : studioT('Delete skill')}
+          </Button>
+        </AlertDialog.Footer>
+      </AlertDialog.Content>
+    </AlertDialog>
+  );
+};
 
 interface DeleteSkillEntryProps {
   skillId: string;
@@ -81,6 +89,7 @@ interface DeleteSkillEntryProps {
 }
 
 export const DeleteSkillPanelButton = ({ skillId, skillName, disabled = false }: DeleteSkillEntryProps) => {
+  useLocale();
   const { open, setOpen, isPending, confirm } = useDeleteSkillAction({ skillId });
 
   return (
@@ -94,7 +103,7 @@ export const DeleteSkillPanelButton = ({ skillId, skillName, disabled = false }:
         data-testid="skill-builder-delete-skill"
         icon={<TrashIcon />}
       >
-        <span>Delete skill</span>
+        <span>{studioT('Delete skill')}</span>
       </Button>
       <DeleteSkillDialog
         open={open}
@@ -108,6 +117,7 @@ export const DeleteSkillPanelButton = ({ skillId, skillName, disabled = false }:
 };
 
 export const DeleteSkillMenuItem = ({ skillId, skillName, disabled = false }: DeleteSkillEntryProps) => {
+  useLocale();
   const { open, setOpen, isPending, confirm } = useDeleteSkillAction({ skillId });
 
   return (
@@ -122,7 +132,7 @@ export const DeleteSkillMenuItem = ({ skillId, skillName, disabled = false }: De
         }}
       >
         <TrashIcon />
-        <span>Delete skill</span>
+        <span>{studioT('Delete skill')}</span>
       </DropdownMenu.Item>
       <DeleteSkillDialog
         open={open}

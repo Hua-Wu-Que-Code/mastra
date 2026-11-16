@@ -8,9 +8,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/ds/components/Popover
 import { IconCalendar1 } from '@/ds/icons/central/IconCalendar1';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { fieldTriggerErrorBorder } from '@/ds/primitives/form-element';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export const DateField: React.FC<AutoFormFieldProps> = ({ inputProps, field }) => {
+  useLocale();
   const { key, ...props } = inputProps;
   const [value, setValue] = useState<Date | undefined>(undefined);
   const [open, setOpen] = useState(false);
@@ -56,7 +59,7 @@ export const DateField: React.FC<AutoFormFieldProps> = ({ inputProps, field }) =
           {value ? (
             <span className="text-foreground">{format(value, 'PPP')}</span>
           ) : (
-            <span className="text-muted-foreground">Pick a date</span>
+            <span className="text-muted-foreground">{studioT('Pick a date')}</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -65,7 +68,7 @@ export const DateField: React.FC<AutoFormFieldProps> = ({ inputProps, field }) =
         {value && (
           <div className="p-3 pt-0">
             <Button icon={<IconCrossMedium />} variant="default" size="lg" className="w-full" onClick={handleClear}>
-              Clear
+              {studioT('Clear')}
             </Button>
           </div>
         )}

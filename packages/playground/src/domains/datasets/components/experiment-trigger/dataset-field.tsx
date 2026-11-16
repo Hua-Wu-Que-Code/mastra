@@ -8,6 +8,8 @@ import {
 } from '@mastra/playground-ui/components/Combobox';
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Metadata } from '@mastra/playground-ui/components/Metadata';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDatasetItems } from '@mastra/react/hooks/datasets';
 import { sameValue } from './experiment-trigger-options';
 import type { DatasetOption, FieldPopupContainer } from './experiment-trigger-options';
@@ -21,6 +23,7 @@ export interface DatasetFieldProps {
 }
 
 export function DatasetField({ datasets, datasetId, version, onDatasetChange, container }: DatasetFieldProps) {
+  useLocale();
   const { total: itemCount } = useDatasetItems({
     datasetId,
     search: undefined,
@@ -34,9 +37,11 @@ export function DatasetField({ datasets, datasetId, version, onDatasetChange, co
     <Field>
       <FieldLabel
         required
-        info="The items to run. Each item's input goes to the target. Runs on the latest version unless you pick one under Advanced."
+        info={studioT(
+          "The items to run. Each item's input goes to the target. Runs on the latest version unless you pick one under Advanced.",
+        )}
       >
-        Dataset
+        {studioT('Dataset')}
       </FieldLabel>
       <ComboboxRoot
         items={datasets}
@@ -45,18 +50,20 @@ export function DatasetField({ datasets, datasetId, version, onDatasetChange, co
         isItemEqualToValue={sameValue}
         autoHighlight
       >
-        <ComboboxInput placeholder="Select a dataset">
+        <ComboboxInput placeholder={studioT('Select a dataset')}>
           {itemCount !== undefined && (
             <Metadata>
               <Metadata.Item>
-                {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                {itemCount} {itemCount === 1 ? studioT('item') : studioT('items')}
               </Metadata.Item>
-              <Metadata.Item>{version === undefined ? 'latest' : `v${version}`}</Metadata.Item>
+              <Metadata.Item>
+                {version === undefined ? studioT('latest') : studioT('v{value0}', { value0: version })}
+              </Metadata.Item>
             </Metadata>
           )}
         </ComboboxInput>
         <ComboboxContent container={container}>
-          <ComboboxEmpty>No datasets found</ComboboxEmpty>
+          <ComboboxEmpty>{studioT('No datasets found')}</ComboboxEmpty>
           <ComboboxList>
             {(item: DatasetOption) => (
               <ComboboxItem key={item.value} value={item}>

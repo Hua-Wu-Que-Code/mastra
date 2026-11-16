@@ -1,4 +1,5 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 import { AgentLayout } from '../agent-layout';
 import { SidebarPanel } from '../sidebar-panel';
@@ -73,6 +74,7 @@ function LeftPanel({
   onOpenPr?: () => Promise<void>;
   isViewingPreviousVersion?: boolean;
 }) {
+  useLocale();
   const { versionSelector, actionBar } = AgentPlaygroundVersionBar({
     agentId,
     activeVersionId,
@@ -100,7 +102,7 @@ function LeftPanel({
 
       <div className="px-4 pt-3">
         <Txt variant="caption" tone="muted">
-          Edit your agent's system prompt, tools, and variables below.
+          {studioT("Edit your agent's system prompt, tools, and variables below.")}
         </Txt>
       </div>
 
@@ -142,10 +144,11 @@ export function AgentPlaygroundView({
   onOpenPr,
   isViewingPreviousVersion,
 }: AgentPlaygroundViewProps) {
+  useLocale();
   return (
     <AgentLayout
       agentId={agentId}
-      leftDrawerLabel="Open configuration"
+      leftDrawerLabel={studioT('Open configuration')}
       leftSlot={
         <LeftPanel
           agentId={agentId}

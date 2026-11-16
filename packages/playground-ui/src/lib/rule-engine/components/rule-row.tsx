@@ -1,15 +1,16 @@
 import * as React from 'react';
-
 import type { ConditionOperator } from '../types';
-
 import { RuleFieldSelect } from './rule-field-select';
+
 import { RuleOperatorSelect } from './rule-operator-select';
+
 import { RuleValueInput } from './rule-value-input';
 import { getFieldOptionAtPath } from './schema-utils';
 import type { RuleRowProps } from './types';
-
 import { Button } from '@/ds/components/Button';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'integer']);
@@ -18,6 +19,7 @@ const PRIMITIVE_TYPES = new Set(['string', 'number', 'boolean', 'integer']);
  * A single rule row with field selector, operator selector, and value input
  */
 export const RuleRow: React.FC<RuleRowProps> = ({ schema, rule, onChange, onRemove, className }) => {
+  useLocale();
   const fieldType = React.useMemo(() => {
     return getFieldOptionAtPath(schema, rule.field)?.type;
   }, [schema, rule.field]);
@@ -98,7 +100,7 @@ export const RuleRow: React.FC<RuleRowProps> = ({ schema, rule, onChange, onRemo
         )}
       </div>
 
-      <Button type="button" onClick={onRemove} tooltip="Remove rule" size="icon-sm" variant="ghost">
+      <Button type="button" onClick={onRemove} tooltip={studioT('Remove rule')} size="icon-sm" variant="ghost">
         <IconCrossMedium />
       </Button>
     </div>

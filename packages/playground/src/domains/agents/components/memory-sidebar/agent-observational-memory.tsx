@@ -12,6 +12,10 @@ import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-c
 import { useElapsedTime } from '@mastra/playground-ui/hooks/use-elapsed-time';
 import { IconBrain } from '@mastra/playground-ui/icons/central/IconBrain';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -73,6 +77,7 @@ const ProgressBar = ({
   baseThreshold?: number;
   totalBudget?: number;
 }) => {
+  useLocale();
   const isAdaptive = baseThreshold !== undefined && totalBudget !== undefined;
   const percentage = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
   const barColor = getBarColor(percentage);
@@ -97,20 +102,20 @@ const ProgressBar = ({
         <Txt as="span" variant="meta" tone="muted" className="uppercase">
           {label}
         </Txt>
-        <InfoTooltip aria-label={`${settingsOwner} settings`} contentClassName="max-w-xs">
+        <InfoTooltip aria-label={studioT('{value0} settings', { value0: settingsOwner })} contentClassName="max-w-xs">
           <div className="space-y-1.5">
             <Txt as="p" variant="column" tone="ink">
-              {settingsOwner} Settings
+              <Trans id="{part0} Settings" values={{ part0: settingsOwner }} />
             </Txt>
             <div className="space-y-0.5">
               <Txt as="p" variant="caption">
-                <span className="text-muted-foreground">Model:</span>{' '}
-                <span className="text-foreground">{model || 'not configured'}</span>
+                <span className="text-muted-foreground">{studioT('Model:')}</span>{' '}
+                <span className="text-foreground">{model || studioT('not configured')}</span>
               </Txt>
               {modelRouting?.length ? (
                 <div>
                   <Txt as="span" variant="caption" tone="muted">
-                    Routing:
+                    {studioT('Routing:')}
                   </Txt>
                   <div className="mt-0.5 space-y-0.5 pl-2">
                     {modelRouting.map(route => (
@@ -122,15 +127,19 @@ const ProgressBar = ({
                 </div>
               ) : (
                 <Txt as="p" variant="caption">
-                  <span className="text-muted-foreground">Threshold:</span>{' '}
-                  <span className="text-foreground">{formatTokens(baseThreshold ?? max)} tokens</span>
+                  <span className="text-muted-foreground">{studioT('Threshold:')}</span>{' '}
+                  <span className="text-foreground">
+                    <Trans id="{part0} tokens" values={{ part0: formatTokens(baseThreshold ?? max) }} />
+                  </span>
                 </Txt>
               )}
               {isAdaptive && totalBudget && (
                 <Txt as="p" variant="caption">
-                  <span className="text-muted-foreground">Mode:</span>{' '}
-                  <span className="text-badge-amber-indicator">Adaptive</span>{' '}
-                  <span className="text-muted-foreground">({formatTokens(totalBudget)} shared budget)</span>
+                  <span className="text-muted-foreground">{studioT('Mode:')}</span>{' '}
+                  <span className="text-badge-amber-indicator">{studioT('Adaptive')}</span>{' '}
+                  <span className="text-muted-foreground">
+                    <Trans id="({part0} shared budget)" values={{ part0: formatTokens(totalBudget) }} />
+                  </span>
                 </Txt>
               )}
             </div>
@@ -154,7 +163,7 @@ const ProgressBar = ({
                 </Txt>
               </>
             ) : showAdaptiveLabel ? (
-              'adaptive'
+              studioT('adaptive')
             ) : (
               `${Math.round(percentage)}%`
             )}
@@ -173,7 +182,7 @@ const ProgressBar = ({
                 </Txt>
               </>
             ) : showAdaptiveLabel ? (
-              'adaptive'
+              studioT('adaptive')
             ) : (
               `${Math.round(percentage)}%`
             )}
@@ -206,9 +215,12 @@ const ProgressBar = ({
               <TooltipContent side="top" className="max-w-xs">
                 <Txt as="p" variant="caption">
                   <span className="text-badge-amber-indicator">{formatTokens(baseThreshold)}</span>
-                  <span className="text-muted-foreground"> is the configured threshold. </span>
+                  <span className="text-muted-foreground"> {' ' + studioT('is the configured threshold.') + ' '}</span>
                   <span className="text-foreground">
-                    Adaptive mode shares a {formatTokens(totalBudget)} token budget between messages and observations.
+                    <Trans
+                      id="Adaptive mode shares a {part0} token budget between messages and observations."
+                      values={{ part0: formatTokens(totalBudget) }}
+                    />
                   </span>
                 </Txt>
               </TooltipContent>
@@ -220,45 +232,52 @@ const ProgressBar = ({
   );
 };
 
-const ObservationalMemoryHeader = () => (
-  <div className="mb-3 flex items-center gap-2">
-    <IconBrain className="size-icon-md text-badge-purple-indicator" />
-    <Txt as="h3" variant="subheading" tone="ink">
-      Observational Memory
-    </Txt>
-  </div>
-);
-
-const ObservationalMemoryDisabled = () => (
-  <div className="p-4">
+const ObservationalMemoryHeader = () => {
+  useLocale();
+  return (
     <div className="mb-3 flex items-center gap-2">
-      <IconBrain className="size-icon-md text-muted-foreground" />
+      <IconBrain className="size-icon-md text-badge-purple-indicator" />
       <Txt as="h3" variant="subheading" tone="ink">
-        Observational Memory
+        {studioT('Observational Memory')}
       </Txt>
     </div>
-    <div className={cn(raisedSurfaceStyle, 'rounded-lg p-4')}>
-      <Txt tone="muted" className="mb-3">
-        Observational Memory is not enabled for this agent. Enable it to automatically extract and maintain observations
-        from conversations.
-      </Txt>
-      <a
-        href="https://mastra.ai/en/docs/memory/observational-memory"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(
-          'inline-flex items-center gap-2 text-info-indicator hover:underline',
-          controlStateColorTransition,
-        )}
-      >
-        <Txt as="span" variant="body" className="block">
-          Learn about Observational Memory
+  );
+};
+
+const ObservationalMemoryDisabled = () => {
+  useLocale();
+  return (
+    <div className="p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <IconBrain className="size-icon-md text-muted-foreground" />
+        <Txt as="h3" variant="subheading" tone="ink">
+          {studioT('Observational Memory')}
         </Txt>
-        <IconSquareArrowTopRight className="size-icon-xs" />
-      </a>
+      </div>
+      <div className={cn(raisedSurfaceStyle, 'rounded-lg p-4')}>
+        <Txt tone="muted" className="mb-3">
+          {studioT(
+            'Observational Memory is not enabled for this agent. Enable it to automatically extract and maintain observations from conversations.',
+          )}
+        </Txt>
+        <a
+          href="https://mastra.ai/en/docs/memory/observational-memory"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            'inline-flex items-center gap-2 text-info-indicator hover:underline',
+            controlStateColorTransition,
+          )}
+        >
+          <Txt as="span" variant="body" className="block">
+            {studioT('Learn about Observational Memory')}
+          </Txt>
+          <IconSquareArrowTopRight className="size-icon-xs" />
+        </a>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function ObservationalMemoryProgressBars({
   pendingMessageTokens,
@@ -289,13 +308,14 @@ function ObservationalMemoryProgressBars({
   reflectionModel?: string;
   reflectionModelRouting?: ModelRouting;
 }) {
+  useLocale();
   return (
     <TooltipProvider delayDuration={0}>
       <div className="mb-3 flex gap-3">
         <ProgressBar
           value={pendingMessageTokens}
           max={messageTokensThreshold}
-          label="Messages"
+          label={studioT('Messages')}
           isActive={isObserving}
           model={observationModel}
           modelRouting={observationModelRouting}
@@ -305,7 +325,7 @@ function ObservationalMemoryProgressBars({
         <ProgressBar
           value={observationTokenCount}
           max={observationTokensThreshold}
-          label="Observations"
+          label={studioT('Observations')}
           isActive={isReflecting}
           baseThreshold={baseObservationTokens}
           model={reflectionModel}
@@ -324,6 +344,7 @@ interface AgentObservationalMemoryProps {
 }
 
 export const AgentObservationalMemory = ({ agentId, resourceId, threadId }: AgentObservationalMemoryProps) => {
+  useLocale();
   const { isPanelOpen: isDetailViewOpen, openPanel: openDetailView, closePanel: closeDetailView } = useMemoryTimeline();
   const { isObservingFromStream, isReflectingFromStream, streamProgress, clearProgress } =
     useObservationalMemoryContext();
@@ -497,7 +518,7 @@ export const AgentObservationalMemory = ({ agentId, resourceId, threadId }: Agen
         onClick={() => (isDetailViewOpen ? closeDetailView() : openDetailView())}
         icon={<IconBrain />}
       >
-        Analyze observations
+        {studioT('Analyze observations')}
       </Button>
     </div>
   );

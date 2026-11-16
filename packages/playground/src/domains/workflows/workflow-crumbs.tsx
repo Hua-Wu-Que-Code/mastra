@@ -1,6 +1,8 @@
 import { CrumbSkeleton, crumbSwitcherTriggerProps } from '@mastra/playground-ui/components/Breadcrumb';
 import { CopyButton } from '@mastra/playground-ui/components/CopyButton';
 import { WorkflowCombobox } from '@mastra/playground-ui/domains/workflows/components/workflow-combobox';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useWorkflows } from '@mastra/react/hooks/workflows';
 import { useParams } from 'react-router';
 
@@ -14,10 +16,11 @@ export function WorkflowCrumb() {
 }
 
 export function WorkflowSwitcher() {
+  useLocale();
   const { workflowId } = useParams<{ workflowId: string }>();
   if (!workflowId) return null;
 
-  return <WorkflowCombobox value={workflowId} {...crumbSwitcherTriggerProps} aria-label="Switch workflow" />;
+  return <WorkflowCombobox value={workflowId} {...crumbSwitcherTriggerProps} aria-label={studioT('Switch workflow')} />;
 }
 
 export function WorkflowRunCrumb() {
@@ -28,8 +31,9 @@ export function WorkflowRunCrumb() {
 }
 
 export function WorkflowRunCopyAction() {
+  useLocale();
   const { runId } = useParams<{ runId: string }>();
   if (!runId) return null;
 
-  return <CopyButton content={runId} tooltip="Copy run id" variant="ghost" size="icon-sm" />;
+  return <CopyButton content={runId} tooltip={studioT('Copy run id')} variant="ghost" size="icon-sm" />;
 }

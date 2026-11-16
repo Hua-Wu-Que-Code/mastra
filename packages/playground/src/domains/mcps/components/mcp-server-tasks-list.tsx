@@ -12,6 +12,10 @@ import { IconCircleCheck } from '@mastra/playground-ui/icons/central/IconCircleC
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
 import { IconUser } from '@mastra/playground-ui/icons/central/IconUser';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { hueAccentColor } from '@mastra/playground-ui/utils/colors';
 import { useMemo, useRef, useState } from 'react';
 import type { FormEvent, SyntheticEvent } from 'react';
@@ -39,7 +43,14 @@ const UNAVAILABLE = {
   resource_scoped: 'The task list needs a Studio session that is not scoped to a resource.',
 } as const;
 
-const OPERATORS: FilterBarOperator[] = [{ id: 'is', label: 'is' }];
+const OPERATORS: FilterBarOperator[] = [
+  {
+    id: 'is',
+    get label() {
+      return studioT('is');
+    },
+  },
+];
 
 const STATUS_OPTIONS = Object.entries(TASK_STATUS_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -71,6 +82,7 @@ const fromItems = (items: FilterBarItem[]): McpTaskFilters => {
  * for servers that report `tasks_capability`.
  */
 export function McpServerTasksList({ server }: { server: McpServerInfo }) {
+  const studioLocale = useLocale();
   const { filters, setFilters } = useTaskFilters();
   const { data, isLoading, isError, hasNextPage, fetchNextPage, isFetchingNextPage } = useMcpServerTasks(
     server.id,
@@ -94,7 +106,7 @@ export function McpServerTasksList({ server }: { server: McpServerInfo }) {
     () => [
       {
         id: 'status',
-        label: 'Status',
+        label: studioT('Status'),
         icon: IconCircleCheck,
         color: hueAccentColor('orange'),
         operators: ['is'],
@@ -103,7 +115,7 @@ export function McpServerTasksList({ server }: { server: McpServerInfo }) {
       },
       {
         id: 'surface',
-        label: 'Surface',
+        label: studioT('Surface'),
         icon: IconMaintenance,
         color: hueAccentColor('blue'),
         operators: ['is'],
@@ -112,23 +124,23 @@ export function McpServerTasksList({ server }: { server: McpServerInfo }) {
       },
       {
         id: 'client',
-        label: 'Client',
+        label: studioT('Client'),
         icon: IconUser,
         color: hueAccentColor('purple'),
         operators: ['is'],
         suggestions: clients.map(([value, label]) => ({ value, label })),
       },
     ],
-    [surfaces, clients],
+    [surfaces, clients, studioLocale],
   );
 
   return (
-    <section aria-label="Tasks" className="flex flex-col gap-3">
+    <section aria-label={studioT('Tasks')} className="flex flex-col gap-3">
       <Txt as="h2" variant="heading">
-        Tasks
+        {studioT('Tasks')}
       </Txt>
 
-      {isError && <Notice variant="destructive">Could not load this server's tasks.</Notice>}
+      {isError && <Notice variant="destructive">{studioT("Could not load this server's tasks.")}</Notice>}
       {unavailable && <Notice variant="info">{UNAVAILABLE[unavailable]}</Notice>}
 
       {!unavailable && (
@@ -140,11 +152,11 @@ export function McpServerTasksList({ server }: { server: McpServerInfo }) {
               value={toItems(filters)}
               onValueChange={(items: FilterBarItem[]) => setFilters(fromItems(items))}
               createItemId={fieldId => fieldId}
-              aria-label="Task filters"
+              aria-label={studioT('Task filters')}
               className="min-w-64 flex-1"
             >
               <FilterBar.Chips />
-              <FilterBar.Input placeholder="Filter tasks" />
+              <FilterBar.Input placeholder={studioT('Filter tasks')} />
             </FilterBar>
           </ActionRow.Start>
           <ActionRow.End>
@@ -157,18 +169,18 @@ export function McpServerTasksList({ server }: { server: McpServerInfo }) {
       {data && !unavailable && (
         <DataList columns={COLUMNS} scrollRef={containerRef}>
           <DataList.Top>
-            <DataList.TopCell>Surface</DataList.TopCell>
-            <DataList.TopCell>Status</DataList.TopCell>
-            <DataList.TopCell>Created</DataList.TopCell>
-            <DataList.TopCell>Updated</DataList.TopCell>
-            <DataList.TopCell>Expires</DataList.TopCell>
-            <DataList.TopCell>Inputs</DataList.TopCell>
-            <DataList.TopCell>Key</DataList.TopCell>
-            <DataList.TopCell>Client</DataList.TopCell>
+            <DataList.TopCell>{studioT('Surface')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Status')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Created')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Updated')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Expires')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Inputs')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Key')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Client')}</DataList.TopCell>
           </DataList.Top>
 
           {tasks.length === 0 && (
-            <DataList.NoMatch message={filtered ? 'No tasks match these filters' : 'No tasks yet'} />
+            <DataList.NoMatch message={filtered ? studioT('No tasks match these filters') : studioT('No tasks yet')} />
           )}
 
           {tasks.map((task, index) => (
@@ -186,10 +198,13 @@ export function McpServerTasksList({ server }: { server: McpServerInfo }) {
       {hasNextPage && (
         <div className="flex items-center gap-3">
           <Button variant="default" size="sm" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-            {isFetchingNextPage ? 'Loading…' : 'Load more'}
+            {isFetchingNextPage ? studioT('Loading…') : studioT('Load more')}
           </Button>
           <Txt variant="caption" tone="muted">
-            Showing the {tasks.length} most recent {filtered ? 'matching ' : ''}tasks.
+            <Trans
+              id="Showing the {part0} most recent {part1} tasks."
+              values={{ part0: tasks.length, part1: filtered ? studioT('matching') + ' ' : '' }}
+            />
           </Txt>
         </div>
       )}
@@ -208,6 +223,7 @@ function McpTaskRow({
   rowProps: ReturnType<ReturnType<typeof useDataListKeyboard>['getRowProps']>;
   onFilterClient: () => void;
 }) {
+  useLocale();
   const { Link } = useLinkComponent();
   const [params] = useSearchParams();
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -221,7 +237,7 @@ function McpTaskRow({
         LinkComponent={Link}
         tabIndex={-1}
         onClick={stopPropagation}
-        aria-label={`${task.surface} task ${shortTaskKey(task.taskKey)}`}
+        aria-label={studioT('{value0} task {value1}', { value0: task.surface, value1: shortTaskKey(task.taskKey) })}
       >
         <DataList.NameCell>{task.surface}</DataList.NameCell>
         <DataList.Cell>
@@ -232,7 +248,7 @@ function McpTaskRow({
           <RelativeTimestamp value={task.lastUpdatedAt} />
         </DataList.Cell>
         <DataList.Cell className="text-muted-foreground">
-          {task.expiresAt ? <RelativeTimestamp value={task.expiresAt} /> : 'never'}
+          {task.expiresAt ? <RelativeTimestamp value={task.expiresAt} /> : studioT('never')}
         </DataList.Cell>
         <DataList.TextCell>{Object.keys(task.inputRequests ?? {}).length || '—'}</DataList.TextCell>
         <DataList.TextCell font="mono" className="text-muted-foreground">
@@ -245,8 +261,8 @@ function McpTaskRow({
           variant="ghost"
           size="sm"
           className="w-full justify-start font-mono"
-          tooltip="Show only this client's tasks"
-          aria-label={`Show only tasks from client ${clientName(task)}`}
+          tooltip={studioT("Show only this client's tasks")}
+          aria-label={studioT('Show only tasks from client {value0}', { value0: clientName(task) })}
           onClick={event => {
             event.stopPropagation();
             onFilterClient();
@@ -261,6 +277,7 @@ function McpTaskRow({
 
 /** Opens a task from the MCP task id a client sees, such as the one in a tool-call card. */
 function FindTaskById({ serverId }: { serverId: string }) {
+  useLocale();
   const [taskId, setTaskId] = useState('');
   const find = useFindMcpServerTask(serverId);
   const { open } = useTaskDrawerParam();
@@ -278,7 +295,7 @@ function FindTaskById({ serverId }: { serverId: string }) {
   };
 
   return (
-    <form onSubmit={submit} className="flex items-center gap-2" aria-label="Find a task by MCP task id">
+    <form onSubmit={submit} className="flex items-center gap-2" aria-label={studioT('Find a task by MCP task id')}>
       <Input
         size="sm"
         value={taskId}
@@ -286,17 +303,17 @@ function FindTaskById({ serverId }: { serverId: string }) {
           setTaskId(event.target.value);
           find.reset();
         }}
-        placeholder="MCP task id"
-        aria-label="MCP task id"
+        placeholder={studioT('MCP task id')}
+        aria-label={studioT('MCP task id')}
         aria-invalid={find.isError || undefined}
         className="w-56 font-mono"
       />
       <Button type="submit" size="sm" variant="default" disabled={!taskId.trim() || find.isPending}>
-        Find
+        {studioT('Find')}
       </Button>
       {find.isError && (
         <Txt variant="caption" role="status" className="text-destructive-foreground">
-          No task with that id.
+          {studioT('No task with that id.')}
         </Txt>
       )}
     </form>

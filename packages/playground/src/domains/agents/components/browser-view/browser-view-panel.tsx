@@ -5,6 +5,8 @@ import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMe
 import { IconGlobe } from '@mastra/playground-ui/icons/central/IconGlobe';
 import { IconMinimize45 } from '@mastra/playground-ui/icons/central/IconMinimize45';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { overlaySurfaceStyle, raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useEffect, useRef } from 'react';
@@ -16,6 +18,7 @@ import { useRestoreFocus } from '@/hooks/use-restore-focus';
 
 // Always mounted so the screencast WebSocket survives; viewMode decides visibility.
 export function BrowserViewPanel() {
+  useLocale();
   const { viewMode, status, currentUrl, hide, closeBrowser } = useBrowserSession();
   const isModal = viewMode === 'modal';
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -69,7 +72,7 @@ export function BrowserViewPanel() {
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Browser view"
+        aria-label={studioT('Browser view')}
         tabIndex={-1}
         className={cn(
           'flex max-h-full w-full max-w-5xl flex-col',
@@ -88,23 +91,23 @@ export function BrowserViewPanel() {
               tone={currentUrl ? 'ink' : 'muted'}
               className={cn('block truncate', !currentUrl && 'italic')}
             >
-              {currentUrl || 'No URL'}
+              {currentUrl || studioT('No URL')}
             </Txt>
           </div>
           <Badge variant={statusBadge.variant} size="sm" indicator={statusBadge.indicator}>
             {statusBadge.label}
           </Badge>
           <div className="ml-2 flex items-center gap-1">
-            <Button variant="ghost" size="icon-sm" tooltip="Minimize to chat" onClick={hide}>
-              <IconMinimize45 />
+            <Button variant="ghost" size="icon-sm" tooltip={studioT('Minimize to chat')} onClick={hide}>
+              <IconMinimize45 className="h-4 w-4" />
             </Button>
             {currentUrl && (
-              <Button variant="ghost" size="icon-sm" tooltip="Open in new tab" onClick={handleOpenExternal}>
-                <IconSquareArrowTopRight />
+              <Button variant="ghost" size="icon-sm" tooltip={studioT('Open in new tab')} onClick={handleOpenExternal}>
+                <IconSquareArrowTopRight className="h-4 w-4" />
               </Button>
             )}
-            <Button variant="ghost" size="icon-sm" tooltip="Close browser" onClick={closeBrowser}>
-              <IconCrossMedium />
+            <Button variant="ghost" size="icon-sm" tooltip={studioT('Close browser')} onClick={closeBrowser}>
+              <IconCrossMedium className="h-4 w-4" />
             </Button>
           </div>
         </div>

@@ -2,9 +2,9 @@ import { format, isValid, parse } from 'date-fns';
 import * as React from 'react';
 import type { DayPickerSingleProps } from 'react-day-picker';
 import { useDebouncedCallback } from 'use-debounce';
-
 import { DatePicker } from './date-picker';
 import { Button } from '@/ds/components/Button';
+
 import type { ButtonProps } from '@/ds/components/Button';
 import { Field, FieldError, FieldLabel } from '@/ds/components/Field';
 import { Input } from '@/ds/components/Input';
@@ -14,6 +14,8 @@ import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { controlTriggerOpenStateFor } from '@/ds/primitives/control-size';
 import { fieldTriggerStyle } from '@/ds/primitives/form-element';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type CommonProps = Omit<DayPickerSingleProps, 'mode' | 'selected' | 'onSelect'> & {
@@ -127,6 +129,7 @@ export const DateTimePickerContent = ({
   placeholder?: string;
   className?: string;
 }) => {
+  useLocale();
   const [localErrorMsg, setLocalErrorMsg] = React.useState<string | null>(null);
   const [timeStrValue, setTimeStrValue] = React.useState<string>(() =>
     value ? format(value, 'HH:mm') : toTimeFieldValue(defaultTimeStrValue) || '00:00',
@@ -222,7 +225,7 @@ export const DateTimePickerContent = ({
 
   return (
     <div
-      aria-label="Choose date"
+      aria-label={studioT('Choose date')}
       className={cn('relative flex flex-col', className)}
       onKeyDown={e => {
         e.stopPropagation();
@@ -232,7 +235,7 @@ export const DateTimePickerContent = ({
       }}
     >
       <Field invalid={Boolean(localErrorMsg)} className="m-4 mb-0 w-auto!">
-        <FieldLabel className="sr-only">Date</FieldLabel>
+        <FieldLabel className="sr-only">{studioT('Date')}</FieldLabel>
         <Input type="text" value={dateInputValue} onChange={handleInputChange} placeholder={placeholder} />
         <FieldError>{localErrorMsg}</FieldError>
       </Field>
@@ -249,7 +252,7 @@ export const DateTimePickerContent = ({
       <Input
         type="time"
         size="sm"
-        aria-label="Time"
+        aria-label={studioT('Time')}
         value={timeStrValue}
         onChange={e => handleTimeStrChange(e.target.value)}
         className="m-4 mt-0 w-auto"
@@ -258,7 +261,7 @@ export const DateTimePickerContent = ({
       <div className="m-4 mt-0 grid grid-cols-[1fr_2fr] gap-2">
         {newValueDefined && (
           <Button icon={<IconCrossMedium />} tabIndex={0} size="md" onClick={handleClear} type="button">
-            Clear
+            {studioT('Clear')}
           </Button>
         )}
         <Button
@@ -271,7 +274,7 @@ export const DateTimePickerContent = ({
             newValueDefined ? handleApply() : handleCancel();
           }}
         >
-          {newValueDefined ? `Apply` : `Cancel`}
+          {newValueDefined ? studioT('Apply') : studioT('Cancel')}
         </Button>
       </div>
     </div>
@@ -286,6 +289,7 @@ type DefaultButtonProps = Pick<ButtonProps, 'variant' | 'size' | 'tooltip' | 'di
 
 export const DefaultTrigger = React.forwardRef<HTMLButtonElement, DefaultButtonProps>(
   ({ value, placeholder, variant = 'default', size, className, ...props }, ref) => {
+    useLocale();
     return (
       <Button
         ref={ref}
@@ -303,7 +307,7 @@ export const DefaultTrigger = React.forwardRef<HTMLButtonElement, DefaultButtonP
         {value ? (
           <span className="text-foreground">{format(value, 'PP p')}</span>
         ) : (
-          <span className="text-muted-foreground">{placeholder ?? 'Pick a date'}</span>
+          <span className="text-muted-foreground">{placeholder ?? studioT('Pick a date')}</span>
         )}
       </Button>
     );

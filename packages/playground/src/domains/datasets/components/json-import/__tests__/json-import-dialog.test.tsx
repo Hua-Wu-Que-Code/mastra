@@ -1,6 +1,7 @@
 import type { RouteResponse } from '@mastra/client-js';
 import type { CodeEditorProps } from '@mastra/playground-ui/components/CodeEditor';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { locale } from '@mastra/playground-ui/lib/i18n';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -303,5 +304,21 @@ describe('JSONImportDialog', () => {
 
     await screen.findByRole('button', { name: 'Copied' });
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining('"input": "How do I reset my password?"'));
+  });
+});
+
+describe('JSONImportDialog localization', () => {
+  describe('when the user switches to Chinese with validated items', () => {
+    it('keeps the items and uses Chinese grammar without English suffixes', () => {
+      renderDialog();
+      pasteJSON(VALID_ITEMS);
+      try {
+        act(() => locale.setLocale('zh'));
+        expect(screen.getByRole('status').textContent).toBe('3 个条目已就绪1 个条目没有 groundTruth');
+        expect(screen.getByRole('button', { name: '导入 3 项' })).toBeTruthy();
+      } finally {
+        act(() => locale.setLocale('en'));
+      }
+    });
   });
 });

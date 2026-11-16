@@ -1,5 +1,6 @@
 import { Button } from '@/ds/components/Button';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface DataDetailsPanelCloseButtonProps {
   onClick: () => void;
@@ -9,11 +10,18 @@ export interface DataDetailsPanelCloseButtonProps {
 
 export function DataDetailsPanelCloseButton({
   onClick,
-  tooltip = 'Close panel',
+  tooltip = studioT('Close panel'),
   className,
 }: DataDetailsPanelCloseButtonProps) {
+  useLocale();
   return (
-    <Button size="icon-md" onClick={onClick} aria-label="Close panel" tooltip={tooltip} className={className}>
+    <Button
+      size="icon-md"
+      onClick={onClick}
+      aria-label={studioT('Close panel')}
+      tooltip={tooltip}
+      className={className}
+    >
       <IconCrossMedium />
     </Button>
   );

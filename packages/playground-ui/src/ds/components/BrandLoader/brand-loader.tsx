@@ -1,5 +1,6 @@
 import { useId } from 'react';
 
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './brand-loader.css';
@@ -30,7 +31,8 @@ const bubbleBySize = {
   lg: 4.498,
 };
 
-function BrandLoader({ className, size = 'md', 'aria-label': ariaLabel = 'Loading' }: BrandLoaderProps) {
+function BrandLoader({ className, size = 'md', 'aria-label': ariaLabel = studioT('Loading') }: BrandLoaderProps) {
+  useLocale();
   const reactId = useId();
   const filterId = `brand-loader-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const r = bubbleBySize[size];

@@ -7,6 +7,6 @@ export interface InfrastructureDetailRowProps {
 
 export const InfrastructureDetailRow = ({ label, value }: InfrastructureDetailRowProps) => (
   <SettingsItem title={label}>
-    <span className="truncate text-body-sm text-muted-foreground">{value}</span>
+    <span className="text-body-sm text-muted-foreground truncate">{value}</span>
   </SettingsItem>
 );

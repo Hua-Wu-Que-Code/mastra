@@ -4,6 +4,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useState } from 'react';
@@ -17,6 +19,7 @@ import { navCrumb } from '@/domains/navigation/crumbs';
 const crumbs = [navCrumb('/mcps')];
 
 const MCPs = () => {
+  useLocale();
   const { data: mcpServers = [], isLoading, error } = useMCPServers();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<McpServersSort>();
@@ -24,7 +27,7 @@ const MCPs = () => {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">MCP Servers</h1>
+        <h1 className="sr-only">{studioT('MCP Servers')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -33,7 +36,7 @@ const MCPs = () => {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">MCP Servers</h1>
+        <h1 className="sr-only">{studioT('MCP Servers')}</h1>
         <PermissionDenied variant="fill" resource="MCP servers" />
       </PageLayout>
     );
@@ -42,11 +45,11 @@ const MCPs = () => {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">MCP Servers</h1>
+        <h1 className="sr-only">{studioT('MCP Servers')}</h1>
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load MCP servers"
+          titleSlot={studioT('Failed to load MCP servers')}
           descriptionSlot={error.message}
         />
       </PageLayout>
@@ -56,7 +59,7 @@ const MCPs = () => {
   if (mcpServers.length === 0 && !isLoading) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">MCP Servers</h1>
+        <h1 className="sr-only">{studioT('MCP Servers')}</h1>
         <div className="flex flex-col gap-6">
           <BuiltinMcpServerSection />
           <NoMCPServersInfo />
@@ -75,15 +78,15 @@ const MCPs = () => {
               <SearchInput
                 {...listSearchProps}
                 onValueChange={setSearch}
-                label="Search MCP servers"
-                placeholder="Search by name"
+                label={studioT('Search MCP servers')}
+                placeholder={studioT('Search by name')}
               />
             </div>
           </ActionRow.Start>
         </ActionRow>
       }
     >
-      <h1 className="sr-only">MCP Servers</h1>
+      <h1 className="sr-only">{studioT('MCP Servers')}</h1>
       <div className="flex flex-col gap-6">
         <BuiltinMcpServerSection />
         <McpServersList

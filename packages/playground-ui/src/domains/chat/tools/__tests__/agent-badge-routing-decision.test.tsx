@@ -46,20 +46,22 @@ describe('AgentBadge routing decision', () => {
     };
 
     renderToStaticMarkup(
-      AgentBadge({
-        agentId: 'weather',
-        messages: [],
-        metadata: {
-          mode: 'network',
-          selectionReason: 'fallback reason',
-          agentInput: 'fallback input',
-          routingDecision,
-        },
-        toolCallId: 'tool-call-1',
-        toolName: 'agent-call',
-        isNetwork: true,
-        toolApprovalMetadata: undefined,
-      }),
+      <AgentBadge
+        {...{
+          agentId: 'weather',
+          messages: [],
+          metadata: {
+            mode: 'network',
+            selectionReason: 'fallback reason',
+            agentInput: 'fallback input',
+            routingDecision,
+          },
+          toolCallId: 'tool-call-1',
+          toolName: 'agent-call',
+          isNetwork: true,
+          toolApprovalMetadata: undefined,
+        }}
+      />,
     );
 
     expect(mockNetworkChoiceMetadataDialogTrigger).toHaveBeenCalledWith(
@@ -75,19 +77,21 @@ describe('AgentBadge routing decision', () => {
     const { AgentBadge } = await import('../badges/agent-badge');
 
     renderToStaticMarkup(
-      AgentBadge({
-        agentId: 'weather',
-        messages: [],
-        metadata: {
-          mode: 'network',
-          selectionReason: 'fallback reason',
-          agentInput: { foo: 'bar' },
-        },
-        toolCallId: 'tool-call-1',
-        toolName: 'agent-call',
-        isNetwork: true,
-        toolApprovalMetadata: undefined,
-      }),
+      <AgentBadge
+        {...{
+          agentId: 'weather',
+          messages: [],
+          metadata: {
+            mode: 'network',
+            selectionReason: 'fallback reason',
+            agentInput: { foo: 'bar' },
+          },
+          toolCallId: 'tool-call-1',
+          toolName: 'agent-call',
+          isNetwork: true,
+          toolApprovalMetadata: undefined,
+        }}
+      />,
     );
 
     expect(mockNetworkChoiceMetadataDialogTrigger).toHaveBeenCalledWith(

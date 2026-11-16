@@ -74,7 +74,6 @@ import MCPs from './pages/mcps';
 import { McpServerPage } from './pages/mcps/[serverId]';
 import Metrics from './pages/metrics';
 import PromptBlocks from './pages/prompt-blocks';
-import Resources from './pages/resources';
 import Scorers from './pages/scorers';
 import Scorer from './pages/scorers/scorer';
 import { StudioSettingsPage } from './pages/settings';
@@ -94,6 +93,9 @@ import Workspace from './pages/workspace';
 import { AuthLayout } from '@/components/auth-layout';
 import { Layout } from '@/components/layout';
 import { MinimalLayout } from '@/components/minimal-layout';
+import { useAccount } from '@/domains/account/account-context';
+import { createAccountFetch } from '@/domains/account/account-fetch';
+import { AccountGate } from '@/domains/account/account-gate';
 import { AgentBuilderEditionLayout, AgentBuilderLayout } from '@/domains/agent-builder/layouts/agent-builder-layout';
 import { AgentLayout } from '@/domains/agents/agent-layout';
 import { RoleImpersonationProvider } from '@/domains/auth/context/role-impersonation-context';
@@ -341,7 +343,6 @@ export const routes: RouteObject[] = [
         path: '/observability',
         loader: ({ request }: LoaderFunctionArgs) => redirect(`/traces${new URL(request.url).search}`),
       },
-      { path: '/resources', element: <Resources /> },
       { path: '/agents', element: <Agents /> },
       {
         path: '/cms/agents/create',
@@ -522,13 +523,19 @@ export const routes: RouteObject[] = [
 ];
 
 function App() {
+  const account = useAccount();
   const studioBasePath = window.MASTRA_STUDIO_BASE_PATH || '';
   const { baseUrl, headers, apiPrefix, isLoading } = useStudioConfig();
 
   // Create a stable fetch function that auto-refreshes on 401
   const customFetch = useMemo(
-    () => (baseUrl ? createFetchWithRefresh(baseUrl, apiPrefix) : undefined),
-    [baseUrl, apiPrefix],
+    () =>
+      account
+        ? createAccountFetch(account, apiPrefix)
+        : baseUrl
+          ? createFetchWithRefresh(baseUrl, apiPrefix)
+          : undefined,
+    [baseUrl, apiPrefix, account],
   );
   const studioHeaders = useMemo(() => ({ ...headers, 'x-mastra-client-type': 'studio' }), [headers]);
   const router = useMemo(() => createBrowserRouter(routes, { basename: studioBasePath }), [studioBasePath]);
@@ -572,9 +579,11 @@ export default function AppWrapper() {
 
   return (
     <PlaygroundQueryClient>
-      <StudioConfigProvider endpoint={endpoint} defaultApiPrefix={apiPrefix}>
-        <App />
-      </StudioConfigProvider>
+      <AccountGate endpoint={endpoint} apiPrefix={apiPrefix}>
+        <StudioConfigProvider endpoint={endpoint} defaultApiPrefix={apiPrefix}>
+          <App />
+        </StudioConfigProvider>
+      </AccountGate>
     </PlaygroundQueryClient>
   );
 }

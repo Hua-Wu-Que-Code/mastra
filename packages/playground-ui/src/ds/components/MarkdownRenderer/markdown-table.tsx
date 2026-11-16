@@ -9,16 +9,18 @@ import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
 import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSquare1';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function MarkdownTable({ node, children }: ComponentProps<'table'> & ExtraProps) {
+  useLocale();
   const markdown = node?.properties.tableMarkdown;
   const csv = node?.properties.tableCsv;
-  const { isCopied, copyToClipboard } = useCopyToClipboard({ copyMessage: 'Copied table markdown' });
+  const { isCopied, copyToClipboard } = useCopyToClipboard({ copyMessage: studioT('Copied table markdown') });
 
   return (
     <div className="my-3 w-fit max-w-full min-w-0">
       <div className="flex justify-end">
-        <ButtonsGroup size="sm" aria-label="Table actions">
+        <ButtonsGroup size="sm" aria-label={studioT('Table actions')}>
           <Button
             type="button"
             variant="ghost"
@@ -26,16 +28,16 @@ export function MarkdownTable({ node, children }: ComponentProps<'table'> & Extr
             onClick={() => {
               if (typeof markdown === 'string') copyToClipboard(markdown);
             }}
-            aria-label="Copy table as markdown"
+            aria-label={studioT('Copy table as markdown')}
           >
             {isCopied ? <IconCheckmark2Medium /> : <IconSquareBehindSquare1 />}
-            {isCopied ? 'Copied!' : 'Copy table as markdown'}
+            {isCopied ? studioT('Copied!') : studioT('Copy table as markdown')}
           </Button>
           <DropdownMenu>
             <DropdownMenu.Trigger
               disabled={typeof csv !== 'string'}
               render={
-                <Button type="button" size="icon-sm" variant="ghost" aria-label="More table options">
+                <Button type="button" size="icon-sm" variant="ghost" aria-label={studioT('More table options')}>
                   <IconChevronDownMedium />
                 </Button>
               }
@@ -48,7 +50,7 @@ export function MarkdownTable({ node, children }: ComponentProps<'table'> & Extr
                 }}
               >
                 <IconArrowInbox />
-                Download CSV
+                {studioT('Download CSV')}
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu>

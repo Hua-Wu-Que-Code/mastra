@@ -5,6 +5,10 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 
 import { IconCircleCheck } from '@mastra/playground-ui/icons/central/IconCircleCheck';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { CsvValidationResult, RowValidationResult } from '../../utils/csv-validation';
 
@@ -18,6 +22,7 @@ interface ValidationReportProps {
  * Displays count of valid/invalid rows and a table of failures.
  */
 export function ValidationReport({ result, className }: ValidationReportProps) {
+  useLocale();
   const { validCount, invalidCount, totalRows, invalidRows } = result;
 
   // All rows valid
@@ -26,7 +31,10 @@ export function ValidationReport({ result, className }: ValidationReportProps) {
       <div className={cn('flex items-center gap-2 text-success-indicator', className)}>
         <IconCircleCheck className="size-icon-md" />
         <Txt as="span" variant="body" className="block">
-          All {totalRows} row{totalRows !== 1 ? 's' : ''} valid
+          <Trans
+            id="All {part0} row {part1} valid"
+            values={{ part0: totalRows, part1: totalRows !== 1 ? studioT('English plural suffix') : '' }}
+          />
         </Txt>
       </div>
     );
@@ -38,13 +46,16 @@ export function ValidationReport({ result, className }: ValidationReportProps) {
       <div className="flex items-center gap-2 text-warning-foreground">
         <IconExclamationTriangle className="size-icon-md" />
         <Txt as="span" variant="body" className="block">
-          {invalidCount} of {totalRows} rows will be skipped (validation failed)
+          <Trans
+            id="{part0} of {part1} rows will be skipped (validation failed)"
+            values={{ part0: invalidCount, part1: totalRows }}
+          />
         </Txt>
       </div>
 
       {validCount > 0 && (
         <Txt as="p" variant="body" tone="muted">
-          {validCount} rows will be imported
+          <Trans id="{part0} rows will be imported" values={{ part0: validCount }} />
         </Txt>
       )}
 
@@ -55,17 +66,17 @@ export function ValidationReport({ result, className }: ValidationReportProps) {
             <tr>
               <th className="px-2 py-1 text-left">
                 <Txt as="span" variant="column" className="block">
-                  Row
+                  {studioT('Row')}
                 </Txt>
               </th>
               <th className="px-2 py-1 text-left">
                 <Txt as="span" variant="column" className="block">
-                  Field
+                  {studioT('Field')}
                 </Txt>
               </th>
               <th className="px-2 py-1 text-left">
                 <Txt as="span" variant="column" className="block">
-                  Error
+                  {studioT('Error')}
                 </Txt>
               </th>
             </tr>
@@ -78,7 +89,7 @@ export function ValidationReport({ result, className }: ValidationReportProps) {
               <tr>
                 <td colSpan={3} className="px-2 py-1 text-muted-foreground italic">
                   <Txt as="span" variant="caption" className="block">
-                    ... and {invalidCount - invalidRows.length} more
+                    <Trans id="... and {part0} more" values={{ part0: invalidCount - invalidRows.length }} />
                   </Txt>
                 </td>
               </tr>

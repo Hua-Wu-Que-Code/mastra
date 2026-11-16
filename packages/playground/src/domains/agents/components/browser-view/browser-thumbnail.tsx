@@ -7,6 +7,10 @@ import { IconChevronTopMedium } from '@mastra/playground-ui/icons/central/IconCh
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconExpand45 } from '@mastra/playground-ui/icons/central/IconExpand45';
 import { IconStudioDisplay } from '@mastra/playground-ui/icons/central/IconStudioDisplay';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { controlStateColorTransition, focusRingInset } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHoverInGroup } from '@mastra/playground-ui/primitives/typography';
@@ -28,6 +32,7 @@ interface BrowserThumbnailProps {
  * - Expanded: Larger view with screencast + actions, with a button to switch to modal
  */
 export function BrowserThumbnail({ agentName = 'Agent' }: BrowserThumbnailProps) {
+  useLocale();
   const { hasSession, viewMode, status, currentUrl, setViewMode, closeBrowser } = useBrowserSession();
   const { latestFrame } = useBrowserFrame();
   const { toolCalls } = useBrowserToolCalls();
@@ -111,7 +116,7 @@ export function BrowserThumbnail({ agentName = 'Agent' }: BrowserThumbnailProps)
         {/* Thumbnail preview */}
         <div className={cn(raisedSurfaceStyle, 'relative h-14 w-24 shrink-0 overflow-hidden rounded-md')}>
           {hasFrame ? (
-            <img ref={imgRef} alt="Browser preview" className="h-full w-full object-cover" />
+            <img ref={imgRef} alt={studioT('Browser preview')} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
               <IconStudioDisplay className="size-icon-lg text-muted-foreground" />
@@ -125,10 +130,10 @@ export function BrowserThumbnail({ agentName = 'Agent' }: BrowserThumbnailProps)
         <div className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2">
             <Txt as="span" variant="subheading" tone="ink" className="truncate">
-              {agentName}&apos;s browser
+              <Trans id="{part0} 's browser" values={{ part0: agentName }} />
             </Txt>
             <Badge variant={isLive ? 'success' : 'neutral'} size="sm" indicator={isLive ? 'pulse' : 'dot'}>
-              {isLive ? 'Live' : 'Idle'}
+              {isLive ? studioT('Live') : studioT('Idle')}
             </Badge>
           </div>
           <Txt variant="caption" tone="muted" className="mt-0.5 truncate">
@@ -158,7 +163,7 @@ export function BrowserThumbnail({ agentName = 'Agent' }: BrowserThumbnailProps)
                 <Button
                   variant="default"
                   size="icon-sm"
-                  tooltip="Center view"
+                  tooltip={studioT('Center view')}
                   onClick={handleOpenModal}
                   className="bg-sidebar/80 backdrop-blur-sm"
                 >
@@ -167,7 +172,7 @@ export function BrowserThumbnail({ agentName = 'Agent' }: BrowserThumbnailProps)
                 <Button
                   variant="default"
                   size="icon-sm"
-                  tooltip="Close browser"
+                  tooltip={studioT('Close browser')}
                   onClick={handleClose}
                   className="bg-sidebar/80 backdrop-blur-sm"
                 >
@@ -182,7 +187,7 @@ export function BrowserThumbnail({ agentName = 'Agent' }: BrowserThumbnailProps)
             <div ref={actionsRef} className="max-h-40 overflow-y-auto border-t border-border">
               <div className="px-3 py-2">
                 <Txt as="h4" variant="subheading" tone="muted" className="mb-2">
-                  Browser Actions
+                  {studioT('Browser Actions')}
                 </Txt>
                 <div className="space-y-1">
                   {toolCalls.slice(-5).map(entry => (

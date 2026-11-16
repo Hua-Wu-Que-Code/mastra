@@ -3,6 +3,7 @@ import { Button } from '../Button';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSquare1';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type CopyButtonProps = {
   content: string;
@@ -19,12 +20,13 @@ export function CopyButton({
   content,
   copyMessage,
   showToast,
-  tooltip = 'Copy to clipboard',
+  tooltip = studioT('Copy to clipboard'),
   size = 'icon-sm',
   variant,
   className,
   disabled,
 }: CopyButtonProps) {
+  useLocale();
   const { isCopied, handleCopy } = useCopyToClipboard({
     text: content,
     copyMessage,
@@ -39,8 +41,8 @@ export function CopyButton({
       variant={variant}
       className={className}
       disabled={disabled}
-      tooltip={isCopied ? 'Copied!' : tooltip}
-      aria-label={isCopied ? 'Copied!' : tooltip}
+      tooltip={isCopied ? studioT('Copied!') : tooltip}
+      aria-label={isCopied ? studioT('Copied!') : tooltip}
     >
       {isCopied ? <IconCheckmark2Medium /> : <IconSquareBehindSquare1 />}
     </Button>

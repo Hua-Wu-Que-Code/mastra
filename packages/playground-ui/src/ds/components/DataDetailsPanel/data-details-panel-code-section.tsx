@@ -6,6 +6,8 @@ import { CopyButton } from '@/ds/components/CopyButton';
 import { IconAlignmentJustify } from '@/ds/icons/central/IconAlignmentJustify';
 import { IconAlignmentLeft } from '@/ds/icons/central/IconAlignmentLeft';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface DataDetailsPanelCodeSectionProps {
@@ -26,6 +28,7 @@ export function DataDetailsPanelCodeSection({
   className,
   actions,
 }: DataDetailsPanelCodeSectionProps) {
+  useLocale();
   const [showAsMultilineText, setShowAsMultilineText] = useState(false);
   const hasMultilineText = useMemo(() => {
     try {
@@ -60,7 +63,7 @@ export function DataDetailsPanelCodeSection({
             {hasMultilineText && (
               <Button
                 size="icon-md"
-                aria-label={showAsMultilineText ? 'Show escaped newlines' : 'Show multiline text'}
+                aria-label={showAsMultilineText ? studioT('Show escaped newlines') : studioT('Show multiline text')}
                 onClick={() => setShowAsMultilineText(v => !v)}
               >
                 {showAsMultilineText ? <IconAlignmentLeft /> : <IconAlignmentJustify />}

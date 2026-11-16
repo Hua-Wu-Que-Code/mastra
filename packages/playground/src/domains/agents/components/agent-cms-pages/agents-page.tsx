@@ -4,6 +4,8 @@ import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Section, SubSectionRoot } from '@mastra/playground-ui/components/Section';
 import { Switch } from '@mastra/playground-ui/components/Switch';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { passwordManagerOptOutProps } from '@mastra/playground-ui/primitives/password-manager-autofill';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { RuleGroup } from '@mastra/playground-ui/utils/rule-engine';
@@ -16,6 +18,7 @@ import { SectionHeader, DisplayConditionsDialog } from '@/domains/cms';
 import { SubSectionHeader } from '@/domains/cms/components/section/section-header';
 
 export function AgentsPage() {
+  useLocale();
   const { form, readOnly, agentId: currentAgentId } = useAgentEditFormContext();
   const { control } = form;
   const { data: agents } = useAgents();
@@ -98,17 +101,24 @@ export function AgentsPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <SectionHeader
-            title="Sub-Agents"
-            subtitle={`Select sub-agents for this agent to delegate to.${count > 0 ? ` (${count} selected)` : ''}`}
+            title={studioT('Sub-Agents')}
+            subtitle={studioT('Select sub-agents for this agent to delegate to.{value0}', {
+              value0: count > 0 ? ` (${count} selected)` : '',
+            })}
           />
         </div>
 
         <SubSectionRoot>
           <Section.Header>
-            <SubSectionHeader title="Available Agents" icon={<AgentIcon />} />
+            <SubSectionHeader title={studioT('Available Agents')} icon={<AgentIcon />} />
           </Section.Header>
 
-          <SearchInput label="Search agents" placeholder="Search agents" value={search} onValueChange={setSearch} />
+          <SearchInput
+            label={studioT('Search agents')}
+            placeholder={studioT('Search agents')}
+            value={search}
+            onValueChange={setSearch}
+          />
 
           {filteredOptions.length > 0 && (
             <div className="flex flex-col gap-1">

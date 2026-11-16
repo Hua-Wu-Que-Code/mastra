@@ -3,6 +3,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconPlugin1 } from '@mastra/playground-ui/icons/central/IconPlugin1';
 import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconSettingsSliderHor';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useChannelInstallations, useChannelPlatforms } from '@mastra/react/hooks/agents';
 import { useState } from 'react';
 import { ChannelDialog } from './publish-channel-dialogs/channel-dialog';
@@ -16,6 +18,7 @@ export interface ConnectChannelMessageProps {
 }
 
 export function ConnectChannelMessage({ platformId, agentId }: ConnectChannelMessageProps) {
+  useLocale();
   const { data: platforms = [], isLoading: arePlatformsLoading } = useChannelPlatforms();
   const platform = platforms.find(p => p.id === platformId);
   const { data: installations = [] } = useChannelInstallations({
@@ -49,11 +52,11 @@ export function ConnectChannelMessage({ platformId, agentId }: ConnectChannelMes
         </Txt>
         {!platform.isConfigured ? (
           <Badge variant="warning" size="sm" indicator="dot">
-            Not configured
+            {studioT('Not configured')}
           </Badge>
         ) : installation ? (
           <Badge variant="success" size="sm" indicator="dot">
-            Connected
+            {studioT('Connected')}
           </Badge>
         ) : null}
 
@@ -65,7 +68,7 @@ export function ConnectChannelMessage({ platformId, agentId }: ConnectChannelMes
             disabled
             data-testid={`agent-builder-chat-connect-channel-${platformId}-button`}
           >
-            Not configured
+            {studioT('Not configured')}
           </Button>
         ) : installation ? (
           <Button
@@ -75,7 +78,7 @@ export function ConnectChannelMessage({ platformId, agentId }: ConnectChannelMes
             onClick={() => setDialogOpen(true)}
             data-testid={`agent-builder-chat-connect-channel-${platformId}-button`}
           >
-            Manage
+            {studioT('Manage')}
           </Button>
         ) : (
           <Button
@@ -86,7 +89,11 @@ export function ConnectChannelMessage({ platformId, agentId }: ConnectChannelMes
             disabled={isConnecting}
             data-testid={`agent-builder-chat-connect-channel-${platformId}-button`}
           >
-            {isConnecting ? 'Connecting…' : platformId === 'slack' ? 'Continue with Slack' : `Connect ${platform.name}`}
+            {isConnecting
+              ? studioT('Connecting…')
+              : platformId === 'slack'
+                ? studioT('Continue with Slack')
+                : studioT('Connect {value0}', { value0: platform.name })}
           </Button>
         )}
       </div>

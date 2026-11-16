@@ -1,6 +1,7 @@
 import type { WorkflowRunStreamResult } from '../context/workflow-run-context';
 import { WorkflowStatus } from './workflow-status';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface StepResult {
   status: string;
@@ -22,6 +23,7 @@ export interface WorkflowStepsStatusProps {
 }
 
 export function WorkflowStepsStatus({ steps, workflowResult }: WorkflowStepsStatusProps) {
+  useLocale();
   const filteredSteps = Object.entries(steps).filter(([key, _]) => key !== 'input' && !key.endsWith('.input'));
 
   if (filteredSteps.length === 0) {
@@ -31,7 +33,7 @@ export function WorkflowStepsStatus({ steps, workflowResult }: WorkflowStepsStat
   return (
     <div className="flex flex-col gap-2 border-t border-border pt-5">
       <Txt variant="meta" tone="muted">
-        Status
+        {studioT('Status')}
       </Txt>
       <div className="flex flex-col gap-4">
         {filteredSteps.map(([stepId, step]) => {

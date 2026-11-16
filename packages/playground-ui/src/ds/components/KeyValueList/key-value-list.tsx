@@ -4,6 +4,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconChevronRightMedium } from '@/ds/icons/central/IconChevronRightMedium';
 import { VisuallyHidden } from '@/ds/primitives/visually-hidden';
 import type { LinkComponent } from '@/ds/types/link-component';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type KeyValueListItemValue = {
@@ -32,6 +34,7 @@ export type KeyValueListProps = {
 };
 
 export function KeyValueList({ data, className, labelsAreHidden, isLoading, LinkComponent: Link }: KeyValueListProps) {
+  useLocale();
   const LabelWrapper = ({ children }: { children: React.ReactNode }) => {
     return labelsAreHidden ? <VisuallyHidden>{children}</VisuallyHidden> : children;
   };
@@ -108,7 +111,7 @@ export function KeyValueList({ data, className, labelsAreHidden, isLoading, Link
                     value
                   ) : (
                     <Txt as="span" variant="caption" tone="muted">
-                      n/a
+                      {studioT('n/a')}
                     </Txt>
                   )}
                 </>

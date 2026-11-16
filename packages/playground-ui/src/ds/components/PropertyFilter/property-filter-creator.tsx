@@ -22,6 +22,8 @@ import {
 } from '@/ds/primitives/menu-item';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // Plain <button>s navigated with roving focus (not Base UI).
@@ -64,12 +66,13 @@ export function PropertyFilterCreator({
   fields,
   tokens,
   onTokensChange,
-  label = 'Add filter',
+  label = studioT('Add filter'),
   disabled,
   size,
   onStartTextFilter,
   hiddenFieldIds,
 }: PropertyFilterCreatorProps) {
+  useLocale();
   const visibleFields = useMemo(() => {
     if (!hiddenFieldIds || hiddenFieldIds.length === 0) return fields;
     const hidden = new Set(hiddenFieldIds);
@@ -190,14 +193,16 @@ export function PropertyFilterCreator({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                aria-label="Back to properties"
+                aria-label={studioT('Back to properties')}
                 className={cn(quietTextHover, controlStateColorTransition)}
                 onClick={reset}
               >
                 <IconArrowLeft className="size-icon-md" />
               </button>
               <IconFilter1 className="size-icon-md shrink-0 text-muted-foreground" />
-              <Txt as="span" variant="caption" tone="muted">{`${selectedField.label} is`}</Txt>
+              <Txt as="span" variant="caption" tone="muted">
+                {studioT('{value0} is', { value0: selectedField.label })}
+              </Txt>
             </div>
           )}
 
@@ -258,7 +263,7 @@ export function PropertyFilterCreator({
                       >
                         <span className="truncate">{f.label}</span>
                         {used ? (
-                          <span className="ml-auto text-muted-foreground">In use</span>
+                          <span className="ml-auto text-muted-foreground">{studioT('In use')}</span>
                         ) : (
                           <span
                             className={cn(
@@ -273,7 +278,7 @@ export function PropertyFilterCreator({
                     );
                   })
                 ) : (
-                  <div className={menuEmptyClass}>No matching property.</div>
+                  <div className={menuEmptyClass}>{studioT('No matching property.')}</div>
                 )}
               </>
             </div>
@@ -289,9 +294,9 @@ export function PropertyFilterCreator({
                   setMultiValue(v);
                   setError(undefined);
                 }}
-                placeholder={selectedField.placeholder ?? `Choose ${selectedField.label}`}
-                searchPlaceholder={`Search ${selectedField.label.toLowerCase()}`}
-                emptyText={selectedField.emptyText ?? 'No option found.'}
+                placeholder={selectedField.placeholder ?? studioT('Choose {value0}', { value0: selectedField.label })}
+                searchPlaceholder={studioT('Search {value0}', { value0: selectedField.label.toLowerCase() })}
+                emptyText={selectedField.emptyText ?? studioT('No option found.')}
                 size="md"
                 aria-label={selectedField.label}
               />
@@ -302,10 +307,10 @@ export function PropertyFilterCreator({
           {selectedField && (
             <div className="flex items-center justify-end gap-2">
               <Button icon={<IconCrossMedium />} variant="ghost" size="md" onClick={() => setOpen(false)}>
-                Cancel
+                {studioT('Cancel')}
               </Button>
               <Button icon={<IconFilter2 />} size="md" onClick={commit}>
-                Add filter
+                {studioT('Add filter')}
               </Button>
             </div>
           )}

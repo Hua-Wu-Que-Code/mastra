@@ -7,6 +7,7 @@ import { IconChatBubble7 } from '@mastra/playground-ui/icons/central/IconChatBub
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 /** Tabs that render a pill in the bar. Routes without a pill pass `'none'`. */
 export type AgentPageTab = 'chat' | 'versions' | 'traces';
@@ -39,6 +40,7 @@ export function AgentPageTabs({
   showPlayground = false,
   showObservability = false,
 }: AgentPageTabsProps) {
+  useLocale();
   const { navigate } = useLinkComponent();
 
   const hrefMap: Record<AgentPageTab, string> = {
@@ -58,9 +60,9 @@ export function AgentPageTabs({
     <div className="flex min-w-0 items-center justify-between gap-2 p-1.5">
       <Tabs value={activeTab} defaultTab={activeTab} onValueChange={handleTabChange} className="min-w-0">
         <TabList variant="pill-ghost">
-          <AgentTab value="chat" icon={<IconChatBubble7 />} label="Chat" />
-          {showObservability && <AgentTab value="traces" icon={<TraceIcon />} label="Traces" />}
-          {showPlayground && <AgentTab value="versions" icon={<IconBranch />} label="Editor" />}
+          <AgentTab value="chat" icon={<IconChatBubble7 />} label={studioT('Chat')} />
+          {showObservability && <AgentTab value="traces" icon={<TraceIcon />} label={studioT('Traces')} />}
+          {showPlayground && <AgentTab value="versions" icon={<IconBranch />} label={studioT('Editor')} />}
         </TabList>
       </Tabs>
       {(!showObservability || !showPlayground) && (
@@ -68,10 +70,11 @@ export function AgentPageTabs({
           {!showObservability && (
             <DisabledFeatureButton
               icon={<TraceIcon />}
-              label="Traces"
+              label={studioT('Traces')}
               tooltipContent={
                 <>
-                  Add <code>@mastra/observability</code> to enable Traces.
+                  {studioT('Add') + ' '}
+                  <code>@mastra/observability</code> {' ' + studioT('to enable Traces.')}
                 </>
               }
               docsHref="https://mastra.ai/docs/observability/overview"
@@ -80,8 +83,8 @@ export function AgentPageTabs({
           {!showPlayground && (
             <DisabledFeatureButton
               icon={<IconBranch />}
-              label="Editor"
-              tooltipContent="Add @mastra/editor to enable the Editor."
+              label={studioT('Editor')}
+              tooltipContent={studioT('Add @mastra/editor to enable the Editor.')}
               docsHref="https://mastra.ai/docs/editor/overview"
             />
           )}

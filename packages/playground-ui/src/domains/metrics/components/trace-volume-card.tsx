@@ -11,6 +11,7 @@ import { ChartCard } from './chart-card';
 import { ChartCardError } from './chart-card-error';
 import { ShareBar } from '@/ds/components/ShareBar';
 import type { ShareBarRow } from '@/ds/components/ShareBar';
+import { useLocale, t as studioT } from '@/lib/i18n';
 
 type Entity = 'agents' | 'workflows' | 'tools';
 
@@ -19,7 +20,13 @@ const ROOT_ENTITY: Record<Entity, EntityType> = {
   workflows: EntityType.WORKFLOW_RUN,
   tools: EntityType.TOOL,
 };
-const COLUMNS = [{ label: 'Error rate' }];
+const COLUMNS = [
+  {
+    get label() {
+      return studioT('Error rate');
+    },
+  },
+];
 
 const TITLE: Record<Entity, string> = {
   agents: 'Agent runs',
@@ -46,6 +53,7 @@ export type TraceVolumeCardProps = {
 };
 
 export function TraceVolumeCard({ onViewTraces, onViewErrors, onEntityClick }: TraceVolumeCardProps) {
+  useLocale();
   const [entity, setEntity] = useState<Entity>('agents');
   const rootEntityType = ROOT_ENTITY[entity];
   const volume = useTraceVolumeMetrics({
@@ -100,14 +108,14 @@ export function TraceVolumeCard({ onViewTraces, onViewErrors, onEntityClick }: T
           key={entity}
           rows={rows}
           columns={COLUMNS}
-          valueLabel="Runs"
+          valueLabel={studioT('Runs')}
           color={CHART_COLORS.sky}
           other={rest => {
             const errors = rest.reduce((sum, r) => sum + (errorsOf.get(r.key) ?? 0), 0);
             const runs = rest.reduce((sum, r) => sum + r.share, 0);
             return { value: formatCount(runs), cells: [errorRate(errors, runs)] };
           }}
-          emptyState="No runs in this range."
+          emptyState={studioT('No runs in this range.')}
           isLoading={volume.isLoading}
         />
       </ChartArea>

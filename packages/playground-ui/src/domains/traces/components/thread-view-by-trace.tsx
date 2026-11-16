@@ -6,9 +6,9 @@ import type { FeedbackOptions } from './feedback-options';
 import { TraceScoresTab } from '@/domains/scores';
 import { ThreadTrace, useThreadTraceRow } from '@/domains/traces/components/thread-trace';
 import type { ThreadTraceSelectedSpan } from '@/domains/traces/components/thread-trace';
-
 import { ThreadViewSkeleton } from '@/domains/traces/components/thread-view-skeleton';
 import { TraceFeedbackTab } from '@/domains/traces/components/trace-feedback-tab';
+
 import { TraceThreadItemView } from '@/domains/traces/components/trace-thread-item-view';
 import { TracesErrorContent } from '@/domains/traces/components/traces-error-content';
 import { useTracesListSource } from '@/domains/traces/hooks/use-traces-list-source';
@@ -21,6 +21,7 @@ import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRi
 import { Icon } from '@/ds/icons/Icon';
 import { ScorersIcon } from '@/ds/icons/ScorersIcon';
 import { useLinkComponent } from '@/lib/framework';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 // `queryTraces` requires a time range; start at the epoch so it covers the whole thread, like the legacy endpoint.
 const THREAD_WINDOW_FROM = new Date(0).toISOString();
@@ -55,6 +56,7 @@ export function ThreadViewByTrace({
   onOpenScore,
   pageSize = 3,
 }: ThreadViewByTraceProps) {
+  useLocale();
   const legacyFilters = useMemo<UseTracesListSourceArgs['legacyFilters']>(() => ({ threadId }), [threadId]);
   const { rows, isLoading, isPlaceholderData, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useTracesListSource({
@@ -94,7 +96,7 @@ export function ThreadViewByTrace({
   if (error) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <TracesErrorContent error={error} resource="traces" errorTitle="Failed to load traces" />
+        <TracesErrorContent error={error} resource="traces" errorTitle={studioT('Failed to load traces')} />
       </div>
     );
   }
@@ -105,7 +107,7 @@ export function ThreadViewByTrace({
     return (
       <div className="flex h-full items-center justify-center p-4">
         <Txt variant="body" tone="muted">
-          No traces found for this thread.
+          {studioT('No traces found for this thread.')}
         </Txt>
       </div>
     );
@@ -149,6 +151,7 @@ function ThreadTraceRowContent({
   feedbackOptions?: FeedbackOptions;
   onOpenScore: (traceId: string, scoreId: string) => void;
 }) {
+  useLocale();
   const { traceId, highlightSpans } = useThreadTraceRow();
   const { Link, paths } = useLinkComponent();
   const traceHref = paths.traceLink(traceId);
@@ -158,11 +161,11 @@ function ThreadTraceRowContent({
 
   return (
     <>
-      <ThreadTrace.Divider label={`Turn ${turn}`}>
+      <ThreadTrace.Divider label={studioT('Turn {value0}', { value0: turn })}>
         {traceHref && (
           <>
             <Button render={<Link href={traceHref} />} variant="ghost" size="sm" icon={<IconSquareArrowTopRight />}>
-              Go to trace
+              {studioT('Go to trace')}
             </Button>
             <span aria-hidden className="h-4 w-px bg-border" />
           </>
@@ -172,21 +175,21 @@ function ThreadTraceRowContent({
             <Icon size="xs">
               <IconChatBubble7 />
             </Icon>
-            Messages
+            {studioT('Messages')}
           </ThreadTrace.Tab>
           {withFeedback && (
             <ThreadTrace.Tab value="feedback">
               <Icon size="xs">
                 <IconChatBubble7Plus />
               </Icon>
-              Feedback
+              {studioT('Feedback')}
             </ThreadTrace.Tab>
           )}
           <ThreadTrace.Tab value="scores">
             <Icon size="xs">
               <ScorersIcon />
             </Icon>
-            Scores
+            {studioT('Scores')}
           </ThreadTrace.Tab>
         </ThreadTrace.TabList>
       </ThreadTrace.Divider>

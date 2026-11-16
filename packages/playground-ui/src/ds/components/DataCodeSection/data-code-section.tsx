@@ -15,6 +15,8 @@ import { IconAlignmentLeft } from '@/ds/icons/central/IconAlignmentLeft';
 import { IconExpand315 } from '@/ds/icons/central/IconExpand315';
 import { IconMagnifyingGlass } from '@/ds/icons/central/IconMagnifyingGlass';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface DataCodeSectionDiff {
@@ -57,6 +59,7 @@ interface CodeViewProps {
 }
 
 function CodeView({ code, changed, diffSide, searchQuery }: CodeViewProps) {
+  useLocale();
   const ref = useRef<ReactCodeMirrorRef>(null);
   const query = searchQuery.toLowerCase();
 
@@ -100,7 +103,7 @@ function CodeView({ code, changed, diffSide, searchQuery }: CodeViewProps) {
       lineNumbers={false}
       showCopyButton={false}
       variant="embedded"
-      aria-label="JSON content"
+      aria-label={studioT('JSON content')}
       extensions={extensions}
     />
   );
@@ -129,6 +132,7 @@ export function DataCodeSection({
   diff,
   actions,
 }: DataCodeSectionProps) {
+  useLocale();
   const changed = useMemo(() => (diff ? changedLines(codeStr, diff) : undefined), [codeStr, diff]);
   const [showAsMultilineText, setShowAsMultilineText] = useState(false);
   const [searchMinimized, setSearchMinimized] = useState(true);
@@ -162,16 +166,16 @@ export function DataCodeSection({
             (searchMinimized ? (
               <Button
                 size="icon-sm"
-                aria-label="Search code"
-                tooltip="Search code"
+                aria-label={studioT('Search code')}
+                tooltip={studioT('Search code')}
                 onClick={() => setSearchMinimized(false)}
               >
                 <IconMagnifyingGlass />
               </Button>
             ) : (
               <SearchInput
-                label="Search code"
-                placeholder="Search"
+                label={studioT('Search code')}
+                placeholder={studioT('Search')}
                 size="sm"
                 value={searchQuery}
                 onValueChange={setSearchQuery}
@@ -184,14 +188,19 @@ export function DataCodeSection({
             {hasMultilineText && (
               <Button
                 size="icon-md"
-                aria-label={showAsMultilineText ? 'Show escaped newlines' : 'Show multiline text'}
-                tooltip={showAsMultilineText ? 'Show escaped newlines' : 'Show multiline text'}
+                aria-label={showAsMultilineText ? studioT('Show escaped newlines') : studioT('Show multiline text')}
+                tooltip={showAsMultilineText ? studioT('Show escaped newlines') : studioT('Show multiline text')}
                 onClick={() => setShowAsMultilineText(v => !v)}
               >
                 {showAsMultilineText ? <IconAlignmentLeft /> : <IconAlignmentJustify />}
               </Button>
             )}
-            <Button size="icon-md" aria-label="Expand" tooltip="Expand" onClick={() => setExpandedOpen(true)}>
+            <Button
+              size="icon-md"
+              aria-label={studioT('Expand')}
+              tooltip={studioT('Expand')}
+              onClick={() => setExpandedOpen(true)}
+            >
               <IconExpand315 />
             </Button>
           </ButtonsGroup>
@@ -228,8 +237,8 @@ export function DataCodeSection({
               <div className="flex shrink-0 items-center gap-2">
                 {!expandedMultiline && (
                   <SearchInput
-                    label="Search code"
-                    placeholder="Search"
+                    label={studioT('Search code')}
+                    placeholder={studioT('Search')}
                     size="sm"
                     value={expandedSearchQuery}
                     onValueChange={setExpandedSearchQuery}
@@ -240,8 +249,8 @@ export function DataCodeSection({
                   {hasMultilineText && (
                     <Button
                       size="icon-md"
-                      aria-label={expandedMultiline ? 'Show escaped newlines' : 'Show multiline text'}
-                      tooltip={expandedMultiline ? 'Show escaped newlines' : 'Show multiline text'}
+                      aria-label={expandedMultiline ? studioT('Show escaped newlines') : studioT('Show multiline text')}
+                      tooltip={expandedMultiline ? studioT('Show escaped newlines') : studioT('Show multiline text')}
                       onClick={() => setExpandedMultiline(v => !v)}
                     >
                       {expandedMultiline ? <IconAlignmentLeft /> : <IconAlignmentJustify />}

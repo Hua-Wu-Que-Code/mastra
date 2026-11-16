@@ -4,6 +4,8 @@ import type { FilterBarField, FilterBarItem, FilterBarOperator } from '@mastra/p
 import { IconCircleCheck } from '@mastra/playground-ui/icons/central/IconCircleCheck';
 import { IconLab } from '@mastra/playground-ui/icons/central/IconLab';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { hueAccentColor } from '@mastra/playground-ui/utils/colors';
 import { useMemo } from 'react';
 import type { ReviewListStatus } from './dataset-review';
@@ -22,12 +24,29 @@ export const STATUS_FIELD_ID = 'status';
 export const TAG_FIELD_ID = 'tag';
 
 const STATUS_OPTIONS: Array<{ value: ReviewListStatus; label: string }> = [
-  { value: 'review', label: 'Review queue' },
-  { value: 'completed', label: 'Completed' },
+  {
+    value: 'review',
+    get label() {
+      return studioT('Review queue');
+    },
+  },
+  {
+    value: 'completed',
+    get label() {
+      return studioT('Completed');
+    },
+  },
 ];
 
 // Every field takes exactly one operator, so chips render as `Field · Value`.
-const OPERATORS: FilterBarOperator[] = [{ id: 'is', label: 'is' }];
+const OPERATORS: FilterBarOperator[] = [
+  {
+    id: 'is',
+    get label() {
+      return studioT('is');
+    },
+  },
+];
 
 export interface ReviewQueueFilters extends TargetFilterValue {
   experimentId: string;
@@ -72,6 +91,7 @@ export function ReviewQueueFilterBar({
   tagOptions,
   onChange,
 }: ReviewQueueFilterBarProps) {
+  const studioLocale = useLocale();
   const targetFields = useTargetFilterFields(targetType);
 
   // Same hues as the matching trace filter fields so a "Tag" or "Experiment" chip reads alike across pages.
@@ -80,7 +100,7 @@ export function ReviewQueueFilterBar({
       ...targetFields,
       {
         id: EXPERIMENT_FIELD_ID,
-        label: 'Experiment',
+        label: studioT('Experiment'),
         icon: IconLab,
         color: hueAccentColor('pink'),
         strict: true,
@@ -91,7 +111,7 @@ export function ReviewQueueFilterBar({
       },
       {
         id: STATUS_FIELD_ID,
-        label: 'Status',
+        label: studioT('Status'),
         icon: IconCircleCheck,
         color: hueAccentColor('orange'),
         strict: true,
@@ -99,7 +119,7 @@ export function ReviewQueueFilterBar({
       },
       {
         id: TAG_FIELD_ID,
-        label: 'Tag',
+        label: studioT('Tag'),
         icon: IconTag,
         color: hueAccentColor('pink'),
         strict: true,
@@ -108,7 +128,7 @@ export function ReviewQueueFilterBar({
         suggestions: tagOptions,
       },
     ],
-    [targetFields, experiments, tagOptions],
+    [targetFields, experiments, tagOptions, studioLocale],
   );
 
   const value = useMemo(
@@ -124,11 +144,11 @@ export function ReviewQueueFilterBar({
       onValueChange={(items: FilterBarItem[]) => onChange(fromItems(items))}
       // Items are rebuilt from URL params with `id: fieldId`; keep the draft on the same id so the chip survives.
       createItemId={fieldId => fieldId}
-      aria-label="Review queue filters"
+      aria-label={studioT('Review queue filters')}
       className="min-w-64 flex-1"
     >
       <FilterBar.Chips />
-      <FilterBar.Input placeholder="Filter review queue" />
+      <FilterBar.Input placeholder={studioT('Filter review queue')} />
     </FilterBar>
   );
 }

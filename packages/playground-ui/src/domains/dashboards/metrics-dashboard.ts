@@ -6,6 +6,7 @@ import type {
   DashboardWidget,
   DashboardWidgetView,
 } from '@mastra/client-js';
+import { t as studioT } from '@/lib/i18n';
 
 const INPUT = 'mastra_model_total_input_tokens';
 const OUTPUT = 'mastra_model_total_output_tokens';
@@ -42,12 +43,18 @@ const tokenUsageWidget: DashboardWidget = {
   id: 'token-usage',
   span: 6,
   kind: 'timeseries',
-  title: 'Token usage',
+  get title() {
+    return studioT('Token usage');
+  },
   drilldown: { action: { page: 'traces' }, click: { page: 'traces' } },
   views: [
     {
-      label: 'Token usage',
-      description: 'Input, cache reads and output.',
+      get label() {
+        return studioT('Token usage');
+      },
+      get description() {
+        return studioT('Input, cache reads and output.');
+      },
       queries: [sumSeries('input', INPUT), sumSeries('output', OUTPUT), sumSeries('cacheRead', CACHE_READ)],
       options: {
         chart: 'stackedBar',
@@ -56,19 +63,39 @@ const tokenUsageWidget: DashboardWidget = {
         series: [
           {
             dataKey: 'input',
-            label: 'Input',
+            get label() {
+              return studioT('Input');
+            },
             color: 'green',
             value: { max: [{ minus: [{ query: 'input' }, { query: 'cacheRead' }] }, { const: 0 }] },
           },
-          { dataKey: 'cacheRead', label: 'Cache read', color: 'violet', value: { query: 'cacheRead' } },
-          { dataKey: 'output', label: 'Output', color: 'sky', value: { query: 'output' } },
+          {
+            dataKey: 'cacheRead',
+            get label() {
+              return studioT('Cache read');
+            },
+            color: 'violet',
+            value: { query: 'cacheRead' },
+          },
+          {
+            dataKey: 'output',
+            get label() {
+              return studioT('Output');
+            },
+            color: 'sky',
+            value: { query: 'output' },
+          },
         ],
         total: { value: 'total' },
       },
     },
     {
-      label: 'Model cost',
-      description: 'Estimated model spend.',
+      get label() {
+        return studioT('Model cost');
+      },
+      get description() {
+        return studioT('Estimated model spend.');
+      },
       // Cache reads aren't charted here, but fetching them keeps their answer, so going back to
       // Token usage sends nothing, as the card's one request for both views does.
       queries: [sumSeries('input', INPUT), sumSeries('output', OUTPUT), sumSeries('cacheRead', CACHE_READ)],
@@ -79,7 +106,9 @@ const tokenUsageWidget: DashboardWidget = {
         series: [
           {
             dataKey: 'cost',
-            label: 'Cost',
+            get label() {
+              return studioT('Cost');
+            },
             color: 'green',
             value: {
               sum: [
@@ -105,11 +134,17 @@ const agentRunsWidget: DashboardWidget = {
   id: 'agent-runs',
   span: 6,
   kind: 'timeseries',
-  title: 'Agent runs',
+  get title() {
+    return studioT('Agent runs');
+  },
   views: [
     {
-      label: 'Agent runs',
-      description: 'Completed and failed runs.',
+      get label() {
+        return studioT('Agent runs');
+      },
+      get description() {
+        return studioT('Completed and failed runs.');
+      },
       drilldown: { click: agentRunsTraces },
       queries: [agentRunsByStatus],
       options: {
@@ -118,15 +153,33 @@ const agentRunsWidget: DashboardWidget = {
         axis: false,
         xLabels: 'edges',
         series: [
-          { dataKey: 'completed', label: 'Completed', color: 'green', value: completedRuns },
-          { dataKey: 'failed', label: 'Failed', color: 'error', value: failedRuns },
+          {
+            dataKey: 'completed',
+            get label() {
+              return studioT('Completed');
+            },
+            color: 'green',
+            value: completedRuns,
+          },
+          {
+            dataKey: 'failed',
+            get label() {
+              return studioT('Failed');
+            },
+            color: 'error',
+            value: failedRuns,
+          },
         ],
         total: { value: 'total' },
       },
     },
     {
-      label: 'Failure rate',
-      description: 'Share of agent runs that failed.',
+      get label() {
+        return studioT('Failure rate');
+      },
+      get description() {
+        return studioT('Share of agent runs that failed.');
+      },
       drilldown: {
         action: { page: 'logs', filters: failedAgentRuns },
         click: { page: 'traces', filters: failedAgentRuns },
@@ -140,7 +193,9 @@ const agentRunsWidget: DashboardWidget = {
         series: [
           {
             dataKey: 'failureRate',
-            label: 'Failed runs',
+            get label() {
+              return studioT('Failed runs');
+            },
             color: 'error',
             value: {
               coalesce: [{ ratio: { of: failedRuns, over: { sum: [completedRuns, failedRuns] } } }, { const: 0 }],
@@ -176,16 +231,34 @@ const latencyView = (label: string, metric: string, rootEntityType: string): Das
     buckets: 'api',
     xLabels: 'edges',
     series: [
-      { dataKey: 'p50', label: 'P50', color: 'sky', value: { query: 'latency', percentile: 0.5 }, round: true },
+      {
+        dataKey: 'p50',
+        get label() {
+          return studioT('P50');
+        },
+        color: 'sky',
+        value: { query: 'latency', percentile: 0.5 },
+        round: true,
+      },
       {
         dataKey: 'p95',
-        label: 'P95',
+        get label() {
+          return studioT('P95');
+        },
         color: 'green',
         emphasis: true,
         value: { query: 'latency', percentile: 0.95 },
         round: true,
       },
-      { dataKey: 'p99', label: 'P99', color: 'violet', value: { query: 'latency', percentile: 0.99 }, round: true },
+      {
+        dataKey: 'p99',
+        get label() {
+          return studioT('P99');
+        },
+        color: 'violet',
+        value: { query: 'latency', percentile: 0.99 },
+        round: true,
+      },
     ],
     total: { value: { peak: 'p95' } },
   },
@@ -195,8 +268,12 @@ const latencyWidget: DashboardWidget = {
   id: 'latency',
   span: 6,
   kind: 'timeseries',
-  title: 'Latency',
-  description: 'Duration percentiles.',
+  get title() {
+    return studioT('Latency');
+  },
+  get description() {
+    return studioT('Duration percentiles.');
+  },
   drilldown: { click: { page: 'traces' } },
   views: [
     latencyView('Agent latency', 'mastra_agent_duration_ms', 'agent'),
@@ -217,8 +294,12 @@ const distinctIdsWidget: DashboardWidget = {
   id: 'distinct-ids',
   span: 6,
   kind: 'timeseries',
-  title: 'Resources and threads',
-  description: 'Unique ids on traces; users and sessions only when set.',
+  get title() {
+    return studioT('Resources and threads');
+  },
+  get description() {
+    return studioT('Unique ids on traces; users and sessions only when set.');
+  },
   drilldown: { click: { page: 'traces' } },
   views: [
     {
@@ -278,19 +359,25 @@ const nameColumn = (label: string, options: Record<string, unknown> = {}): Dashb
 });
 const projectColumn: DashboardColumn = {
   id: 'project',
-  label: 'Project',
+  get label() {
+    return studioT('Project');
+  },
   scope: 'org',
   options: { type: 'dimension', dimension: 'projectId', as: 'project', width: 'minmax(8rem,2fr)' },
 };
 const errorColumns: DashboardColumn[] = [
   {
     id: 'errorRate',
-    label: 'Errors',
+    get label() {
+      return studioT('Errors');
+    },
     options: { type: 'value', value: { query: 'figures', measure: 'errorRate' }, format: 'percent', better: 'lower' },
   },
   {
     id: 'p95',
-    label: 'P95 latency',
+    get label() {
+      return studioT('P95 latency');
+    },
     options: {
       type: 'value',
       value: { query: 'figures', measure: 'duration.p95' },
@@ -302,7 +389,9 @@ const errorColumns: DashboardColumn[] = [
 const usageColumns: DashboardColumn[] = [
   {
     id: 'tokens',
-    label: 'Tokens',
+    get label() {
+      return studioT('Tokens');
+    },
     options: {
       type: 'value',
       value: { query: 'usage', field: 'value' },
@@ -314,7 +403,9 @@ const usageColumns: DashboardColumn[] = [
   },
   {
     id: 'cost',
-    label: 'Cost',
+    get label() {
+      return studioT('Cost');
+    },
     options: {
       type: 'value',
       value: { query: 'usage', field: 'estimatedCost' },
@@ -339,15 +430,27 @@ const countColumn = (count: { label: string; value: Record<string, unknown>; spa
     description: count.spans ? SPAN_DESCRIPTION : TRACE_DESCRIPTION,
   },
 });
-const changeColumn: DashboardColumn = { id: 'change', label: '% Change', options: { type: 'change' } };
-const TRACES = { label: 'Traces', value: { query: 'figures', measure: 'count' }, spans: false };
+const changeColumn: DashboardColumn = {
+  id: 'change',
+  get label() {
+    return studioT('% Change');
+  },
+  options: { type: 'change' },
+};
+const TRACES = {
+  get label() {
+    return studioT('Traces');
+  },
+  value: { query: 'figures', measure: 'count' },
+  spans: false,
+};
 
 const tableOptions = (groupBy: string[], name: string, emptyMessage: string, extra: Record<string, unknown> = {}) => ({
   groupBy,
   defaultSort: { column: 'count', direction: 'desc' },
   pageSize: 10,
   emptyMessage,
-  ariaLabel: `${name} breakdown`,
+  ariaLabel: studioT('{value} breakdown', { value: name }),
   ...extra,
 });
 
@@ -385,7 +488,7 @@ const entityView = (
   const usage = label === 'Agents';
   const traces = label !== 'Tools';
   return {
-    label: `Breakdown by ${name.toLowerCase()}`,
+    label: studioT('Breakdown by {value0}', { value0: name.toLowerCase() }),
     scope,
     description,
     queries: [
@@ -410,8 +513,20 @@ const entityView = (
       ...(usage ? usageColumns : []),
       countColumn(
         traces
-          ? { label: 'Traces', value: { query: 'figures', measure: 'countDistinct.traceId' }, spans: false }
-          : { label: 'Spans', value: { query: 'figures', measure: 'count' }, spans: true },
+          ? {
+              get label() {
+                return studioT('Traces');
+              },
+              value: { query: 'figures', measure: 'countDistinct.traceId' },
+              spans: false,
+            }
+          : {
+              get label() {
+                return studioT('Spans');
+              },
+              value: { query: 'figures', measure: 'count' },
+              spans: true,
+            },
       ),
       changeColumn,
     ],
@@ -441,9 +556,13 @@ const traceColumns = (
 const environmentsView = (scope: 'org' | 'project'): DashboardWidgetView => {
   const groupBy = scoped(scope, 'environment');
   return {
-    label: 'Breakdown by environment',
+    get label() {
+      return studioT('Breakdown by environment');
+    },
     scope,
-    description: 'Traces, errors, latency and spend per environment.',
+    get description() {
+      return studioT('Traces, errors, latency and spend per environment.');
+    },
     queries: [
       {
         id: 'figures',
@@ -487,7 +606,9 @@ const threadsView = (scope: 'org' | 'project'): DashboardWidgetView => {
   };
   const resourceColumn: DashboardColumn = {
     id: 'resource',
-    label: 'Resource',
+    get label() {
+      return studioT('Resource');
+    },
     options: {
       type: 'dimension',
       dimension: 'resourceId',
@@ -497,9 +618,13 @@ const threadsView = (scope: 'org' | 'project'): DashboardWidgetView => {
     },
   };
   return {
-    label: 'Breakdown by thread',
+    get label() {
+      return studioT('Breakdown by thread');
+    },
     scope,
-    description: 'Traces, errors, latency and spend per thread.',
+    get description() {
+      return studioT('Traces, errors, latency and spend per thread.');
+    },
     queries: [threads, usageTotals(groupBy), ...(scope === 'org' ? [resources] : [])],
     columns: traceColumns('Thread', {}, [resourceColumn]),
     options: tableOptions(groupBy, 'Thread', 'No traces with a thread in this range.', {
@@ -513,9 +638,13 @@ const threadsView = (scope: 'org' | 'project'): DashboardWidgetView => {
 const modelsView = (scope: 'org' | 'project'): DashboardWidgetView => {
   const groupBy = scoped(scope, 'provider').concat('model');
   return {
-    label: 'Breakdown by model',
+    get label() {
+      return studioT('Breakdown by model');
+    },
     scope,
-    description: 'Model calls, tokens and spend per model.',
+    get description() {
+      return studioT('Model calls, tokens and spend per model.');
+    },
     queries: [
       {
         id: 'calls',
@@ -534,7 +663,13 @@ const modelsView = (scope: 'org' | 'project'): DashboardWidgetView => {
       nameColumn('Model', { unnamed: 'Unknown model', mark: { providerDimension: 'provider' } }),
       projectColumn,
       ...usageColumns,
-      countColumn({ label: 'Spans', value: { query: 'calls', field: 'value' }, spans: true }),
+      countColumn({
+        get label() {
+          return studioT('Spans');
+        },
+        value: { query: 'calls', field: 'value' },
+        spans: true,
+      }),
       changeColumn,
     ],
     options: tableOptions(groupBy, 'Model', 'No model usage in this range.', drill(scope, 'model', 'model')),
@@ -569,13 +704,19 @@ const breakdownWidget: DashboardWidget = {
   id: 'breakdown',
   span: 12,
   kind: 'table',
-  title: 'Breakdown',
+  get title() {
+    return studioT('Breakdown');
+  },
   drilldown: { click: { page: 'traces' } },
   views: [
     {
-      label: 'Breakdown by project',
+      get label() {
+        return studioT('Breakdown by project');
+      },
       scope: 'org',
-      description: 'Traces, errors, latency and spend per project.',
+      get description() {
+        return studioT('Traces, errors, latency and spend per project.');
+      },
       queries: [
         {
           id: 'figures',

@@ -3,6 +3,8 @@ import type { FilterBarField, FilterBarItem, FilterBarOperator } from '@mastra/p
 import { IconCircleCheck } from '@mastra/playground-ui/icons/central/IconCircleCheck';
 import { IconMagnifyingGlass } from '@mastra/playground-ui/icons/central/IconMagnifyingGlass';
 import { IconServer1 } from '@mastra/playground-ui/icons/central/IconServer1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { hueAccentColor } from '@mastra/playground-ui/utils/colors';
 import { useMemo } from 'react';
 import { EXPERIMENT_STATUS_OPTIONS } from './experiments-list-options';
@@ -22,8 +24,18 @@ const DATASET_FIELD_ID = 'dataset';
 const ALL = 'all';
 
 const OPERATORS: FilterBarOperator[] = [
-  { id: 'contains', label: 'contains' },
-  { id: 'is', label: 'is' },
+  {
+    id: 'contains',
+    get label() {
+      return studioT('contains');
+    },
+  },
+  {
+    id: 'is',
+    get label() {
+      return studioT('is');
+    },
+  },
 ];
 
 const STATUS_SUGGESTIONS = EXPERIMENT_STATUS_OPTIONS.filter(option => option.value !== ALL);
@@ -67,16 +79,23 @@ export function ExperimentsFilterBar({
   datasetOptions,
   onChange,
 }: ExperimentsFilterBarProps) {
+  const studioLocale = useLocale();
   const targetFields = useTargetFilterFields(targetType);
 
   const fields = useMemo<FilterBarField[]>(
     () => [
       // Listed first so free text lands on it by default.
-      { id: SEARCH_FIELD_ID, label: 'Search', icon: IconMagnifyingGlass, search: true, operators: ['contains'] },
+      {
+        id: SEARCH_FIELD_ID,
+        label: studioT('Search'),
+        icon: IconMagnifyingGlass,
+        search: true,
+        operators: ['contains'],
+      },
       ...targetFields,
       {
         id: STATUS_FIELD_ID,
-        label: 'Status',
+        label: studioT('Status'),
         icon: IconCircleCheck,
         color: hueAccentColor('orange'),
         operators: ['is'],
@@ -85,7 +104,7 @@ export function ExperimentsFilterBar({
       },
       {
         id: DATASET_FIELD_ID,
-        label: 'Dataset',
+        label: studioT('Dataset'),
         icon: IconServer1,
         color: hueAccentColor('blue'),
         operators: ['is'],
@@ -93,7 +112,7 @@ export function ExperimentsFilterBar({
         suggestions: datasetOptions.filter(option => option.value !== ALL),
       },
     ],
-    [targetFields, datasetOptions],
+    [targetFields, datasetOptions, studioLocale],
   );
 
   const value = useMemo(
@@ -109,11 +128,11 @@ export function ExperimentsFilterBar({
       onValueChange={(items: FilterBarItem[]) => onChange(fromItems(items))}
       // Items are rebuilt from state with `id: fieldId`; keep the draft on the same id so the chip survives.
       createItemId={fieldId => fieldId}
-      aria-label="Experiments filters"
+      aria-label={studioT('Experiments filters')}
       className="min-w-64 flex-1"
     >
       <FilterBar.Chips />
-      <FilterBar.Input placeholder="Filter experiments" />
+      <FilterBar.Input placeholder={studioT('Filter experiments')} />
     </FilterBar>
   );
 }

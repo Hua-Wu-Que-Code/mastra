@@ -1,6 +1,8 @@
 import type { FilterBarField, FilterBarItem } from '@mastra/playground-ui/components/FilterBar';
 import { IconBox } from '@mastra/playground-ui/icons/central/IconBox';
 import { IconFingerPrint1 } from '@mastra/playground-ui/icons/central/IconFingerPrint1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { hueAccentColor } from '@mastra/playground-ui/utils/colors';
 import { useAgents } from '@mastra/react/hooks/agents';
 import { useProcessors } from '@mastra/react/hooks/processors';
@@ -58,6 +60,7 @@ export const targetFromItems = (items: FilterBarItem[]): TargetFilterValue => {
  * and only the entities of that type are fetched.
  */
 export function useTargetFilterFields(targetType: DatasetTargetType | ''): FilterBarField[] {
+  const studioLocale = useLocale();
   const { data: agents } = useAgents({ queryOptions: { enabled: targetType === 'agent' } });
   const { data: workflows } = useWorkflows({ queryOptions: { enabled: targetType === 'workflow' } });
   const { data: scorers } = useScorers({ enabled: targetType === 'scorer' });
@@ -81,7 +84,7 @@ export function useTargetFilterFields(targetType: DatasetTargetType | ''): Filte
     return [
       {
         id: TARGET_TYPE_FIELD_ID,
-        label: 'Target type',
+        label: studioT('Target type'),
         icon: IconBox,
         color: hueAccentColor('purple'),
         operators: ['is'],
@@ -90,7 +93,7 @@ export function useTargetFilterFields(targetType: DatasetTargetType | ''): Filte
       },
       {
         id: TARGET_ID_FIELD_ID,
-        label: targetType ? TARGET_TYPE_LABELS[targetType] : 'Target',
+        label: targetType ? TARGET_TYPE_LABELS[targetType] : studioT('Target'),
         icon: IconFingerPrint1,
         color: hueAccentColor('pink'),
         operators: ['is'],
@@ -100,5 +103,5 @@ export function useTargetFilterFields(targetType: DatasetTargetType | ''): Filte
         suggestions: targetOptions,
       },
     ];
-  }, [targetType, agents, workflows, scorers, processors]);
+  }, [targetType, agents, workflows, scorers, processors, studioLocale]);
 }

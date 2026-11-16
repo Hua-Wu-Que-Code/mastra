@@ -1,17 +1,41 @@
 import type { ComponentType, SVGProps } from 'react';
-
 import type { KnowledgePagePayload } from '../pageTypes';
 
 import { ConfluenceIcon, GithubIcon, GoogleIcon, LinearIcon, NotionIcon, SlackIcon, ZendeskIcon } from '@/ds/icons';
+import { t as studioT } from '@/lib/i18n';
 
 type KnowledgeSource = { label: string; icon?: ComponentType<SVGProps<SVGSVGElement>> };
 
 const SOURCES: Record<string, KnowledgeSource> = {
-  linear: { label: 'Linear', icon: LinearIcon },
-  notion: { label: 'Notion', icon: NotionIcon },
-  confluence: { label: 'Confluence', icon: ConfluenceIcon },
-  zendesk: { label: 'Zendesk', icon: ZendeskIcon },
-  fireflies: { label: 'Fireflies' },
+  linear: {
+    get label() {
+      return studioT('Linear');
+    },
+    icon: LinearIcon,
+  },
+  notion: {
+    get label() {
+      return studioT('Notion');
+    },
+    icon: NotionIcon,
+  },
+  confluence: {
+    get label() {
+      return studioT('Confluence');
+    },
+    icon: ConfluenceIcon,
+  },
+  zendesk: {
+    get label() {
+      return studioT('Zendesk');
+    },
+    icon: ZendeskIcon,
+  },
+  fireflies: {
+    get label() {
+      return studioT('Fireflies');
+    },
+  },
   github: { label: 'GitHub', icon: GithubIcon },
   slack: { label: 'Slack', icon: SlackIcon },
   google: { label: 'Google', icon: GoogleIcon },

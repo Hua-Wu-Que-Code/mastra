@@ -22,6 +22,8 @@ import { IconBookmarkPlus } from '@mastra/playground-ui/icons/central/IconBookma
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconDotGrid2x3 } from '@mastra/playground-ui/icons/central/IconDotGrid2x3';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -75,6 +77,7 @@ const SaveAsPromptBlockDialog = ({
   isPending: boolean;
   error: string | null;
 }) => {
+  useLocale();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
@@ -98,26 +101,26 @@ const SaveAsPromptBlockDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange} pending={isPending}>
       <DialogContent size="sm">
         <DialogHeader>
-          <DialogTitle>Save as prompt block</DialogTitle>
-          <DialogDescription>Create a reusable prompt block from this content.</DialogDescription>
+          <DialogTitle>{studioT('Save as prompt block')}</DialogTitle>
+          <DialogDescription>{studioT('Create a reusable prompt block from this content.')}</DialogDescription>
         </DialogHeader>
         <Form onSubmit={handleSubmit}>
           <DialogBody>
             <Field>
-              <FieldLabel>Name</FieldLabel>
+              <FieldLabel>{studioT('Name')}</FieldLabel>
               <Input
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="e.g. Tone guidelines"
+                placeholder={studioT('e.g. Tone guidelines')}
                 autoFocus
               />
             </Field>
             <Field>
-              <FieldLabel>Description (optional)</FieldLabel>
+              <FieldLabel>{studioT('Description (optional)')}</FieldLabel>
               <Input
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Brief description"
+                placeholder={studioT('Brief description')}
               />
             </Field>
             {error ? (
@@ -127,9 +130,9 @@ const SaveAsPromptBlockDialog = ({
             ) : null}
           </DialogBody>
           <DialogFooter>
-            <DialogCancel>Cancel</DialogCancel>
+            <DialogCancel>{studioT('Cancel')}</DialogCancel>
             <DialogAction type="submit" disabled={!name.trim()}>
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? studioT('Saving...') : studioT('Save')}
             </DialogAction>
           </DialogFooter>
         </Form>
@@ -150,6 +153,7 @@ const InlineBlockContent = ({
   autoFocus = false,
   readOnly = false,
 }: InlineBlockContentProps) => {
+  useLocale();
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -209,7 +213,7 @@ const InlineBlockContent = ({
                     <IconDotGrid2x3 />
                   </Icon>
                 </TooltipTrigger>
-                <TooltipContent side="left">Drag to reorder</TooltipContent>
+                <TooltipContent side="left">{studioT('Drag to reorder')}</TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -229,14 +233,14 @@ const InlineBlockContent = ({
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => setSaveDialogOpen(true)}
-                tooltip="Save as prompt block"
+                tooltip={studioT('Save as prompt block')}
               >
                 <IconBookmarkPlus />
               </Button>
             )}
 
             {onDelete && (
-              <Button variant="ghost" size="icon-sm" onClick={onDelete} tooltip="Delete block">
+              <Button variant="ghost" size="icon-sm" onClick={onDelete} tooltip={studioT('Delete block')}>
                 <IconCrossMedium />
               </Button>
             )}

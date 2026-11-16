@@ -2,6 +2,8 @@ import { CodeEditor } from '@mastra/playground-ui/components/CodeEditor';
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState, useCallback, useMemo } from 'react';
 
 import type { InMemoryFileNode } from '../agent-edit-page/utils/form-validation';
@@ -47,6 +49,7 @@ export function SkillFolder({
   setWorkspaceId,
   workspaceOptions,
 }: SkillFolderProps) {
+  useLocale();
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 
   const handleFileContentChange = useCallback(
@@ -82,12 +85,12 @@ export function SkillFolder({
       <div className="h-full overflow-y-auto border-r border-border p-4">
         {workspaceOptions.length > 0 && (
           <Field className="pb-4">
-            <FieldLabel>Workspace</FieldLabel>
+            <FieldLabel>{studioT('Workspace')}</FieldLabel>
             <Combobox
               options={workspaceOptions}
               value={workspaceId}
               onValueChange={setWorkspaceId}
-              placeholder="Select a workspace"
+              placeholder={studioT('Select a workspace')}
               disabled={readOnly}
             />
           </Field>
@@ -128,7 +131,7 @@ export function SkillFolder({
         ) : (
           <div className="flex h-full items-center justify-center">
             <Txt tone="muted" as="span" variant="caption" className="block">
-              Select a file to edit its content
+              {studioT('Select a file to edit its content')}
             </Txt>
           </div>
         )}

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { ModelPickerProvider } from './model-picker-types';
 import { CommandItem } from '@/ds/components/Command';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface ModelPickerProviderOptionProps {
   provider: ModelPickerProvider;
@@ -11,6 +12,7 @@ interface ModelPickerProviderOptionProps {
 
 /** A provider that isn't connected; picking it lists its models. */
 export function ModelPickerProviderOption({ provider, onSelect, renderProviderIcon }: ModelPickerProviderOptionProps) {
+  useLocale();
   const count = provider.models.length;
   return (
     <CommandItem value={`provider:${provider.id}`} onSelect={onSelect}>
@@ -19,7 +21,7 @@ export function ModelPickerProviderOption({ provider, onSelect, renderProviderIc
       </span>
       <span className="truncate">{provider.name}</span>
       <Txt as="span" variant="caption" tone="muted" className="ml-auto shrink-0">
-        {count} {count === 1 ? 'model' : 'models'}
+        {count} {count === 1 ? studioT('model') : studioT('models')}
       </Txt>
     </CommandItem>
   );

@@ -15,6 +15,10 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@mastra/playground-ui/components/Select';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations, useDatasets } from '@mastra/react/hooks/datasets';
 import { useState } from 'react';
@@ -34,6 +38,7 @@ export function AddItemsToDatasetDialog({
   currentDatasetId,
   onSuccess,
 }: AddItemsToDatasetDialogProps) {
+  useLocale();
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('');
   const [isAdding, setIsAdding] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -49,7 +54,7 @@ export function AddItemsToDatasetDialog({
     e.preventDefault();
 
     if (!selectedDatasetId) {
-      toast.error('Please select a dataset');
+      toast.error(studioT('Please select a dataset'));
       return;
     }
 
@@ -69,7 +74,13 @@ export function AddItemsToDatasetDialog({
       }
 
       const targetDataset = datasets.find(dataset => dataset.id === selectedDatasetId);
-      toast.success(`Added ${items.length} item${items.length !== 1 ? 's' : ''} to "${targetDataset?.name}"`);
+      toast.success(
+        studioT('Added {value0} item{value1} to "{value2}"', {
+          value0: items.length,
+          value1: items.length !== 1 ? studioT('English plural suffix') : '',
+          value2: targetDataset?.name,
+        }),
+      );
 
       setSelectedDatasetId('');
       setIsAdding(false);
@@ -78,7 +89,9 @@ export function AddItemsToDatasetDialog({
 
       onSuccess?.(selectedDatasetId);
     } catch (error) {
-      toast.error(`Failed to add items: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to add items: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
       setIsAdding(false);
       setProgress(0);
     }
@@ -90,24 +103,26 @@ export function AddItemsToDatasetDialog({
     <Dialog open={open} onOpenChange={onOpenChange} pending={isAdding}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Items to Dataset</DialogTitle>
+          <DialogTitle>{studioT('Add Items to Dataset')}</DialogTitle>
         </DialogHeader>
         <Form onSubmit={handleSubmit}>
           <DialogBody>
             <Field>
-              <FieldLabel required>Target Dataset</FieldLabel>
+              <FieldLabel required>{studioT('Target Dataset')}</FieldLabel>
               <Select
                 value={selectedDatasetId}
                 onValueChange={setSelectedDatasetId}
                 disabled={isAdding || isDatasetsLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={isDatasetsLoading ? 'Loading datasets...' : 'Select a dataset'} />
+                  <SelectValue
+                    placeholder={isDatasetsLoading ? studioT('Loading datasets...') : studioT('Select a dataset')}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {availableDatasets.length === 0 ? (
                     <Txt as="p" variant="body" tone="muted" className="px-2 py-4 text-center">
-                      No other datasets available
+                      {studioT('No other datasets available')}
                     </Txt>
                   ) : (
                     availableDatasets.map(dataset => (
@@ -121,7 +136,10 @@ export function AddItemsToDatasetDialog({
             </Field>
 
             <Txt tone="muted">
-              {items.length} item{items.length !== 1 ? 's' : ''} will be copied to the selected dataset
+              <Trans
+                id="{part0} item {part1} will be copied to the selected dataset"
+                values={{ part0: items.length, part1: items.length !== 1 ? studioT('English plural suffix') : '' }}
+              />
             </Txt>
 
             {isAdding && (
@@ -133,15 +151,17 @@ export function AddItemsToDatasetDialog({
                   />
                 </div>
                 <Txt tone="muted">
-                  Adding items: {progress} / {items.length}
+                  <Trans id="Adding items: {part0} / {part1}" values={{ part0: progress, part1: items.length }} />
                 </Txt>
               </div>
             )}
           </DialogBody>
           <DialogFooter>
-            <DialogCancel onClick={() => setSelectedDatasetId('')}>Cancel</DialogCancel>
+            <DialogCancel onClick={() => setSelectedDatasetId('')}>{studioT('Cancel')}</DialogCancel>
             <DialogAction type="submit" disabled={!selectedDatasetId || availableDatasets.length === 0}>
-              {isAdding ? `Adding... (${progress}/${items.length})` : 'Add items'}
+              {isAdding
+                ? studioT('Adding... ({value0}/{value1})', { value0: progress, value1: items.length })
+                : studioT('Add items')}
             </DialogAction>
           </DialogFooter>
         </Form>

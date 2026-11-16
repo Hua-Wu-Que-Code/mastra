@@ -76,7 +76,6 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // UI-only pages (no corresponding API resource) - marked as public
   // These pages don't fetch protected data, so they're accessible to all authenticated users
   { route: '/settings', permission: 'public', name: 'Settings' },
-  { route: '/resources', permission: 'public', name: 'Resources' },
   // End-user connections are gated server-side on the caller's own resource
   // key (userConnectRoutes), not on a studio RBAC resource.
   { route: '/connections', permission: 'public', name: 'Connections' },
@@ -139,7 +138,7 @@ export function hasRoutePermission(
  * Used for redirecting users who land on a page they can't access.
  *
  * Skips public routes so we prefer gated routes the user has access to.
- * Falls back to /resources (a public route) if no gated routes are accessible.
+ * Falls back to /settings (a public route) if no gated routes are accessible.
  */
 export function getFirstAccessibleRoute(
   hasPermission: (p: string) => boolean,
@@ -159,6 +158,6 @@ export function getFirstAccessibleRoute(
       return route;
     }
   }
-  // Fall back to /resources if no gated routes are accessible
-  return '/resources';
+  // Fall back to /settings if no gated routes are accessible
+  return '/settings';
 }

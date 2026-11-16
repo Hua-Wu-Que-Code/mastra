@@ -1,6 +1,8 @@
 import type { McpServerEventInfo } from '@mastra/client-js';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { Notice } from '@mastra/playground-ui/components/Notice';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import { useMcpEventFeed } from '../../hooks/use-mcp-event-feed';
 import { McpEventArgumentsForm } from './mcp-event-arguments-form';
@@ -19,6 +21,7 @@ export interface McpEventLivePanelProps {
 
 /** Watch an event type: stream it (push types) or poll it, and send test events under `mastra dev`. */
 export function McpEventLivePanel({ serverId, event, testEmit, canEmit }: McpEventLivePanelProps) {
+  useLocale();
   const [args, setArgs] = useState<Record<string, unknown>>({});
   const feed = useMcpEventFeed(serverId, event.name);
   const canStream = event.delivery.includes('push');
@@ -30,15 +33,15 @@ export function McpEventLivePanel({ serverId, event, testEmit, canEmit }: McpEve
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <McpEventFeedStatus status={feed.status} canStream={canStream} cursor={feed.cursor} />
-        {canStream && isStreaming && <Button onClick={feed.stop}>Stop</Button>}
+        {canStream && isStreaming && <Button onClick={feed.stop}>{studioT('Stop')}</Button>}
         {canStream && !isStreaming && (
           <Button variant="primary" onClick={() => void feed.start(args)}>
-            Start
+            {studioT('Start')}
           </Button>
         )}
         {!canStream && (
           <Button variant="primary" disabled={feed.status === 'polling'} onClick={() => void feed.pollOnce(args)}>
-            Poll once
+            {studioT('Poll once')}
           </Button>
         )}
       </div>

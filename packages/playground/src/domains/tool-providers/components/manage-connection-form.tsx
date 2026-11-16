@@ -10,7 +10,11 @@ import { IconChainLink3 } from '@mastra/playground-ui/icons/central/IconChainLin
 import { IconChevronLeftMedium } from '@mastra/playground-ui/icons/central/IconChevronLeftMedium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
+
 import { useDisconnectConnection } from '@mastra/react/hooks/tool-providers';
 import { Unplug } from 'lucide-react';
 import { useState } from 'react';
@@ -40,6 +44,7 @@ export const ManageConnectionForm = ({
   onBack,
   onDisconnected,
 }: ManageConnectionFormProps) => {
+  useLocale();
   const rename = useDebouncedConnectionRename({ providerId, connectionId, initialLabel });
   const disconnectConnection = useDisconnectConnection();
   const [draft, setDraft] = useState(initialLabel);
@@ -52,7 +57,7 @@ export const ManageConnectionForm = ({
       { providerId, connectionId, force: true },
       {
         onSuccess: () => {
-          toast.success('Connection disconnected');
+          toast.success(studioT('Connection disconnected'));
           onDisconnected(connectionId);
         },
       },
@@ -68,12 +73,12 @@ export const ManageConnectionForm = ({
             variant="ghost"
             size="sm"
             onClick={onBack}
-            aria-label="Back to connections"
+            aria-label={studioT('Back to connections')}
             data-testid={`${testIdPrefix}-back`}
             className="-mt-1 -ml-1.5 w-fit text-muted-foreground"
             icon={<IconChevronLeftMedium />}
           >
-            Connections
+            {studioT('Connections')}
           </Button>
         )}
         <div className="flex flex-col items-center gap-4 text-center">
@@ -89,7 +94,7 @@ export const ManageConnectionForm = ({
 
           <div className="flex w-full flex-col items-center gap-1.5">
             <Txt variant="meta" tone="muted">
-              {integrationName} connection
+              <Trans id="{part0} connection" values={{ part0: integrationName }} />
             </Txt>
             <Field invalid={Boolean(rename.error)} className="w-full justify-items-center gap-1.5">
               <div className="relative w-full">
@@ -102,15 +107,15 @@ export const ManageConnectionForm = ({
                     rename.scheduleRename(event.target.value);
                   }}
                   disabled={disabled || rename.isPending}
-                  placeholder="Unnamed connection"
+                  placeholder={studioT('Unnamed connection')}
                   autoFocus
-                  aria-label="Connection name"
+                  aria-label={studioT('Connection name')}
                   testId={`${testIdPrefix}-input`}
                   className="text-center"
                 />
                 {rename.isPending && (
                   <span className="absolute top-1/2 right-2 -translate-y-1/2">
-                    <Spinner size="sm" aria-label="Saving" data-testid={`${testIdPrefix}-saving`} />
+                    <Spinner size="sm" aria-label={studioT('Saving')} data-testid={`${testIdPrefix}-saving`} />
                   </span>
                 )}
               </div>
@@ -126,7 +131,7 @@ export const ManageConnectionForm = ({
             disabled={disabled || disconnectConnection.isPending}
             data-testid={`${testIdPrefix}-disconnect`}
           >
-            Disconnect
+            {studioT('Disconnect')}
           </Button>
         </div>
       </DialogBody>
@@ -134,10 +139,11 @@ export const ManageConnectionForm = ({
       <AlertDialog open={confirmDisconnectOpen} onOpenChange={setConfirmDisconnectOpen}>
         <AlertDialog.Content data-testid={`${testIdPrefix}-disconnect-dialog`}>
           <AlertDialog.Header>
-            <AlertDialog.Title>Disconnect connection?</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Disconnect connection?')}</AlertDialog.Title>
             <AlertDialog.Description>
-              Disconnecting revokes this authorized account and removes it from Mastra. Agents using this connection
-              will lose access. This can’t be undone.
+              {studioT(
+                'Disconnecting revokes this authorized account and removes it from Mastra. Agents using this connection will lose access. This can’t be undone.',
+              )}
             </AlertDialog.Description>
           </AlertDialog.Header>
           {disconnectConnection.error ? (
@@ -152,7 +158,7 @@ export const ManageConnectionForm = ({
               data-testid={`${testIdPrefix}-disconnect-cancel`}
               disabled={disconnectConnection.isPending}
             >
-              Cancel
+              {studioT('Cancel')}
             </AlertDialog.Cancel>
             <Button
               icon={<Unplug />}
@@ -162,7 +168,7 @@ export const ManageConnectionForm = ({
               disabled={disabled || disconnectConnection.isPending}
               data-testid={`${testIdPrefix}-disconnect-confirm`}
             >
-              {disconnectConnection.isPending ? 'Disconnecting…' : 'Disconnect'}
+              {disconnectConnection.isPending ? studioT('Disconnecting…') : studioT('Disconnect')}
             </Button>
           </AlertDialog.Footer>
         </AlertDialog.Content>

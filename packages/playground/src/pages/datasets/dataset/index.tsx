@@ -13,6 +13,8 @@ import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedi
 import { IconSquareBehindSquare1 } from '@mastra/playground-ui/icons/central/IconSquareBehindSquare1';
 import { ExperimentsIcon } from '@mastra/playground-ui/icons/ExperimentsIcon';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useDataset, useDatasetItems } from '@mastra/react/hooks/datasets';
 import type { ReactNode } from 'react';
@@ -34,9 +36,10 @@ import { datasetCrumb, datasetVersionCrumb, navCrumb } from '@/domains/navigatio
 import type { CrumbDef } from '@/domains/navigation/crumbs';
 
 function DatasetPageShell({ crumbs, children }: { crumbs: CrumbDef[]; children?: ReactNode }) {
+  useLocale();
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Dataset</h1>
+      <h1 className="sr-only">{studioT('Dataset')}</h1>
       <div />
       <div className="flex h-full items-center justify-center">{children}</div>
     </PageLayout>
@@ -44,6 +47,7 @@ function DatasetPageShell({ crumbs, children }: { crumbs: CrumbDef[]; children?:
 }
 
 function DatasetPage() {
+  useLocale();
   const { datasetId } = useParams() as { datasetId: string };
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -98,11 +102,11 @@ function DatasetPage() {
     return (
       <DatasetPageShell crumbs={shellCrumbs}>
         <EmptyState
-          titleSlot="Dataset not found"
-          descriptionSlot={`No dataset with id "${datasetId}".`}
+          titleSlot={studioT('Dataset not found')}
+          descriptionSlot={studioT('No dataset with id "{value0}".', { value0: datasetId })}
           actionSlot={
             <Button render={<Link to="/datasets" />} icon={<IconArrowLeft />}>
-              Back to datasets
+              {studioT('Back to datasets')}
             </Button>
           }
         />
@@ -115,8 +119,10 @@ function DatasetPage() {
       <DatasetPageShell crumbs={shellCrumbs}>
         <EmptyState
           tone="error"
-          titleSlot="Failed to load dataset"
-          descriptionSlot={error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'}
+          titleSlot={studioT('Failed to load dataset')}
+          descriptionSlot={
+            error instanceof Error ? error.message : studioT('An unexpected error occurred. Please try again.')
+          }
         />
       </DatasetPageShell>
     );
@@ -142,7 +148,7 @@ function DatasetPage() {
     <>
       {hasItems && (
         <Button variant="ghost" size="sm" onClick={() => setExperimentDialogOpen(true)} icon={<IconPlusMedium />}>
-          New experiment
+          {studioT('New experiment')}
         </Button>
       )}
       {showDataActions && (
@@ -152,27 +158,27 @@ function DatasetPage() {
           render={<Link to={`/experiments?dataset=${datasetId}`} />}
           icon={<ExperimentsIcon />}
         >
-          Experiments
+          {studioT('Experiments')}
         </Button>
       )}
       <Button variant="ghost" size="sm" onClick={() => setSchemaDialogOpen(true)} icon={<IconCodeBrackets />}>
-        Schema
+        {studioT('Schema')}
       </Button>
       <DropdownMenu>
         <DropdownMenu.Trigger asChild>
-          <Button variant="ghost" size="icon-sm" aria-label="Dataset actions menu">
+          <Button variant="ghost" size="icon-sm" aria-label={studioT('Dataset actions menu')}>
             <IconDotGrid1x3Vertical />
           </Button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end" className="w-48">
           <DropdownMenu.Item onSelect={() => void navigate(`/datasets/${datasetId}/edit`)}>
-            <IconPencil /> Edit dataset
+            <IconPencil /> {' ' + studioT('Edit dataset')}
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={() => setDuplicateDialogOpen(true)}>
-            <IconSquareBehindSquare1 /> Duplicate dataset
+            <IconSquareBehindSquare1 /> {' ' + studioT('Duplicate dataset')}
           </DropdownMenu.Item>
           <DropdownMenu.Item onSelect={() => setDeleteDialogOpen(true)} variant="destructive">
-            <TrashIcon /> Delete dataset
+            <TrashIcon /> {' ' + studioT('Delete dataset')}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu>

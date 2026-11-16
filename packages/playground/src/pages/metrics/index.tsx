@@ -28,6 +28,8 @@ import {
   loadMetricsFiltersFromStorage,
   saveMetricsFiltersToStorage,
 } from '@mastra/playground-ui/domains/metrics/metrics-filters';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useAgentRunsKpiMetrics } from '@mastra/react/hooks/metrics';
 import { useEntityNames, useEnvironments, useServiceNames, useTags } from '@mastra/react/hooks/traces';
@@ -177,6 +179,7 @@ export default function Metrics() {
 
 /** Fetches and renders dashboard data only after the storage gate confirms metrics support. */
 function MetricsContent() {
+  useLocale();
   const { error } = useAgentRunsKpiMetrics(useMetricsFilters());
 
   const { isInMemory } = useObservabilityStorageCapabilities();
@@ -196,7 +199,7 @@ function MetricsContent() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={metricsCrumbs} />}>
-        <h1 className="sr-only">Metrics</h1>
+        <h1 className="sr-only">{studioT('Metrics')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -205,7 +208,7 @@ function MetricsContent() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={metricsCrumbs} />}>
-        <h1 className="sr-only">Metrics</h1>
+        <h1 className="sr-only">{studioT('Metrics')}</h1>
         <PermissionDenied variant="fill" resource="metrics" />
       </PageLayout>
     );
@@ -214,8 +217,13 @@ function MetricsContent() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={metricsCrumbs} />}>
-        <h1 className="sr-only">Metrics</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load metrics" descriptionSlot={error.message} />
+        <h1 className="sr-only">{studioT('Metrics')}</h1>
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load metrics')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -224,10 +232,11 @@ function MetricsContent() {
     <MetricsPageLayout filterFields={filterFields}>
       <div className="grid content-start gap-4">
         {isInMemory && (
-          <Notice variant="info" title="Metrics are not persisted">
+          <Notice variant="info" title={studioT('Metrics are not persisted')}>
             <Notice.Message>
-              This project uses in-memory storage for observability. Metrics will be lost on every server restart. For
-              persistent metrics, switch the observability storage to ClickHouse, DuckDB, Postgres v-next, or Spanner.
+              {studioT(
+                'This project uses in-memory storage for observability. Metrics will be lost on every server restart. For persistent metrics, switch the observability storage to ClickHouse, DuckDB, Postgres v-next, or Spanner.',
+              )}
             </Notice.Message>
           </Notice>
         )}

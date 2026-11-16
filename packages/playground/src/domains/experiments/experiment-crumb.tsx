@@ -1,5 +1,7 @@
 import { Metadata } from '@mastra/playground-ui/components/Metadata';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDatasetExperiment, useExperiment } from '@mastra/react/hooks/datasets';
 import { useParams } from 'react-router';
 import { ExperimentStatusIcon } from '@/domains/experiments/components/experiment-stats';
@@ -47,6 +49,7 @@ export function ExperimentCrumbStatusIcon() {
 
 /** Item count rendered next to the experiment name once the run settles; the page body shows an active run's progress. */
 export function ExperimentCrumbItemCount() {
+  useLocale();
   const experiment = useLiveExperiment();
   if (!experiment || experiment.status === 'running' || experiment.status === 'pending') return null;
 
@@ -57,7 +60,11 @@ export function ExperimentCrumbItemCount() {
     <Txt as="span" variant="caption" tone="muted" className="tabular-nums">
       <Metadata>
         <Metadata.Item>{count}</Metadata.Item>
-        {failedCount > 0 && <Metadata.Item>{failedCount} errored</Metadata.Item>}
+        {failedCount > 0 && (
+          <Metadata.Item>
+            {failedCount} {' ' + studioT('errored')}
+          </Metadata.Item>
+        )}
       </Metadata>
     </Txt>
   );

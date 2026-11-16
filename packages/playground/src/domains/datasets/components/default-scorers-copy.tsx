@@ -1,9 +1,10 @@
 import { ScorersIcon } from '@mastra/playground-ui/icons/ScorersIcon';
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 
 export const DEFAULT_SCORERS_LABEL = (
   <span className="flex items-center gap-1.5 [&>svg]:size-icon-sm [&>svg]:shrink-0">
     <ScorersIcon />
-    Default scorers
+    {studioT('Default scorers')}
   </span>
 );
 export const DEFAULT_SCORERS_HELPER_TEXT =

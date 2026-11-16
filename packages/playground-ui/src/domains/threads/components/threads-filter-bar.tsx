@@ -9,6 +9,7 @@ import {
 } from '../hooks/use-threads-filter-bar';
 import { FilterBar } from '@/ds/components/FilterBar';
 import { FILTER_BAR_TIME_RANGE_FIELD_ID } from '@/ds/components/FilterBar/filter-bar-time-range';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 // Items are rebuilt from tokens with `id: fieldId` (traceTokensToFilterBarItems); give the
 // draft that id so the chip survives the round trip without remounting.
@@ -43,6 +44,7 @@ export function ThreadsFilterBar({
   onFiltersChange,
   disabled,
 }: ThreadsFilterBarProps) {
+  useLocale();
   const fields = useThreadsFilterBarFields();
   const { filterBarValue, onFilterBarChange } = useThreadsFilterBar({ tokens, groups, onFiltersChange });
 
@@ -54,7 +56,7 @@ export function ThreadsFilterBar({
       onValueChange={onFilterBarChange}
       createItemId={createItemId}
       maxDepth={3}
-      aria-label="Thread filters"
+      aria-label={studioT('Thread filters')}
       className="min-w-64 flex-1"
     >
       <FilterBar.Chips
@@ -77,7 +79,7 @@ export function ThreadsFilterBar({
           )
         }
       />
-      <FilterBar.Input placeholder="Filter threads" />
+      <FilterBar.Input placeholder={studioT('Filter threads')} />
     </FilterBar>
   );
 }

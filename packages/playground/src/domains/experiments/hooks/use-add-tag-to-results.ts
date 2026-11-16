@@ -1,4 +1,6 @@
 import type { DatasetExperimentResult } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { useCallback, useState } from 'react';
@@ -14,6 +16,7 @@ type UseAddTagToResultsArgs = {
  * failures do not stop the remaining updates.
  */
 export function useAddTagToResults({ datasetId, experimentId }: UseAddTagToResultsArgs) {
+  const studioLocale = useLocale();
   const [isPending, setIsPending] = useState(false);
   const { updateExperimentResult } = useDatasetMutations();
 
@@ -43,10 +46,10 @@ export function useAddTagToResults({ datasetId, experimentId }: UseAddTagToResul
       if (added > 0) {
         toast(`Tag "${tag}" added to ${added} result${added > 1 ? 's' : ''}`);
       } else {
-        toast.error('Failed to add tag');
+        toast.error(studioT('Failed to add tag'));
       }
     },
-    [datasetId, experimentId, isPending, updateExperimentResult],
+    [datasetId, experimentId, isPending, updateExperimentResult, studioLocale],
   );
 
   return { addTag, isPending };

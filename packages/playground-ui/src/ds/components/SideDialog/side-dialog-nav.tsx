@@ -1,6 +1,8 @@
 import { Button } from '@/ds/components/Button';
 import { IconArrowDown } from '@/ds/icons/central/IconArrowDown';
 import { IconArrowUp } from '@/ds/icons/central/IconArrowUp';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SideDialogNavProps = {
@@ -10,6 +12,7 @@ export type SideDialogNavProps = {
 };
 
 export function SideDialogNav({ onNext, onPrevious, className }: SideDialogNavProps) {
+  useLocale();
   const handleOnNext = () => {
     onNext?.();
   };
@@ -23,10 +26,10 @@ export function SideDialogNav({ onNext, onPrevious, className }: SideDialogNavPr
       {(onNext || onPrevious) && (
         <div className={cn('flex items-baseline gap-3')}>
           <Button onClick={handleOnPrevious} disabled={!onPrevious} icon={<IconArrowUp />}>
-            Previous
+            {studioT('Previous')}
           </Button>
           <Button onClick={handleOnNext} disabled={!onNext} icon={<IconArrowDown />}>
-            Next
+            {studioT('Next')}
           </Button>
         </div>
       )}

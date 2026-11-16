@@ -1,5 +1,7 @@
 import type { DatasetItem } from '@mastra/client-js';
 import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useUrlSort } from '@mastra/playground-ui/sort/use-url-sort';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations, useDataset, useDatasetItems } from '@mastra/react/hooks/datasets';
@@ -29,6 +31,7 @@ export function DatasetItemsView({
   onNavigateToDataset,
   toolbarActionsSlot,
 }: DatasetItemsViewProps) {
+  useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const { activeVersion: activeDatasetVersion } = useDatasetItemsUrlState(searchParams, setSearchParams);
   const { sort, onSortChange } = useUrlSort({ searchParams, setSearchParams, allowedKeys: DATASET_ITEMS_SORT_KEYS });
@@ -102,7 +105,7 @@ export function DatasetItemsView({
 
   const handleBulkDeleteConfirm = async () => {
     await deleteItems.mutateAsync({ datasetId, itemIds: itemIdsToDelete });
-    toast.success(`Deleted ${itemIdsToDelete.length} items`);
+    toast.success(studioT('Deleted {value0} items', { value0: itemIdsToDelete.length }));
     setDeleteDialogOpen(false);
     setItemIdsToDelete([]);
     setClearSelectionTrigger(prev => prev + 1);
@@ -173,16 +176,18 @@ export function DatasetItemsView({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialog.Content>
           <AlertDialog.Header>
-            <AlertDialog.Title>Delete Items</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Delete Items')}</AlertDialog.Title>
             <AlertDialog.Description>
-              Are you sure you want to delete {itemIdsToDelete.length} item
-              {itemIdsToDelete.length !== 1 ? 's' : ''}? This action cannot be undone.
+              {studioT('Are you sure you want to delete') + ' '}
+              {itemIdsToDelete.length} {' ' + studioT('item')}
+              {itemIdsToDelete.length !== 1 ? studioT('English plural suffix') : ''}
+              {studioT('? This action cannot be undone.')}
             </AlertDialog.Description>
           </AlertDialog.Header>
           <AlertDialog.Footer>
-            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
             <AlertDialog.Action onClick={handleBulkDeleteConfirm}>
-              {deleteItems.isPending ? 'Deleting...' : 'Delete'}
+              {deleteItems.isPending ? studioT('Deleting...') : studioT('Delete')}
             </AlertDialog.Action>
           </AlertDialog.Footer>
         </AlertDialog.Content>

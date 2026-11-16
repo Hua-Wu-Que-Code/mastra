@@ -4,6 +4,8 @@ import type { DataListSort } from '@mastra/playground-ui/components/DataList';
 import { RelativeTimestamp } from '@mastra/playground-ui/components/RelativeTimestamp';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { useMemo } from 'react';
@@ -31,6 +33,7 @@ const sortAccessors = {
 const COLUMNS = 'minmax(0, 1.2fr) minmax(0, 1.4fr) minmax(0, 1fr) auto auto auto';
 
 export function SchedulesList({ schedules, isLoading, search = '', sort, onSortChange }: SchedulesListProps) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
 
   const filtered = useMemo(() => {
@@ -66,15 +69,17 @@ export function SchedulesList({ schedules, isLoading, search = '', sort, onSortC
     <DataList columns={COLUMNS} className="min-w-0" scrollRef={containerRef}>
       <DataList.Top>
         {header('target', 'Target')}
-        <DataList.TopCell>Schedule ID</DataList.TopCell>
-        <DataList.TopCell>Cron</DataList.TopCell>
+        <DataList.TopCell>{studioT('Schedule ID')}</DataList.TopCell>
+        <DataList.TopCell>{studioT('Cron')}</DataList.TopCell>
         {header('status', 'Status')}
         {header('nextFireAt', 'Next fire')}
         {header('lastFireAt', 'Last run')}
       </DataList.Top>
 
-      {filtered.length === 0 && search ? <DataList.NoMatch message="No schedules match your search" /> : null}
-      {filtered.length === 0 && !search ? <DataList.NoMatch message="No schedules configured" /> : null}
+      {filtered.length === 0 && search ? (
+        <DataList.NoMatch message={studioT('No schedules match your search')} />
+      ) : null}
+      {filtered.length === 0 && !search ? <DataList.NoMatch message={studioT('No schedules configured')} /> : null}
 
       {filtered.map((s, index) => (
         <DataList.RowLink key={s.id} to={paths.scheduleLink(s.id)} LinkComponent={Link} {...getRowProps(index)}>
@@ -87,7 +92,7 @@ export function SchedulesList({ schedules, isLoading, search = '', sort, onSortC
           <DataList.Cell>
             <span className="inline-flex items-center gap-2 whitespace-nowrap">
               <Txt as="span" variant="caption" font="mono">
-                {s.cron ?? (s.runAt ? `once @ ${new Date(s.runAt).toLocaleString()}` : '—')}
+                {s.cron ?? (s.runAt ? studioT('once @ {value0}', { value0: new Date(s.runAt).toLocaleString() }) : '—')}
               </Txt>
               {s.timezone ? (
                 <Txt as="span" variant="meta" tone="muted">
@@ -113,7 +118,7 @@ export function SchedulesList({ schedules, isLoading, search = '', sort, onSortC
             ) : s.lastFireAt ? (
               <RelativeTimestamp value={s.lastFireAt} />
             ) : (
-              <span className="text-muted-foreground">Never</span>
+              <span className="text-muted-foreground">{studioT('Never')}</span>
             )}
           </DataList.Cell>
         </DataList.RowLink>

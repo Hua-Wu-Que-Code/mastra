@@ -15,6 +15,10 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { useState } from 'react';
@@ -90,6 +94,7 @@ export function CreateDatasetFromItemsDialog({
   items,
   onSuccess,
 }: CreateDatasetFromItemsDialogProps) {
+  useLocale();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -100,7 +105,7 @@ export function CreateDatasetFromItemsDialog({
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error('Dataset name is required');
+      toast.error(studioT('Dataset name is required'));
       return;
     }
 
@@ -127,7 +132,7 @@ export function CreateDatasetFromItemsDialog({
         setProgress(i + 1);
       }
 
-      toast.success(`Dataset created with ${items.length} items`);
+      toast.success(studioT('Dataset created with {value0} items', { value0: items.length }));
 
       setName('');
       setDescription('');
@@ -137,7 +142,11 @@ export function CreateDatasetFromItemsDialog({
 
       onSuccess?.(dataset.id);
     } catch (error) {
-      toast.error(`Failed to create dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to create dataset: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
       setIsCreating(false);
       setProgress(0);
     }
@@ -149,34 +158,37 @@ export function CreateDatasetFromItemsDialog({
     <Dialog open={open} onOpenChange={onOpenChange} pending={isCreating}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Dataset from Items</DialogTitle>
+          <DialogTitle>{studioT('Create Dataset from Items')}</DialogTitle>
         </DialogHeader>
         <Form onSubmit={handleSubmit}>
           <DialogBody>
             <Field>
-              <FieldLabel required>Name</FieldLabel>
+              <FieldLabel required>{studioT('Name')}</FieldLabel>
               <Input
                 required
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Enter dataset name"
+                placeholder={studioT('Enter dataset name')}
                 autoFocus
                 disabled={isCreating}
               />
             </Field>
 
             <Field>
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>{studioT('Description')}</FieldLabel>
               <Input
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Enter dataset description (optional)"
+                placeholder={studioT('Enter dataset description (optional)')}
                 disabled={isCreating}
               />
             </Field>
 
             <Txt tone="muted">
-              {items.length} item{items.length !== 1 ? 's' : ''} will be copied to the new dataset
+              <Trans
+                id="{part0} item {part1} will be copied to the new dataset"
+                values={{ part0: items.length, part1: items.length !== 1 ? studioT('English plural suffix') : '' }}
+              />
             </Txt>
 
             {isCreating && (
@@ -188,7 +200,7 @@ export function CreateDatasetFromItemsDialog({
                   />
                 </div>
                 <Txt tone="muted">
-                  Copying items: {progress} / {items.length}
+                  <Trans id="Copying items: {part0} / {part1}" values={{ part0: progress, part1: items.length }} />
                 </Txt>
               </div>
             )}
@@ -200,10 +212,12 @@ export function CreateDatasetFromItemsDialog({
                 setDescription('');
               }}
             >
-              Cancel
+              {studioT('Cancel')}
             </DialogCancel>
             <DialogAction type="submit" disabled={!name.trim()}>
-              {isCreating ? `Creating... (${progress}/${items.length})` : 'Create dataset'}
+              {isCreating
+                ? studioT('Creating... ({value0}/{value1})', { value0: progress, value1: items.length })
+                : studioT('Create dataset')}
             </DialogAction>
           </DialogFooter>
         </Form>

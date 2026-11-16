@@ -2,6 +2,8 @@ import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useStoredPromptBlockMutations } from '@mastra/react/hooks/prompt-blocks';
 import { useState } from 'react';
@@ -13,6 +15,7 @@ interface DeletePromptBlockActionProps {
 }
 
 export function DeletePromptBlockAction({ blockId, blockName, disabled = false }: DeletePromptBlockActionProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const { navigate, paths } = useLinkComponent();
   const { deleteStoredPromptBlock } = useStoredPromptBlockMutations({ blockId: blockId });
@@ -22,11 +25,11 @@ export function DeletePromptBlockAction({ blockId, blockName, disabled = false }
   const confirm = async () => {
     try {
       await deleteStoredPromptBlock.mutateAsync();
-      toast.success('Prompt block deleted');
+      toast.success(studioT('Prompt block deleted'));
       setOpen(false);
       navigate(paths.promptBlocksLink());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete prompt block');
+      toast.error(err instanceof Error ? err.message : studioT('Failed to delete prompt block'));
     }
   };
 
@@ -40,19 +43,21 @@ export function DeletePromptBlockAction({ blockId, blockName, disabled = false }
         size="sm"
       >
         <TrashIcon />
-        Delete
+        {studioT('Delete')}
       </Button>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialog.Content data-testid="prompt-block-delete-dialog">
           <AlertDialog.Header>
-            <AlertDialog.Title>Delete prompt block?</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Delete prompt block?')}</AlertDialog.Title>
             <AlertDialog.Description>
-              This permanently deletes &quot;{blockName}&quot;. This cannot be undone.
+              {studioT('This permanently deletes "')}
+              {blockName}
+              {studioT('". This cannot be undone.')}
             </AlertDialog.Description>
           </AlertDialog.Header>
           <AlertDialog.Footer>
             <AlertDialog.Cancel data-testid="prompt-block-delete-cancel" disabled={isPending}>
-              Cancel
+              {studioT('Cancel')}
             </AlertDialog.Cancel>
             <Button
               variant="primary"
@@ -64,7 +69,7 @@ export function DeletePromptBlockAction({ blockId, blockName, disabled = false }
                 void confirm();
               }}
             >
-              {isPending ? 'Deleting…' : 'Delete prompt block'}
+              {isPending ? studioT('Deleting…') : studioT('Delete prompt block')}
             </Button>
           </AlertDialog.Footer>
         </AlertDialog.Content>

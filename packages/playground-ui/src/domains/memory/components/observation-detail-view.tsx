@@ -8,6 +8,8 @@ import { cn } from '../../../lib/utils';
 import { observationPriorityByEmoji, observationPriorityTone } from '../lib/observation-priority';
 import type { ObservationPriority } from '../lib/observation-priority';
 import type { OMHistoryRecord } from '../types';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate } from '@/utils/date-format';
 
 const CodeDiff = lazy(() => import('../../../ds/components/CodeDiff').then(({ CodeDiff }) => ({ default: CodeDiff })));
@@ -137,7 +139,13 @@ function parseObservations(raw: string): ParsedSection[] {
       }
     }
     if (!current) {
-      current = { title: 'Recent', relativeTime: null, items: [] };
+      current = {
+        get title() {
+          return studioT('Recent');
+        },
+        relativeTime: null,
+        items: [],
+      };
       sections.push(current);
     }
     const indent = line.match(/^(\s*)/)?.[1]?.length ?? 0;
@@ -186,11 +194,12 @@ function ObservationItems({ items, nested = false }: { items: ParsedItem[]; nest
 }
 
 function ObservationContent({ observations }: { observations: string }) {
+  useLocale();
   const sections = useMemo(() => parseObservations(observations), [observations]);
   if (sections.length === 0) {
     return (
       <Txt variant="caption" tone="muted" className="italic">
-        Initialized
+        {studioT('Initialized')}
       </Txt>
     );
   }
@@ -226,12 +235,13 @@ function ObservationHistoryPanel({
   selectedRecordId: string | null;
   onSelectRecord: (id: string | null) => void;
 }) {
+  useLocale();
   if (records.length <= 1) return null;
 
   return (
     <div className="flex w-50 min-w-45 flex-col overflow-hidden border-l border-border">
       <div className="border-b border-border px-4 py-2">
-        <Txt tone="ink">History</Txt>
+        <Txt tone="ink">{studioT('History')}</Txt>
       </div>
       <div className="flex-1 overflow-y-auto">
         {records.map(record => {
@@ -250,7 +260,7 @@ function ObservationHistoryPanel({
               <Txt as="span" variant="caption" className="block">
                 {record.activeObservations || (
                   <span className="text-muted-foreground italic">
-                    {record.isObserving || record.isReflecting ? 'Processing\u2026' : 'Initialized'}
+                    {record.isObserving || record.isReflecting ? studioT('Processing…') : studioT('Initialized')}
                   </span>
                 )}
               </Txt>
@@ -275,6 +285,7 @@ export function ObservationDetailView({
   onSelectRecord,
   isLoading,
 }: ObservationDetailViewProps) {
+  useLocale();
   const [showDiff, setShowDiff] = useState(false);
 
   const sorted = useMemo(
@@ -306,8 +317,8 @@ export function ObservationDetailView({
   if (!selected) {
     return (
       <EmptyState
-        titleSlot="No observations"
-        descriptionSlot="No observational memory snapshots available for this thread."
+        titleSlot={studioT('No observations')}
+        descriptionSlot={studioT('No observational memory snapshots available for this thread.')}
         variant="fill"
       />
     );
@@ -323,7 +334,7 @@ export function ObservationDetailView({
             <div className="flex items-start justify-end gap-3">
               <Field orientation="horizontal" className="gap-1.5">
                 <Checkbox checked={showDiff} onCheckedChange={v => setShowDiff(v === true)} />
-                <FieldLabel size="smaller">Show diff</FieldLabel>
+                <FieldLabel size="smaller">{studioT('Show diff')}</FieldLabel>
               </Field>
             </div>
           </div>
@@ -344,7 +355,7 @@ export function ObservationDetailView({
             <ObservationContent observations={activeObservations} />
           ) : (
             <Txt variant="caption" tone="muted" className="italic">
-              {selected.isObserving || selected.isReflecting ? 'Processing…' : 'Initialized'}
+              {selected.isObserving || selected.isReflecting ? studioT('Processing…') : studioT('Initialized')}
             </Txt>
           )}
         </div>

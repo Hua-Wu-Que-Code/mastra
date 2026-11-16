@@ -1,6 +1,10 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -20,6 +24,7 @@ export function AgentVersionPanel({
   onVersionSelect,
   activeVersionId,
 }: AgentVersionPanelProps) {
+  useLocale();
   const { data, isLoading } = useAgentVersions({
     agentId,
     params: { orderBy: { direction: 'DESC' } },
@@ -35,7 +40,7 @@ export function AgentVersionPanel({
     <div className="flex h-full flex-col">
       <div className="border-b border-border px-3 py-3">
         <Txt variant="column" tone="ink">
-          Version history
+          {studioT('Version history')}
         </Txt>
       </div>
 
@@ -43,7 +48,7 @@ export function AgentVersionPanel({
         {isLoading ? (
           <div className="px-3 py-4">
             <Txt variant="meta" tone="faint">
-              Loading versions...
+              {studioT('Loading versions...')}
             </Txt>
           </div>
         ) : (
@@ -70,10 +75,10 @@ export function AgentVersionPanel({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <Txt variant="caption" className="text-inherit">
-                        v{version.versionNumber}
+                        <Trans id="v {part0}" values={{ part0: version.versionNumber }} />
                       </Txt>
-                      {isPublished && <Badge variant="success">Published</Badge>}
-                      {isDraft && <Badge variant="info">Draft</Badge>}
+                      {isPublished && <Badge variant="success">{studioT('Published')}</Badge>}
+                      {isDraft && <Badge variant="info">{studioT('Draft')}</Badge>}
                     </div>
                     <Txt variant="meta" tone="faint" className="mt-0.5">
                       {formatDate(version.createdAt, 'date-time') ?? ''}

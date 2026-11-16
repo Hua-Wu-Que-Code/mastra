@@ -1,6 +1,8 @@
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useSchedules } from '@mastra/react/hooks/schedules';
 import { useParams } from 'react-router';
@@ -11,6 +13,7 @@ import { SchedulesPage as SchedulesPageContent } from '@/domains/schedules/compo
  * for the graph canvas), so this page brings its own padded `PageLayout` body like `TracesPage` does.
  */
 function WorkflowSchedules() {
+  useLocale();
   const { workflowId } = useParams();
   const { error } = useSchedules(workflowId ? { workflowId } : {});
 
@@ -31,7 +34,7 @@ function WorkflowSchedules() {
 
   return (
     <PageLayout>
-      <h1 className="sr-only">Schedules</h1>
+      <h1 className="sr-only">{studioT('Schedules')}</h1>
       {content}
     </PageLayout>
   );

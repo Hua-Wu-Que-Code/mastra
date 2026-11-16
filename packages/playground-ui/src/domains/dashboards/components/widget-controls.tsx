@@ -16,6 +16,8 @@ import { MetricsCard, onCardHover } from '@/ds/components/MetricsCard';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { IconBell2 } from '@/ds/icons/central/IconBell2';
 import { IconExpand45 } from '@/ds/icons/central/IconExpand45';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -60,6 +62,7 @@ export function AlertMenu({
   label: string;
   LinkComponent: DashboardAlert['LinkComponent'];
 }) {
+  useLocale();
   const links = entries.filter(isLink);
   const [only] = entries;
   if (!only) return null;
@@ -72,7 +75,13 @@ export function AlertMenu({
   }
   const [link] = links;
   if (links.length === 1 && link) {
-    return <AlertAction action={link.action} label={`Create alert from ${link.label}`} LinkComponent={LinkComponent} />;
+    return (
+      <AlertAction
+        action={link.action}
+        label={studioT('Create alert from {value0}', { value0: link.label })}
+        LinkComponent={LinkComponent}
+      />
+    );
   }
   return (
     <DropdownMenu>
@@ -80,7 +89,7 @@ export function AlertMenu({
         <IconBell2 />
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end" className="max-w-80">
-        <DropdownMenu.Label>Create alert from</DropdownMenu.Label>
+        <DropdownMenu.Label>{studioT('Create alert from')}</DropdownMenu.Label>
         {entries.map((entry, i) =>
           'href' in entry.action ? (
             <DropdownMenu.LinkItem key={i} render={<LinkComponent href={entry.action.href} />}>
@@ -141,8 +150,13 @@ export function ExpandAction({
   href: string;
   LinkComponent: DashboardExpand['LinkComponent'];
 }) {
+  useLocale();
   return (
-    <MetricsCard.Action label={`Expand ${title}`} className={onCardHover} render={<LinkComponent href={href} />}>
+    <MetricsCard.Action
+      label={studioT('Expand {value0}', { value0: title })}
+      className={onCardHover}
+      render={<LinkComponent href={href} />}
+    >
       <IconExpand45 />
     </MetricsCard.Action>
   );

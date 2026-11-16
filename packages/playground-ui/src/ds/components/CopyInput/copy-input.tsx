@@ -1,6 +1,7 @@
 import { CopyButton } from '../CopyButton';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../InputGroup';
 import type { InputGroupInputProps } from '../InputGroup';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type CopyInputProps = Omit<
   InputGroupInputProps,
@@ -13,11 +14,17 @@ export type CopyInputProps = Omit<
 
 /** A read-only value people copy, like an ID or a URL: shown in an input so it reads and selects like one. */
 export function CopyInput({ value, label, className, disabled, ...props }: CopyInputProps) {
+  useLocale();
   return (
     <InputGroup className={className}>
       <InputGroupInput {...props} aria-label={label} value={value} readOnly spellCheck={false} disabled={disabled} />
       <InputGroupAddon align="inline-end">
-        <CopyButton content={value} tooltip={`Copy ${label}`} variant="ghost" disabled={disabled} />
+        <CopyButton
+          content={value}
+          tooltip={studioT('Copy {value0}', { value0: label })}
+          variant="ghost"
+          disabled={disabled}
+        />
       </InputGroupAddon>
     </InputGroup>
   );

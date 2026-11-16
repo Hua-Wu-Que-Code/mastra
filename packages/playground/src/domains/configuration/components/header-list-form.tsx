@@ -4,6 +4,7 @@ import { Input } from '@mastra/playground-ui/components/Input';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export type HeaderListFormItem = {
   /** A stable key for the row; without it rows are keyed by position, so removing one shifts the inputs below it. */
@@ -19,10 +20,11 @@ export interface HeaderListFormProps {
 }
 
 export const HeaderListForm = ({ headers, onAddHeader, onRemoveHeader }: HeaderListFormProps) => {
+  useLocale();
   return (
     <div className="space-y-4">
       <Txt as="h2" variant="body" tone="ink">
-        Headers
+        {studioT('Headers')}
       </Txt>
 
       <div className="space-y-6">
@@ -37,14 +39,14 @@ export const HeaderListForm = ({ headers, onAddHeader, onRemoveHeader }: HeaderL
         )}
 
         <div className="flex items-center justify-between gap-2">
-          {headers.length === 0 && <Txt tone="muted">No header yet</Txt>}
+          {headers.length === 0 && <Txt tone="muted">{studioT('No header yet')}</Txt>}
           <Button
             type="button"
             onClick={() => onAddHeader({ name: '', value: '' })}
             size={headers.length === 0 ? 'md' : 'sm'}
             icon={<IconPlusMedium />}
           >
-            {headers.length === 0 ? 'Add header' : 'Add another header'}
+            {headers.length === 0 ? studioT('Add header') : studioT('Add another header')}
           </Button>
         </div>
       </div>
@@ -58,33 +60,46 @@ interface HeaderListFormItemProps {
   onRemove: () => void;
 }
 
-const HeaderListFormItem = ({ index, header, onRemove }: HeaderListFormItemProps) => (
-  <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4">
-    <Field className="row-span-3 grid-rows-subgrid gap-y-0">
-      <FieldLabel required className="mb-2">
-        Name
-      </FieldLabel>
-      <Input name={`headers.${index}.name`} placeholder="e.g. Authorization" required defaultValue={header.name} />
-      <FieldError className="mt-1" />
-    </Field>
+const HeaderListFormItem = ({ index, header, onRemove }: HeaderListFormItemProps) => {
+  useLocale();
+  return (
+    <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4">
+      <Field className="row-span-3 grid-rows-subgrid gap-y-0">
+        <FieldLabel required className="mb-2">
+          {studioT('Name')}
+        </FieldLabel>
+        <Input
+          name={`headers.${index}.name`}
+          placeholder={studioT('e.g. Authorization')}
+          required
+          defaultValue={header.name}
+        />
+        <FieldError className="mt-1" />
+      </Field>
 
-    <Field className="row-span-3 grid-rows-subgrid gap-y-0">
-      <FieldLabel required className="mb-2">
-        Value
-      </FieldLabel>
-      <Input name={`headers.${index}.value`} placeholder="e.g. Bearer <token>" required defaultValue={header.value} />
-      <FieldError className="mt-1" />
-    </Field>
+      <Field className="row-span-3 grid-rows-subgrid gap-y-0">
+        <FieldLabel required className="mb-2">
+          {studioT('Value')}
+        </FieldLabel>
+        <Input
+          name={`headers.${index}.value`}
+          placeholder={studioT('e.g. Bearer <token>')}
+          required
+          defaultValue={header.value}
+        />
+        <FieldError className="mt-1" />
+      </Field>
 
-    <Button
-      size="icon-md"
-      type="button"
-      onClick={onRemove}
-      aria-label="Remove header"
-      tooltip="Remove header"
-      className="col-start-3 row-start-2"
-    >
-      <TrashIcon />
-    </Button>
-  </div>
-);
+      <Button
+        size="icon-md"
+        type="button"
+        onClick={onRemove}
+        aria-label={studioT('Remove header')}
+        tooltip={studioT('Remove header')}
+        className="col-start-3 row-start-2"
+      >
+        <TrashIcon />
+      </Button>
+    </div>
+  );
+};

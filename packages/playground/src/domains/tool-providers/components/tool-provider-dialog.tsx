@@ -1,6 +1,8 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { SideDialog } from '@mastra/playground-ui/components/SideDialog';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { SelectedToolList } from './selected-tool-list';
@@ -15,6 +17,7 @@ interface ToolProviderDialogProps {
 }
 
 export function ToolProviderDialog({ provider, onClose, selectedToolIds, onSubmit }: ToolProviderDialogProps) {
+  useLocale();
   const [selectedToolkit, setSelectedToolkit] = useState<string | undefined>(undefined);
   const [localSelection, setLocalSelection] = useState<Map<string, string>>(new Map());
 
@@ -66,14 +69,19 @@ export function ToolProviderDialog({ provider, onClose, selectedToolIds, onSubmi
       isOpen={!!provider}
       onClose={onClose}
       dialogTitle={provider?.name ?? ''}
-      dialogDescription={provider?.description ?? 'Browse tools from this provider'}
+      dialogDescription={provider?.description ?? studioT('Browse tools from this provider')}
       level={1}
     >
       <SideDialog.Header className="px-9 pt-4">
         <SideDialog.Heading>{provider?.name}</SideDialog.Heading>
         {onSubmit && (
           <Button icon={<ToolsIcon />} variant="primary" size="sm" onClick={handleSubmit}>
-            {selectionCount > 0 ? `Add ${selectionCount} tool${selectionCount !== 1 ? 's' : ''}` : 'Add tools'}
+            {selectionCount > 0
+              ? studioT('Add {value0} tool{value1}', {
+                  value0: selectionCount,
+                  value1: selectionCount !== 1 ? studioT('English plural suffix') : '',
+                })
+              : studioT('Add tools')}
           </Button>
         )}
       </SideDialog.Header>

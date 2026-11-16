@@ -7,6 +7,8 @@ import { TracesErrorContent } from '@/domains/traces/components/traces-error-con
 import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { IconCodeTree } from '@/ds/icons/central/IconCodeTree';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export interface TraceThreadItemViewProps {
@@ -17,6 +19,7 @@ export interface TraceThreadItemViewProps {
 }
 
 export function TraceThreadItemView({ traceId, onHighlightSpans, className }: TraceThreadItemViewProps) {
+  useLocale();
   const { data, isLoading, error } = useTraceSpans({
     traceId: traceId,
     passive: true,
@@ -28,7 +31,7 @@ export function TraceThreadItemView({ traceId, onHighlightSpans, className }: Tr
   if (error) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <TracesErrorContent error={error} resource="trace" errorTitle="Failed to load partial thread" />
+        <TracesErrorContent error={error} resource="trace" errorTitle={studioT('Failed to load partial thread')} />
       </div>
     );
   }
@@ -39,7 +42,7 @@ export function TraceThreadItemView({ traceId, onHighlightSpans, className }: Tr
     return (
       <div className="flex h-full items-center justify-center p-4">
         <Txt variant="body" tone="muted">
-          No agent turn found for this trace.
+          {studioT('No agent turn found for this trace.')}
         </Txt>
       </div>
     );
@@ -56,8 +59,8 @@ export function TraceThreadItemView({ traceId, onHighlightSpans, className }: Tr
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  tooltip="Highlight spans"
-                  aria-label="Highlight spans"
+                  tooltip={studioT('Highlight spans')}
+                  aria-label={studioT('Highlight spans')}
                   onClick={() => onHighlightSpans(message.traceSpanIds)}
                 >
                   <IconCodeTree />

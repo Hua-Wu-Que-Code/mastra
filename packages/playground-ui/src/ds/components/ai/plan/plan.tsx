@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-
 import { Badge } from '@/ds/components/Badge';
 import { Button } from '@/ds/components/Button';
+
 import { CollapsibleBox, DEFAULT_COLLAPSED_HEIGHT, useCollapsibleBox } from '@/ds/components/CollapsibleBox';
 import type { CollapsibleBoxState } from '@/ds/components/CollapsibleBox';
 import { MarkdownRenderer } from '@/ds/components/MarkdownRenderer';
@@ -14,6 +14,8 @@ import { IconMinimize45 } from '@/ds/icons/central/IconMinimize45';
 import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSquare1';
 import { Icon } from '@/ds/icons/Icon';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const PlanContext = createContext<CollapsibleBoxState | null>(null);
@@ -101,6 +103,7 @@ export interface PlanCopyButtonProps extends Omit<
 }
 
 export function PlanCopyButton({ content, ...props }: PlanCopyButtonProps) {
+  useLocale();
   const { isCopied, handleCopy } = useCopyToClipboard({
     text: content,
     copiedDuration: 1500,
@@ -113,8 +116,8 @@ export function PlanCopyButton({ content, ...props }: PlanCopyButtonProps) {
       type="button"
       variant="ghost"
       size="icon-sm"
-      tooltip="Copy plan"
-      aria-label="Copy plan"
+      tooltip={studioT('Copy plan')}
+      aria-label={studioT('Copy plan')}
       onClick={handleCopy}
     >
       {isCopied ? <IconCheckmark2Medium /> : <IconSquareBehindSquare1 />}
@@ -213,10 +216,11 @@ export interface PlanFileProps extends Omit<ComponentProps<'div'>, 'children'> {
 }
 
 export function PlanFile({ children, className, ...props }: PlanFileProps) {
+  useLocale();
   return (
     <div data-slot="plan-file" className={className} {...props}>
       <Txt as="p" variant="meta" tone="muted" className="mb-2">
-        Plan file
+        {studioT('Plan file')}
       </Txt>
       <Txt as="p" variant="caption" tone="ink" font="mono" className="break-all">
         {children}
@@ -261,6 +265,7 @@ export type PlanExpandButtonProps = Omit<
 >;
 
 export function PlanExpandButton({ className, variant = 'default', ...props }: PlanExpandButtonProps) {
+  useLocale();
   const { isExpanded, isClipped, toggleExpanded } = usePlanContext();
 
   // Nothing to expand: the collapsed card already shows the whole plan.
@@ -273,11 +278,11 @@ export function PlanExpandButton({ className, variant = 'default', ...props }: P
       type="button"
       variant={variant}
       size="sm"
-      aria-label={isExpanded ? 'Collapse plan' : 'Expand plan'}
+      aria-label={isExpanded ? studioT('Collapse plan') : studioT('Expand plan')}
       onClick={toggleExpanded}
       icon={isExpanded ? <IconMinimize45 /> : <IconExpand45 />}
     >
-      {isExpanded ? 'Collapse plan' : 'Expand plan'}
+      {isExpanded ? studioT('Collapse plan') : studioT('Expand plan')}
     </Button>
   );
 }

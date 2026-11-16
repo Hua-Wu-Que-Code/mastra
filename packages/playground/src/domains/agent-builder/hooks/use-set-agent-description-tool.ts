@@ -1,4 +1,6 @@
 import { createTool } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { z } from 'zod-v4';
@@ -8,14 +10,16 @@ import type { AgentBuilderEditFormValues } from '@/domains/agent-builder/schemas
 export const SET_AGENT_DESCRIPTION_TOOL_NAME = 'set-agent-description';
 
 export function useSetAgentDescriptionTool() {
+  const studioLocale = useLocale();
   const formMethods = useFormContext<AgentBuilderEditFormValues>();
 
   return useMemo(
     () =>
       createTool({
         id: SET_AGENT_DESCRIPTION_TOOL_NAME,
-        description:
+        description: studioT(
           'Set the agent description. Use this for a short, human-readable summary of what this agent does. Shown to users when browsing agents. Keep it concise (one sentence).',
+        ),
         inputSchema: z.object({
           description: z
             .string()
@@ -31,6 +35,6 @@ export function useSetAgentDescriptionTool() {
           return { success: true };
         },
       }),
-    [formMethods],
+    [formMethods, studioLocale],
   );
 }

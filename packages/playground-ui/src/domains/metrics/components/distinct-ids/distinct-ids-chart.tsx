@@ -14,13 +14,42 @@ import { ChartCardError } from '../chart-card-error';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import { MetricsLineChart, MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
+import { t as studioT } from '@/lib/i18n';
 
 /** Most apps set resource and thread ids (through memory); few set user and session ids. */
 const IDS = [
-  { measure: 'countDistinct.resourceId', dataKey: 'resources', label: 'Resources', color: CHART_COLORS.sky },
-  { measure: 'countDistinct.threadId', dataKey: 'threads', label: 'Threads', color: CHART_COLORS.green },
-  { measure: 'countDistinct.userId', dataKey: 'users', label: 'Users', color: CHART_COLORS.violet },
-  { measure: 'countDistinct.sessionId', dataKey: 'sessions', label: 'Sessions', color: CHART_COLORS.teal },
+  {
+    measure: 'countDistinct.resourceId',
+    dataKey: 'resources',
+    get label() {
+      return studioT('Resources');
+    },
+    color: CHART_COLORS.sky,
+  },
+  {
+    measure: 'countDistinct.threadId',
+    dataKey: 'threads',
+    get label() {
+      return studioT('Threads');
+    },
+    color: CHART_COLORS.green,
+  },
+  {
+    measure: 'countDistinct.userId',
+    dataKey: 'users',
+    get label() {
+      return studioT('Users');
+    },
+    color: CHART_COLORS.violet,
+  },
+  {
+    measure: 'countDistinct.sessionId',
+    dataKey: 'sessions',
+    get label() {
+      return studioT('Sessions');
+    },
+    color: CHART_COLORS.teal,
+  },
 ] as const;
 
 type Id = (typeof IDS)[number];

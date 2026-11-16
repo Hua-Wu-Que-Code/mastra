@@ -1,3 +1,5 @@
+import { t as studioT } from '@/lib/i18n';
+
 /**
  * Story-only fixtures: one day of edge traffic in hourly buckets, shaped like the Requests
  * page data. Deterministic (no Math.random) so stories and visual diffs stay stable.
@@ -87,24 +89,86 @@ const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFracti
 export const count = (value: number) => compact.format(value);
 
 export const statusSeries = [
-  { dataKey: '2xx', label: '2xx', color: 'var(--chart-green)' },
-  { dataKey: '3xx', label: '3xx', color: 'var(--chart-blue)' },
-  { dataKey: '4xx', label: '4xx', color: 'var(--chart-amber)' },
-  { dataKey: '5xx', label: '5xx', color: 'var(--chart-red)' },
+  {
+    dataKey: '2xx',
+    get label() {
+      return studioT('2xx');
+    },
+    color: 'var(--chart-green)',
+  },
+  {
+    dataKey: '3xx',
+    get label() {
+      return studioT('3xx');
+    },
+    color: 'var(--chart-blue)',
+  },
+  {
+    dataKey: '4xx',
+    get label() {
+      return studioT('4xx');
+    },
+    color: 'var(--chart-amber)',
+  },
+  {
+    dataKey: '5xx',
+    get label() {
+      return studioT('5xx');
+    },
+    color: 'var(--chart-red)',
+  },
 ];
 
 export const percentileSeries = [
-  { dataKey: 'p50', label: 'P50', color: 'var(--chart-sequential-1)' },
-  { dataKey: 'p95', label: 'P95', color: 'var(--chart-sequential-3)' },
-  { dataKey: 'p99', label: 'P99', color: 'var(--chart-sequential-5)' },
+  {
+    dataKey: 'p50',
+    get label() {
+      return studioT('P50');
+    },
+    color: 'var(--chart-sequential-1)',
+  },
+  {
+    dataKey: 'p95',
+    get label() {
+      return studioT('P95');
+    },
+    color: 'var(--chart-sequential-3)',
+  },
+  {
+    dataKey: 'p99',
+    get label() {
+      return studioT('P99');
+    },
+    color: 'var(--chart-sequential-5)',
+  },
 ];
 
 export const errorRateSeries = [
-  { dataKey: 'errorRate', label: '5xx rate', color: 'var(--chart-red)' },
-  { dataKey: 'clientErrorRate', label: '4xx rate', color: 'var(--chart-amber)' },
+  {
+    dataKey: 'errorRate',
+    get label() {
+      return studioT('5xx rate');
+    },
+    color: 'var(--chart-red)',
+  },
+  {
+    dataKey: 'clientErrorRate',
+    get label() {
+      return studioT('4xx rate');
+    },
+    color: 'var(--chart-amber)',
+  },
 ];
 
-export const coldStartSeries = [{ dataKey: 'coldStarts', label: 'Cold starts', color: 'var(--chart-cyan)' }];
+export const coldStartSeries = [
+  {
+    dataKey: 'coldStarts',
+    get label() {
+      return studioT('Cold starts');
+    },
+    color: 'var(--chart-cyan)',
+  },
+];
 
 export const routes = [
   { method: 'POST', path: '/api/agents/:id/stream', requests: 16_400, errorRate: 0.0075, p95: 6490 },
@@ -117,8 +181,22 @@ export const routes = [
 
 /** Volume against the previous period: solid emphasis line, dashed comparison. */
 export const requestsVsPreviousSeries = [
-  { dataKey: 'total', label: 'Requests', color: 'var(--chart-blue)', emphasis: true },
-  { dataKey: 'prevTotal', label: 'Previous period', color: 'var(--gray-8)', dashed: true },
+  {
+    dataKey: 'total',
+    get label() {
+      return studioT('Requests');
+    },
+    color: 'var(--chart-blue)',
+    emphasis: true,
+  },
+  {
+    dataKey: 'prevTotal',
+    get label() {
+      return studioT('Previous period');
+    },
+    color: 'var(--gray-8)',
+    dashed: true,
+  },
 ];
 
 /** Hourly timestamps of the window (ms), for building other hourly fixtures on the same grid. */
@@ -227,50 +305,236 @@ export const usd = (value: number) => (value < 0.01 && value > 0 ? '<$0.01' : `$
 export const traceVolume: Record<'agents' | 'workflows' | 'tools', { label: string; runs: number; errors: number }[]> =
   {
     agents: [
-      { label: 'Code Agent', runs: 102, errors: 6 },
-      { label: 'Observer', runs: 22, errors: 1 },
-      { label: 'Research Supervisor', runs: 14, errors: 2 },
-      { label: 'Billing Agent', runs: 6, errors: 0 },
-      { label: 'Content Moderation Assistant', runs: 3, errors: 0 },
+      {
+        get label() {
+          return studioT('Code Agent');
+        },
+        runs: 102,
+        errors: 6,
+      },
+      {
+        get label() {
+          return studioT('Observer');
+        },
+        runs: 22,
+        errors: 1,
+      },
+      {
+        get label() {
+          return studioT('Research Supervisor');
+        },
+        runs: 14,
+        errors: 2,
+      },
+      {
+        get label() {
+          return studioT('Billing Agent');
+        },
+        runs: 6,
+        errors: 0,
+      },
+      {
+        get label() {
+          return studioT('Content Moderation Assistant');
+        },
+        runs: 3,
+        errors: 0,
+      },
     ],
     workflows: [
-      { label: 'release-notes', runs: 15, errors: 1 },
-      { label: 'document-ingest', runs: 9, errors: 0 },
-      { label: 'weekly-report', runs: 6, errors: 2 },
+      {
+        get label() {
+          return studioT('release-notes');
+        },
+        runs: 15,
+        errors: 1,
+      },
+      {
+        get label() {
+          return studioT('document-ingest');
+        },
+        runs: 9,
+        errors: 0,
+      },
+      {
+        get label() {
+          return studioT('weekly-report');
+        },
+        runs: 6,
+        errors: 2,
+      },
     ],
     tools: [
-      { label: 'search_docs', runs: 415, errors: 3 },
-      { label: 'read_file', runs: 388, errors: 0 },
-      { label: 'run_command', runs: 221, errors: 17 },
-      { label: 'fetch_url', runs: 104, errors: 8 },
-      { label: 'create_issue', runs: 11, errors: 0 },
-      { label: 'list_dir', runs: 64, errors: 0 },
-      { label: 'write_file', runs: 42, errors: 1 },
-      { label: 'send_email', runs: 20, errors: 2 },
-      { label: 'query_db', runs: 9, errors: 0 },
+      {
+        get label() {
+          return studioT('search_docs');
+        },
+        runs: 415,
+        errors: 3,
+      },
+      {
+        get label() {
+          return studioT('read_file');
+        },
+        runs: 388,
+        errors: 0,
+      },
+      {
+        get label() {
+          return studioT('run_command');
+        },
+        runs: 221,
+        errors: 17,
+      },
+      {
+        get label() {
+          return studioT('fetch_url');
+        },
+        runs: 104,
+        errors: 8,
+      },
+      {
+        get label() {
+          return studioT('create_issue');
+        },
+        runs: 11,
+        errors: 0,
+      },
+      {
+        get label() {
+          return studioT('list_dir');
+        },
+        runs: 64,
+        errors: 0,
+      },
+      {
+        get label() {
+          return studioT('write_file');
+        },
+        runs: 42,
+        errors: 1,
+      },
+      {
+        get label() {
+          return studioT('send_email');
+        },
+        runs: 20,
+        errors: 2,
+      },
+      {
+        get label() {
+          return studioT('query_db');
+        },
+        runs: 9,
+        errors: 0,
+      },
     ],
   };
 
 /** Spend per agent, model and thread, with tokens. */
 export const usageBy: Record<'agents' | 'models' | 'threads', { label: string; cost: number; tokens: number }[]> = {
   agents: [
-    { label: 'Code Agent', cost: 27.92, tokens: 37_500_000 },
-    { label: 'Observer', cost: 1.06, tokens: 1_890_000 },
-    { label: 'Research Supervisor', cost: 0.71, tokens: 1_260_000 },
-    { label: 'Billing Agent', cost: 0.22, tokens: 470_000 },
-    { label: 'Content Moderation Assistant', cost: 0.11, tokens: 301_000 },
+    {
+      get label() {
+        return studioT('Code Agent');
+      },
+      cost: 27.92,
+      tokens: 37_500_000,
+    },
+    {
+      get label() {
+        return studioT('Observer');
+      },
+      cost: 1.06,
+      tokens: 1_890_000,
+    },
+    {
+      get label() {
+        return studioT('Research Supervisor');
+      },
+      cost: 0.71,
+      tokens: 1_260_000,
+    },
+    {
+      get label() {
+        return studioT('Billing Agent');
+      },
+      cost: 0.22,
+      tokens: 470_000,
+    },
+    {
+      get label() {
+        return studioT('Content Moderation Assistant');
+      },
+      cost: 0.11,
+      tokens: 301_000,
+    },
   ],
   models: [
-    { label: 'claude-opus-5-5', cost: 29.84, tokens: 55_700_000 },
-    { label: 'deepseek-v4-flash', cost: 0.12, tokens: 14_300_000 },
-    { label: 'deepseek-flash', cost: 0.06, tokens: 1_900_000 },
-    { label: 'deepseek-v4-flash-0731', cost: 0.004, tokens: 39_300 },
+    {
+      get label() {
+        return studioT('claude-opus-5-5');
+      },
+      cost: 29.84,
+      tokens: 55_700_000,
+    },
+    {
+      get label() {
+        return studioT('deepseek-v4-flash');
+      },
+      cost: 0.12,
+      tokens: 14_300_000,
+    },
+    {
+      get label() {
+        return studioT('deepseek-flash');
+      },
+      cost: 0.06,
+      tokens: 1_900_000,
+    },
+    {
+      get label() {
+        return studioT('deepseek-v4-flash-0731');
+      },
+      cost: 0.004,
+      tokens: 39_300,
+    },
   ],
   threads: [
-    { label: '55399b…6028', cost: 5.12, tokens: 3_980_000 },
-    { label: '27581b…df9e', cost: 4.87, tokens: 3_540_000 },
-    { label: '8f7b3b…adf7', cost: 3.27, tokens: 3_700_000 },
-    { label: 'c1820b…806f', cost: 2.52, tokens: 1_440_000 },
-    { label: 'c51f16…8a90', cost: 2.25, tokens: 2_900_000 },
+    {
+      get label() {
+        return studioT('55399b…6028');
+      },
+      cost: 5.12,
+      tokens: 3_980_000,
+    },
+    {
+      get label() {
+        return studioT('27581b…df9e');
+      },
+      cost: 4.87,
+      tokens: 3_540_000,
+    },
+    {
+      get label() {
+        return studioT('8f7b3b…adf7');
+      },
+      cost: 3.27,
+      tokens: 3_700_000,
+    },
+    {
+      get label() {
+        return studioT('c1820b…806f');
+      },
+      cost: 2.52,
+      tokens: 1_440_000,
+    },
+    {
+      get label() {
+        return studioT('c51f16…8a90');
+      },
+      cost: 2.25,
+      tokens: 2_900_000,
+    },
   ],
 };

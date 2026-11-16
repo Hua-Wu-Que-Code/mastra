@@ -4,6 +4,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useAgents } from '@mastra/react/hooks/agents';
 import { useTools } from '@mastra/react/hooks/tools';
@@ -20,6 +22,7 @@ import { useToolDrawerParam } from '@/domains/tools/hooks/use-tool-drawer-param'
 const crumbs = [navCrumb('/tools')];
 
 export default function Tools() {
+  useLocale();
   const { data: agentsRecord = {}, isLoading: isLoadingAgents, error: agentsError } = useAgents();
   const { data: tools = {}, isLoading: isLoadingTools, error: toolsError } = useTools();
   const [search, setSearch] = useState('');
@@ -32,7 +35,7 @@ export default function Tools() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Tools</h1>
+        <h1 className="sr-only">{studioT('Tools')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -41,7 +44,7 @@ export default function Tools() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Tools</h1>
+        <h1 className="sr-only">{studioT('Tools')}</h1>
         <PermissionDenied variant="fill" resource="tools" />
       </PageLayout>
     );
@@ -50,8 +53,13 @@ export default function Tools() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Tools</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load tools" descriptionSlot={error.message} />
+        <h1 className="sr-only">{studioT('Tools')}</h1>
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load tools')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -59,7 +67,7 @@ export default function Tools() {
   if (Object.keys(tools).length === 0 && !isLoading) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Tools</h1>
+        <h1 className="sr-only">{studioT('Tools')}</h1>
         <NoToolsInfo />
       </PageLayout>
     );
@@ -75,15 +83,15 @@ export default function Tools() {
               <SearchInput
                 {...listSearchProps}
                 onValueChange={setSearch}
-                label="Search tools"
-                placeholder="Search by name"
+                label={studioT('Search tools')}
+                placeholder={studioT('Search by name')}
               />
             </div>
           </ActionRow.Start>
         </ActionRow>
       }
     >
-      <h1 className="sr-only">Tools</h1>
+      <h1 className="sr-only">{studioT('Tools')}</h1>
       <ToolsList
         tools={tools}
         agents={agentsRecord}

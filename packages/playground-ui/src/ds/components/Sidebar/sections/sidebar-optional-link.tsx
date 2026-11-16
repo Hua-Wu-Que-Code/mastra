@@ -4,6 +4,7 @@ import { SidebarSectionLink } from './sidebar-section-link';
 import type { OptionalSidebarLink, SidebarLinkPlacement } from './sidebar-visibility';
 import { isSidebarLinkPlacement, sidebarLinkPlacementLabels, sidebarLinkPlacements } from './sidebar-visibility';
 import { ContextMenu } from '@/ds/components/ContextMenu';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SidebarOptionalLinkProps = {
   link: OptionalSidebarLink;
@@ -22,6 +23,7 @@ export function SidebarOptionalLink({
   onPlacementChange,
   onCustomize,
 }: SidebarOptionalLinkProps) {
+  useLocale();
   const itemRef = useRef<HTMLElement | null>(null);
 
   return (
@@ -32,7 +34,7 @@ export function SidebarOptionalLink({
         }}
         render={<SidebarSectionLink link={link} activeCandidates={activeCandidates} isActive={isActive} />}
       />
-      <ContextMenu.Content aria-label={`${link.name} options`}>
+      <ContextMenu.Content aria-label={studioT('{value0} options', { value0: link.name })}>
         <ContextMenu.RadioGroup
           value={placement}
           onValueChange={value => {
@@ -47,7 +49,7 @@ export function SidebarOptionalLink({
         </ContextMenu.RadioGroup>
         <ContextMenu.Separator />
         <ContextMenu.Item onClick={() => onCustomize(itemRef.current?.querySelector('a') ?? null)}>
-          Customize sidebar…
+          {studioT('Customize sidebar…')}
         </ContextMenu.Item>
       </ContextMenu.Content>
     </ContextMenu>

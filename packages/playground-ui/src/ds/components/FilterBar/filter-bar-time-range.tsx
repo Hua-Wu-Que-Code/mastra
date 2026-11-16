@@ -1,12 +1,13 @@
-/* eslint-disable react-refresh/only-export-components */
 import { useRef } from 'react';
 import { FILTER_BAR_CONTROL_SIZE } from './filter-bar-chip';
+/* eslint-disable react-refresh/only-export-components */
 import { useFilterBarContext } from './filter-bar-context';
 import type { FilterBarField, FilterBarItem } from './types';
 import { useFilterBarItemKeys } from './use-filter-bar-item-keys';
 import { DateTimeRangePicker } from '@/ds/components/DateTimeRangePicker/date-time-range-picker';
 import type { DateTimeRangePickerProps } from '@/ds/components/DateTimeRangePicker/date-time-range-picker';
 import { IconCalendar1 } from '@/ds/icons/central/IconCalendar1';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export const FILTER_BAR_TIME_RANGE_FIELD_ID = 'timeRange';
 
@@ -18,7 +19,9 @@ export const FILTER_BAR_TIME_RANGE_FIELD_ID = 'timeRange';
  */
 export const FILTER_BAR_TIME_RANGE_FIELD: FilterBarField = {
   id: FILTER_BAR_TIME_RANGE_FIELD_ID,
-  label: 'Time',
+  get label() {
+    return studioT('Time');
+  },
   icon: IconCalendar1,
   type: 'text',
   operators: ['is'],
@@ -41,6 +44,7 @@ export type FilterBarTimeRangeProps = Omit<DateTimeRangePickerProps, 'size' | 'r
  * order.
  */
 export function FilterBarTimeRange(props: FilterBarTimeRangeProps) {
+  useLocale();
   const ctx = useFilterBarContext();
   const rootRef = useRef<HTMLDivElement>(null);
   const { onKeyDown } = useFilterBarItemKeys({
@@ -55,7 +59,7 @@ export function FilterBarTimeRange(props: FilterBarTimeRangeProps) {
     <div
       ref={rootRef}
       role="group"
-      aria-label="Time range"
+      aria-label={studioT('Time range')}
       data-slot="filter-bar-time-range"
       className="flex"
       onKeyDown={onKeyDown}

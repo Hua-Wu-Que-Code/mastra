@@ -5,6 +5,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../Tooltip/tooltip';
 import { TabListContext } from './tabs-context';
 import { controlStateColorTransition, focusRing } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type TabProps = {
@@ -31,6 +33,7 @@ export const Tab = ({
   attention = false,
   className,
 }: TabProps) => {
+  useLocale();
   const list = useContext(TabListContext);
   const ref = useRef<HTMLDivElement>(null);
   const register = list?.register;
@@ -104,7 +107,7 @@ export const Tab = ({
       {attention && (
         <>
           <span aria-hidden="true" data-slot="tab-attention" />
-          <span className="sr-only"> Needs attention</span>
+          <span className="sr-only">{' ' + studioT('Needs attention')}</span>
         </>
       )}
     </BaseTabs.Tab>

@@ -17,6 +17,7 @@ import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCh
 import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyDisk1';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { RefObject } from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
@@ -43,6 +44,7 @@ export function ScorerEditSidebar({
   formRef,
   mode = 'create',
 }: ScorerEditSidebarProps) {
+  useLocale();
   const {
     register,
     control,
@@ -56,22 +58,25 @@ export function ScorerEditSidebar({
     <div className="flex h-full flex-col">
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-4 p-4">
-          <SectionHeader title="Configuration" subtitle="Define your scorer's name, type, and settings." />
+          <SectionHeader
+            title={studioT('Configuration')}
+            subtitle={studioT("Define your scorer's name, type, and settings.")}
+          />
 
           <Field invalid={Boolean(errors.name)}>
-            <FieldLabel required>Name</FieldLabel>
-            <Input placeholder="My Scorer" required {...register('name')} />
+            <FieldLabel required>{studioT('Name')}</FieldLabel>
+            <Input placeholder={studioT('My Scorer')} required {...register('name')} />
             <FieldError>{errors.name?.message}</FieldError>
           </Field>
 
           <Field invalid={Boolean(errors.description)}>
-            <FieldLabel required>Description</FieldLabel>
-            <Textarea placeholder="Describe what this scorer does" required {...register('description')} />
+            <FieldLabel required>{studioT('Description')}</FieldLabel>
+            <Textarea placeholder={studioT('Describe what this scorer does')} required {...register('description')} />
             <FieldError>{errors.description?.message}</FieldError>
           </Field>
 
           <Field invalid={Boolean(errors.model?.provider)}>
-            <FieldLabel required>Provider</FieldLabel>
+            <FieldLabel required>{studioT('Provider')}</FieldLabel>
             <Controller
               name="model.provider"
               control={control}
@@ -83,7 +88,7 @@ export function ScorerEditSidebar({
           </Field>
 
           <Field invalid={Boolean(errors.model?.name)}>
-            <FieldLabel required>Model</FieldLabel>
+            <FieldLabel required>{studioT('Model')}</FieldLabel>
             <Controller
               name="model.name"
               control={control}
@@ -100,7 +105,7 @@ export function ScorerEditSidebar({
           </Field>
 
           <Fieldset className="flex flex-col gap-1.5">
-            <FieldsetLegend>Score Range</FieldsetLegend>
+            <FieldsetLegend>{studioT('Score Range')}</FieldsetLegend>
             <div className="flex items-center gap-2">
               <Controller
                 name="scoreRange.min"
@@ -108,14 +113,14 @@ export function ScorerEditSidebar({
                 render={({ field }) => (
                   <Input
                     type="number"
-                    placeholder="Min"
+                    placeholder={studioT('Min')}
                     value={field.value}
                     onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 )}
               />
               <Txt as="span" variant="caption" tone="muted">
-                to
+                {studioT('to')}
               </Txt>
               <Controller
                 name="scoreRange.max"
@@ -123,7 +128,7 @@ export function ScorerEditSidebar({
                 render={({ field }) => (
                   <Input
                     type="number"
-                    placeholder="Max"
+                    placeholder={studioT('Max')}
                     value={field.value}
                     onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                   />
@@ -142,14 +147,14 @@ export function ScorerEditSidebar({
                     className="flex flex-col gap-1.5"
                     render={<RadioGroup value={field.value ?? 'none'} onValueChange={field.onChange} />}
                   >
-                    <FieldsetLegend>Default Sampling</FieldsetLegend>
+                    <FieldsetLegend>{studioT('Default Sampling')}</FieldsetLegend>
                     <FieldItem>
                       <RadioGroupItem value="none" />
-                      <FieldLabel>None</FieldLabel>
+                      <FieldLabel>{studioT('None')}</FieldLabel>
                     </FieldItem>
                     <FieldItem>
                       <RadioGroupItem value="ratio" />
-                      <FieldLabel>Ratio</FieldLabel>
+                      <FieldLabel>{studioT('Ratio')}</FieldLabel>
                     </FieldItem>
                   </Fieldset>
                 </Field>
@@ -165,7 +170,7 @@ export function ScorerEditSidebar({
                     step="0.1"
                     min="0"
                     max="1"
-                    placeholder="Rate (0-1)"
+                    placeholder={studioT('Rate (0-1)')}
                     value={field.value ?? ''}
                     onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
                   />
@@ -183,14 +188,14 @@ export function ScorerEditSidebar({
               {isSavingDraft ? (
                 <>
                   <Spinner className="h-4 w-4" />
-                  Saving...
+                  {studioT('Saving...')}
                 </>
               ) : (
                 <>
                   <Icon>
                     <IconFloppyDisk1 />
                   </Icon>
-                  Save
+                  {studioT('Save')}
                 </>
               )}
             </Button>
@@ -198,14 +203,14 @@ export function ScorerEditSidebar({
               {isSubmitting ? (
                 <>
                   <Spinner className="h-4 w-4" />
-                  Publishing...
+                  {studioT('Publishing...')}
                 </>
               ) : (
                 <>
                   <Icon>
                     <IconCheckmark2Medium />
                   </Icon>
-                  Publish
+                  {studioT('Publish')}
                 </>
               )}
             </Button>
@@ -215,14 +220,14 @@ export function ScorerEditSidebar({
             {isSubmitting ? (
               <>
                 <Spinner className="h-4 w-4" />
-                Creating...
+                {studioT('Creating...')}
               </>
             ) : (
               <>
                 <Icon>
                   <IconCheckmark2Medium />
                 </Icon>
-                Create scorer
+                {studioT('Create scorer')}
               </>
             )}
           </Button>

@@ -1,3 +1,4 @@
+import { t as studioT } from '@/lib/i18n';
 import type { TraceQueryScalarPredicate, TraceQueryTokenField } from '@mastra/core/storage';
 import type { TraceFilterNode } from '@/domains/traces/trace-query-filters';
 import type { FilterBarField } from '@/ds/components/FilterBar/types';
@@ -41,7 +42,12 @@ export function withTokenSearchFields(fields: FilterBarField[], enabled: boolean
     return {
       ...existing,
       id: prefix + path,
-      label: prefix === 'spans.' ? (path === 'all' ? 'Any span content' : `Span ${label.toLowerCase()}`) : label,
+      label:
+        prefix === 'spans.'
+          ? path === 'all'
+            ? studioT('Any span content')
+            : studioT('Span {value0}', { value0: studioT(label) })
+          : studioT(label),
       icon:
         path === 'error' || path === 'errorPreview' ? IconExclamationTriangle : (existing?.icon ?? IconMagnifyingGlass),
       operators: [...(existing?.operators ?? []), 'hasAllTokens'],
@@ -49,7 +55,7 @@ export function withTokenSearchFields(fields: FilterBarField[], enabled: boolean
       validateInput: value =>
         tokenSearchValue(value)
           ? undefined
-          : `Enter words to search (up to ${TRACE_QUERY_TOKEN_SEARCH_MAX_LENGTH} characters)`,
+          : studioT('Enter words to search (up to {count} characters)', { count: TRACE_QUERY_TOKEN_SEARCH_MAX_LENGTH }),
     };
   });
   return [...searchable, ...fields.filter(field => !searchable.some(search => search.id === field.id))];

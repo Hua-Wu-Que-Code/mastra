@@ -22,6 +22,7 @@ import { SkillMessage } from '@/domains/chat/messages/skill-message';
 import { ReasoningActivity } from '@/ds/components/ai/activity';
 import { Message } from '@/ds/components/Message';
 import { Metadata } from '@/ds/components/Metadata';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -56,6 +57,7 @@ function catalogOnly(parts: unknown[]): AvailableSkill[] | undefined {
 }
 
 function MessageText({ text }: { text: string }) {
+  useLocale();
   const catalog = parseAvailableSkills(text);
   if (!catalog) return <SpanPayloadMarkdown>{dedent(text)}</SpanPayloadMarkdown>;
 
@@ -64,7 +66,7 @@ function MessageText({ text }: { text: string }) {
   return (
     <div className="flex flex-col gap-3">
       {before && <SpanPayloadMarkdown>{before}</SpanPayloadMarkdown>}
-      <SpanPayloadField label={`Skills (${catalog.skills.length})`}>
+      <SpanPayloadField label={studioT('Skills ({value0})', { value0: catalog.skills.length })}>
         <SkillList skills={catalog.skills} />
       </SpanPayloadField>
       {after && <SpanPayloadMarkdown>{after}</SpanPayloadMarkdown>}
@@ -175,11 +177,12 @@ export function SpanSignal({ signal }: { signal: SignalData }) {
 // renderer only needs `isRecord` narrowing to read `role` / `content` / `parts` defensively.
 /** One message of a span; `footer` sits right under it (e.g. the metadata of the signal it came from). */
 function SpanMessage({ message, footer }: { message: unknown; footer?: ReactNode }) {
+  useLocale();
   if (typeof message === 'string') {
     return (
       <Message from="user" data-role="user" footer={footer}>
         <div className="flex flex-col gap-2">
-          <SpanPayloadLabel>user</SpanPayloadLabel>
+          <SpanPayloadLabel>{studioT('user')}</SpanPayloadLabel>
           <MessageText text={message} />
         </div>
       </Message>
@@ -225,11 +228,14 @@ function SpanMessage({ message, footer }: { message: unknown; footer?: ReactNode
     <div data-role={role} className="flex min-w-0 flex-col gap-2">
       <SpanPayloadLabel>
         {hasToolResultLabels ? (
-          'Tool result'
+          studioT('Tool result')
         ) : skills ? (
           <Metadata>
             <Metadata.Item>{role}</Metadata.Item>
-            <Metadata.Item>Skills ({skills.length})</Metadata.Item>
+            <Metadata.Item>
+              {studioT('Skills (')}
+              {skills.length})
+            </Metadata.Item>
           </Metadata>
         ) : (
           role

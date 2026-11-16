@@ -8,6 +8,8 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
 import { IconHistory } from '@mastra/playground-ui/icons/central/IconHistory';
 import { IconLaw } from '@mastra/playground-ui/icons/central/IconLaw';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useDataset, useDatasetItems } from '@mastra/react/hooks/datasets';
 import { useMemo } from 'react';
@@ -16,9 +18,19 @@ import { PageBreadcrumbs } from '@/components/ui/page-breadcrumbs';
 import { DatasetCompareVersionToolbar, DatasetCompareVersionsList } from '@/domains/datasets';
 import { datasetCrumb, navCrumb } from '@/domains/navigation/crumbs';
 
-const crumbs = [navCrumb('/datasets'), datasetCrumb, { id: 'dataset-versions', label: 'Versions' }];
+const crumbs = [
+  navCrumb('/datasets'),
+  datasetCrumb,
+  {
+    id: 'dataset-versions',
+    get label() {
+      return studioT('Versions');
+    },
+  },
+];
 
 function DatasetCompareVersionsPage() {
+  useLocale();
   const { datasetId } = useParams<{ datasetId: string }>();
   const [searchParams] = useSearchParams();
   const versionNumbers =
@@ -67,7 +79,7 @@ function DatasetCompareVersionsPage() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Versions</h1>
+        <h1 className="sr-only">{studioT('Versions')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -76,7 +88,7 @@ function DatasetCompareVersionsPage() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Versions</h1>
+        <h1 className="sr-only">{studioT('Versions')}</h1>
         <PermissionDenied variant="fill" resource="datasets" />
       </PageLayout>
     );
@@ -85,10 +97,10 @@ function DatasetCompareVersionsPage() {
   if (!datasetId || versionNumbers.length < 2) {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Versions</h1>
+        <h1 className="sr-only">{studioT('Versions')}</h1>
         <div className="grid h-full min-w-min content-start items-start overflow-x-auto overflow-y-auto">
           <div className="py-5 text-center text-muted-foreground">
-            <p>Select at least two versions to compare.</p>
+            <p>{studioT('Select at least two versions to compare.')}</p>
           </div>
         </div>
       </PageLayout>
@@ -103,24 +115,24 @@ function DatasetCompareVersionsPage() {
 
   return (
     <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Versions</h1>
+      <h1 className="sr-only">{studioT('Versions')}</h1>
       <div className="h-full overflow-hidden px-[3vw] pb-4">
         <div className="mx-auto grid h-full max-w-[140rem] grid-rows-[auto_1fr] gap-4">
           <MainHeader>
             <MainHeader.Column>
               <MainHeader.Title>
-                <IconLaw /> Compare Dataset Versions
+                <IconLaw /> {' ' + studioT('Compare Dataset Versions')}
               </MainHeader.Title>
               <MainHeader.Description>
                 <TextAndIcon>
-                  <IconHistory /> Comparing {versionNumbers.length} versions of{' '}
-                  {dataset?.name || datasetId?.slice(0, 8)}
+                  <IconHistory /> {' ' + studioT('Comparing') + ' '}
+                  {versionNumbers.length} {' ' + studioT('versions of')} {dataset?.name || datasetId?.slice(0, 8)}
                 </TextAndIcon>
               </MainHeader.Description>
             </MainHeader.Column>
             <MainHeader.Column>
               <Button render={<Link to={`/datasets/${datasetId}`} />} icon={<IconArrowLeft />}>
-                Back to dataset
+                {studioT('Back to dataset')}
               </Button>
             </MainHeader.Column>
           </MainHeader>

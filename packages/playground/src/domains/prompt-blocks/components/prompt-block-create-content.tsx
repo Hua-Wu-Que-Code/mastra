@@ -1,5 +1,7 @@
 import type { CreateStoredPromptBlockParams } from '@mastra/client-js';
 import { Form } from '@mastra/playground-ui/components/Form';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 
 import { useStoredPromptBlockMutations } from '@mastra/react/hooks/prompt-blocks';
@@ -13,13 +15,14 @@ interface PromptBlockCreateContentProps {
 }
 
 export function PromptBlockCreateContent({ onSuccess }: PromptBlockCreateContentProps) {
+  useLocale();
   const { createStoredPromptBlock } = useStoredPromptBlockMutations();
   const { form } = usePromptBlockEditForm();
 
   const handlePublish = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error(studioT('Please fill in all required fields'));
       return;
     }
 
@@ -35,10 +38,14 @@ export function PromptBlockCreateContent({ onSuccess }: PromptBlockCreateContent
       };
 
       const created = await createStoredPromptBlock.mutateAsync(createParams);
-      toast.success('Prompt block created successfully');
+      toast.success(studioT('Prompt block created successfully'));
       onSuccess?.(created);
     } catch (error) {
-      toast.error(`Failed to create prompt block: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to create prompt block: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 

@@ -7,6 +7,7 @@ import { ChartCard } from './chart-card';
 import { ChartCardError } from './chart-card-error';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
 import { MetricsLineChart } from '@/ds/components/MetricsLineChart';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /** Scores aren't problems, so no warm hues; past five scorers the colors repeat. */
 const SCORER_COLORS = [
@@ -31,10 +32,11 @@ function scorerSeries(scorers: ScorerAverage[]): MetricsLineChartSeries[] {
 
 /** Average result of each scorer over time, 0 to 1. */
 export function ScoresCard() {
+  useLocale();
   const { data, isLoading, isError, isPlaceholderData } = useMetricsScores();
   const scorers = data?.scorers ?? [];
 
-  const layout = { title: 'Scores' };
+  const layout = { title: studioT('Scores') };
 
   if (isError) {
     return (

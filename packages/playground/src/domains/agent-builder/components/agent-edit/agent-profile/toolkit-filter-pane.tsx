@@ -4,6 +4,8 @@ import { ScrollArea, ScrollAreaViewport } from '@mastra/playground-ui/components
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -207,6 +209,7 @@ export const ToolkitFilterPane = ({
   disabled = false,
   multipleAllowedByProvider,
 }: ToolkitFilterPaneProps) => {
+  useLocale();
   const [search, setSearch] = useState('');
   const term = search.trim().toLowerCase();
 
@@ -221,11 +224,11 @@ export const ToolkitFilterPane = ({
       data-testid={`${TEST_ID_PREFIX}-filter`}
     >
       <SearchInput
-        label="Search toolkits"
+        label={studioT('Search toolkits')}
         size="md"
         className="flex-none"
         data-testid={`${TEST_ID_PREFIX}-filter-search`}
-        placeholder="Search toolkits"
+        placeholder={studioT('Search toolkits')}
         value={search}
         onValueChange={setSearch}
       />
@@ -239,7 +242,7 @@ export const ToolkitFilterPane = ({
           className={cn(quietTextHover, controlStateColorTransition, 'disabled:cursor-not-allowed disabled:opacity-60')}
         >
           <Txt as="span" variant="meta" className="block">
-            Select all
+            {studioT('Select all')}
           </Txt>
         </button>
         <button
@@ -250,7 +253,7 @@ export const ToolkitFilterPane = ({
           className={cn(quietTextHover, controlStateColorTransition, 'disabled:cursor-not-allowed disabled:opacity-60')}
         >
           <Txt as="span" variant="meta" className="block">
-            Clear all
+            {studioT('Clear all')}
           </Txt>
         </button>
       </div>

@@ -23,6 +23,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconArrowRotateCounterClockwise } from '@/ds/icons/central/IconArrowRotateCounterClockwise';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { useMeasuredAutoHeight } from '@/hooks/use-measured-auto-height';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { compareModelReleaseDates } from '@/utils/model';
 
@@ -99,6 +101,7 @@ export function ModelPickerPanel({
   onAddProvider,
   sheet,
 }: ModelPickerPanelProps) {
+  useLocale();
   // The popover and sheet unmount when closed, so each open starts with a fresh search and filter.
   const [query, setQuery] = useState('');
   const [providerFilter, setProviderFilter] = useState(initialProviderFilter);
@@ -166,7 +169,7 @@ export function ModelPickerPanel({
             )}
           >
             <CommandInput
-              placeholder="Search models"
+              placeholder={studioT('Search models')}
               value={query}
               onValueChange={setQuery}
               wrapperClassName={cn('border-b-0', addProvider && 'pr-1')}
@@ -206,13 +209,13 @@ export function ModelPickerPanel({
             ) : null}
           </div>
           <CommandList className="max-h-none overflow-visible">
-            <CommandEmpty>No matching model.</CommandEmpty>
+            <CommandEmpty>{studioT('No matching model.')}</CommandEmpty>
             {deferredQuery ? (
               <CommandGroup>
                 {matches.slice(0, MAX_SEARCH_RESULTS).map(({ provider, model }) => renderOption(provider, model))}
                 {matches.length > MAX_SEARCH_RESULTS ? (
                   <Txt as="p" variant="caption" tone="muted" className="px-2 py-1.5">
-                    Refine the search to see more.
+                    {studioT('Refine the search to see more.')}
                   </Txt>
                 ) : null}
               </CommandGroup>

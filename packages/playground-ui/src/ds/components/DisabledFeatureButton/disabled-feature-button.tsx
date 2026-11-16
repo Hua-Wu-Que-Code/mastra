@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
-
 import { Button } from '@/ds/components/Button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
+
 import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRight';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type DisabledFeatureButtonProps = {
@@ -19,6 +21,7 @@ export type DisabledFeatureButtonProps = {
  * tooltip stays reachable by keyboard while the visual button remains inert.
  */
 export function DisabledFeatureButton({ icon, label, tooltipContent, docsHref }: DisabledFeatureButtonProps) {
+  useLocale();
   return (
     <Tooltip>
       <TooltipTrigger
@@ -42,7 +45,7 @@ export function DisabledFeatureButton({ icon, label, tooltipContent, docsHref }:
               controlStateColorTransition,
             )}
           >
-            Learn more
+            {studioT('Learn more')}
             <IconSquareArrowTopRight className="size-icon-xs" />
           </a>
         </span>

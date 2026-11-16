@@ -3,6 +3,8 @@ import { Card } from '@mastra/playground-ui/components/Card';
 import { CollapsibleBox, useCollapsibleBox } from '@mastra/playground-ui/components/CollapsibleBox';
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
 import { IconMinimize45 } from '@mastra/playground-ui/icons/central/IconMinimize45';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { ReactNode } from 'react';
 
@@ -39,6 +41,7 @@ export function ComparisonSection({
   onExpandedChange,
   children,
 }: ComparisonSectionProps) {
+  useLocale();
   const ownBox = useCollapsibleBox({ collapsedHeight: 160 });
   // Clipping is still measured per box; only the expanded flag comes from outside when controlled.
   const box =
@@ -51,7 +54,7 @@ export function ComparisonSection({
           toggleExpanded: () => onExpandedChange(!expanded),
         };
   const content = collapsible ? (
-    <CollapsibleBox state={box} expandLabel="Expand">
+    <CollapsibleBox state={box} expandLabel={studioT('Expand')}>
       {children}
     </CollapsibleBox>
   ) : (
@@ -79,7 +82,7 @@ export function ComparisonSection({
         {collapsible && box.isExpanded && box.isClipped && (
           <div className="flex justify-center pt-1">
             <Button size="sm" variant="ghost" icon={<IconMinimize45 />} onClick={() => box.setExpanded(false)}>
-              Collapse
+              {studioT('Collapse')}
             </Button>
           </div>
         )}

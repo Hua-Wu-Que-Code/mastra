@@ -6,8 +6,9 @@ import { Table } from '@mastra/playground-ui/components/Table';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import type { UserConnectProvider, UserConnection } from '@mastra/playground-ui/domains/connect';
 import { ProviderLogo } from '@mastra/playground-ui/domains/connect';
-
 import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Unplug } from 'lucide-react';
 
 function statusVariant(status: string): BadgeVariant {
@@ -42,13 +43,14 @@ function ConnectionRows({
   onDisconnect,
   disconnectPendingId,
 }: ConnectionRowsProps) {
+  useLocale();
   const columnCount = 4;
 
   return (
     <Table.Body aria-label={label}>
       <Table.Row>
         <Table.Head scope="rowgroup" colSpan={columnCount}>
-          {onDisconnect ? 'User' : 'Global'}
+          {onDisconnect ? studioT('User') : studioT('Global')}
         </Table.Head>
       </Table.Row>
       {loading ? (
@@ -97,7 +99,11 @@ function ConnectionRows({
               <Table.Cell align="right">
                 {onDisconnect ? (
                   <DropdownMenu>
-                    <DropdownMenu.Trigger variant="ghost" size="icon-sm" aria-label={`Actions for ${displayName}`}>
+                    <DropdownMenu.Trigger
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={studioT('Actions for {value0}', { value0: displayName })}
+                    >
                       <IconDotGrid1x3Vertical />
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content align="end" className="w-44">
@@ -106,7 +112,7 @@ function ConnectionRows({
                         disabled={disconnectPendingId === connection.id}
                         onSelect={() => onDisconnect(connection.id, displayName)}
                       >
-                        <Unplug /> Disconnect
+                        <Unplug /> {' ' + studioT('Disconnect')}
                       </DropdownMenu.Item>
                     </DropdownMenu.Content>
                   </DropdownMenu>
@@ -137,31 +143,32 @@ export function ConnectionsTable({
   onDisconnect,
   disconnectPendingId,
 }: ConnectionsTableProps) {
+  useLocale();
   return (
-    <Table variant="inset" aria-label="Connections" aria-busy={loading || undefined}>
+    <Table variant="inset" aria-label={studioT('Connections')} aria-busy={loading || undefined}>
       <Table.Header>
         <Table.Row>
-          <Table.Head>Integration</Table.Head>
-          <Table.Head>Account</Table.Head>
-          <Table.Head>Status</Table.Head>
+          <Table.Head>{studioT('Integration')}</Table.Head>
+          <Table.Head>{studioT('Account')}</Table.Head>
+          <Table.Head>{studioT('Status')}</Table.Head>
           <Table.Head align="right">
-            <span className="sr-only">Actions</span>
+            <span className="sr-only">{studioT('Actions')}</span>
           </Table.Head>
         </Table.Row>
       </Table.Header>
       <ConnectionRows
-        label="Global connections"
+        label={studioT('Global connections')}
         connections={globalConnections}
         providersById={providersById}
         loading={loading}
-        emptyMessage="No global connections are linked to this project."
+        emptyMessage={studioT('No global connections are linked to this project.')}
       />
       <ConnectionRows
-        label="Your connections"
+        label={studioT('Your connections')}
         connections={userConnections}
         providersById={providersById}
         loading={loading}
-        emptyMessage="You haven't connected any accounts yet."
+        emptyMessage={studioT("You haven't connected any accounts yet.")}
         onDisconnect={onDisconnect}
         disconnectPendingId={disconnectPendingId}
       />

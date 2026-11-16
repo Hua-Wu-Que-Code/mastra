@@ -10,6 +10,8 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { IconArrowInbox } from '@mastra/playground-ui/icons/central/IconArrowInbox';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { IconSparklesTwo } from '@mastra/playground-ui/icons/central/IconSparklesTwo';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useStoredSkills } from '@mastra/react/hooks/agents';
 import { useCurrentUser } from '@mastra/react/hooks/auth';
@@ -25,6 +27,7 @@ import { useBuilderRegistries } from '@/domains/agent-builder/hooks/use-builder-
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
 export default function AgentBuilderSkillsPage() {
+  useLocale();
   const navigate = useNavigate();
   const { isLoading: isCurrentUserLoading } = useCurrentUser();
   const { hasPermission, rbacEnabled } = usePermissions();
@@ -73,7 +76,7 @@ export default function AgentBuilderSkillsPage() {
       }
       return (
         <div className="flex items-center justify-center pt-10">
-          <EmptyState tone="error" titleSlot="Failed to load skills" descriptionSlot={error.message} />
+          <EmptyState tone="error" titleSlot={studioT('Failed to load skills')} descriptionSlot={error.message} />
         </div>
       );
     }
@@ -82,13 +85,13 @@ export default function AgentBuilderSkillsPage() {
       return (
         <div className="flex items-center-safe justify-center-safe">
           <EmptyState
-            titleSlot="No skills yet"
-            descriptionSlot="Create your first skill to give agents new capabilities."
+            titleSlot={studioT('No skills yet')}
+            descriptionSlot={studioT('Create your first skill to give agents new capabilities.')}
             actionSlot={
               canWriteSkills ? (
                 <div className="flex items-center gap-2">
                   <Button variant="primary" onClick={goToCreate} icon={<IconPlusMedium />}>
-                    New skill
+                    {studioT('New skill')}
                   </Button>
                   {enabledRegistry && (
                     <Button
@@ -96,7 +99,7 @@ export default function AgentBuilderSkillsPage() {
                       onClick={() => setRegistryDialog({ id: enabledRegistry.id, label: enabledRegistry.label })}
                       icon={<IconArrowInbox />}
                     >
-                      Browse registry
+                      {studioT('Browse registry')}
                     </Button>
                   )}
                 </div>
@@ -119,9 +122,9 @@ export default function AgentBuilderSkillsPage() {
               <ActionRow.Start>
                 <PageHeader>
                   <PageHeader.Title>
-                    <IconSparklesTwo /> My skills
+                    <IconSparklesTwo /> {' ' + studioT('My skills')}
                   </PageHeader.Title>
-                  <PageHeader.Description>Skills you've created.</PageHeader.Description>
+                  <PageHeader.Description>{studioT("Skills you've created.")}</PageHeader.Description>
                 </PageHeader>
               </ActionRow.Start>
               {skills.length > 0 && canWriteSkills && (
@@ -132,11 +135,11 @@ export default function AgentBuilderSkillsPage() {
                       onClick={() => setRegistryDialog({ id: enabledRegistry.id, label: enabledRegistry.label })}
                       icon={<IconArrowInbox />}
                     >
-                      Browse registry
+                      {studioT('Browse registry')}
                     </Button>
                   )}
                   <Button variant="primary" onClick={goToCreate} icon={<IconPlusMedium />}>
-                    New skill
+                    {studioT('New skill')}
                   </Button>
                 </ActionRow.End>
               )}
@@ -147,8 +150,8 @@ export default function AgentBuilderSkillsPage() {
                   <SearchInput
                     {...listSearchProps}
                     onValueChange={setSearch}
-                    label="Search skills"
-                    placeholder="Search by name or description"
+                    label={studioT('Search skills')}
+                    placeholder={studioT('Search by name or description')}
                   />
                 </div>
               </ActionRow.Start>
@@ -170,19 +173,21 @@ export default function AgentBuilderSkillsPage() {
           installedSkillIds={installedSkillIds}
           onInstalled={storedSkillId => {
             const installed = skills.find(s => s.id === storedSkillId);
-            toast.success(installed ? `Imported "${installed.name}"` : 'Skill imported');
+            toast.success(
+              installed ? studioT('Imported "{value0}"', { value0: installed.name }) : studioT('Skill imported'),
+            );
           }}
           onCollision={skillName => {
             const existing = skills.find(s => s.id === skillName || s.name === skillName);
             if (existing) {
-              toast.error(`"${existing.name}" is already in your library`, {
+              toast.error(studioT('"{value0}" is already in your library', { value0: existing.name }), {
                 action: {
-                  label: 'Open existing',
+                  label: studioT('Open existing'),
                   onClick: () => goToEdit(existing.id),
                 },
               });
             } else {
-              toast.error(`A skill named "${skillName}" already exists.`);
+              toast.error(studioT('A skill named "{value0}" already exists.', { value0: skillName }));
             }
           }}
         />

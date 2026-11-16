@@ -1,13 +1,14 @@
 import type { TaskItem } from '@mastra/core/signals';
-
 import { PinnedKnowledgeActivity } from '../knowledge/pinned-knowledge';
 import { pinnedKnowledgeFromSignal } from '../knowledge/pinned-knowledge-data';
+
 import { NotificationSignalNotice } from './notification-signal-notice';
 import { formatSignalValue, isRecord, isSignalData, signalContentsToText } from './signal-data';
 import type { SignalData } from './signal-data';
 import { parseSkillBody } from './skill-activation';
 import { SkillMessage } from './skill-message';
 import { SignalActivity } from '@/ds/components/ai/activity';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SignalBadgeProps = {
   signal: unknown;
@@ -57,6 +58,7 @@ function getSkillActivation(signal: SignalData, text: string) {
 }
 
 export const SignalBadge = ({ signal: value, defaultOpen }: SignalBadgeProps) => {
+  useLocale();
   if (!isSignalData(value)) return null;
 
   const text = signalContentsToText(value.contents);
@@ -77,7 +79,12 @@ export const SignalBadge = ({ signal: value, defaultOpen }: SignalBadgeProps) =>
     const skill = getSkillActivation(value, text);
     if (skill) return <SkillMessage activation={skill} defaultOpen={defaultOpen} />;
     return (
-      <SignalActivity kind="reactive" label={value.tagName ?? 'Signal'} message={text} defaultOpen={defaultOpen} />
+      <SignalActivity
+        kind="reactive"
+        label={value.tagName ?? studioT('Signal')}
+        message={text}
+        defaultOpen={defaultOpen}
+      />
     );
   }
 

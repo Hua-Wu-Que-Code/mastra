@@ -1,6 +1,8 @@
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useAgents } from '@mastra/react/hooks/agents';
 import { useEffect } from 'react';
@@ -23,9 +25,9 @@ export interface AgentComboboxProps {
 export function AgentCombobox({
   value,
   onValueChange,
-  placeholder = 'Select an agent',
-  searchPlaceholder = 'Search agents',
-  emptyText = 'No agents found.',
+  placeholder = studioT('Select an agent'),
+  searchPlaceholder = studioT('Search agents'),
+  emptyText = studioT('No agents found.'),
   className,
   disabled = false,
   variant,
@@ -34,15 +36,16 @@ export function AgentCombobox({
   'aria-label': ariaLabel,
   align,
 }: AgentComboboxProps) {
+  const studioLocale = useLocale();
   const { data: agents = {}, isLoading, isError, error } = useAgents();
   const { navigate, paths } = useLinkComponent();
 
   useEffect(() => {
     if (isError) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load agents';
-      toast.error(`Error loading agents: ${errorMessage}`);
+      toast.error(studioT('Error loading agents: {value0}', { value0: errorMessage }));
     }
-  }, [isError, error]);
+  }, [isError, error, studioLocale]);
 
   const agentOptions = Object.keys(agents).map(key => ({
     label: agents[key]?.name || key,
@@ -62,7 +65,7 @@ export function AgentCombobox({
       options={agentOptions}
       value={value}
       onValueChange={handleValueChange}
-      placeholder={isLoading ? 'Loading agents...' : placeholder}
+      placeholder={isLoading ? studioT('Loading agents...') : placeholder}
       searchPlaceholder={searchPlaceholder}
       emptyText={emptyText}
       className={className}

@@ -1,5 +1,7 @@
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Controller } from 'react-hook-form';
 
 import { useAgentEditFormContext } from '../../context/agent-edit-form-context';
@@ -7,6 +9,7 @@ import { getEditorOwnership } from '../../utils/editor-ownership';
 import { AgentCMSBlocks } from '../agent-cms-blocks';
 
 export function InstructionBlocksPage() {
+  useLocale();
   const { form, readOnly, isCodeAgentOverride, editorConfig } = useAgentEditFormContext();
   const { isInstructionsLocked } = getEditorOwnership(isCodeAgentOverride, editorConfig);
   const isReadOnly = readOnly || isInstructionsLocked;
@@ -16,10 +19,11 @@ export function InstructionBlocksPage() {
   return (
     <ScrollArea className="h-full">
       {isInstructionsLocked && (
-        <Notice variant="info" title="Instructions are owned by code">
+        <Notice variant="info" title={studioT('Instructions are owned by code')}>
           <Notice.Message>
-            This code-defined agent has disabled instructions editing from Studio. Update the agent definition in code
-            to change its instructions.
+            {studioT(
+              'This code-defined agent has disabled instructions editing from Studio. Update the agent definition in code to change its instructions.',
+            )}
           </Notice.Message>
         </Notice>
       )}
@@ -31,7 +35,7 @@ export function InstructionBlocksPage() {
           <AgentCMSBlocks
             items={field.value ?? []}
             onChange={field.onChange}
-            placeholder="Enter content"
+            placeholder={studioT('Enter content')}
             schema={schema}
             readOnly={isReadOnly}
           />

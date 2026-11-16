@@ -3,6 +3,8 @@ import type { WorkflowStepCardViewProps } from '../../types';
 import { ClockDial, DurationDial } from './workflow-time-dial';
 import type { DurationUnit } from './workflow-time-dial';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate, formatShortDate } from '@/utils/date-format';
 import { formatDuration } from '@/utils/duration';
 
@@ -45,10 +47,11 @@ function TimingReading({
 }
 
 export function WorkflowTiming({ duration, date }: Pick<WorkflowStepCardViewProps, 'duration' | 'date'>) {
+  useLocale();
   if (date) {
     const scheduled = new Date(date);
     if (!Number.isFinite(scheduled.getTime())) {
-      return <span className={captionClasses}>Schedule unavailable</span>;
+      return <span className={captionClasses}>{studioT('Schedule unavailable')}</span>;
     }
     return (
       <TimingReading
@@ -61,13 +64,13 @@ export function WorkflowTiming({ duration, date }: Pick<WorkflowStepCardViewProp
   }
   if (duration === undefined) return null;
   if (!Number.isFinite(duration) || duration < 0) {
-    return <span className={captionClasses}>Delay unavailable</span>;
+    return <span className={captionClasses}>{studioT('Delay unavailable')}</span>;
   }
   const reading = durationReading(duration);
   return (
     <TimingReading
       value={formatDuration(duration) ?? ''}
-      caption="Configured delay"
+      caption={studioT('Configured delay')}
       dial={<DurationDial {...reading} />}
     />
   );

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-
 import { EXAMPLES_PAGE_SIZE, ExamplesPager } from './examples-pager';
 import { useNoise, useNoiseExamples } from './hooks';
+
 import { shareSentence } from './signal-formatting';
 import type { ThemeSelection, ThemeSelectionStats } from './theme-drilldown-data';
 import { TraceInsightView } from './trace-insight-view';
@@ -16,6 +16,8 @@ import {
 } from '@/ds/components/Drawer';
 import { Txt } from '@/ds/components/Txt';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface NoiseDetailPanelProps {
@@ -37,6 +39,7 @@ export function NoiseDetailPanel({
   filteredStats,
   onClose,
 }: NoiseDetailPanelProps) {
+  useLocale();
   const filterKey = filters
     .map(filter => `${filter.signalName}:${filter.kind === 'theme' ? filter.themeId : 'noise'}`)
     .join(',');
@@ -71,8 +74,11 @@ export function NoiseDetailPanel({
     >
       <DrawerContent>
         <DrawerHeader className="border-b border-border">
-          <DrawerTitle>Noise</DrawerTitle>
-          <DrawerDescription className="sr-only">Noise details for the {signalName} trace signal</DrawerDescription>
+          <DrawerTitle>{studioT('Noise')}</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            {studioT('Noise details for the') + ' '}
+            {signalName} {' ' + studioT('trace signal')}
+          </DrawerDescription>
         </DrawerHeader>
         <DrawerBody className="grid content-start gap-6 overflow-y-auto p-6">
           {insightTraceId !== undefined && (
@@ -82,19 +88,20 @@ export function NoiseDetailPanel({
             <>
               <section aria-labelledby="noise-summary-heading">
                 <Txt as="h2" variant="eyebrow" tone="muted" id="noise-summary-heading">
-                  Summary
+                  {studioT('Summary')}
                 </Txt>
                 <Txt tone="ink" className="mt-3">
-                  Noise contains trace signal summaries that did not consistently match a recurring theme in this
-                  snapshot.
+                  {studioT(
+                    'Noise contains trace signal summaries that did not consistently match a recurring theme in this snapshot.',
+                  )}
                 </Txt>
                 {noiseQuery.isPending && (
                   <Txt tone="muted" className="mt-4">
-                    Loading noise details…
+                    {studioT('Loading noise details…')}
                   </Txt>
                 )}
                 {noiseQuery.isError && (
-                  <Txt className="mt-4 text-destructive-foreground">Unable to load noise details.</Txt>
+                  <Txt className="mt-4 text-destructive-foreground">{studioT('Unable to load noise details.')}</Txt>
                 )}
                 {noiseQuery.data && (
                   <Txt tone="ink" className="mt-4 tabular-nums">
@@ -108,21 +115,21 @@ export function NoiseDetailPanel({
 
               <section aria-labelledby="noise-examples-heading">
                 <Txt as="h2" variant="eyebrow" tone="muted" id="noise-examples-heading">
-                  Example summaries
+                  {studioT('Example summaries')}
                 </Txt>
                 {examplesQuery.isPending && (
                   <Txt tone="muted" className="mt-3">
-                    Loading examples…
+                    {studioT('Loading examples…')}
                   </Txt>
                 )}
                 {examplesQuery.isError && (
-                  <Txt className="mt-3 text-destructive-foreground">Unable to load examples.</Txt>
+                  <Txt className="mt-3 text-destructive-foreground">{studioT('Unable to load examples.')}</Txt>
                 )}
                 {examplesQuery.data && (
                   <>
                     {examplesQuery.data.examples.length === 0 ? (
                       <Txt tone="muted" className="mt-3">
-                        No noise examples in this snapshot.
+                        {studioT('No noise examples in this snapshot.')}
                       </Txt>
                     ) : (
                       <ul className="mt-3 space-y-3">
@@ -130,7 +137,7 @@ export function NoiseDetailPanel({
                           <li key={example.traceId}>
                             <button
                               type="button"
-                              aria-label={`View trace insight for ${example.signalText}`}
+                              aria-label={studioT('View trace insight for {value0}', { value0: example.signalText })}
                               onClick={() => setInsightTraceId(example.traceId)}
                               className={cn(
                                 'text-foreground',

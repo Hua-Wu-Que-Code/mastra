@@ -1,6 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { MetricsKpiCard } from '@/ds/components/MetricsKpiCard';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type KpiCardProps = {
@@ -33,12 +35,13 @@ export function KpiCard({ label, icon: Icon, isError = false, ...reading }: KpiC
 }
 
 function KpiError() {
+  useLocale();
   return (
     <>
       <MetricsKpiCard.ValueRow className="mt-1">
         <MetricsKpiCard.Value>—</MetricsKpiCard.Value>
       </MetricsKpiCard.ValueRow>
-      <MetricsKpiCard.Footer detail={<span className="text-destructive-foreground">Couldn't load</span>} />
+      <MetricsKpiCard.Footer detail={<span className="text-destructive-foreground">{studioT("Couldn't load")}</span>} />
     </>
   );
 }

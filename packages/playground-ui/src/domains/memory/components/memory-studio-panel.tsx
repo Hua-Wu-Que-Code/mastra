@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-
 import { Button } from '../../../ds/components/Button';
 import { Skeleton } from '../../../ds/components/Skeleton';
+
 import { Txt } from '../../../ds/components/Txt';
 import { MemoryIcon } from '../../../ds/icons/MemoryIcon';
 import { extractOmMarkers } from '../lib/extract-markers';
@@ -14,6 +14,7 @@ import type { ZoomRange } from './flame-graph';
 import { ObservationDetailView } from './observation-detail-view';
 import { ThreadContextProgress } from './thread-context-progress';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface MemoryStudioPanelProps {
   messages: MemoryMessage[];
@@ -48,6 +49,7 @@ export function MemoryStudioPanel({
   onSelectTimestamp,
   contextWindow,
 }: MemoryStudioPanelProps) {
+  useLocale();
   const [manualOMRecordId, setManualOMRecordId] = useState<string | null>(null);
 
   const markers = useMemo(() => extractOmMarkers(messages), [messages]);
@@ -95,13 +97,19 @@ export function MemoryStudioPanel({
   return (
     <div className="flex size-full flex-col overflow-hidden">
       <div className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2.5">
-        <Button type="button" variant="ghost" size="icon-sm" tooltip="Back to memory" onClick={() => onClose?.()}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          tooltip={studioT('Back to memory')}
+          onClick={() => onClose?.()}
+        >
           <IconArrowLeft />
         </Button>
         <span className="flex min-w-0 items-center gap-1.5 text-foreground">
           <MemoryIcon className="size-icon-md shrink-0" />
           <Txt as="span" variant="column">
-            Observational memory
+            {studioT('Observational memory')}
           </Txt>
         </span>
       </div>
@@ -128,7 +136,7 @@ export function MemoryStudioPanel({
               messageThreshold={contextWindow?.messageThreshold ?? windowState.messageThreshold}
               memoryTokens={memoryTokens}
               memoryThreshold={memoryThreshold}
-              memoryLabel="Observations"
+              memoryLabel={studioT('Observations')}
             />
             <FlameGraph
               omRecords={omRecords}

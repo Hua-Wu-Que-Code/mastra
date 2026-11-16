@@ -8,6 +8,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { IconLibrary } from '@mastra/playground-ui/icons/central/IconLibrary';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -29,6 +31,7 @@ import { useBuilderAgentFeatures } from '@/domains/agent-builder/hooks/use-build
 type Tab = 'agents' | 'skills';
 
 export default function AgentBuilderLibraryPage() {
+  useLocale();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<Tab>('agents');
@@ -64,7 +67,7 @@ export default function AgentBuilderLibraryPage() {
     }
     return (
       <div className="flex items-center justify-center pt-10">
-        <EmptyState tone="error" titleSlot="Failed to load the library" descriptionSlot={error.message} />
+        <EmptyState tone="error" titleSlot={studioT('Failed to load the library')} descriptionSlot={error.message} />
       </div>
     );
   };
@@ -77,8 +80,8 @@ export default function AgentBuilderLibraryPage() {
         return (
           <div className="flex items-center-safe justify-center-safe">
             <EmptyState
-              titleSlot="No public agents yet"
-              descriptionSlot="Mark an agent as Public to share it with the team library."
+              titleSlot={studioT('No public agents yet')}
+              descriptionSlot={studioT('Mark an agent as Public to share it with the team library.')}
             />
           </div>
         );
@@ -100,8 +103,8 @@ export default function AgentBuilderLibraryPage() {
       return (
         <div className="flex items-center-safe justify-center-safe">
           <EmptyState
-            titleSlot="No public skills yet"
-            descriptionSlot="Mark a skill as Public to share it with the team library."
+            titleSlot={studioT('No public skills yet')}
+            descriptionSlot={studioT('Mark a skill as Public to share it with the team library.')}
           />
         </div>
       );
@@ -125,10 +128,12 @@ export default function AgentBuilderLibraryPage() {
               <ActionRow.Start>
                 <PageHeader>
                   <PageHeader.Title>
-                    <IconLibrary /> Library
+                    <IconLibrary /> {' ' + studioT('Library')}
                   </PageHeader.Title>
                   <PageHeader.Description>
-                    {tab === 'agents' ? 'Agents shared with the team library.' : 'Skills shared with the team library.'}
+                    {tab === 'agents'
+                      ? studioT('Agents shared with the team library.')
+                      : studioT('Skills shared with the team library.')}
                   </PageHeader.Description>
                 </PageHeader>
               </ActionRow.Start>
@@ -147,7 +152,7 @@ export default function AgentBuilderLibraryPage() {
                       )}
                     >
                       <Txt as="span" variant="column" className="block">
-                        Agents
+                        {studioT('Agents')}
                       </Txt>
                     </button>
                     <button
@@ -160,7 +165,7 @@ export default function AgentBuilderLibraryPage() {
                       )}
                     >
                       <Txt as="span" variant="column" className="block">
-                        Skills
+                        {studioT('Skills')}
                       </Txt>
                     </button>
                   </div>
@@ -169,8 +174,8 @@ export default function AgentBuilderLibraryPage() {
                   <SearchInput
                     {...listSearchProps}
                     onValueChange={setSearch}
-                    label="Search library"
-                    placeholder="Search by name or description"
+                    label={studioT('Search library')}
+                    placeholder={studioT('Search by name or description')}
                   />
                 </div>
               </ActionRow.Start>

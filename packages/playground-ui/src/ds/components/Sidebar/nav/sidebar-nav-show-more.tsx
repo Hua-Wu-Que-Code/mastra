@@ -3,6 +3,8 @@ import type { SidebarState } from '../root/sidebar-context';
 import { useMaybeSidebarState } from '../root/sidebar-context';
 import { textStyle } from '@/ds/primitives/text';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SidebarNavShowMoreProps = Omit<ComponentProps<'button'>, 'children' | 'onClick'> & {
@@ -20,6 +22,7 @@ export function SidebarNavShowMore({
   className,
   ...props
 }: SidebarNavShowMoreProps) {
+  useLocale();
   const context = useMaybeSidebarState();
   const state = stateProp ?? context?.state ?? 'default';
   if (state === 'collapsed' || foldedCount <= 0) return null;
@@ -37,7 +40,7 @@ export function SidebarNavShowMore({
       )}
       {...props}
     >
-      {expanded ? 'Show less' : `Show ${foldedCount} more`}
+      {expanded ? studioT('Show less') : studioT('Show {value0} more', { value0: foldedCount })}
     </button>
   );
 }

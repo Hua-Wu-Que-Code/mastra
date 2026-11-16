@@ -2,6 +2,8 @@ import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useStoredAgentMutations, useStoredAgentDependents } from '@mastra/react/hooks/agents';
 import { useState } from 'react';
@@ -14,6 +16,7 @@ interface UseDeleteAgentActionParams {
 }
 
 const useDeleteAgentAction = ({ agentId }: UseDeleteAgentActionParams) => {
+  useLocale();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { deleteStoredAgent } = useStoredAgentMutations({ agentId: agentId });
@@ -21,11 +24,11 @@ const useDeleteAgentAction = ({ agentId }: UseDeleteAgentActionParams) => {
   const confirm = async () => {
     try {
       await deleteStoredAgent.mutateAsync(undefined);
-      toast.success('Agent deleted');
+      toast.success(studioT('Agent deleted'));
       setOpen(false);
       void navigate('/agent-builder/agents', { viewTransition: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete agent');
+      toast.error(err instanceof Error ? err.message : studioT('Failed to delete agent'));
     }
   };
 
@@ -54,6 +57,7 @@ const DeleteAgentDialog = ({
   isPending,
   onConfirm,
 }: DeleteAgentDialogProps) => {
+  useLocale();
   const { isLoading: isDependentsLoading } = useStoredAgentDependents({
     agentId: agentId,
     queryOptions: { enabled: Boolean(agentId) && open },
@@ -63,10 +67,11 @@ const DeleteAgentDialog = ({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content data-testid="agent-builder-delete-agent-dialog">
         <AlertDialog.Header>
-          <AlertDialog.Title>Delete agent?</AlertDialog.Title>
+          <AlertDialog.Title>{studioT('Delete agent?')}</AlertDialog.Title>
           <AlertDialog.Description>
-            This permanently deletes &quot;{agentName}&quot; and removes its conversation history. This cannot be
-            undone.
+            {studioT('This permanently deletes "')}
+            {agentName}
+            {studioT('" and removes its conversation history. This cannot be undone.')}
           </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Body>
@@ -74,7 +79,7 @@ const DeleteAgentDialog = ({
         </AlertDialog.Body>
         <AlertDialog.Footer>
           <AlertDialog.Cancel data-testid="agent-builder-delete-agent-cancel" disabled={isPending}>
-            Cancel
+            {studioT('Cancel')}
           </AlertDialog.Cancel>
           <Button
             icon={<TrashIcon />}
@@ -85,7 +90,7 @@ const DeleteAgentDialog = ({
               onConfirm();
             }}
           >
-            {isPending ? 'Deleting…' : 'Delete agent'}
+            {isPending ? studioT('Deleting…') : studioT('Delete agent')}
           </Button>
         </AlertDialog.Footer>
       </AlertDialog.Content>
@@ -100,6 +105,7 @@ interface DeleteAgentEntryProps {
 }
 
 export const DeleteAgentPanelButton = ({ agentId, agentName, disabled = false }: DeleteAgentEntryProps) => {
+  useLocale();
   const { open, setOpen, isPending, confirm } = useDeleteAgentAction({ agentId, agentName });
 
   return (
@@ -112,7 +118,7 @@ export const DeleteAgentPanelButton = ({ agentId, agentName, disabled = false }:
         variant="ghost"
         size="sm"
       >
-        Delete agent
+        {studioT('Delete agent')}
       </Button>
       <DeleteAgentDialog
         open={open}
@@ -127,6 +133,7 @@ export const DeleteAgentPanelButton = ({ agentId, agentName, disabled = false }:
 };
 
 export const DeleteAgentMenuItem = ({ agentId, agentName, disabled = false }: DeleteAgentEntryProps) => {
+  useLocale();
   const { open, setOpen, isPending, confirm } = useDeleteAgentAction({ agentId, agentName });
 
   return (
@@ -141,7 +148,7 @@ export const DeleteAgentMenuItem = ({ agentId, agentName, disabled = false }: De
         }}
       >
         <TrashIcon />
-        <span>Delete agent</span>
+        <span>{studioT('Delete agent')}</span>
       </DropdownMenu.Item>
       <DeleteAgentDialog
         open={open}

@@ -5,6 +5,8 @@ import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { useTraceQueryAvailable } from '@mastra/playground-ui/domains/capabilities';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useDatasetExperiment, useDatasetExperimentResults, useExperiment } from '@mastra/react/hooks/datasets';
 import { useExperimentMetrics } from '@mastra/react/hooks/experiments';
@@ -34,9 +36,10 @@ import type { CrumbDef } from '@/domains/navigation/crumbs';
 const EMPTY_RESULTS: never[] = [];
 
 function ExperimentPageShell({ crumbs, children }: { crumbs: CrumbDef[]; children?: ReactNode }) {
+  useLocale();
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Experiment</h1>
+      <h1 className="sr-only">{studioT('Experiment')}</h1>
       <div />
       <div className="flex h-full items-center justify-center">{children}</div>
     </PageLayout>
@@ -44,6 +47,7 @@ function ExperimentPageShell({ crumbs, children }: { crumbs: CrumbDef[]; childre
 }
 
 function ExperimentPage() {
+  useLocale();
   const { experimentId } = useParams<{ experimentId: string }>();
   // The selected item shows in the side panel, so it gets no crumb of its own.
   const crumbs: CrumbDef[] = [
@@ -127,11 +131,11 @@ function ExperimentPage() {
   const notFound = (
     <ExperimentPageShell crumbs={crumbs}>
       <EmptyState
-        titleSlot="Experiment not found"
-        descriptionSlot={`No experiment with id "${experimentId}".`}
+        titleSlot={studioT('Experiment not found')}
+        descriptionSlot={studioT('No experiment with id "{value0}".', { value0: experimentId })}
         actionSlot={
           <Button render={<Link to="/experiments" />} icon={<IconArrowLeft />}>
-            Back to experiments
+            {studioT('Back to experiments')}
           </Button>
         }
       />
@@ -145,11 +149,11 @@ function ExperimentPage() {
       <ExperimentPageShell crumbs={crumbs}>
         <EmptyState
           tone="error"
-          titleSlot="Failed to load experiment"
+          titleSlot={studioT('Failed to load experiment')}
           descriptionSlot={
             experimentError instanceof Error
               ? experimentError.message
-              : 'An unexpected error occurred. Please try again.'
+              : studioT('An unexpected error occurred. Please try again.')
           }
         />
       </ExperimentPageShell>

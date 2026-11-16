@@ -2,6 +2,7 @@
 
 import { DataList } from '@mastra/playground-ui/components/DataList';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface CSVPreviewTableProps {
   headers: string[];
@@ -23,6 +24,7 @@ function truncateValue(value: unknown): string {
  * Displays first N rows with truncated cell values.
  */
 export function CSVPreviewTable({ headers, data, maxRows = 5 }: CSVPreviewTableProps) {
+  useLocale();
   const displayData = data.slice(0, maxRows);
   const totalRows = data.length;
   const columns = headers.map((_, index) => (index === 0 ? 'minmax(10rem, 14rem)' : 'minmax(8rem, 12rem)')).join(' ');
@@ -71,8 +73,11 @@ export function CSVPreviewTable({ headers, data, maxRows = 5 }: CSVPreviewTableP
       {/* Row count indicator */}
       <Txt as="p" variant="caption" tone="muted">
         {displayData.length < totalRows
-          ? `Showing ${displayData.length} of ${totalRows} rows`
-          : `${totalRows} row${totalRows !== 1 ? 's' : ''}`}
+          ? studioT('Showing {value0} of {value1} rows', { value0: displayData.length, value1: totalRows })
+          : studioT('{value0} row{value1}', {
+              value0: totalRows,
+              value1: totalRows !== 1 ? studioT('English plural suffix') : '',
+            })}
       </Txt>
     </div>
   );

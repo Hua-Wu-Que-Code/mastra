@@ -3,6 +3,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useState, useRef, useEffect } from 'react';
@@ -16,6 +18,7 @@ export function ProposalTag({
   onRename: (newTag: string) => void;
   onRemove: () => void;
 }) {
+  useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(tag);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,7 +85,7 @@ export function ProposalTag({
           setIsEditing(true);
         }}
         className={cn(quietTextHover, 'p-0.5 opacity-0 transition-opacity group-hover:opacity-100')}
-        title="Edit tag"
+        title={studioT('Edit tag')}
       >
         <IconPencil className="size-icon-xs" />
       </button>
@@ -90,7 +93,7 @@ export function ProposalTag({
         type="button"
         onClick={onRemove}
         className="p-0.5 text-placeholder opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive-foreground"
-        title="Remove tag"
+        title={studioT('Remove tag')}
       >
         <IconCrossMedium className="size-icon-xs" />
       </button>

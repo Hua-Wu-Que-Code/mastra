@@ -6,6 +6,8 @@ import { IconArrowInbox } from '@mastra/playground-ui/icons/central/IconArrowInb
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
 import { IconSquareBehindSquare1 } from '@mastra/playground-ui/icons/central/IconSquareBehindSquare1';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 import { SkillFavoriteButton } from './skill-favorite-button';
 import { getSkillOrigin } from '@/domains/agent-builder/utils/skill-origin';
@@ -18,6 +20,7 @@ export type SkillBuilderListProps = {
 };
 
 export function SkillBuilderList({ skills, search, onSkillClick, showFavorites = true }: SkillBuilderListProps) {
+  useLocale();
   const filtered = useMemo(() => {
     const q = (search ?? '').trim().toLowerCase();
     if (!q) return skills;
@@ -31,7 +34,10 @@ export function SkillBuilderList({ skills, search, onSkillClick, showFavorites =
   if (filtered.length === 0) {
     return (
       <div className="flex items-center-safe justify-center-safe">
-        <EmptyState titleSlot="No skills match your search" descriptionSlot="Try a different name or description." />
+        <EmptyState
+          titleSlot={studioT('No skills match your search')}
+          descriptionSlot={studioT('Try a different name or description.')}
+        />
       </div>
     );
   }
@@ -51,7 +57,7 @@ export function SkillBuilderList({ skills, search, onSkillClick, showFavorites =
                     <TooltipTrigger asChild>
                       <span
                         className="shrink-0 text-muted-foreground"
-                        aria-label="Private skill"
+                        aria-label={studioT('Private skill')}
                         data-testid="skill-builder-private-visibility-icon"
                       >
                         <Icon size="xs">
@@ -59,7 +65,7 @@ export function SkillBuilderList({ skills, search, onSkillClick, showFavorites =
                         </Icon>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Only visible to you</TooltipContent>
+                    <TooltipContent>{studioT('Only visible to you')}</TooltipContent>
                   </Tooltip>
                 )}
                 {(() => {
@@ -74,7 +80,7 @@ export function SkillBuilderList({ skills, search, onSkillClick, showFavorites =
                           variant="meta"
                           tone="muted"
                           className="inline-flex shrink-0 items-center gap-1 rounded bg-card px-1.5 py-0.5"
-                          aria-label={isCopy ? 'Copied skill' : 'Imported skill'}
+                          aria-label={isCopy ? studioT('Copied skill') : studioT('Imported skill')}
                           data-testid="skill-builder-origin-badge"
                         >
                           {isCopy ? (
@@ -82,15 +88,19 @@ export function SkillBuilderList({ skills, search, onSkillClick, showFavorites =
                           ) : (
                             <IconArrowInbox className="size-icon-xs" />
                           )}
-                          {origin.type === 'skills-sh' ? 'skills.sh' : isCopy ? 'copied' : 'imported'}
+                          {origin.type === 'skills-sh'
+                            ? studioT('skills.sh')
+                            : isCopy
+                              ? studioT('copied')
+                              : studioT('imported')}
                         </Txt>
                       </TooltipTrigger>
                       <TooltipContent>
                         {origin.type === 'skills-sh'
-                          ? `Imported from ${origin.owner}/${origin.repo}`
+                          ? studioT('Imported from {value0}/{value1}', { value0: origin.owner, value1: origin.repo })
                           : isCopy
-                            ? `Copied from "${origin.sourceSkillName}"`
-                            : 'Imported from external registry'}
+                            ? studioT('Copied from "{value0}"', { value0: origin.sourceSkillName })
+                            : studioT('Imported from external registry')}
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -98,7 +108,7 @@ export function SkillBuilderList({ skills, search, onSkillClick, showFavorites =
               </div>
               <div className="mt-0.5 flex items-center gap-2">
                 <Txt as="span" variant="caption" tone="muted" className="line-clamp-1">
-                  {skill.description || 'No description'}
+                  {skill.description || studioT('No description')}
                 </Txt>
               </div>
               {showFavorites && (

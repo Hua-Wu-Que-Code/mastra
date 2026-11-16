@@ -4,6 +4,8 @@ import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCh
 import { IconFileArrowRightIn } from '@mastra/playground-ui/icons/central/IconFileArrowRightIn';
 import { IconFileArrowRightOut } from '@mastra/playground-ui/icons/central/IconFileArrowRightOut';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { truncateString } from '@mastra/playground-ui/utils/truncate-string';
@@ -29,6 +31,7 @@ const sortAccessors = {
 };
 
 export function ProcessorsList({ processors, isLoading, search = '', sort, onSortChange }: ProcessorsListProps) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
 
   const processorData = useMemo(
@@ -58,63 +61,70 @@ export function ProcessorsList({ processors, isLoading, search = '', sort, onSor
       <DataList.Top>
         {onSortChange ? (
           <DataList.SortableTopCell sortKey="name" sort={sortFor('name')} onSortChange={onSortChange}>
-            Name
+            {studioT('Name')}
           </DataList.SortableTopCell>
         ) : (
-          <DataList.TopCell>Name</DataList.TopCell>
+          <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
         )}
-        <DataList.TopCell>Description</DataList.TopCell>
-        <DataList.TopCellSmart long="Input" short="Input" tooltip="Contains input phase" className="text-center" />
+        <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
+        <DataList.TopCellSmart
+          long="Input"
+          short="Input"
+          tooltip={studioT('Contains input phase')}
+          className="text-center"
+        />
         <DataList.TopCellSmart
           long="Input Step"
           short={
             <>
-              <IconFileArrowRightIn /> Step
+              <IconFileArrowRightIn /> {' ' + studioT('Step')}
             </>
           }
-          tooltip="Contains input step phase"
+          tooltip={studioT('Contains input step phase')}
           className="text-center"
         />
         <DataList.TopCellSmart
           long="Output Step"
           short={
             <>
-              <IconFileArrowRightOut /> Step
+              <IconFileArrowRightOut /> {' ' + studioT('Step')}
             </>
           }
-          tooltip="Contains output step phase"
+          tooltip={studioT('Contains output step phase')}
           className="text-center"
         />
         <DataList.TopCellSmart
           long="Output Stream"
           short={
             <>
-              <IconFileArrowRightOut /> Stream
+              <IconFileArrowRightOut /> {' ' + studioT('Stream')}
             </>
           }
-          tooltip="Contains output stream phase"
+          tooltip={studioT('Contains output stream phase')}
           className="text-center"
         />
         <DataList.TopCellSmart
           long="Output Result"
           short={
             <>
-              <IconFileArrowRightOut /> Result
+              <IconFileArrowRightOut /> {' ' + studioT('Result')}
             </>
           }
-          tooltip="Contains output result phase"
+          tooltip={studioT('Contains output result phase')}
           className="text-center"
         />
         {onSortChange ? (
           <DataList.SortableTopCell sortKey="agents" sort={sortFor('agents')} onSortChange={onSortChange} align="end">
-            Used by
+            {studioT('Used by')}
           </DataList.SortableTopCell>
         ) : (
           <DataList.TopCellSmart short="Used by" long="Used by Agents" className="text-center" />
         )}
       </DataList.Top>
 
-      {filteredData.length === 0 && search ? <DataList.NoMatch message="No Processors match your search" /> : null}
+      {filteredData.length === 0 && search ? (
+        <DataList.NoMatch message={studioT('No Processors match your search')} />
+      ) : null}
 
       {filteredData.map((processor, index) => {
         const name = truncateString(processor.name || processor.id, 50);

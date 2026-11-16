@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import type { ZodSchema } from 'zod';
-
 import { WorkflowInputData } from './workflow-input-data';
 import { Button } from '@/ds/components/Button';
+
 import { IconLoadingCircle } from '@/ds/icons/central/IconLoadingCircle';
 import { IconPlay } from '@/ds/icons/central/IconPlay';
 import { Icon } from '@/ds/icons/Icon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface WorkflowTriggerFormProps {
   zodSchema: ZodSchema | null;
@@ -32,8 +33,9 @@ export function WorkflowTriggerForm({
   leftActions,
   headingSlot,
   collapsible,
-  submitButtonLabel = 'Run',
+  submitButtonLabel = studioT('Run'),
 }: WorkflowTriggerFormProps) {
+  useLocale();
   if (isViewingRun) {
     return headingSlot && <div className="pb-3">{headingSlot}</div>;
   }
@@ -45,7 +47,7 @@ export function WorkflowTriggerForm({
         defaultValues={defaultValues}
         isSubmitLoading={isStreaming}
         submitButtonLabel={submitButtonLabel}
-        inputTypeLabel="Next run input"
+        inputTypeLabel={studioT('Next run input')}
         submitButtonVariant="primary"
         submitButtonIcon={
           <Icon>

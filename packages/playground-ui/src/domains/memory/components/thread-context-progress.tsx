@@ -2,6 +2,8 @@ import { formatCompactTokens } from '@/ds/components/TokenBudget/format-tokens';
 import { toneClass } from '@/ds/components/TokenBudget/tones';
 import type { TokenBudgetTone } from '@/ds/components/TokenBudget/tones';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface ThreadContextProgressProps {
@@ -24,6 +26,7 @@ function ProgressBar({
   max: number;
   tone: TokenBudgetTone;
 }) {
+  useLocale();
   const percent = Math.max(0, Math.min(100, (value / max) * 100));
 
   return (
@@ -48,8 +51,9 @@ export function ThreadContextProgress({
   messageThreshold,
   memoryTokens,
   memoryThreshold,
-  memoryLabel = 'Memory',
+  memoryLabel = studioT('Memory'),
 }: ThreadContextProgressProps) {
+  useLocale();
   const showMessages = messageTokens != null && messageThreshold != null && messageThreshold > 0;
   const showMemory = memoryTokens != null && memoryThreshold != null && memoryThreshold > 0;
 
@@ -61,7 +65,7 @@ export function ThreadContextProgress({
     <div className="border-b border-border px-3 py-2">
       <div className="flex flex-col gap-2 sm:flex-row">
         {showMessages ? (
-          <ProgressBar label="Messages" value={messageTokens} max={messageThreshold} tone="messages" />
+          <ProgressBar label={studioT('Messages')} value={messageTokens} max={messageThreshold} tone="messages" />
         ) : null}
         {showMemory ? (
           <ProgressBar label={memoryLabel} value={memoryTokens} max={memoryThreshold} tone="memory" />

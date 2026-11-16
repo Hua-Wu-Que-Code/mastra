@@ -6,6 +6,7 @@ import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
 import { IconGauge } from '@mastra/playground-ui/icons/central/IconGauge';
 import { IconReceiptBill } from '@mastra/playground-ui/icons/central/IconReceiptBill';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export type ExperimentScorePanelProps = {
   /** Always mount the panel and pass `undefined` to close it, so the drawer can animate out. */
@@ -25,8 +26,14 @@ function isCodeBasedScorer(score: ClientScoreRowData): boolean {
 }
 
 export function ExperimentScorePanel({ score, onNext, onPrevious, onClose, onShowTrace }: ExperimentScorePanelProps) {
+  useLocale();
   return (
-    <DataPanel open={!!score} onClose={onClose} title={score ? `Score ${score.scorerId}` : 'Score'} depth={2}>
+    <DataPanel
+      open={!!score}
+      onClose={onClose}
+      title={score ? studioT('Score {value0}', { value0: score.scorerId }) : studioT('Score')}
+      depth={2}
+    >
       {score && (
         <ExperimentScorePanelBody
           score={score}
@@ -47,20 +54,27 @@ function ExperimentScorePanelBody({
   onClose,
   onShowTrace,
 }: Omit<ExperimentScorePanelProps, 'score'> & { score: ClientScoreRowData }) {
+  useLocale();
   const isCodeBased = isCodeBasedScorer(score);
   const naText = isCodeBased ? 'Not applicable (code-based scorer)' : 'Step not configured';
 
   return (
     <>
       <DataPanel.Header>
-        <DataPanel.CloseButton onClick={onClose} tooltip="Close score panel" />
+        <DataPanel.CloseButton onClick={onClose} tooltip={studioT('Close score panel')} />
         <DataPanel.Heading>
-          Score
+          {studioT('Score')}
           <DataPanel.CopyId id={score.scorerId} />
         </DataPanel.Heading>
         <DataPanel.HeaderActions>
           {onShowTrace && score.traceId && (
-            <Button size="icon-sm" variant="ghost" onClick={onShowTrace} tooltip="See trace" aria-label="See trace">
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onShowTrace}
+              tooltip={studioT('See trace')}
+              aria-label={studioT('See trace')}
+            >
               <TraceIcon />
             </Button>
           )}
@@ -68,8 +82,8 @@ function ExperimentScorePanelBody({
             <DataPanel.NextPrevNav
               onPrevious={onPrevious}
               onNext={onNext}
-              previousLabel="Go to previous score"
-              nextLabel="Go to next score"
+              previousLabel={studioT('Go to previous score')}
+              nextLabel={studioT('Go to next score')}
             />
           )}
         </DataPanel.HeaderActions>
@@ -78,7 +92,7 @@ function ExperimentScorePanelBody({
       <DataPanel.Content>
         <div className="grid gap-3">
           <DataPanel.CodeSection
-            title={`Score: ${score.score}`}
+            title={studioT('Score: {value0}', { value0: score.score })}
             icon={<IconGauge />}
             codeStr={score.reason || naText}
             simplified
@@ -87,25 +101,25 @@ function ExperimentScorePanelBody({
           {!isCodeBased && (
             <>
               <DataPanel.CodeSection
-                title="Preprocess Prompt"
+                title={studioT('Preprocess Prompt')}
                 icon={<IconReceiptBill />}
                 codeStr={score.preprocessPrompt || naText}
                 simplified
               />
               <DataPanel.CodeSection
-                title="Analyze Prompt"
+                title={studioT('Analyze Prompt')}
                 icon={<IconReceiptBill />}
                 codeStr={score.analyzePrompt || naText}
                 simplified
               />
               <DataPanel.CodeSection
-                title="Generate Score Prompt"
+                title={studioT('Generate Score Prompt')}
                 icon={<IconReceiptBill />}
                 codeStr={score.generateScorePrompt || naText}
                 simplified
               />
               <DataPanel.CodeSection
-                title="Generate Reason Prompt"
+                title={studioT('Generate Reason Prompt')}
                 icon={<IconReceiptBill />}
                 codeStr={score.generateReasonPrompt || naText}
                 simplified

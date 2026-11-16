@@ -1,3 +1,4 @@
+import { t as studioT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type StatusTone = 'success' | 'progress' | 'error' | 'neutral';
@@ -15,12 +16,44 @@ export type StatusPresentationFn<T> = (status: T | null) => StatusPresentation;
 export type DeployState = 'ready' | 'building' | 'idle' | 'queued' | 'stopped' | 'error';
 
 export const deployStates = {
-  ready: { label: 'Ready', tone: 'success' },
-  building: { label: 'Building', tone: 'progress' },
-  idle: { label: 'Idle', tone: 'neutral', glyph: 'ring' },
-  queued: { label: 'Queued', tone: 'neutral', glyph: 'ring' },
-  stopped: { label: 'Stopped', tone: 'neutral' },
-  error: { label: 'Error', tone: 'error' },
+  ready: {
+    get label() {
+      return studioT('Ready');
+    },
+    tone: 'success',
+  },
+  building: {
+    get label() {
+      return studioT('Building');
+    },
+    tone: 'progress',
+  },
+  idle: {
+    get label() {
+      return studioT('Idle');
+    },
+    tone: 'neutral',
+    glyph: 'ring',
+  },
+  queued: {
+    get label() {
+      return studioT('Queued');
+    },
+    tone: 'neutral',
+    glyph: 'ring',
+  },
+  stopped: {
+    get label() {
+      return studioT('Stopped');
+    },
+    tone: 'neutral',
+  },
+  error: {
+    get label() {
+      return studioT('Error');
+    },
+    tone: 'error',
+  },
 } satisfies Record<DeployState, Omit<StatusPresentation, 'description'>>;
 
 const TONE_FILL: Record<StatusTone, string> = {

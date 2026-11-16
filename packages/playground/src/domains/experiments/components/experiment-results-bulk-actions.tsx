@@ -1,6 +1,8 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconClipboard2 } from '@mastra/playground-ui/icons/central/IconClipboard2';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { ExperimentResultsSelection } from '../hooks/use-experiment-results-selection';
 import { ExperimentResultsTagPicker } from './experiment-results-tag-picker';
 
@@ -10,6 +12,7 @@ export interface ExperimentResultsBulkActionsProps {
 
 /** Selection count (a button clearing the selection once non-empty), plus the actions acting on the selected results. */
 export function ExperimentResultsBulkActions({ selection }: ExperimentResultsBulkActionsProps) {
+  useLocale();
   const { selectedIds, selectedResults, tagVocabulary, isFlagging, isTagging } = selection;
   const busy = isFlagging || isTagging;
   const isEmpty = selectedIds.size === 0;
@@ -22,15 +25,15 @@ export function ExperimentResultsBulkActions({ selection }: ExperimentResultsBul
         disabled={isEmpty}
         iconEnd={isEmpty ? undefined : <IconCrossMedium />}
         onClick={selection.clearSelection}
-        tooltip={isEmpty ? undefined : 'Clear selection'}
+        tooltip={isEmpty ? undefined : studioT('Clear selection')}
         className="tabular-nums"
       >
-        {selectedIds.size} selected
+        {selectedIds.size} {' ' + studioT('selected')}
       </Button>
       {!isEmpty && (
         <>
           <Button size="sm" disabled={busy} onClick={selection.flagSelectedForReview} icon={<IconClipboard2 />}>
-            Request review
+            {studioT('Request review')}
           </Button>
           <ExperimentResultsTagPicker
             selectedResults={selectedResults}

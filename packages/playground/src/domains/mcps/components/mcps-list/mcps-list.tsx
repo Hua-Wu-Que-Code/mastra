@@ -5,6 +5,8 @@ import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { truncateString } from '@mastra/playground-ui/utils/truncate-string';
@@ -59,6 +61,7 @@ function McpServerRow({ server, rowProps }: { server: McpServer; rowProps?: Reco
 }
 
 export function McpServersList({ mcpServers, isLoading, search = '', sort, onSortChange }: McpServersListProps) {
+  useLocale();
   const filteredData = useMemo(() => {
     const term = search.toLowerCase();
     return sortBy(
@@ -83,23 +86,30 @@ export function McpServersList({ mcpServers, isLoading, search = '', sort, onSor
             sort={sort?.key === 'name' ? sort.direction : undefined}
             onSortChange={onSortChange}
           >
-            Name
+            {studioT('Name')}
           </DataList.SortableTopCell>
         ) : (
-          <DataList.TopCell>Name</DataList.TopCell>
+          <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
         )}
         <DataList.TopCell>URL</DataList.TopCell>
-        <DataList.TopCellSmart long="Agents" short={<AgentIcon />} tooltip="Agent tools" className="text-center" />
-        <DataList.TopCellSmart long="Tools" short={<ToolsIcon />} tooltip="Tools" className="text-center" />
+        <DataList.TopCellSmart
+          long="Agents"
+          short={<AgentIcon />}
+          tooltip={studioT('Agent tools')}
+          className="text-center"
+        />
+        <DataList.TopCellSmart long="Tools" short={<ToolsIcon />} tooltip={studioT('Tools')} className="text-center" />
         <DataList.TopCellSmart
           long="Workflows"
           short={<WorkflowIcon />}
-          tooltip="Workflow tools"
+          tooltip={studioT('Workflow tools')}
           className="text-center"
         />
       </DataList.Top>
 
-      {filteredData.length === 0 && search ? <DataList.NoMatch message="No MCP Servers match your search" /> : null}
+      {filteredData.length === 0 && search ? (
+        <DataList.NoMatch message={studioT('No MCP Servers match your search')} />
+      ) : null}
 
       {filteredData.map((server, index) => (
         <McpServerRow key={server.id} server={server} rowProps={getRowProps(index)} />

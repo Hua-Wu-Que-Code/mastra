@@ -37,7 +37,15 @@ type NavCrumbOverrides = Partial<Pick<CrumbDef, 'id' | 'label' | 'to' | 'icon'>>
 export function navCrumb(url: string, overrides?: NavCrumbOverrides): CrumbDef {
   const item = findNavItem(url);
   if (!item) throw new Error(`navCrumb: unknown nav url "${url}"`);
-  return { id: `nav:${url}`, label: item.name, icon: item.Icon, to: url, ...overrides };
+  return {
+    id: `nav:${url}`,
+    get label() {
+      return item.name;
+    },
+    icon: item.Icon,
+    to: url,
+    ...overrides,
+  };
 }
 
 export const decodeRouteParam = (value: string | undefined) => {

@@ -6,6 +6,8 @@ import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Switch } from '@mastra/playground-ui/components/Switch';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useStoredSkills } from '@mastra/react/hooks/agents';
 
 import { useState } from 'react';
@@ -15,6 +17,7 @@ import { SkillEditDialog } from './skill-edit-dialog';
 import { SectionHeader } from '@/domains/cms';
 
 export function SkillsPage() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const { data: storedSkillsResponse, isLoading } = useStoredSkills();
@@ -65,18 +68,25 @@ export function SkillsPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <SectionHeader
-            title="Skills"
-            subtitle={`Give your agent specialized knowledge by using skills.${totalCount > 0 ? ` (${totalCount} selected)` : ''}`}
+            title={studioT('Skills')}
+            subtitle={studioT('Give your agent specialized knowledge by using skills.{value0}', {
+              value0: totalCount > 0 ? ` (${totalCount} selected)` : '',
+            })}
           />
 
           {!readOnly && (
             <Button size="sm" onClick={() => setDialogOpen(true)} icon={<IconPlusMedium />}>
-              Add a skill
+              {studioT('Add a skill')}
             </Button>
           )}
         </div>
 
-        <SearchInput label="Search skills" placeholder="Search skills" value={search} onValueChange={setSearch} />
+        <SearchInput
+          label={studioT('Search skills')}
+          placeholder={studioT('Search skills')}
+          value={search}
+          onValueChange={setSearch}
+        />
 
         {filteredSkills.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -84,7 +94,7 @@ export function SkillsPage() {
               <Entity key={skill.id} className="bg-background">
                 <EntityContent>
                   <EntityName>{skill.name}</EntityName>
-                  <EntityDescription>{skill.description || 'No description'}</EntityDescription>
+                  <EntityDescription>{skill.description || studioT('No description')}</EntityDescription>
                 </EntityContent>
 
                 {!readOnly && (
@@ -101,12 +111,12 @@ export function SkillsPage() {
         {!isLoading && storedSkills.length === 0 && (
           <div className="py-8">
             <EmptyState
-              titleSlot="No skills available"
-              descriptionSlot="Create a skill to give your agent specialized knowledge."
+              titleSlot={studioT('No skills available')}
+              descriptionSlot={studioT('Create a skill to give your agent specialized knowledge.')}
               actionSlot={
                 !readOnly ? (
                   <Button onClick={() => setDialogOpen(true)} icon={<IconPlusMedium />}>
-                    Add a skill
+                    {studioT('Add a skill')}
                   </Button>
                 ) : undefined
               }

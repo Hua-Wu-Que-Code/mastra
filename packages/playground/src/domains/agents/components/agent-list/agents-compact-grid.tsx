@@ -3,6 +3,8 @@ import { Card, CardContent } from '@mastra/playground-ui/components/Card';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { AgentCompactCard } from './agent-compact-card';
 
 export interface AgentsCompactGridProps {
@@ -33,16 +35,17 @@ function AgentsCompactGridSkeleton() {
 }
 
 export function AgentsCompactGrid({ agents, isLoading, hasSearch }: AgentsCompactGridProps) {
+  useLocale();
   return (
     <ScrollArea orientation="vertical" className="size-full">
       {isLoading ? <AgentsCompactGridSkeleton /> : null}
 
       {!isLoading && agents.length === 0 && hasSearch ? (
-        <Txt className="py-5 text-center">No Agents match your search</Txt>
+        <Txt className="py-5 text-center">{studioT('No Agents match your search')}</Txt>
       ) : null}
 
       {!isLoading && agents.length > 0 ? (
-        <ul aria-label="Agents compact grid" className={compactGridClassName}>
+        <ul aria-label={studioT('Agents compact grid')} className={compactGridClassName}>
           {agents.map(agent => (
             <li key={agent.id} className="min-w-0">
               <AgentCompactCard agent={agent} />

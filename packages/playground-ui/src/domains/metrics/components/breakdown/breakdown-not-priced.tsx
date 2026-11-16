@@ -1,4 +1,7 @@
+import { t as studioT, useLocale } from '@/lib/i18n';
+
 /** A figure without a price: said so rather than shown as $0. */
 export function BreakdownNotPriced() {
-  return <span title="No price for this model">Not priced</span>;
+  useLocale();
+  return <span title={studioT('No price for this model')}>{studioT('Not priced')}</span>;
 }

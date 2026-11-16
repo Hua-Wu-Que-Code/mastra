@@ -1,4 +1,5 @@
 import type { AddDatasetItemParams } from '@mastra/client-js';
+import { t as studioT } from '@/lib/i18n';
 
 export type TrajectoryExpectation = NonNullable<AddDatasetItemParams['expectedTrajectory']>;
 export type ExpectedStep = NonNullable<TrajectoryExpectation['steps']>[number];
@@ -32,7 +33,12 @@ export const STEP_TYPE_OPTIONS: Array<{ value: StepTypeOption; label: string }> 
   ...Object.keys(STEP_TYPE_LABELS)
     .filter(isExpectedStepType)
     .map(value => ({ value, label: STEP_TYPE_LABELS[value] })),
-  { value: 'generic', label: 'Any step' },
+  {
+    value: 'generic',
+    get label() {
+      return studioT('Any step');
+    },
+  },
 ];
 
 export const ORDERING_LABELS = {

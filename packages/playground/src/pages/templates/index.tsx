@@ -2,6 +2,8 @@ import { Header, HeaderTitle } from '@mastra/playground-ui/components/Header';
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { IconPackage } from '@mastra/playground-ui/icons/central/IconPackage';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMastraTemplates } from '@mastra/react/hooks/templates';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -10,20 +12,28 @@ import { TemplatesList } from '@/domains/templates/templates-list';
 import { TemplatesTools } from '@/domains/templates/templates-tools';
 import { cn } from '@/lib/utils';
 
-const crumbs = [{ id: 'templates', label: 'Templates' }];
+const crumbs = [
+  {
+    id: 'templates',
+    get label() {
+      return studioT('Templates');
+    },
+  },
+];
 
 export default function Templates() {
+  useLocale();
   const { data, isLoading } = useMastraTemplates();
   const { templates, tags, providers } = data ?? { templates: [], tags: [], providers: [] };
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const tagOptions = [{ value: 'all', label: 'Any tag' }];
+  const tagOptions = [{ value: 'all', label: studioT('Any tag') }];
   (tags || []).forEach(tag => {
     tagOptions.push({ value: tag, label: tag });
   });
-  const providerOptions = [{ value: 'all', label: 'Any provider' }];
+  const providerOptions = [{ value: 'all', label: studioT('Any provider') }];
   (providers || []).forEach(provider => {
     providerOptions.push({ value: provider, label: provider });
   });
@@ -67,13 +77,13 @@ export default function Templates() {
 
   return (
     <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Templates</h1>
+      <h1 className="sr-only">{studioT('Templates')}</h1>
       <Header>
         <HeaderTitle>
           <Icon>
             <IconPackage />
           </Icon>
-          Templates
+          {studioT('Templates')}
         </HeaderTitle>
       </Header>
 

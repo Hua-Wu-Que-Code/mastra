@@ -12,6 +12,7 @@ import { ChartCard } from './chart-card';
 import { ChartCardError } from './chart-card-error';
 import { ShareBar } from '@/ds/components/ShareBar';
 import type { ShareBarRow } from '@/ds/components/ShareBar';
+import { useLocale, t as studioT } from '@/lib/i18n';
 
 type View = 'agents' | 'models' | 'threads';
 
@@ -41,7 +42,13 @@ export type UsageCardProps = {
 type ViewProps = UsageCardProps & { onViewChange: (view: View) => void };
 
 const KEEP = { placeholderData: keepPreviousData };
-const COLUMNS = [{ label: 'Tokens' }];
+const COLUMNS = [
+  {
+    get label() {
+      return studioT('Tokens');
+    },
+  },
+];
 
 /** Who is spending: agents, models or threads ranked by cost share, with tokens. Only the open tab loads. */
 export function UsageCard(props: UsageCardProps) {
@@ -122,6 +129,7 @@ function UsageFrame({
   isUpdating,
   isError,
 }: ViewProps & { view: View; rows: UsageRow[]; isLoading: boolean; isUpdating: boolean; isError: boolean }) {
+  useLocale();
   const tokensOf = new Map(rows.map(r => [r.key, r.tokens]));
   const shareRows: ShareBarRow[] = rows.map(r => ({
     key: r.key,
@@ -157,13 +165,13 @@ function UsageFrame({
         <ShareBar
           rows={shareRows}
           columns={COLUMNS}
-          valueLabel="Cost"
+          valueLabel={studioT('Cost')}
           color={CHART_COLORS.green}
           other={rest => ({
             value: formatUsd(rest.reduce((sum, r) => sum + r.share, 0)),
             cells: [formatCount(rest.reduce((sum, r) => sum + (tokensOf.get(r.key) ?? 0), 0))],
           })}
-          emptyState="No model usage in this range."
+          emptyState={studioT('No model usage in this range.')}
           isLoading={isLoading}
         />
       </ChartArea>

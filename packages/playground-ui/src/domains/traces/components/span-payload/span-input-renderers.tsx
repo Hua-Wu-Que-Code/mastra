@@ -10,29 +10,31 @@ import type { PayloadRegistry } from './span-payload-registry';
 import { SpanToolNameValue } from './span-payload-tool';
 import { getSpanSignal } from '@/domains/traces/utils/span-signal';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 function SpanTextRenderer({ value }: { value: string }) {
   return <SpanPayloadMarkdown>{value}</SpanPayloadMarkdown>;
 }
 
 function SpanAgentRunResumeRenderer({ value }: { value: AgentRunResumeInput }) {
+  useLocale();
   const { resumeData, toolName, toolCallId, ...rest } = value;
   const hasTarget = toolName !== undefined || toolCallId !== undefined;
   const data = resumeData !== undefined ? resumeData : Object.keys(rest).length > 0 ? rest : undefined;
   return (
     <div data-slot="span-agent-run-resume" className="flex flex-col gap-6">
       {hasTarget && (
-        <SpanPayloadField label="Resumes into">
+        <SpanPayloadField label={studioT('Resumes into')}>
           <DataKeysAndValues>
             {toolName !== undefined && (
               <>
-                <DataKeysAndValues.Key>Tool</DataKeysAndValues.Key>
+                <DataKeysAndValues.Key>{studioT('Tool')}</DataKeysAndValues.Key>
                 <SpanToolNameValue toolName={String(toolName)} />
               </>
             )}
             {toolCallId !== undefined && (
               <>
-                <DataKeysAndValues.Key>Tool call id</DataKeysAndValues.Key>
+                <DataKeysAndValues.Key>{studioT('Tool call id')}</DataKeysAndValues.Key>
                 <DataKeysAndValues.ValueWithCopyBtn copyValue={String(toolCallId)}>
                   {String(toolCallId)}
                 </DataKeysAndValues.ValueWithCopyBtn>
@@ -42,7 +44,7 @@ function SpanAgentRunResumeRenderer({ value }: { value: AgentRunResumeInput }) {
         </SpanPayloadField>
       )}
       {data !== undefined && (
-        <SpanPayloadField label="Resume data">
+        <SpanPayloadField label={studioT('Resume data')}>
           <SpanPayloadJson value={data} />
         </SpanPayloadField>
       )}

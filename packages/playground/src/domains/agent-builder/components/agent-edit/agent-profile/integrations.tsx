@@ -1,6 +1,8 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { surfaceRimFocus } from '@mastra/playground-ui/primitives/form-element';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -21,6 +23,7 @@ const PLATFORM_DESCRIPTION: Record<string, string> = {
 };
 
 export const Integrations = ({ agentId, editable = true }: IntegrationsProps) => {
+  useLocale();
   const { data: platforms = [], isLoading } = useChannelPlatforms();
   const { canPublishToChannel } = useEditPage();
   const { requestPublishAndConnect, dialog, channelDialog } = usePublishAndConnectChannel(agentId);
@@ -61,7 +64,7 @@ export const Integrations = ({ agentId, editable = true }: IntegrationsProps) =>
     return (
       <div className="flex justify-center px-4 py-5" data-testid="integrations-detail-picker">
         <Txt variant="body" tone="muted">
-          No integrations configured for this project
+          {studioT('No integrations configured for this project')}
         </Txt>
       </div>
     );
@@ -72,11 +75,12 @@ export const Integrations = ({ agentId, editable = true }: IntegrationsProps) =>
       <div className="flex w-full max-w-[48rem] flex-col items-center gap-4 text-center">
         <div className="flex flex-col gap-2">
           <Txt variant="heading" tone="ink">
-            Channel integrations
+            {studioT('Channel integrations')}
           </Txt>
           <Txt variant="body" tone="muted">
-            Publish this agent to external platforms. Each connection installs a bot in the platform that runs this
-            agent.
+            {studioT(
+              'Publish this agent to external platforms. Each connection installs a bot in the platform that runs this agent.',
+            )}
           </Txt>
         </div>
 
@@ -109,6 +113,7 @@ interface IntegrationCardProps {
 }
 
 const IntegrationCard = ({ platform, agentId, disabled, requiresLibrary, onSelect }: IntegrationCardProps) => {
+  useLocale();
   const { data: installations = [] } = useChannelInstallations({
     platform: platform.id,
     agentId: agentId,
@@ -154,21 +159,21 @@ const IntegrationCard = ({ platform, agentId, disabled, requiresLibrary, onSelec
 
       {!platform.isConfigured ? (
         <Badge variant="warning" size="sm" indicator="dot">
-          Not configured
+          {studioT('Not configured')}
         </Badge>
       ) : installation ? (
         <Badge variant="success" size="sm" indicator="dot">
-          Connected
+          {studioT('Connected')}
         </Badge>
       ) : (
         <Badge size="sm" indicator="dot">
-          Not connected
+          {studioT('Not connected')}
         </Badge>
       )}
 
       {showLibraryBadge ? (
         <Badge variant="warning" size="sm" indicator="dot">
-          Add to library to connect
+          {studioT('Add to library to connect')}
         </Badge>
       ) : null}
     </button>

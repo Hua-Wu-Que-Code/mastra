@@ -15,11 +15,13 @@ import {
   ActivityTrigger,
 } from '@/ds/components/ai/activity';
 import type { ActivityStatus } from '@/ds/components/ai/activity';
+import { toolLabel } from '@/ds/components/ai/tool-call/tool-phrases';
 import { Metadata } from '@/ds/components/Metadata';
 import { ScrollArea } from '@/ds/components/ScrollArea';
 import { Txt } from '@/ds/components/Txt';
 import { IconArrowsHide } from '@/ds/icons/central/IconArrowsHide';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface ToolCallGroupStep {
   toolName: string;
@@ -39,18 +41,24 @@ export interface ToolCallGroupProps {
 const MAX_KIND_GLYPHS = 4;
 
 export function ToolCallGroup({ steps, leading, children }: ToolCallGroupProps) {
+  useLocale();
   const running = steps.find(step => step.status === 'running');
   const live = running && presentTool(running.toolName, running.args);
 
   return (
-    <Activity status={running ? 'running' : 'idle'} aria-label={`Tool group: ${steps.length} steps`}>
+    <Activity
+      status={running ? 'running' : 'idle'}
+      aria-label={studioT('Tool group: {value0} steps', { value0: steps.length })}
+    >
       <ActivityTrigger>
         <ActivityHeader>
           <ActivityLeading>{leading}</ActivityLeading>
           <ActivityIcon>
             <IconArrowsHide aria-hidden className="size-icon-sm text-placeholder" />
           </ActivityIcon>
-          <ActivityLabel>{steps.length} steps</ActivityLabel>
+          <ActivityLabel>
+            {steps.length} {' ' + studioT('steps')}
+          </ActivityLabel>
           {live && live.description ? (
             <ActivityLabel className="max-w-none min-w-0 shrink">{live.description}</ActivityLabel>
           ) : (
@@ -74,6 +82,7 @@ export function ToolCallGroup({ steps, leading, children }: ToolCallGroupProps) 
 }
 
 function GroupProgress({ steps }: { steps: ToolCallGroupStep[] }) {
+  useLocale();
   const done = steps.filter(step => step.status !== 'running').length;
   if (done < steps.length) {
     return (
@@ -85,7 +94,11 @@ function GroupProgress({ steps }: { steps: ToolCallGroupStep[] }) {
   const failed = steps.filter(step => step.status === 'error').length;
   const errorIndicator =
     failed > 0 ? (
-      <IconCrossMedium role="img" aria-label="Failed" className="size-icon-sm shrink-0 text-destructive-foreground" />
+      <IconCrossMedium
+        role="img"
+        aria-label={studioT('Failed')}
+        className="size-icon-sm shrink-0 text-destructive-foreground"
+      />
     ) : null;
   // Older consumers only supply visual status, which cannot distinguish completed from interrupted calls.
   if (steps.some(step => step.hasResult === undefined)) return errorIndicator;
@@ -114,7 +127,7 @@ function GroupProgress({ steps }: { steps: ToolCallGroupStep[] }) {
 
 function GroupKinds({ steps }: { steps: ToolCallGroupStep[] }) {
   const presented = steps.map(step => presentTool(step.toolName, step.args));
-  const labels = new Set(presented.map(({ label }) => label));
+  const labels = new Set(presented.map(({ label }) => toolLabel(label)));
   const glyphs = [...new Map(presented.map(({ pose, icon }) => [pose, icon]))].slice(0, MAX_KIND_GLYPHS);
 
   return (

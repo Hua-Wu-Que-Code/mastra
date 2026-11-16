@@ -13,6 +13,7 @@ import type { ActivityStatus } from '@/ds/components/ai/activity';
 import { ToolCallMono } from '@/ds/components/ai/tool-call';
 import { Button } from '@/ds/components/Button';
 import { CodeEditor } from '@/ds/components/CodeEditor';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type TextMessage = {
   type: 'text';
@@ -63,6 +64,7 @@ export const AgentBadge = ({
   onLoadPrevious,
   isLoadingPrevious = false,
 }: AgentBadgeProps) => {
+  useLocale();
   const routingDecision = metadata?.mode === 'network' ? metadata.routingDecision : undefined;
   const selectionReason =
     metadata?.mode === 'network' ? (routingDecision?.selectionReason ?? metadata.selectionReason) : undefined;
@@ -148,7 +150,7 @@ export const AgentBadge = ({
               disabled={isLoadingPrevious}
               data-testid="agent-badge-load-previous"
             >
-              {isLoadingPrevious ? 'Loading earlier messages…' : 'Load earlier messages'}
+              {isLoadingPrevious ? studioT('Loading earlier messages…') : studioT('Load earlier messages')}
             </Button>
           )}
 
@@ -191,7 +193,7 @@ export const AgentBadge = ({
 
           {suspendPayloadSlot !== undefined && suspendPayload && (
             <div>
-              <SectionLabel>Agent suspend payload</SectionLabel>
+              <SectionLabel>{studioT('Agent suspend payload')}</SectionLabel>
               {suspendPayloadSlot}
             </div>
           )}

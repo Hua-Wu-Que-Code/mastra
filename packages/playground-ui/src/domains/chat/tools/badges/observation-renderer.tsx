@@ -4,6 +4,8 @@ import { useMemo } from 'react';
 import { observationPriorityByEmoji, observationPriorityTone } from '@/domains/memory/lib/observation-priority';
 import { MarkdownRenderer } from '@/ds/components/MarkdownRenderer';
 import { Txt } from '@/ds/components/Txt/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 type Priority = '🔴' | '🟡' | '🟢';
@@ -308,6 +310,7 @@ function ThreadSection({
   showThreadId: boolean;
   useInheritedTextColor?: boolean;
 }) {
+  useLocale();
   return (
     <div className="mb-3">
       {showThreadId && thread.threadId !== 'default' && (
@@ -320,7 +323,7 @@ function ThreadSection({
             useInheritedTextColor ? 'bg-current/10 opacity-60' : 'bg-muted/50',
           )}
         >
-          Thread{' '}
+          {studioT('Thread')}{' '}
           <Txt as="span" variant="meta" font="mono">
             {thread.threadId}
           </Txt>
@@ -354,6 +357,7 @@ export function ObservationRenderer({
   showSuggestedResponse = false,
   useInheritedTextColor = false,
 }: ObservationRendererProps) {
+  useLocale();
   const parsed = useMemo(() => parseObservations(observations), [observations]);
 
   const hasMultipleThreads =
@@ -362,7 +366,7 @@ export function ObservationRenderer({
   if (parsed.threads.length === 0 && !parsed.currentTask && !parsed.suggestedResponse) {
     return (
       <Txt as="p" variant="caption" tone="muted" className={cn('italic', className)}>
-        No observations
+        {studioT('No observations')}
       </Txt>
     );
   }
@@ -386,7 +390,7 @@ export function ObservationRenderer({
       {showCurrentTask && parsed.currentTask && (
         <div className="mt-2 border-t border-border pt-2">
           <Txt as="p" variant="meta" tone="muted" className="mb-1 uppercase">
-            Current Task
+            {studioT('Current Task')}
           </Txt>
           <Txt as="p" variant="caption" tone="ink" className="whitespace-pre-wrap">
             {parsed.currentTask}
@@ -397,7 +401,7 @@ export function ObservationRenderer({
       {showSuggestedResponse && parsed.suggestedResponse && (
         <div className="mt-2 border-t border-border pt-2">
           <Txt as="p" variant="meta" tone="muted" className="mb-1 uppercase">
-            Suggested Response
+            {studioT('Suggested Response')}
           </Txt>
           <Txt as="p" variant="caption" className="whitespace-pre-wrap text-foreground/80 italic">
             {parsed.suggestedResponse}

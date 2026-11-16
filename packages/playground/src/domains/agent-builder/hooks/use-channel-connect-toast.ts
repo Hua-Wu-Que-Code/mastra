@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router';
@@ -12,6 +13,7 @@ const formatPlatformLabel = (platform: string | null): string => {
 };
 
 export const useChannelConnectToast = () => {
+  const studioLocale = useLocale();
   const [searchParams] = useSearchParams();
   const handledKeyRef = useRef<string | null>(null);
 
@@ -33,10 +35,10 @@ export const useChannelConnectToast = () => {
 
     if (channelConnected === 'true') {
       const teamSuffix = team ? ` workspace "${team}"` : '';
-      toast.success(`Connected to ${platformLabel}${teamSuffix}`);
+      toast.success(studioT('Connected to {value0}{value1}', { value0: platformLabel, value1: teamSuffix }));
     } else {
       // v8 ignore next
-      toast.error(`Failed to connect ${platformLabel}: ${channelError}`);
+      toast.error(studioT('Failed to connect {value0}: {value1}', { value0: platformLabel, value1: channelError }));
     }
-  }, [channelConnected, channelError, platform, searchParams, team]);
+  }, [channelConnected, channelError, platform, searchParams, team, studioLocale]);
 };

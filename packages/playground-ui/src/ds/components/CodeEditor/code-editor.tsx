@@ -21,6 +21,8 @@ import { useFieldControlAria } from '@/ds/components/Field/field-control-aria';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { fieldErrorRimWithin, inputSurfaceAndFocusWithinStyle } from '@/ds/primitives/form-element';
 import { formatJSON } from '@/lib/formatting';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import type { JsonSchema } from '@/lib/json-schema';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
@@ -234,6 +236,7 @@ export const CodeEditor = forwardRef<ReactCodeMirrorRef, CodeEditorProps>(
     },
     ref,
   ) => {
+    useLocale();
     const fieldAria = useFieldControlAria({ 'aria-label': ariaLabelProp });
     const ariaLabel = ariaLabelProp ?? 'Code editor';
     const controlId = id ?? fieldAria.id;
@@ -248,7 +251,7 @@ export const CodeEditor = forwardRef<ReactCodeMirrorRef, CodeEditorProps>(
       try {
         onChange?.((await formatJSON(formattedCode)).trimEnd());
       } catch {
-        toast.error('Can’t format: the JSON is invalid');
+        toast.error(studioT('Can’t format: the JSON is invalid'));
       }
     };
 
@@ -315,8 +318,8 @@ export const CodeEditor = forwardRef<ReactCodeMirrorRef, CodeEditorProps>(
               <Button
                 type="button"
                 size="icon-sm"
-                tooltip="Format JSON"
-                aria-label="Format JSON"
+                tooltip={studioT('Format JSON')}
+                aria-label={studioT('Format JSON')}
                 onClick={handleFormat}
               >
                 <IconCodeBrackets />

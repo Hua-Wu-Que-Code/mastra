@@ -5,6 +5,8 @@ import { Fieldset, FieldsetLegend } from '@mastra/playground-ui/components/Field
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { IconArrowRotateCounterClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateCounterClockwise';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
 import { useState } from 'react';
 import type { RefObject } from 'react';
@@ -34,6 +36,7 @@ export function AgentModelField({
   onReset,
   container,
 }: AgentModelFieldProps) {
+  useLocale();
   const policy = useBuilderModelPolicy();
   const { isLoading: providersLoading } = useLLMProviders();
   const [modelOpen, setModelOpen] = useState(false);
@@ -41,9 +44,9 @@ export function AgentModelField({
   if (policy.active && policy.pickerVisible === false) {
     return (
       <Fieldset className="gap-2">
-        <FieldsetLegend>Model</FieldsetLegend>
+        <FieldsetLegend>{studioT('Model')}</FieldsetLegend>
         <div>
-          <Badge icon={<IconLock />}>Locked by admin</Badge>
+          <Badge icon={<IconLock />}>{studioT('Locked by admin')}</Badge>
         </div>
       </Fieldset>
     );
@@ -57,7 +60,7 @@ export function AgentModelField({
 
   return (
     <Fieldset className="gap-2">
-      <FieldsetLegend>Model</FieldsetLegend>
+      <FieldsetLegend>{studioT('Model')}</FieldsetLegend>
       {providersLoading ? (
         // Reserve the picker's footprint; the pickers' own skeletons stretch to a width they don't have here.
         <Skeleton className="h-control-md w-60 rounded-full" />
@@ -68,7 +71,7 @@ export function AgentModelField({
               value={provider}
               onValueChange={handleProviderChange}
               container={container}
-              aria-label="Model provider"
+              aria-label={studioT('Model provider')}
               className="w-auto min-w-0 shrink-0 gap-1 px-3"
             />
             <LLMModels
@@ -79,12 +82,12 @@ export function AgentModelField({
               onOpenChange={setModelOpen}
               container={container}
               disabled={!provider}
-              aria-label="Model"
+              aria-label={studioT('Model')}
               className="w-auto min-w-0 gap-1 px-3"
             />
           </ButtonsGroup>
           {canReset && (
-            <Button variant="ghost" size="icon-md" tooltip="Use the agent's model" onClick={onReset}>
+            <Button variant="ghost" size="icon-md" tooltip={studioT("Use the agent's model")} onClick={onReset}>
               <IconArrowRotateCounterClockwise />
             </Button>
           )}

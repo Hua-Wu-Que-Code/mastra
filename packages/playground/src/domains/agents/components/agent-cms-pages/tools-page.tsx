@@ -9,6 +9,8 @@ import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMe
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { passwordManagerOptOutProps } from '@mastra/playground-ui/primitives/password-manager-autofill';
 import { controlStateColorTransition, focusRing } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
@@ -26,6 +28,7 @@ import { MCPClientList } from '@/domains/mcps/components/mcp-client-list';
 import { IntegrationToolsSection } from '@/domains/tool-providers/components';
 
 export function ToolsPage() {
+  useLocale();
   const { form, readOnly, isCodeAgentOverride, editorConfig } = useAgentEditFormContext();
   const { control } = form;
   const { data: tools } = useTools();
@@ -161,7 +164,7 @@ export function ToolsPage() {
             <input
               type="text"
               {...passwordManagerOptOutProps}
-              aria-label={`Description for ${tool.label}`}
+              aria-label={studioT('Description for {value0}', { value0: tool.label })}
               disabled={!canEditToolDescriptions}
               className={cn(
                 '-mx-1 block w-full appearance-none rounded border border-transparent bg-transparent px-1 text-muted-foreground',
@@ -188,7 +191,7 @@ export function ToolsPage() {
             type="button"
             onClick={() => handleValueChange(tool.value)}
             className={cn('rounded-sm', focusRing, quietTextHover, controlStateColorTransition)}
-            aria-label={`Remove ${tool.label}`}
+            aria-label={studioT('Remove {value0}', { value0: tool.label })}
           >
             <Icon size="xs">
               <IconCrossMedium />
@@ -203,30 +206,32 @@ export function ToolsPage() {
     <ScrollArea className="h-full">
       <div className="flex flex-col gap-4 pt-4">
         {isToolsLocked && (
-          <Notice variant="info" title="Tools are owned by code">
+          <Notice variant="info" title={studioT('Tools are owned by code')}>
             <Notice.Message>
-              This code-defined agent has disabled tools editing from Studio. Update the agent definition in code to
-              change its tools.
+              {studioT(
+                'This code-defined agent has disabled tools editing from Studio. Update the agent definition in code to change its tools.',
+              )}
             </Notice.Message>
           </Notice>
         )}
         {!isToolsLocked && descriptionsOnly && (
-          <Notice variant="info" title="Tool membership is owned by code">
+          <Notice variant="info" title={studioT('Tool membership is owned by code')}>
             <Notice.Message>
-              This code-defined agent only allows editing tool descriptions from Studio. Update the agent definition in
-              code to add or remove tools.
+              {studioT(
+                'This code-defined agent only allows editing tool descriptions from Studio. Update the agent definition in code to add or remove tools.',
+              )}
             </Notice.Message>
           </Notice>
         )}
         <SubSectionRoot>
           <Section.Header>
-            <SubSectionHeader title="Tools" icon={<ToolsIcon />} />
+            <SubSectionHeader title={studioT('Tools')} icon={<ToolsIcon />} />
 
             {canEditToolMembership && unselectedOptions.length > 0 && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="sm" icon={<IconPlusMedium />}>
-                    Add tools
+                    {studioT('Add tools')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="max-h-72 w-80 overflow-y-auto p-0 pt-4">

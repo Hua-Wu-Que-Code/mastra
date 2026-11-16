@@ -1,6 +1,8 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import { useToolDrawerParam } from '../../hooks/use-tool-drawer-param';
 import { OpenToolProvider } from './open-tool-context';
@@ -12,6 +14,7 @@ export interface ToolDrawerProps {
 
 /** The side drawer every entry point opens a tool in, driven by `?tool=`: tool icon and name, close on the right. */
 export function ToolDrawer({ children }: ToolDrawerProps) {
+  useLocale();
   const { toolId, close } = useToolDrawerParam();
 
   return (
@@ -24,7 +27,7 @@ export function ToolDrawer({ children }: ToolDrawerProps) {
           <span className="truncate">{toolId}</span>
         </DataPanel.Heading>
         <DataPanel.HeaderActions>
-          <DataPanel.CloseButton icon="x" tooltip="Close tool" onClick={close} />
+          <DataPanel.CloseButton icon="x" tooltip={studioT('Close tool')} onClick={close} />
         </DataPanel.HeaderActions>
       </DataPanel.Header>
       {/* `px-3` matches the header (its `px-2` plus the heading's `px-1`), so title and body share a left edge. */}

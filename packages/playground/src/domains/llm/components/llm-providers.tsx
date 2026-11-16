@@ -3,6 +3,8 @@ import type { ComboboxOption, ComboboxProps } from '@mastra/playground-ui/compon
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { ProviderLogo, cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import { IconCircleInfo } from '@mastra/playground-ui/icons/central/IconCircleInfo';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
@@ -37,6 +39,7 @@ export const LLMProviders = ({
   disabled,
   'aria-label': ariaLabel,
 }: LLMProvidersProps) => {
+  const studioLocale = useLocale();
   const { data: dataProviders, isLoading: providersLoading } = useLLMProviders();
   const allProviders = dataProviders?.providers || [];
 
@@ -58,7 +61,7 @@ export const LLMProviders = ({
             className={`absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ${
               provider.connected ? 'bg-success-indicator' : 'bg-destructive-indicator'
             }`}
-            title={provider.connected ? 'Connected' : 'Not connected'}
+            title={provider.connected ? studioT('Connected') : studioT('Not connected')}
           />
         </div>
       ),
@@ -77,7 +80,7 @@ export const LLMProviders = ({
         />
       ) : null,
     }));
-  }, [sortedProviders]);
+  }, [sortedProviders, studioLocale]);
 
   const handleValueChange = (providerId: string) => {
     const cleanedId = cleanProviderId(providerId);
@@ -98,9 +101,9 @@ export const LLMProviders = ({
       options={providerOptions}
       value={currentModelProvider}
       onValueChange={handleValueChange}
-      placeholder="Select provider"
-      searchPlaceholder="Search providers"
-      emptyText="No providers found"
+      placeholder={studioT('Select provider')}
+      searchPlaceholder={studioT('Search providers')}
+      emptyText={studioT('No providers found')}
       variant={variant}
       size={size}
       className={className}

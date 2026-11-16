@@ -6,6 +6,8 @@ import { Tab, TabContent, TabList, Tabs } from '@mastra/playground-ui/components
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
 import { IconLinebreak } from '@mastra/playground-ui/icons/central/IconLinebreak';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { focusRing } from '@mastra/playground-ui/primitives/transitions';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -17,6 +19,7 @@ const promptTabClassName =
   'h-control-sm px-1 underline-offset-4 data-[active]:underline pointer-coarse:min-h-11 pointer-coarse:min-w-11';
 
 export function AgentSystemPrompt({ instructions, children }: { instructions: string; children?: ReactNode }) {
+  useLocale();
   const [activeTab, setActiveTab] = useState('read');
   const [wrapSource, setWrapSource] = useState(true);
 
@@ -25,7 +28,7 @@ export function AgentSystemPrompt({ instructions, children }: { instructions: st
   return (
     <Tabs defaultTab="read" value={activeTab} onValueChange={setActiveTab} className="min-w-0 overflow-visible">
       <AgentMetadataSection
-        title="System Prompt"
+        title={studioT('System Prompt')}
         accent="pink"
         icon={<IconFileText />}
         actions={
@@ -33,10 +36,10 @@ export function AgentSystemPrompt({ instructions, children }: { instructions: st
             <div className="shrink-0">
               <TabList variant="pill-ghost" className="[--tab-indicator-color:transparent]">
                 <Tab value="read" className={promptTabClassName}>
-                  Read
+                  {studioT('Read')}
                 </Tab>
                 <Tab value="source" className={promptTabClassName}>
-                  Source
+                  {studioT('Source')}
                 </Tab>
               </TabList>
             </div>
@@ -50,9 +53,9 @@ export function AgentSystemPrompt({ instructions, children }: { instructions: st
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  aria-label="Wrap lines"
+                  aria-label={studioT('Wrap lines')}
                   aria-pressed={wrapSource}
-                  tooltip="Wrap lines"
+                  tooltip={studioT('Wrap lines')}
                   className="aria-pressed:bg-fill-hover aria-pressed:text-foreground pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                   onClick={() => setWrapSource(wrapped => !wrapped)}
                 >
@@ -61,7 +64,7 @@ export function AgentSystemPrompt({ instructions, children }: { instructions: st
               )}
               <CopyButton
                 content={instructions}
-                tooltip="Copy system prompt"
+                tooltip={studioT('Copy system prompt')}
                 variant="ghost"
                 size="icon-sm"
                 className="pointer-coarse:min-h-11 pointer-coarse:min-w-11"
@@ -75,7 +78,7 @@ export function AgentSystemPrompt({ instructions, children }: { instructions: st
                 code={instructions}
                 lang="markdown"
                 role="region"
-                aria-label="System prompt source"
+                aria-label={studioT('System prompt source')}
                 tabIndex={0}
                 className={cn(
                   'min-w-0 overflow-x-auto text-foreground',
@@ -88,7 +91,7 @@ export function AgentSystemPrompt({ instructions, children }: { instructions: st
           </div>
         ) : (
           <Txt variant="caption" tone="muted">
-            No system prompt configured
+            {studioT('No system prompt configured')}
           </Txt>
         )}
         {children}

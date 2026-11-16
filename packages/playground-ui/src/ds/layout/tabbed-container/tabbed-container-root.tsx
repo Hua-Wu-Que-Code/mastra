@@ -17,6 +17,8 @@ import type { TabProps } from '@/ds/components/Tabs/tabs-tab';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ds/components/Tooltip/tooltip';
 import { Txt } from '@/ds/components/Txt';
 import { IconFilter2 } from '@/ds/icons/central/IconFilter2';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type TabbedContainerSearchProps = Pick<SearchInputProps, 'debounceMs' | 'label' | 'placeholder'> & {
@@ -60,6 +62,7 @@ export const TabbedContainerDataList = ({ value, columns, fit, children, classNa
 );
 
 export const DataListControls = ({ dataLists }: { dataLists: ReactElement<TabbedContainerDataListProps>[] }) => {
+  useLocale();
   const tabs = useContext(TabsContext);
   return dataLists.map(dataList => {
     const { filter, search, value } = dataList.props;
@@ -95,14 +98,14 @@ export const DataListControls = ({ dataLists }: { dataLists: ReactElement<Tabbed
                       </Txt>
                     ) : null}
                     {filter.multiple ? (
-                      <Combobox {...filter} clearLabel="Clear" size="md" variant="default" />
+                      <Combobox {...filter} clearLabel={studioT('Clear')} size="md" variant="default" />
                     ) : (
                       <Combobox {...filter} size="md" variant="default" />
                     )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  {filterCount > 0 ? `Filter, ${filterCount} selected` : 'Filter'}
+                  {filterCount > 0 ? studioT('Filter, {value0} selected', { value0: filterCount }) : studioT('Filter')}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

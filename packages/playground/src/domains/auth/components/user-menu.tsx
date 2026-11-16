@@ -5,6 +5,8 @@ import { IconArrowBoxLeft } from '@mastra/playground-ui/icons/central/IconArrowB
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconLoadingCircle } from '@mastra/playground-ui/icons/central/IconLoadingCircle';
 import { IconSettingsGear5 } from '@mastra/playground-ui/icons/central/IconSettingsGear5';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import type { AuthenticatedUser, CurrentUser } from '@mastra/react/hooks/auth';
 import { useState } from 'react';
@@ -24,6 +26,7 @@ export type UserMenuProps = {
  * user info, role preview options for admins, and logout button.
  */
 export function UserMenu({ user }: UserMenuProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const { mutate: logout, isPending, error: logoutError } = useLogout();
   const { data: capabilities } = useAuthCapabilities();
@@ -79,7 +82,7 @@ export function UserMenu({ user }: UserMenuProps) {
         {availableRoles && availableRoles.length > 0 && (
           <div className="border-b border-border p-2">
             <Txt variant="meta" tone="muted" className="px-2 py-1 uppercase">
-              Preview as role
+              {studioT('Preview as role')}
             </Txt>
             {availableRoles.map(role => {
               const isActive = isImpersonating && impersonatedRole?.id === role.id;
@@ -125,7 +128,7 @@ export function UserMenu({ user }: UserMenuProps) {
             onClick={() => setOpen(false)}
             icon={<IconSettingsGear5 />}
           >
-            Settings
+            {studioT('Settings')}
           </Button>
           <Button
             icon={<IconArrowBoxLeft />}
@@ -134,7 +137,7 @@ export function UserMenu({ user }: UserMenuProps) {
             disabled={isPending}
             className="w-full justify-start"
           >
-            {isPending ? 'Signing out...' : 'Sign out'}
+            {isPending ? studioT('Signing out...') : studioT('Sign out')}
           </Button>
         </div>
       </PopoverContent>

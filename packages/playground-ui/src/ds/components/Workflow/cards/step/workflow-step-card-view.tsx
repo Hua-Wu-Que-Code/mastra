@@ -13,6 +13,10 @@ import { Metadata } from '@/ds/components/Metadata';
 import { Shimmer } from '@/ds/components/Shimmer';
 import { Txt } from '@/ds/components/Txt';
 import { raisedSurfaceStyle, surfaceStateLayerStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/utils/cn';
 
 type ReportedStatus = NonNullable<WorkflowCardDisplayStatus>;
@@ -48,6 +52,7 @@ const footerStatusClasses: Partial<Record<ReportedStatus, string>> = {
 const suspendedWickStyle: CSSProperties & { '--belt-hue': string } = { '--belt-hue': 'var(--warning-indicator)' };
 
 export function WorkflowStepCardView(props: WorkflowStepCardViewProps) {
+  useLocale();
   const {
     label,
     description,
@@ -120,7 +125,7 @@ export function WorkflowStepCardView(props: WorkflowStepCardViewProps) {
               onSelect && 'group cursor-pointer focus-visible:outline-hidden',
             )}
             type={onSelect ? 'button' : undefined}
-            aria-label={onSelect ? `Inspect ${label}` : undefined}
+            aria-label={onSelect ? studioT('Inspect {value0}', { value0: label }) : undefined}
             aria-pressed={onSelect ? Boolean(isSelected) : undefined}
             onClick={onSelect}
           >
@@ -139,23 +144,29 @@ export function WorkflowStepCardView(props: WorkflowStepCardViewProps) {
               <WorkflowTiming duration={props.duration} date={props.date} />
               {isWaiting && (
                 <Txt as="span" variant="meta" className="text-info-indicator">
-                  Next step in debug
+                  {studioT('Next step in debug')}
                 </Txt>
               )}
               {isForEach && foreachProgress && (
                 <Txt as="span" variant="meta" className="flex flex-col gap-2 py-1">
                   <span>
-                    <strong>{foreachProgress.completedCount}</strong> of {foreachProgress.totalCount} items complete
+                    <Trans
+                      id="{part0} of {part1} items complete"
+                      values={{
+                        part0: <strong>{foreachProgress.completedCount}</strong>,
+                        part1: foreachProgress.totalCount,
+                      }}
+                    />
                   </span>
                   {foreachProgress.totalCount > 0 ? (
                     <progress
                       className="h-1 w-full appearance-none border-0 bg-muted accent-success-indicator [&::-moz-progress-bar]:bg-success-indicator [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-success-indicator"
-                      aria-label={`${label} completed items`}
+                      aria-label={studioT('{value0} completed items', { value0: label })}
                       value={foreachProgress.completedCount}
                       max={foreachProgress.totalCount}
                     />
                   ) : (
-                    <span>No items to process</span>
+                    <span>{studioT('No items to process')}</span>
                   )}
                 </Txt>
               )}
@@ -201,7 +212,8 @@ export function WorkflowStepCardView(props: WorkflowStepCardViewProps) {
                 )}
               >
                 <span>
-                  {expanded ? 'Collapse' : 'Expand'} {isForEach ? 'loop' : 'workflow'}
+                  {expanded ? studioT('Collapse') : studioT('Expand')}{' '}
+                  {isForEach ? studioT('loop') : studioT('workflow')}
                 </span>
                 <DisclosureChevron direction="right" className="size-3.5" />
               </CollapsibleTrigger>

@@ -15,6 +15,7 @@ import { ChartCardError } from './chart-card-error';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
 import { MetricsLineChart, MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
+import { t as studioT } from '@/lib/i18n';
 
 const ROOT_ENTITY: Record<LatencyEntity, EntityType> = {
   agents: EntityType.AGENT,
@@ -23,9 +24,28 @@ const ROOT_ENTITY: Record<LatencyEntity, EntityType> = {
 };
 
 const SERIES: MetricsLineChartSeries[] = [
-  { dataKey: 'p50', label: 'P50', color: CHART_COLORS.sky },
-  { dataKey: 'p95', label: 'P95', color: CHART_COLORS.green, emphasis: true },
-  { dataKey: 'p99', label: 'P99', color: CHART_COLORS.violet },
+  {
+    dataKey: 'p50',
+    get label() {
+      return studioT('P50');
+    },
+    color: CHART_COLORS.sky,
+  },
+  {
+    dataKey: 'p95',
+    get label() {
+      return studioT('P95');
+    },
+    color: CHART_COLORS.green,
+    emphasis: true,
+  },
+  {
+    dataKey: 'p99',
+    get label() {
+      return studioT('P99');
+    },
+    color: CHART_COLORS.violet,
+  },
 ];
 
 const TITLE: Record<LatencyEntity, string> = {

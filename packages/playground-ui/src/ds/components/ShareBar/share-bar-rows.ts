@@ -1,4 +1,5 @@
 import type { ShareBarProps, ShareBarRow } from './share-bar-types';
+import { t as studioT } from '@/lib/i18n';
 
 /** A row's color and how strongly it shows: fainter rows fade toward the card, not to gray. */
 export type Paint = { color: string; alpha: number };
@@ -66,7 +67,7 @@ export function foldRows(
   const folded = other?.(rest);
   const otherRow: ShownRow = {
     key: REST_KEY,
-    label: `Other (${rest.length})`,
+    label: studioT('Other ({value0})', { value0: rest.length }),
     share: sumShares(rest),
     value: folded?.value,
     cells: folded?.cells,

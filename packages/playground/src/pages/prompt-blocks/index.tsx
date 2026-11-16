@@ -4,6 +4,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useUrlSort } from '@mastra/playground-ui/sort/use-url-sort';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useCallback, useMemo, useState } from 'react';
@@ -19,6 +21,7 @@ const PROMPT_BLOCKS_PER_PAGE = 50;
 const PROMPT_BLOCKS_SORT_KEYS = ['updatedAt'] as const;
 
 export default function PromptBlocks() {
+  useLocale();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,7 +67,7 @@ export default function PromptBlocks() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Prompts</h1>
+        <h1 className="sr-only">{studioT('Prompts')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -73,7 +76,7 @@ export default function PromptBlocks() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Prompts</h1>
+        <h1 className="sr-only">{studioT('Prompts')}</h1>
         <PermissionDenied variant="fill" resource="prompt blocks" />
       </PageLayout>
     );
@@ -82,11 +85,11 @@ export default function PromptBlocks() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Prompts</h1>
+        <h1 className="sr-only">{studioT('Prompts')}</h1>
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load prompt blocks"
+          titleSlot={studioT('Failed to load prompt blocks')}
           descriptionSlot={error.message}
         />
       </PageLayout>
@@ -96,7 +99,7 @@ export default function PromptBlocks() {
   if (promptBlocks.length === 0 && !isLoading && page === 0) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Prompts</h1>
+        <h1 className="sr-only">{studioT('Prompts')}</h1>
         <NoPromptBlocksInfo />
       </PageLayout>
     );
@@ -113,15 +116,15 @@ export default function PromptBlocks() {
               <SearchInput
                 {...listSearchProps}
                 onValueChange={handleSearchChange}
-                label="Search prompts"
-                placeholder="Search by name or description"
+                label={studioT('Search prompts')}
+                placeholder={studioT('Search by name or description')}
               />
             </div>
           </ActionRow.Start>
         </ActionRow>
       }
     >
-      <h1 className="sr-only">Prompts</h1>
+      <h1 className="sr-only">{studioT('Prompts')}</h1>
       <PromptsList
         promptBlocks={promptBlocks}
         isLoading={isLoading}

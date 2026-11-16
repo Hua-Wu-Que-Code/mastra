@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface CodeDiffFileHeader {
@@ -38,6 +40,7 @@ function FilePath({ path, variant }: { path: string; variant: 'body-sm' | 'meta'
 }
 
 function HeaderTitle({ path, previousPath }: Pick<CodeDiffFileHeader, 'path' | 'previousPath'>) {
+  useLocale();
   return (
     <span className="flex min-w-0 flex-col">
       <FilePath path={path} variant="body-sm" />
@@ -45,7 +48,7 @@ function HeaderTitle({ path, previousPath }: Pick<CodeDiffFileHeader, 'path' | '
         <span className="flex min-w-0 gap-1">
           {' '}
           <Txt as="span" variant="meta" tone="muted" className="shrink-0">
-            from
+            {studioT('from')}
           </Txt>{' '}
           <FilePath path={previousPath} variant="meta" />
         </span>

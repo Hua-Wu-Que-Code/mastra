@@ -7,6 +7,7 @@ import { Code } from '@/ds/components/Code';
 import { CopyButton } from '@/ds/components/CopyButton';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const surfaceClasses = 'rounded-[calc(var(--radius-xl)-2px)] bg-card text-meta';
 
@@ -16,6 +17,7 @@ export function WorkflowConditionCardView({
   previousDisplayStatus,
   actionBar,
 }: WorkflowConditionCardViewProps) {
+  useLocale();
   const indicator = getConditionIndicator(type);
   const Icon = indicator?.icon ?? IconCodeBrackets;
   const label = indicator?.label.replace(/ condition$/, '') ?? 'Condition';
@@ -44,15 +46,15 @@ export function WorkflowConditionCardView({
         </Badge>
         {hasExpression && (
           <>
-            <span className="ml-auto">Expression</span>
-            <CopyButton content={copyContent} tooltip="Copy expression" className="nodrag nopan" />
+            <span className="ml-auto">{studioT('Expression')}</span>
+            <CopyButton content={copyContent} tooltip={studioT('Copy expression')} className="nodrag nopan" />
           </>
         )}
       </div>
       {hasExpression ? (
         <div
           role="region"
-          aria-label="Condition details"
+          aria-label={studioT('Condition details')}
           tabIndex={0}
           className={`${surfaceClasses} nodrag nopan nowheel max-h-55 overflow-auto p-3.5 text-foreground [&_pre]:leading-relaxed [&_pre]:whitespace-pre-wrap`}
         >
@@ -73,7 +75,7 @@ export function WorkflowConditionCardView({
         </div>
       ) : (
         <p className={`${surfaceClasses} p-3 text-muted-foreground`}>
-          {type === 'else' ? 'When no other branch matches' : 'Condition expression unavailable'}
+          {type === 'else' ? studioT('When no other branch matches') : studioT('Condition expression unavailable')}
         </p>
       )}
       {actionBar && <div className="nodrag nopan flex justify-end px-2.5 py-1.5 empty:hidden">{actionBar}</div>}

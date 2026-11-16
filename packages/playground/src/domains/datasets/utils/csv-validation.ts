@@ -1,9 +1,10 @@
+import { jsonSchemaToZodRuntime } from '@mastra/playground-ui/lib/form/json-schema-to-zod-runtime';
 /**
  * CSV validation utilities for dataset import
  * Validates mapped data before import, including schema validation
  */
 
-import { jsonSchemaToZodRuntime } from '@mastra/playground-ui/lib/form/json-schema-to-zod-runtime';
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { ZodSchema, ZodError, ZodIssue } from 'zod';
 
 /** Column mapping configuration */
@@ -177,7 +178,9 @@ export function validateMappedData(data: Record<string, unknown>[], mapping: Col
     errors.push({
       row: 0, // Header-level error
       column: '',
-      message: 'At least one column must be mapped to input',
+      get message() {
+        return studioT('At least one column must be mapped to input');
+      },
     });
     return { valid: false, errors };
   }
@@ -196,7 +199,7 @@ export function validateMappedData(data: Record<string, unknown>[], mapping: Col
         errors.push({
           row: rowNumber,
           column: col,
-          message: `Input column "${col}" cannot be empty`,
+          message: studioT('Input column "{value0}" cannot be empty', { value0: col }),
         });
       }
     }

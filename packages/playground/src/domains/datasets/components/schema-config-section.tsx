@@ -5,6 +5,8 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useWorkflowSchema } from '@mastra/react/hooks/datasets';
@@ -43,6 +45,7 @@ export function SchemaConfigSection({
   disabled = false,
   defaultOpen = false,
 }: SchemaConfigSectionProps) {
+  useLocale();
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [sourceType, setSourceType] = useState<SourceType>('custom');
   const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
@@ -178,55 +181,55 @@ export function SchemaConfigSection({
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className={cn(quietTextHover, 'flex w-full items-center gap-2 py-2', 'text-subheading')}>
         <DisclosureChevron direction="right" className="size-4" />
-        Schema Configuration (Optional)
+        {studioT('Schema Configuration (Optional)')}
       </CollapsibleTrigger>
 
       <CollapsibleContent className="space-y-4 pt-4">
-        <Notice variant="info" title="JSON Schema Format">
+        <Notice variant="info" title={studioT('JSON Schema Format')}>
           <Notice.Message>
-            Schemas use{' '}
+            {studioT('Schemas use')}{' '}
             <a
               href="https://json-schema.org/"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-info-indicator"
             >
-              JSON Schema
+              {studioT('JSON Schema')}
             </a>{' '}
-            for validation and type checking.
+            {studioT('for validation and type checking.')}
           </Notice.Message>
         </Notice>
 
         <div className="grid gap-2">
           <div className="flex flex-wrap items-end gap-2">
             <Field className="w-40">
-              <FieldLabel size="bigger">Import From</FieldLabel>
+              <FieldLabel size="bigger">{studioT('Import From')}</FieldLabel>
               <Select value={sourceType} onValueChange={v => handleSourceChange(v)} disabled={disabled}>
                 <SelectTrigger size="sm" className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="custom">Custom</SelectItem>
-                  <SelectItem value="agent">Agent</SelectItem>
-                  <SelectItem value="workflow">Workflow</SelectItem>
-                  <SelectItem value="scorer">Scorer</SelectItem>
+                  <SelectItem value="custom">{studioT('Custom')}</SelectItem>
+                  <SelectItem value="agent">{studioT('Agent')}</SelectItem>
+                  <SelectItem value="workflow">{studioT('Workflow')}</SelectItem>
+                  <SelectItem value="scorer">{studioT('Scorer')}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
 
             {sourceType === 'workflow' && (
               <Select value={selectedWorkflow ?? ''} onValueChange={setSelectedWorkflow} disabled={disabled}>
-                <SelectTrigger aria-label="Workflow" size="sm" className="w-48">
-                  <SelectValue placeholder="Select workflow" />
+                <SelectTrigger aria-label={studioT('Workflow')} size="sm" className="w-48">
+                  <SelectValue placeholder={studioT('Select workflow')} />
                 </SelectTrigger>
                 <SelectContent>
                   {workflowsLoading ? (
                     <SelectItem value="__loading__" disabled>
-                      Loading...
+                      {studioT('Loading...')}
                     </SelectItem>
                   ) : workflowOptions.length === 0 ? (
                     <SelectItem value="__empty__" disabled>
-                      No workflows
+                      {studioT('No workflows')}
                     </SelectItem>
                   ) : (
                     workflowOptions.map(([id, wf]) => (
@@ -241,18 +244,18 @@ export function SchemaConfigSection({
 
             {sourceType === 'workflow' && selectedWorkflow && workflowSchemaLoading && (
               <Txt as="span" variant="caption" tone="muted">
-                Loading schema...
+                {studioT('Loading schema...')}
               </Txt>
             )}
 
             {sourceType === 'scorer' && (
               <Select value={scorerTargetType} onValueChange={v => setScorerTargetType(v)} disabled={disabled}>
-                <SelectTrigger aria-label="Scorer target type" size="sm" className="w-32">
+                <SelectTrigger aria-label={studioT('Scorer target type')} size="sm" className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="agent">Agent</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="agent">{studioT('Agent')}</SelectItem>
+                  <SelectItem value="custom">{studioT('Custom')}</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -261,14 +264,14 @@ export function SchemaConfigSection({
           {sourceType === 'scorer' && (
             <Txt variant="caption" tone="muted">
               {scorerTargetType === 'agent'
-                ? 'For calibrating agent-type scorers'
-                : 'For calibrating custom scorers (input/output as any)'}
+                ? studioT('For calibrating agent-type scorers')
+                : studioT('For calibrating custom scorers (input/output as any)')}
             </Txt>
           )}
         </div>
 
         <SchemaField
-          label="Input Schema"
+          label={studioT('Input Schema')}
           value={inputSchema}
           onChange={handleInputSchemaChange}
           sourceSchema={isAutoPopulate ? sourceSchemas.inputSchema : undefined}
@@ -276,7 +279,7 @@ export function SchemaConfigSection({
         />
 
         <SchemaField
-          label="Ground Truth Schema"
+          label={studioT('Ground Truth Schema')}
           value={outputSchema}
           onChange={handleOutputSchemaChange}
           sourceSchema={isAutoPopulate ? sourceSchemas.outputSchema : undefined}
@@ -284,7 +287,7 @@ export function SchemaConfigSection({
         />
 
         <SchemaField
-          label="Request Context Schema"
+          label={studioT('Request Context Schema')}
           value={requestContextSchema}
           onChange={handleRequestContextSchemaChange}
           autoPopulate={false}

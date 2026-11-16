@@ -19,6 +19,8 @@ import { Icon } from '@/ds/icons/Icon';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
 import { controlHeight } from '@/ds/primitives/control-size';
 import { VisuallyHidden } from '@/ds/primitives/visually-hidden';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const restingTabClass = buttonVariants({ variant: 'default', size: 'sm' });
@@ -47,9 +49,10 @@ export function SavedViewTabs<TSettings>({
   defaultLabel,
   newViewSettings,
   describeSettings,
-  'aria-label': ariaLabel = 'Views',
+  'aria-label': ariaLabel = studioT('Views'),
   className,
 }: SavedViewTabsProps<TSettings>) {
+  useLocale();
   const [renamingViewId, setRenamingViewId] = useState<string>();
   const { draft } = views;
   const creating = draft !== undefined && draft.viewId === undefined;
@@ -104,7 +107,7 @@ export function SavedViewTabs<TSettings>({
         <Button
           type="button"
           size="icon-sm"
-          tooltip="New view"
+          tooltip={studioT('New view')}
           disabled={draft !== undefined}
           onClick={() => views.create(newViewSettings)}
         >
@@ -124,6 +127,7 @@ function EditingViewTab({
   unsaved: boolean;
   onRename: (name: string) => void;
 }) {
+  useLocale();
   const [renaming, setRenaming] = useState(false);
   return (
     <span aria-current="true" className={editingTabClass}>
@@ -142,14 +146,14 @@ function EditingViewTab({
           {unsaved && (
             <>
               <span className="size-1.5 shrink-0 rounded-full bg-warning-indicator" aria-hidden />
-              <VisuallyHidden>Unsaved changes</VisuallyHidden>
+              <VisuallyHidden>{studioT('Unsaved changes')}</VisuallyHidden>
             </>
           )}
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
-            tooltip="Rename view"
+            tooltip={studioT('Rename view')}
             className="-mr-2 size-6"
             onClick={() => setRenaming(true)}
           >
@@ -203,11 +207,12 @@ function SavedViewTab<TSettings>({
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
+  useLocale();
   const actions: ViewAction[] = [
-    { label: 'Edit view', icon: <IconPencil aria-hidden />, onClick: onEdit },
-    { label: 'Rename', icon: <IconInputForm aria-hidden />, onClick: onRename },
-    { label: 'Duplicate', icon: <IconSquareBehindSquare1 aria-hidden />, onClick: onDuplicate },
-    { label: 'Delete view', icon: <TrashIcon aria-hidden />, onClick: onDelete, destructive: true },
+    { label: studioT('Edit view'), icon: <IconPencil aria-hidden />, onClick: onEdit },
+    { label: studioT('Rename'), icon: <IconInputForm aria-hidden />, onClick: onRename },
+    { label: studioT('Duplicate'), icon: <IconSquareBehindSquare1 aria-hidden />, onClick: onDuplicate },
+    { label: studioT('Delete view'), icon: <TrashIcon aria-hidden />, onClick: onDelete, destructive: true },
   ];
   const [menuOpen, setMenuOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);

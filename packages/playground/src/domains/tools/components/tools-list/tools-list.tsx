@@ -3,6 +3,8 @@ import { DataList, DataListSkeleton, useDataListKeyboard } from '@mastra/playgro
 import type { DataListSort } from '@mastra/playground-ui/components/DataList';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { truncateString } from '@mastra/playground-ui/utils/truncate-string';
@@ -38,6 +40,7 @@ export function ToolsList({
   onSortChange,
   selectedToolId,
 }: ToolsListProps) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
 
   const toolData = useMemo(() => prepareToolsTable(tools, agents), [tools, agents]);
@@ -65,27 +68,29 @@ export function ToolsList({
       <DataList.Top>
         {onSortChange ? (
           <DataList.SortableTopCell sortKey="name" sort={sortFor('name')} onSortChange={onSortChange}>
-            Name
+            {studioT('Name')}
           </DataList.SortableTopCell>
         ) : (
-          <DataList.TopCell>Name</DataList.TopCell>
+          <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
         )}
-        <DataList.TopCell>Description</DataList.TopCell>
+        <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
         {onSortChange ? (
           <DataList.SortableTopCell sortKey="agents" sort={sortFor('agents')} onSortChange={onSortChange} align="end">
-            Agents
+            {studioT('Agents')}
           </DataList.SortableTopCell>
         ) : (
           <DataList.TopCellSmart
             long="Agents"
             short={<AgentIcon />}
-            tooltip="Attached agents"
+            tooltip={studioT('Attached agents')}
             className="text-center"
           />
         )}
       </DataList.Top>
 
-      {filteredData.length === 0 && search ? <DataList.NoMatch message="No Tools match your search" /> : null}
+      {filteredData.length === 0 && search ? (
+        <DataList.NoMatch message={studioT('No Tools match your search')} />
+      ) : null}
 
       {filteredData.map((tool, index) => {
         const name = truncateString(tool.id, 50);

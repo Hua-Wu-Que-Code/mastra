@@ -11,16 +11,42 @@ import type {
 import type { PropertyFilterField, PropertyFilterToken } from '@/ds/components/PropertyFilter/types';
 import { IconChip } from '@/ds/icons/central/IconChip';
 import { IconCloud } from '@/ds/icons/central/IconCloud';
+import { t as studioT } from '@/lib/i18n';
 
 type EntityTypeValue = `${EntityType}`;
 
 /** Primitive type options — matches the traces filter vocabulary. */
 export const METRICS_ROOT_ENTITY_TYPE_OPTIONS = [
-  { label: 'Agent', entityType: 'agent' },
-  { label: 'Workflow', entityType: 'workflow_run' },
-  { label: 'Scorer', entityType: 'scorer' },
-  { label: 'Ingest', entityType: 'rag_ingestion' },
-  { label: 'Classifier', entityType: 'classifier' },
+  {
+    get label() {
+      return studioT('Agent');
+    },
+    entityType: 'agent',
+  },
+  {
+    get label() {
+      return studioT('Workflow');
+    },
+    entityType: 'workflow_run',
+  },
+  {
+    get label() {
+      return studioT('Scorer');
+    },
+    entityType: 'scorer',
+  },
+  {
+    get label() {
+      return studioT('Ingest');
+    },
+    entityType: 'rag_ingestion',
+  },
+  {
+    get label() {
+      return studioT('Classifier');
+    },
+    entityType: 'classifier',
+  },
 ] as const satisfies readonly { label: string; entityType: EntityTypeValue }[];
 
 /** Field IDs that live in dedicated URL params (not the generic `filterX` set). */
@@ -123,62 +149,140 @@ export function createMetricsPropertyFilterFields({
   const fields: PropertyFilterField[] = [
     {
       id: 'rootEntityType',
-      label: 'Primitive type',
+      get label() {
+        return studioT('Primitive type');
+      },
       kind: 'pick-multi',
       searchable: false,
       options: METRICS_ROOT_ENTITY_TYPE_OPTIONS.map(o => ({ label: o.label, value: o.entityType })),
-      placeholder: 'Choose entity type',
-      emptyText: 'No entity types.',
+      get placeholder() {
+        return studioT('Choose entity type');
+      },
+      get emptyText() {
+        return studioT('No entity types.');
+      },
     },
     {
       id: 'entityName',
-      label: 'Primitive name',
+      get label() {
+        return studioT('Primitive name');
+      },
       kind: 'pick-multi',
       options: availableEntityNames.map(name => ({ label: name, value: name })),
-      placeholder: 'Choose entity names',
-      emptyText: 'No entity names found.',
+      get placeholder() {
+        return studioT('Choose entity names');
+      },
+      get emptyText() {
+        return studioT('No entity names found.');
+      },
       isLoading: loading?.entityNames,
     },
     {
       id: 'tags',
-      label: 'Tags',
+      get label() {
+        return studioT('Tags');
+      },
       kind: 'pick-multi',
       multi: true,
       options: availableTags.map(tag => ({ label: tag, value: tag })),
-      placeholder: 'Choose tags',
-      emptyText: 'No tags found.',
+      get placeholder() {
+        return studioT('Choose tags');
+      },
+      get emptyText() {
+        return studioT('No tags found.');
+      },
       isLoading: loading?.tags,
     },
     {
       id: 'serviceName',
-      label: 'Service Name',
+      get label() {
+        return studioT('Service Name');
+      },
       kind: 'pick-multi',
       options: availableServiceNames.map(name => ({ label: name, value: name })),
-      placeholder: 'Choose service names',
-      emptyText: 'No service names found.',
+      get placeholder() {
+        return studioT('Choose service names');
+      },
+      get emptyText() {
+        return studioT('No service names found.');
+      },
       isLoading: loading?.serviceNames,
     },
     {
       id: 'environment',
-      label: 'Environment',
+      get label() {
+        return studioT('Environment');
+      },
       kind: 'pick-multi',
       options: availableEnvironments.map(env => ({ label: env, value: env })),
-      placeholder: 'Choose environments',
-      emptyText: 'No environments found.',
+      get placeholder() {
+        return studioT('Choose environments');
+      },
+      get emptyText() {
+        return studioT('No environments found.');
+      },
       isLoading: loading?.environments,
     },
     // Provider / model are filterable by URL (filterProvider / filterModel) but
     // are omitted from the popover until we expose a discovery endpoint.
     // High-cardinality IDs — free-text. Backed by bloom_filter skip indexes on
     // ClickHouse, narrow timestamp range pruning on DuckDB.
-    { id: 'threadId', label: 'Thread ID', kind: 'text' },
-    { id: 'resourceId', label: 'Resource ID', kind: 'text' },
-    { id: 'userId', label: 'User ID', kind: 'text' },
-    { id: 'organizationId', label: 'Organization ID', kind: 'text' },
-    { id: 'runId', label: 'Run ID', kind: 'text' },
-    { id: 'sessionId', label: 'Session ID', kind: 'text' },
-    { id: 'requestId', label: 'Request ID', kind: 'text' },
-    { id: 'experimentId', label: 'Experiment ID', kind: 'text' },
+    {
+      id: 'threadId',
+      get label() {
+        return studioT('Thread ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'resourceId',
+      get label() {
+        return studioT('Resource ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'userId',
+      get label() {
+        return studioT('User ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'organizationId',
+      get label() {
+        return studioT('Organization ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'runId',
+      get label() {
+        return studioT('Run ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'sessionId',
+      get label() {
+        return studioT('Session ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'requestId',
+      get label() {
+        return studioT('Request ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'experimentId',
+      get label() {
+        return studioT('Experiment ID');
+      },
+      kind: 'text',
+    },
   ];
   const byLabel = (a: PropertyFilterField, b: PropertyFilterField) => a.label.localeCompare(b.label);
   const pickMulti = fields.filter(f => f.kind === 'pick-multi').sort(byLabel);
@@ -193,8 +297,19 @@ const METRICS_TAGS_OPERATOR_ID = 'hasAll';
 /** Operators of the metrics filter bar. The metrics API matches one value per dimension, so `is`
  *  never widens to "is any of", and it requires every listed tag. */
 export const METRICS_FILTER_BAR_OPERATORS: FilterBarOperator[] = [
-  { id: 'is', label: 'is' },
-  { id: METRICS_TAGS_OPERATOR_ID, label: 'has all of', arity: 'many' },
+  {
+    id: 'is',
+    get label() {
+      return studioT('is');
+    },
+  },
+  {
+    id: METRICS_TAGS_OPERATOR_ID,
+    get label() {
+      return studioT('has all of');
+    },
+    arity: 'many',
+  },
 ];
 
 /** Same labels as the trace filters, so a dimension reads the same on Metrics and Traces. */

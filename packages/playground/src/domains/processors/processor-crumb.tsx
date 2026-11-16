@@ -1,4 +1,6 @@
 import { CrumbSkeleton, crumbSwitcherTriggerProps } from '@mastra/playground-ui/components/Breadcrumb';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useProcessors } from '@mastra/react/hooks/processors';
 import { useParams } from 'react-router';
 import { ProcessorCombobox } from './components/processor-combobox';
@@ -13,8 +15,11 @@ export function ProcessorCrumb() {
 }
 
 export function ProcessorSwitcher() {
+  useLocale();
   const { processorId } = useParams<{ processorId: string }>();
   if (!processorId) return null;
 
-  return <ProcessorCombobox value={processorId} {...crumbSwitcherTriggerProps} aria-label="Switch processor" />;
+  return (
+    <ProcessorCombobox value={processorId} {...crumbSwitcherTriggerProps} aria-label={studioT('Switch processor')} />
+  );
 }

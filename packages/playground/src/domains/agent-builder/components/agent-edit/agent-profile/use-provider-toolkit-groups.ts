@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useToolProviders } from '@mastra/react/hooks/tool-providers';
 import { useMemo } from 'react';
 import type { AgentTool } from '../../../types/agent-tool';
@@ -45,6 +46,7 @@ export interface ProviderToolkitGroups {
  * the bare provider slug to preserve the caller's `Set<toolkit>` contract.
  */
 export const useProviderToolkitGroups = (availableAgentTools: AgentTool[]): ProviderToolkitGroups => {
+  const studioLocale = useLocale();
   const providersQuery = useToolProviders();
   const providers = providersQuery.data?.providers;
 
@@ -63,7 +65,7 @@ export const useProviderToolkitGroups = (availableAgentTools: AgentTool[]): Prov
       }
     }
 
-    const builtIn: ToolkitOption[] = hasBuiltIn ? [{ id: BUILT_IN_TOOLKIT_ID, label: 'Built-in' }] : [];
+    const builtIn: ToolkitOption[] = hasBuiltIn ? [{ id: BUILT_IN_TOOLKIT_ID, label: studioT('Built-in') }] : [];
 
     const providerSections: ProviderSection[] = (providers ?? [])
       .filter(p => slugsByProvider.has(p.id))
@@ -81,5 +83,5 @@ export const useProviderToolkitGroups = (availableAgentTools: AgentTool[]): Prov
       allToolkitIds,
       isProvidersLoading: providersQuery.isLoading,
     };
-  }, [availableAgentTools, providers, providersQuery.isLoading]);
+  }, [availableAgentTools, providers, providersQuery.isLoading, studioLocale]);
 };

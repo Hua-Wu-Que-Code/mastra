@@ -1,4 +1,6 @@
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { HeaderCreateAction } from '@/components/ui/header-create-action';
 import { useCanCreateAgent } from '@/domains/agent-builder/hooks/use-can-create-agent';
 
@@ -8,13 +10,14 @@ import { useCanCreateAgent } from '@/domains/agent-builder/hooks/use-can-create-
  * hook that resolves auth/feature flags.
  */
 export function AgentHeaderCreateAction() {
+  useLocale();
   const { canCreateAgent } = useCanCreateAgent();
   const { paths } = useLinkComponent();
   const createPath = paths.cmsAgentCreateLink();
   if (!canCreateAgent || !createPath) return null;
   return (
-    <HeaderCreateAction href={createPath} tooltip="Create an agent">
-      New agent
+    <HeaderCreateAction href={createPath} tooltip={studioT('Create an agent')}>
+      {studioT('New agent')}
     </HeaderCreateAction>
   );
 }

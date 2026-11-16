@@ -6,6 +6,8 @@ import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useSchedules } from '@mastra/react/hooks/schedules';
 
 export type WorkflowPageTab = 'graph' | 'traces' | 'schedules';
@@ -29,6 +31,7 @@ function WorkflowTab({ value, icon, label }: { value: WorkflowPageTab; icon: Rea
 }
 
 export function WorkflowPageTabs({ workflowId, activeTab, showObservability = false }: WorkflowPageTabsProps) {
+  useLocale();
   const { navigate } = useLinkComponent();
   const { data: schedules, isSuccess: schedulesLoaded } = useSchedules({ workflowId });
   const scheduleCount = schedules?.length ?? 0;
@@ -51,13 +54,15 @@ export function WorkflowPageTabs({ workflowId, activeTab, showObservability = fa
     <div className="flex min-w-0 items-center justify-between gap-2 p-1.5">
       <Tabs value={activeTab} defaultTab={activeTab} onValueChange={handleTabChange} className="min-w-0">
         <TabList variant="pill-ghost">
-          <WorkflowTab value="graph" icon={<WorkflowIcon />} label="Graph" />
-          {showObservability && <WorkflowTab value="traces" icon={<TraceIcon />} label="Traces" />}
+          <WorkflowTab value="graph" icon={<WorkflowIcon />} label={studioT('Graph')} />
+          {showObservability && <WorkflowTab value="traces" icon={<TraceIcon />} label={studioT('Traces')} />}
           {!schedulesDisabled && (
             <WorkflowTab
               value="schedules"
               icon={<IconCalendarClock4 />}
-              label={scheduleCount > 0 ? `Schedules (${scheduleCount})` : 'Schedules'}
+              label={
+                scheduleCount > 0 ? studioT('Schedules ({value0})', { value0: scheduleCount }) : studioT('Schedules')
+              }
             />
           )}
         </TabList>
@@ -67,10 +72,11 @@ export function WorkflowPageTabs({ workflowId, activeTab, showObservability = fa
           {!showObservability && (
             <DisabledFeatureButton
               icon={<TraceIcon />}
-              label="Traces"
+              label={studioT('Traces')}
               tooltipContent={
                 <>
-                  Add <code>@mastra/observability</code> to enable Traces.
+                  {studioT('Add') + ' '}
+                  <code>@mastra/observability</code> {' ' + studioT('to enable Traces.')}
                 </>
               }
               docsHref="https://mastra.ai/docs/observability/overview"
@@ -79,8 +85,8 @@ export function WorkflowPageTabs({ workflowId, activeTab, showObservability = fa
           {schedulesDisabled && (
             <DisabledFeatureButton
               icon={<IconCalendarClock4 />}
-              label="Schedules"
-              tooltipContent="Configure a schedule on this workflow to enable Schedules."
+              label={studioT('Schedules')}
+              tooltipContent={studioT('Configure a schedule on this workflow to enable Schedules.')}
               docsHref="https://mastra.ai/docs/workflows/scheduled-workflows"
             />
           )}

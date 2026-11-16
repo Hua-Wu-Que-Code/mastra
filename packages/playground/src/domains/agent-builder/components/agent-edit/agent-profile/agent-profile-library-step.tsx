@@ -4,6 +4,8 @@ import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCh
 import { IconLibrary } from '@mastra/playground-ui/icons/central/IconLibrary';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { AgentStepContainer } from './agent-step-container';
 import { useStreamRunning } from '@/domains/agent-builder/contexts/stream-chat-context';
@@ -17,6 +19,7 @@ export interface AgentProfileLibraryStepProps {
 }
 
 export const AgentProfileLibraryStep = ({ agentId }: AgentProfileLibraryStepProps) => {
+  useLocale();
   const { next } = useWizard();
   const isStreaming = useStreamRunning();
   const { requestChange, dialog } = useVisibilityChange(agentId);
@@ -32,11 +35,13 @@ export const AgentProfileLibraryStep = ({ agentId }: AgentProfileLibraryStepProp
 
   return (
     <AgentStepContainer
-      title="Add to your library"
-      description="Adding your agent to the library makes it visible to everyone in your workspace, so teammates can discover it, try it out, and copy it as a starting point for their own agents."
+      title={studioT('Add to your library')}
+      description={studioT(
+        'Adding your agent to the library makes it visible to everyone in your workspace, so teammates can discover it, try it out, and copy it as a starting point for their own agents.',
+      )}
       cta={
         <Button onClick={handleContinue} disabled={isStreaming}>
-          Continue{' '}
+          {studioT('Continue')}{' '}
           <Icon>
             <IconArrowRight />
           </Icon>
@@ -55,7 +60,7 @@ export const AgentProfileLibraryStep = ({ agentId }: AgentProfileLibraryStepProp
             <Icon>
               <IconCheckmark2Medium />
             </Icon>
-            Added to your library
+            {studioT('Added to your library')}
           </p>
         ) : (
           <Button
@@ -65,12 +70,13 @@ export const AgentProfileLibraryStep = ({ agentId }: AgentProfileLibraryStepProp
             disabled={isStreaming}
             data-testid="agent-builder-library-add"
           >
-            Add to library
+            {studioT('Add to library')}
           </Button>
         )}
         <p className="max-w-md text-muted-foreground">
-          You can change this at any time in the agent&apos;s visibility settings. Adding to the library now is
-          optional.
+          {studioT(
+            "You can change this at any time in the agent's visibility settings. Adding to the library now is optional.",
+          )}
         </p>
         {dialog}
       </div>

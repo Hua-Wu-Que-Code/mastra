@@ -2,6 +2,8 @@ import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
 import { getShortId } from '@mastra/playground-ui/components/Text';
 import { ExperimentsIcon } from '@mastra/playground-ui/icons/ExperimentsIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useExperimentsForDatasetFilter } from '@mastra/react/hooks/experiments';
 import type { ExperimentTargetFilter } from '@mastra/react/hooks/experiments';
 import { getExperimentDisplayName } from '@/domains/experiments/utils/experiment-display-name';
@@ -36,6 +38,7 @@ export function ExperimentCombobox({
   targetType,
   targetId,
 }: ExperimentComboboxProps) {
+  useLocale();
   const { data, isLoading, isError } = useExperimentsForDatasetFilter({
     datasetId: undefined,
     target: { targetType, targetId },
@@ -50,7 +53,7 @@ export function ExperimentCombobox({
       : (getShortId(experiment.id) ?? experiment.id),
   }));
   const options = allOption
-    ? [{ label: 'All experiments', value: ALL_EXPERIMENTS }, ...experimentOptions]
+    ? [{ label: studioT('All experiments'), value: ALL_EXPERIMENTS }, ...experimentOptions]
     : experimentOptions;
 
   return (
@@ -58,9 +61,15 @@ export function ExperimentCombobox({
       options={options}
       value={value ?? (allOption ? ALL_EXPERIMENTS : '')}
       onValueChange={onValueChange}
-      placeholder={isLoading ? 'Loading experiments...' : isError ? 'Failed to load experiments' : 'Select experiment'}
-      searchPlaceholder="Search experiments"
-      emptyText="No experiments found."
+      placeholder={
+        isLoading
+          ? studioT('Loading experiments...')
+          : isError
+            ? studioT('Failed to load experiments')
+            : studioT('Select experiment')
+      }
+      searchPlaceholder={studioT('Search experiments')}
+      emptyText={studioT('No experiments found.')}
       className={className}
       disabled={isLoading || isError}
       variant={variant}

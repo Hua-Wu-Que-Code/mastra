@@ -15,6 +15,8 @@ import { ThreadList, ThreadListEmpty, ThreadListItem, ThreadListItems } from '@/
 import { Txt } from '@/ds/components/Txt';
 import { Icon } from '@/ds/icons/Icon';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate } from '@/utils/date-format';
 import { toast } from '@/utils/toast';
 
@@ -55,6 +57,7 @@ function formatRunInput(input: unknown): string | null {
 }
 
 function WorkflowRunMeta({ timestamp, resourceId }: { timestamp?: number; resourceId?: string }) {
+  useLocale();
   if (timestamp === undefined && !resourceId) return null;
 
   return (
@@ -65,13 +68,16 @@ function WorkflowRunMeta({ timestamp, resourceId }: { timestamp?: number; resour
             <time dateTime={new Date(timestamp).toISOString()}>{formatDate(timestamp, 'date-time')}</time>
           </Metadata.Item>
         )}
-        {resourceId && <Metadata.Item title={`Resource ${resourceId}`}>{resourceId}</Metadata.Item>}
+        {resourceId && (
+          <Metadata.Item title={studioT('Resource {value0}', { value0: resourceId })}>{resourceId}</Metadata.Item>
+        )}
       </Metadata>
     </Txt>
   );
 }
 
 export const WorkflowRecentRuns = ({ workflowId, runId, canDelete: canDeleteRun }: WorkflowRecentRunsProps) => {
+  useLocale();
   const [isOpen, setIsOpen] = useState(true);
   const [deleteRunId, setDeleteRunId] = useState<string | null>(null);
 
@@ -96,11 +102,11 @@ export const WorkflowRecentRuns = ({ workflowId, runId, canDelete: canDeleteRun 
   const handleDelete = async (runId: string) => {
     try {
       await deleteRun({ runId });
-      toast.success('Workflow run deleted successfully');
+      toast.success(studioT('Workflow run deleted successfully'));
       setDeleteRunId(null);
       navigate(paths.workflowLink(workflowId));
     } catch {
-      toast.error('Failed to delete workflow run');
+      toast.error(studioT('Failed to delete workflow run'));
       setDeleteRunId(null);
     }
   };
@@ -112,7 +118,7 @@ export const WorkflowRecentRuns = ({ workflowId, runId, canDelete: canDeleteRun 
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="flex min-h-0 flex-col">
         <CollapsibleTrigger className="flex shrink-0 items-center gap-2 px-4 py-3 text-left text-caption text-muted-foreground">
           <DisclosureChevron direction="right" className="size-4 text-muted-foreground" />
-          <span>Recent runs</span>
+          <span>{studioT('Recent runs')}</span>
           {!isLoading && !error && (
             <Txt as="span" variant="meta" tone="muted">
               {runList.length}
@@ -127,12 +133,12 @@ export const WorkflowRecentRuns = ({ workflowId, runId, canDelete: canDeleteRun 
                 <Skeleton className="h-32" />
               </div>
             ) : (
-              <ThreadList aria-label="Workflow runs" embedded>
+              <ThreadList aria-label={studioT('Workflow runs')} embedded>
                 {runList.length === 0 ? (
                   <ThreadListEmpty>
                     {error
-                      ? 'Unable to load workflow runs.'
-                      : 'Your run history will appear here once you run the workflow'}
+                      ? studioT('Unable to load workflow runs.')
+                      : studioT('Your run history will appear here once you run the workflow')}
                   </ThreadListEmpty>
                 ) : (
                   <ThreadListItems>
@@ -148,7 +154,7 @@ export const WorkflowRecentRuns = ({ workflowId, runId, canDelete: canDeleteRun 
                           to={paths.workflowRunLink(workflowId, run.runId)}
                           isActive={isActiveRun}
                           onDelete={canDeleteRun ? () => setDeleteRunId(run.runId) : undefined}
-                          deleteLabel="delete run"
+                          deleteLabel={studioT('delete run')}
                           className="h-auto min-h-0 items-stretch py-1"
                         >
                           <span className="flex w-full min-w-0 items-center gap-2.5 px-1 text-left">
@@ -221,18 +227,21 @@ interface DeleteRunDialogProps {
   onDelete: () => void;
 }
 const DeleteRunDialog = ({ open, onOpenChange, onDelete }: DeleteRunDialogProps) => {
+  useLocale();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content>
         <AlertDialog.Header>
-          <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+          <AlertDialog.Title>{studioT('Are you absolutely sure?')}</AlertDialog.Title>
           <AlertDialog.Description>
-            This action cannot be undone. This will permanently delete the workflow run and remove it from our servers.
+            {studioT(
+              'This action cannot be undone. This will permanently delete the workflow run and remove it from our servers.',
+            )}
           </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Footer>
-          <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-          <AlertDialog.Action onClick={onDelete}>Continue</AlertDialog.Action>
+          <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
+          <AlertDialog.Action onClick={onDelete}>{studioT('Continue')}</AlertDialog.Action>
         </AlertDialog.Footer>
       </AlertDialog.Content>
     </AlertDialog>

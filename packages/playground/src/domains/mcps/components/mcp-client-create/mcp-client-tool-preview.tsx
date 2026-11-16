@@ -12,6 +12,10 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { McpServerIcon } from '@mastra/playground-ui/icons/McpServerIcon';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { passwordManagerOptOutProps } from '@mastra/playground-ui/primitives/password-manager-autofill';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { TryConnectMcpMutation } from '@mastra/react/hooks/mcps';
@@ -33,10 +37,13 @@ export function MCPClientToolPreview({
   onToggleTool,
   onDescriptionChange,
 }: MCPClientToolPreviewProps) {
+  useLocale();
   if (serverType === 'stdio') {
     return (
       <EmptyState>
-        <Txt tone="muted">Tool preview is available for HTTP servers. Stdio servers cannot be previewed.</Txt>
+        <Txt tone="muted">
+          {studioT('Tool preview is available for HTTP servers. Stdio servers cannot be previewed.')}
+        </Txt>
       </EmptyState>
     );
   }
@@ -44,7 +51,7 @@ export function MCPClientToolPreview({
   if (!url.trim()) {
     return (
       <EmptyState>
-        <Txt tone="muted">Enter a URL and click &quot;Try to connect&quot; to preview available tools.</Txt>
+        <Txt tone="muted">{studioT('Enter a URL and click "Try to connect" to preview available tools.')}</Txt>
       </EmptyState>
     );
   }
@@ -52,7 +59,7 @@ export function MCPClientToolPreview({
   if (tryConnect.isIdle) {
     return (
       <EmptyState>
-        <Txt tone="muted">Click &quot;Try to connect&quot; to preview available tools.</Txt>
+        <Txt tone="muted">{studioT('Click "Try to connect" to preview available tools.')}</Txt>
       </EmptyState>
     );
   }
@@ -62,20 +69,20 @@ export function MCPClientToolPreview({
       {tryConnect.isPending && (
         <div className="flex items-center gap-2">
           <Spinner className="h-3 w-3" />
-          <Txt tone="muted">Connecting...</Txt>
+          <Txt tone="muted">{studioT('Connecting...')}</Txt>
         </div>
       )}
 
       {tryConnect.isError && (
         <div role="alert">
           <Notice variant="destructive">
-            {tryConnect.error instanceof Error ? tryConnect.error.message : 'Connection failed'}
+            {tryConnect.error instanceof Error ? tryConnect.error.message : studioT('Connection failed')}
           </Notice>
         </div>
       )}
 
       {tryConnect.isSuccess && tryConnect.data.tools.length === 0 && (
-        <Txt tone="muted">Connected successfully but no tools were found.</Txt>
+        <Txt tone="muted">{studioT('Connected successfully but no tools were found.')}</Txt>
       )}
 
       {tryConnect.isSuccess && tryConnect.data.tools.length > 0 && (
@@ -105,6 +112,7 @@ function ToolList({
   onToggleTool?: (toolName: string, description?: string) => void;
   onDescriptionChange?: (toolName: string, description: string) => void;
 }) {
+  useLocale();
   const selectedCount = Object.keys(selectedTools).length;
 
   return (
@@ -114,7 +122,10 @@ function ToolList({
           <McpServerIcon />
         </Icon>
         <Txt variant="heading" as="h2">
-          Available Tools ({selectedCount}/{tools.length} selected)
+          <Trans
+            id="Available Tools ( {part0}/{part1} selected)"
+            values={{ part0: selectedCount, part1: tools.length }}
+          />
         </Txt>
       </div>
 

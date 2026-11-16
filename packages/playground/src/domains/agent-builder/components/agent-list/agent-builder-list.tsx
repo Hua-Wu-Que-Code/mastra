@@ -6,6 +6,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 import { FavoriteButton } from './favorite-button';
 import { cn } from '@/lib/utils';
@@ -56,12 +58,13 @@ function AuthorBadge({ agent, className }: { agent: StoredAgentResponse; classNa
 }
 
 function PrivateVisibilityIcon() {
+  useLocale();
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span
           className="shrink-0 text-muted-foreground"
-          aria-label="Private agent"
+          aria-label={studioT('Private agent')}
           data-testid="agent-builder-private-visibility-icon"
         >
           <Icon size="xs">
@@ -69,12 +72,13 @@ function PrivateVisibilityIcon() {
           </Icon>
         </span>
       </TooltipTrigger>
-      <TooltipContent>Only visible to you</TooltipContent>
+      <TooltipContent>{studioT('Only visible to you')}</TooltipContent>
     </Tooltip>
   );
 }
 
 export function AgentBuilderList({ agents, search, rowTestId, showFavorites = true }: AgentBuilderListProps) {
+  useLocale();
   const { Link } = useLinkComponent();
 
   const filtered = useMemo(() => {
@@ -91,7 +95,10 @@ export function AgentBuilderList({ agents, search, rowTestId, showFavorites = tr
   if (filtered.length === 0) {
     return (
       <div className="flex items-center-safe justify-center-safe">
-        <EmptyState titleSlot="No agents match your search" descriptionSlot="Try a different name or description." />
+        <EmptyState
+          titleSlot={studioT('No agents match your search')}
+          descriptionSlot={studioT('Try a different name or description.')}
+        />
       </div>
     );
   }
@@ -119,7 +126,7 @@ export function AgentBuilderList({ agents, search, rowTestId, showFavorites = tr
               </div>
               <div className="mt-0.5 flex items-center gap-2">
                 <Txt as="span" variant="caption" tone="muted" className="line-clamp-1">
-                  {agent.description || 'No description'}
+                  {agent.description || studioT('No description')}
                 </Txt>
               </div>
               <AuthorBadge agent={agent} className="mt-2 md:hidden" />

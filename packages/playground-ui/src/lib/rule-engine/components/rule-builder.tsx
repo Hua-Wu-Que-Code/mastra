@@ -1,10 +1,10 @@
 import * as React from 'react';
-
 import type { Rule, RuleGroup, RuleGroupDepth1 } from '../types';
 import { isRule, createDefaultRule, createDefaultRuleGroup } from '../utils';
 
 import { RuleRow } from './rule-row';
 import type { RuleBuilderProps, RuleGroupViewProps } from './types';
+
 import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { Icon } from '@/ds/icons';
@@ -13,6 +13,8 @@ import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_MAX_DEPTH = 3;
@@ -21,6 +23,7 @@ const DEFAULT_MAX_DEPTH = 3;
  * Internal recursive component that renders one level of a rule group.
  */
 const RuleGroupView: React.FC<RuleGroupViewProps> = ({ schema, group, onChange, onRemove, depth, maxDepth }) => {
+  useLocale();
   const isRoot = depth === 0;
 
   const handleToggleOperator = () => {
@@ -64,10 +67,10 @@ const RuleGroupView: React.FC<RuleGroupViewProps> = ({ schema, group, onChange, 
       {!isRoot && (
         <div className="flex items-center justify-between border-b border-dashed border-border py-1.5 pr-4 pl-3">
           <Txt as="span" variant="meta" tone="muted">
-            Group
+            {studioT('Group')}
           </Txt>
           {onRemove && (
-            <Button type="button" onClick={onRemove} tooltip="Remove group" size="icon-sm" variant="ghost">
+            <Button type="button" onClick={onRemove} tooltip={studioT('Remove group')} size="icon-sm" variant="ghost">
               <IconCrossMedium />
             </Button>
           )}
@@ -117,11 +120,11 @@ const RuleGroupView: React.FC<RuleGroupViewProps> = ({ schema, group, onChange, 
 
       <div className="flex gap-1 p-2">
         <Button type="button" onClick={handleAddRule} variant="ghost" size="sm" icon={<IconPlusMedium />}>
-          Add rule
+          {studioT('Add rule')}
         </Button>
         {depth < maxDepth - 1 && (
           <Button type="button" onClick={handleAddGroup} variant="ghost" size="sm" icon={<IconComponents />}>
-            Add group
+            {studioT('Add group')}
           </Button>
         )}
       </div>
@@ -142,6 +145,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   maxDepth = DEFAULT_MAX_DEPTH,
   className,
 }) => {
+  useLocale();
   const handleGroupChange = React.useCallback(
     (group: RuleGroup) => {
       onChange(group);
@@ -168,7 +172,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
           <IconPlusMedium />
         </Icon>
         <Txt as="span" variant="caption" className="block">
-          Add conditional rule
+          {studioT('Add conditional rule')}
         </Txt>
       </button>
     );

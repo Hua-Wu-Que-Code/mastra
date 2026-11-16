@@ -2,15 +2,14 @@ import { Network } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-
 import { REST_BATCH, isChildPlaceholder, isRestCircle, isScopeGroup, lazyGraph } from '../lib/graphShape';
 import { scopeTitle } from '../lib/pageAddress';
 import { bodyLinkEdges, bodyLinkRefs, knowledgePageRefIndex } from '../lib/pageRefs';
+
 import { KnowledgePagesByRef } from '../lib/pagesByRefContext';
 import { childCountLabel } from '../lib/pageTree';
 import { mentionPopupPlacement } from '../lib/popupPlacement';
 import { useStableWhile } from '../lib/useStableWhile';
-
 import type {
   KnowledgePageActivityPayload,
   KnowledgeNotePayload,
@@ -22,13 +21,14 @@ import type {
 import { KnowledgeDetailSection, KnowledgeNoteItem, KnowledgePageDetail } from './KnowledgePageDetail';
 import type { PageLinkLists } from './KnowledgePageDetail';
 import { KnowledgePageGraph } from './KnowledgePageGraph';
+
 import { KNOWLEDGE_TREE_ROOT, KnowledgePageTree } from './KnowledgePageTree';
 import { KnowledgeSourceIcon } from './KnowledgeSourceIcon';
 import { KnowledgeTooltip } from './KnowledgeTooltip';
-
 import { ActionRow } from '@/ds/components/ActionRow';
 import { Button } from '@/ds/components/Button';
 import { ButtonsGroup } from '@/ds/components/ButtonsGroup';
+
 import { DataPanel } from '@/ds/components/DataPanel';
 import { EmptyState } from '@/ds/components/EmptyState';
 import { ScrollArea } from '@/ds/components/ScrollArea';
@@ -52,6 +52,10 @@ import { Icon } from '@/ds/icons/Icon';
 import { menuItemButtonClass } from '@/ds/primitives/menu-item';
 import { overlaySurfaceStyle, raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 /** `tree` is only a choice below `lg`; wider screens always show the tree beside the graph or the page. */
@@ -342,8 +346,9 @@ function TreeRowsSkeleton({ label, rows }: { label: string; rows: number }) {
 }
 
 function NotesSkeleton() {
+  useLocale();
   return (
-    <div role="status" aria-label="Loading notes" className="flex flex-col gap-2">
+    <div role="status" aria-label={studioT('Loading notes')} className="flex flex-col gap-2">
       {[0, 1].map(index => (
         <div key={index} className="flex flex-col gap-2 rounded-lg border border-border p-3">
           <SkeletonText className="w-24" />
@@ -356,8 +361,9 @@ function NotesSkeleton() {
 }
 
 function PageSkeleton({ compact }: { compact?: boolean }) {
+  useLocale();
   return (
-    <div role="status" aria-label="Loading page" className="flex flex-col">
+    <div role="status" aria-label={studioT('Loading page')} className="flex flex-col">
       <div
         className={`flex flex-col gap-2 border-b border-border ${compact ? 'px-4 pt-3 pb-4' : 'bg-fill-subtle px-6 pt-5 pb-4'}`}
       >
@@ -375,7 +381,8 @@ function PageSkeleton({ compact }: { compact?: boolean }) {
   );
 }
 
-function MoreButton({ onClick, label = 'Load more' }: { onClick: () => void; label?: string }) {
+function MoreButton({ onClick, label = studioT('Load more') }: { onClick: () => void; label?: string }) {
+  useLocale();
   return (
     <button
       type="button"
@@ -401,6 +408,7 @@ function MoreNotes({
   pagesById: ReadonlyMap<string, KnowledgePagePayload>;
   onPageClick: (page: KnowledgePagePayload) => void;
 }) {
+  useLocale();
   const chunk = source.usePage(pageId, cursor);
   const [showNext, setShowNext] = useState(false);
   const known = useMemo(() => withPages(pagesById, chunk.data?.related ?? []), [chunk.data, pagesById]);
@@ -418,7 +426,7 @@ function MoreNotes({
         showNext ? (
           <MoreNotes source={source} pageId={pageId} cursor={next} pagesById={pagesById} onPageClick={onPageClick} />
         ) : (
-          <MoreButton label="Load more notes" onClick={() => setShowNext(true)} />
+          <MoreButton label={studioT('Load more notes')} onClick={() => setShowNext(true)} />
         )
       ) : null}
     </>
@@ -435,6 +443,7 @@ function ChildPages({
   parentId: string;
   onOpen: (pageId: string) => void;
 }) {
+  useLocale();
   const [cursors, setCursors] = useState<string[]>([]);
   const requests = useMemo(() => [{ parentId }, ...cursors.map(cursor => ({ parentId, cursor }))], [parentId, cursors]);
   const levels = useTreeLevels(requests);
@@ -442,15 +451,15 @@ function ChildPages({
   const last = levels[levels.length - 1];
   if (levels[0]?.isPending) {
     return (
-      <KnowledgeDetailSection label="Pages">
-        <TreeRowsSkeleton label="Loading pages" rows={3} />
+      <KnowledgeDetailSection label={studioT('Pages')}>
+        <TreeRowsSkeleton label={studioT('Loading pages')} rows={3} />
       </KnowledgeDetailSection>
     );
   }
   const next = last?.data?.nextCursor;
   if (pages.length === 0 && !next) return null;
   return (
-    <KnowledgeDetailSection label="Pages">
+    <KnowledgeDetailSection label={studioT('Pages')}>
       <div className={`rounded-xl p-1 ${raisedSurfaceStyle}`}>
         <Tree className="rounded-lg bg-background p-1" onSelect={onOpen}>
           <ChildPageItems pages={pages} useTreeLevels={useTreeLevels} onOpen={onOpen} />
@@ -502,6 +511,7 @@ function ChildPageFolder({
   useTreeLevels: NonNullable<KnowledgeExplorerSource['useTreeLevels']>;
   onOpen: (pageId: string) => void;
 }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   return (
     <Tree.Folder id={page.id} open={open} onOpenChange={setOpen}>
@@ -510,8 +520,8 @@ function ChildPageFolder({
           <Button
             variant="ghost"
             size="icon-sm"
-            tooltip={`Open ${page.name}`}
-            aria-label={`Open ${page.name}`}
+            tooltip={studioT('Open {value0}', { value0: page.name })}
+            aria-label={studioT('Open {value0}', { value0: page.name })}
             onClick={() => onOpen(page.id)}
           >
             <IconArrowRight />
@@ -544,6 +554,7 @@ function ChildPageLevel({
   useTreeLevels: NonNullable<KnowledgeExplorerSource['useTreeLevels']>;
   onOpen: (pageId: string) => void;
 }) {
+  useLocale();
   const [cursors, setCursors] = useState<string[]>([]);
   const levels = useTreeLevels([{ parentId }, ...cursors.map(cursor => ({ parentId, cursor }))]);
   const pages = levels.flatMap(level => level.data?.pages ?? []);
@@ -551,12 +562,14 @@ function ChildPageLevel({
   if (levels[0]?.isPending) {
     return (
       <li role="none" className="pl-6">
-        <TreeRowsSkeleton label="Loading pages" rows={2} />
+        <TreeRowsSkeleton label={studioT('Loading pages')} rows={2} />
       </li>
     );
   }
-  if (levels[0]?.isError) return <ChildPageLevelNote>Couldn’t load the pages under this one.</ChildPageLevelNote>;
-  if (pages.length === 0 && !next) return <ChildPageLevelNote>No pages under this one.</ChildPageLevelNote>;
+  if (levels[0]?.isError)
+    return <ChildPageLevelNote>{studioT('Couldn’t load the pages under this one.')}</ChildPageLevelNote>;
+  if (pages.length === 0 && !next)
+    return <ChildPageLevelNote>{studioT('No pages under this one.')}</ChildPageLevelNote>;
   return (
     <>
       <ChildPageItems pages={pages} useTreeLevels={useTreeLevels} onOpen={onOpen} />
@@ -598,6 +611,7 @@ function MentionPopup({
   onOpen: (pageId: string) => void;
   onClose: () => void;
 }) {
+  useLocale();
   const detail = source.usePage(mention.source.id);
   const notes = (detail.data?.notes ?? []).filter(note => note.mentions.includes(mention.target.id));
   useEffect(() => {
@@ -610,7 +624,7 @@ function MentionPopup({
   return (
     <div
       role="dialog"
-      aria-label={`${mention.source.name} mentions ${mention.target.name}`}
+      aria-label={studioT('{value0} mentions {value1}', { value0: mention.source.name, value1: mention.target.name })}
       data-testid="knowledge-mention-popup"
       className="absolute z-20 flex w-80 max-w-[calc(100%-1rem)] flex-col gap-2 overflow-hidden rounded-lg border border-border bg-card p-3 shadow-overlay"
       style={mentionPopupPlacement(mention)}
@@ -622,7 +636,7 @@ function MentionPopup({
           </button>
           <Txt as="span" variant="card-title" tone="muted">
             {' '}
-            mentions{' '}
+            {studioT('mentions')}{' '}
           </Txt>
           <button type="button" className="hover:underline" onClick={() => onOpen(mention.target.id)}>
             {mention.target.name}
@@ -630,7 +644,7 @@ function MentionPopup({
         </Txt>
         <button
           type="button"
-          aria-label="Close"
+          aria-label={studioT('Close')}
           className="rounded p-0.5 text-muted-foreground hover:bg-fill hover:text-foreground"
           onClick={onClose}
         >
@@ -642,8 +656,10 @@ function MentionPopup({
           <NotesSkeleton />
         ) : notes.length === 0 ? (
           <Txt variant="caption" tone="muted">
-            The notes that make this mention aren't in the first page of notes. Open {mention.source.name} to read them
-            all.
+            <Trans
+              id="The notes that make this mention aren't in the first page of notes. Open {part0} to read them all."
+              values={{ part0: mention.source.name }}
+            />
           </Txt>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -683,6 +699,7 @@ function SelectedPage({
   compact?: boolean;
   onOpenPage?: () => void;
 }) {
+  useLocale();
   const detail = source.usePage(pageId);
   const activity = (source.useActivity ?? noActivity)(pageId);
   const pageLinks = (source.usePageLinks ?? noLinkQuery<KnowledgeExplorerPageLinks>)(pageId).data;
@@ -700,8 +717,8 @@ function SelectedPage({
       <EmptyState
         tone="error"
         variant="fill"
-        titleSlot={notFound ? 'Page not found' : 'Failed to load the page'}
-        descriptionSlot={notFound ? 'It may have been deleted or merged.' : (detail.error?.message ?? '')}
+        titleSlot={notFound ? studioT('Page not found') : studioT('Failed to load the page')}
+        descriptionSlot={notFound ? studioT('It may have been deleted or merged.') : (detail.error?.message ?? '')}
       />
     );
   }
@@ -731,7 +748,7 @@ function SelectedPage({
           moreNotes?.pageId === pageId ? (
             <MoreNotes source={source} pageId={pageId} cursor={next} pagesById={known} onPageClick={onPageClick} />
           ) : (
-            <MoreButton label="Load more notes" onClick={() => setMoreNotes({ pageId })} />
+            <MoreButton label={studioT('Load more notes')} onClick={() => setMoreNotes({ pageId })} />
           )
         ) : undefined
       }
@@ -779,6 +796,7 @@ function linkLists(pageId: string, { edges, pages }: KnowledgeExplorerPageLinks)
 }
 
 function SearchBox({ source, onSelect }: { source: KnowledgeExplorerSource; onSelect: (pageId: string) => void }) {
+  useLocale();
   const [query, setQuery] = useState('');
   const search = source.useSearch(query);
   const results = query.trim().length >= MIN_SEARCH_LENGTH ? (search.data?.results ?? []) : [];
@@ -790,8 +808,8 @@ function SearchBox({ source, onSelect }: { source: KnowledgeExplorerSource; onSe
   return (
     <div className="relative w-64 min-w-0">
       <SearchInput
-        label="Search knowledge"
-        placeholder="Search pages and notes"
+        label={studioT('Search knowledge')}
+        placeholder={studioT('Search pages and notes')}
         size="sm"
         value={query}
         onValueChange={setQuery}
@@ -799,7 +817,7 @@ function SearchBox({ source, onSelect }: { source: KnowledgeExplorerSource; onSe
       {pages.length > 0 ? (
         <div className={`absolute z-20 mt-1 w-full overflow-hidden rounded-xl ${overlaySurfaceStyle}`}>
           <ScrollArea maxHeight="18rem">
-            <ul role="listbox" aria-label="Search results" className="p-1">
+            <ul role="listbox" aria-label={studioT('Search results')} className="p-1">
               {pages.map(page => (
                 <li key={page.id} role="option" aria-selected={false}>
                   <button
@@ -957,6 +975,7 @@ export function KnowledgePageExplorer({
   toolbarEnd,
   flush = false,
 }: KnowledgePageExplorerProps) {
+  useLocale();
   const narrow = useIsMobile(1024);
   const view = !narrow && requestedView === 'tree' ? 'graph' : requestedView;
   const selected = source.usePage(selectedPageId);
@@ -1257,9 +1276,9 @@ export function KnowledgePageExplorer({
   const focusedInGraph = view === 'graph' ? pagesById.get(selectedPageId ?? drawn.hub ?? '') : undefined;
   const children = focusedInGraph ? drawn.hiddenChildren.get(focusedInGraph.id) : undefined;
   const views: Array<{ value: KnowledgeExplorerView; label: string; icon: ReactNode; narrowOnly?: boolean }> = [
-    { value: 'tree', label: 'Tree', icon: <IconCodeTree />, narrowOnly: true },
-    { value: 'graph', label: 'Graph', icon: <Network />, narrowOnly: false },
-    { value: 'page', label: 'Page', icon: <IconFileText />, narrowOnly: false },
+    { value: 'tree', label: studioT('Tree'), icon: <IconCodeTree />, narrowOnly: true },
+    { value: 'graph', label: studioT('Graph'), icon: <Network />, narrowOnly: false },
+    { value: 'page', label: studioT('Page'), icon: <IconFileText />, narrowOnly: false },
   ];
 
   const tabValue = explorerTab(view, showPage);
@@ -1292,13 +1311,13 @@ export function KnowledgePageExplorer({
   const treeClosed = overlay && !treeOpen;
   const treeHeader = overlay ? (
     <DataPanel.Header>
-      <DataPanel.Heading>Pages</DataPanel.Heading>
+      <DataPanel.Heading>{studioT('Pages')}</DataPanel.Heading>
       <DataPanel.HeaderActions>
         <Button
           variant="ghost"
           size="icon-sm"
-          tooltip="Hide pages"
-          aria-label="Hide pages"
+          tooltip={studioT('Hide pages')}
+          aria-label={studioT('Hide pages')}
           ref={hidePagesButton}
           onClick={() => toggleTree(false)}
         >
@@ -1316,7 +1335,7 @@ export function KnowledgePageExplorer({
         >
           <div className="flex min-w-0 flex-1 flex-col">
             <Txt as="span" variant="eyebrow" tone="muted" className="uppercase">
-              {focusScope.displayLabel ?? 'Scope'}
+              {focusScope.displayLabel ?? studioT('Scope')}
             </Txt>
             <span className="flex min-w-0 items-center gap-1.5">
               <KnowledgeSourceIcon page={focusScope} className="size-3.5" />
@@ -1328,14 +1347,14 @@ export function KnowledgePageExplorer({
             </span>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setFocusScopeId(null)}>
-            All scopes
+            {studioT('All scopes')}
           </Button>
         </div>
       ) : null}
       <div className="min-h-0 flex-1 overflow-auto">
         {source.useTreeLevels && lazy.rootsPending ? (
           <div className="p-2">
-            <TreeRowsSkeleton label="Loading pages" rows={6} />
+            <TreeRowsSkeleton label={studioT('Loading pages')} rows={6} />
           </div>
         ) : (
           <KnowledgePageTree
@@ -1371,7 +1390,7 @@ export function KnowledgePageExplorer({
               value={tabValue}
               defaultTab={tabValue}
               onValueChange={next => onViewChange(next)}
-              aria-label="View"
+              aria-label={studioT('View')}
             >
               <TabList variant="pill-ghost" size="sm">
                 {views.map(option => (
@@ -1395,12 +1414,15 @@ export function KnowledgePageExplorer({
         </ActionRow>
         {!lazyMode && graph.truncated && !showPage ? (
           <Txt variant="caption" tone="muted" className={flush ? 'px-3 pt-2' : undefined}>
-            The graph shows the first {graph.pages.length} pages. Open the tree or search to reach the rest.
+            <Trans
+              id="The graph shows the first {part0} pages. Open the tree or search to reach the rest."
+              values={{ part0: graph.pages.length }}
+            />
           </Txt>
         ) : null}
         {selectedPageId && !showPage && isNotFound(selected.error) ? (
           <Txt role="alert" variant="caption" className={`text-destructive-foreground ${flush ? 'px-3 pt-2' : ''}`}>
-            Page not found. The linked page may have been deleted or merged.
+            {studioT('Page not found. The linked page may have been deleted or merged.')}
           </Txt>
         ) : null}
         <div style={insetStyle} className="relative flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
@@ -1411,14 +1433,14 @@ export function KnowledgePageExplorer({
               data-state={treeClosed ? 'closed' : 'open'}
               className={`absolute inset-y-2 left-2 z-10 flex w-72 transition duration-slow ease-out-custom motion-reduce:transition-none ${treeClosed ? 'pointer-events-none -translate-x-4 opacity-0' : 'translate-x-0 opacity-100'}`}
             >
-              <DataPanel variant="inline" title="Pages" className="shadow-overlay">
+              <DataPanel variant="inline" title={studioT('Pages')} className="shadow-overlay">
                 {treeHeader}
                 {treeBody}
               </DataPanel>
             </div>
           ) : (
             <aside
-              aria-label="Pages"
+              aria-label={studioT('Pages')}
               className={`min-h-0 w-full flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card lg:w-72 lg:flex-none lg:shrink-0 ${view === 'tree' ? 'flex' : 'hidden'}`}
             >
               {treeBody}
@@ -1426,8 +1448,8 @@ export function KnowledgePageExplorer({
           )}
           {overlay ? (
             <Button
-              tooltip="Show pages"
-              aria-label="Show pages"
+              tooltip={studioT('Show pages')}
+              aria-label={studioT('Show pages')}
               size="icon-sm"
               inert={!treeClosed}
               aria-hidden={!treeClosed || undefined}
@@ -1441,7 +1463,7 @@ export function KnowledgePageExplorer({
           {showPage && !overlay ? (
             <section
               ref={focusPageTabOnMount}
-              aria-label="Selected page"
+              aria-label={studioT('Selected page')}
               className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card"
             >
               <SelectedPage
@@ -1462,13 +1484,13 @@ export function KnowledgePageExplorer({
                   <ButtonsGroup
                     orientation="vertical"
                     size="sm"
-                    aria-label="Graph options"
+                    aria-label={studioT('Graph options')}
                     className="rounded-xl shadow-overlay"
                   >
                     <Button
                       data-testid="knowledge-graph-back"
-                      aria-label="Back"
-                      tooltip={backTo ? 'Back to the previous page' : 'Nothing to go back to yet'}
+                      aria-label={studioT('Back')}
+                      tooltip={backTo ? studioT('Back to the previous page') : studioT('Nothing to go back to yet')}
                       tooltipPosition="left"
                       size="icon-sm"
                       disabled={!backTo}
@@ -1477,10 +1499,14 @@ export function KnowledgePageExplorer({
                       <IconArrowLeft />
                     </Button>
                     <Button
-                      aria-label="All links"
+                      aria-label={studioT('All links')}
                       aria-pressed={allLinks}
                       data-testid="knowledge-graph-all-links"
-                      tooltip={allLinks ? 'Show only the selected page’s links' : 'Show every link between pages'}
+                      tooltip={
+                        allLinks
+                          ? studioT('Show only the selected page’s links')
+                          : studioT('Show every link between pages')
+                      }
                       tooltipPosition="left"
                       size="icon-sm"
                       className={allLinks ? '[--control-icon:var(--foreground)]' : undefined}
@@ -1489,10 +1515,10 @@ export function KnowledgePageExplorer({
                       <IconChainLink3 />
                     </Button>
                     <Button
-                      aria-label="Link counts"
+                      aria-label={studioT('Link counts')}
                       aria-pressed={dotCounts}
                       data-testid="knowledge-graph-dot-counts"
-                      tooltip={dotCounts ? 'Hide link counts' : 'Show link counts on each dot'}
+                      tooltip={dotCounts ? studioT('Hide link counts') : studioT('Show link counts on each dot')}
                       tooltipPosition="left"
                       size="icon-sm"
                       className={dotCounts ? '[--control-icon:var(--foreground)]' : undefined}
@@ -1557,17 +1583,17 @@ export function KnowledgePageExplorer({
                   className={`absolute inset-y-2 right-2 z-10 flex w-96 transition duration-slow ease-out-custom motion-reduce:transition-none ${drawerPageId ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-4 opacity-0'}`}
                 >
                   {drawerShownId ? (
-                    <DataPanel variant="inline" title="Page details" className="shadow-overlay">
+                    <DataPanel variant="inline" title={studioT('Page details')} className="shadow-overlay">
                       <DataPanel.Header>
                         <DataPanel.Heading className="min-w-0 flex-1 shrink">
-                          <span className="truncate">{drawerPage?.name ?? 'Page'}</span>
+                          <span className="truncate">{drawerPage?.name ?? studioT('Page')}</span>
                         </DataPanel.Heading>
                         <DataPanel.HeaderActions>
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            tooltip="Open page"
-                            aria-label="Open page"
+                            tooltip={studioT('Open page')}
+                            aria-label={studioT('Open page')}
                             onClick={() => {
                               focusTabOnPageOpen.current = true;
                               openPage(drawerShownId);
@@ -1577,8 +1603,8 @@ export function KnowledgePageExplorer({
                           </Button>
                           <DataPanel.CloseButton
                             icon="x"
-                            label="Close page details"
-                            tooltip="Close"
+                            label={studioT('Close page details')}
+                            tooltip={studioT('Close')}
                             onClick={() => {
                               focusViewTab();
                               onSelect(null);
@@ -1608,17 +1634,17 @@ export function KnowledgePageExplorer({
               {pageOverGraph ? (
                 <section
                   ref={focusPageTabOnMount}
-                  aria-label="Selected page"
+                  aria-label={studioT('Selected page')}
                   className="absolute inset-y-2 right-2 left-[calc(var(--knowledge-tree-inset)+0.5rem)] z-20 flex transition-[left] duration-slow ease-out-custom motion-reduce:transition-none"
                 >
-                  <DataPanel variant="inline" title="Page" className="shadow-overlay">
+                  <DataPanel variant="inline" title={studioT('Page')} className="shadow-overlay">
                     <DataPanel.Header>
-                      <DataPanel.Heading>Page</DataPanel.Heading>
+                      <DataPanel.Heading>{studioT('Page')}</DataPanel.Heading>
                       <DataPanel.HeaderActions>
                         <DataPanel.CloseButton
                           icon="x"
-                          label="Close page"
-                          tooltip="Close"
+                          label={studioT('Close page')}
+                          tooltip={studioT('Close')}
                           onClick={() => {
                             focusViewTab();
                             onViewChange('graph');

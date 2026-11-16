@@ -1,5 +1,7 @@
 import type { StoredSkillResponse } from '@mastra/client-js';
 import { Tab, TabContent, TabList, Tabs } from '@mastra/playground-ui/components/Tabs';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAllProviderTools } from '@mastra/react/hooks/tool-providers';
 import type { CSSProperties } from 'react';
 import { useAgentColor } from '../../../contexts/agent-color-context';
@@ -32,6 +34,7 @@ export const AgentProfileTabs = ({
   disabled = false,
   fallbackInstructions,
 }: AgentProfileTabsProps) => {
+  useLocale();
   const agentColor = useAgentColor();
 
   const tabListStyle = { '--tab-indicator-color': agentColor.background } as CSSProperties;
@@ -64,12 +67,12 @@ export const AgentProfileTabs = ({
     <div className="h-full min-h-0 overflow-hidden" data-testid="agent-profile-tabs">
       <Tabs defaultTab={defaultTab} className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
         <TabList sticky className="px-4" style={tabListStyle}>
-          {modelTabEnabled && <Tab value="model">Model</Tab>}
-          {toolsTabEnabled && <Tab value="tools">Tools</Tab>}
-          <Tab value="instructions">Instructions</Tab>
-          {skillsTabEnabled && <Tab value="skills">Skills</Tab>}
-          {browserTabEnabled && <Tab value="browser">Browser</Tab>}
-          {integrationsTabEnabled && <Tab value="integrations">Integrations</Tab>}
+          {modelTabEnabled && <Tab value="model">{studioT('Model')}</Tab>}
+          {toolsTabEnabled && <Tab value="tools">{studioT('Tools')}</Tab>}
+          <Tab value="instructions">{studioT('Instructions')}</Tab>
+          {skillsTabEnabled && <Tab value="skills">{studioT('Skills')}</Tab>}
+          {browserTabEnabled && <Tab value="browser">{studioT('Browser')}</Tab>}
+          {integrationsTabEnabled && <Tab value="integrations">{studioT('Integrations')}</Tab>}
         </TabList>
 
         <div className="h-full min-h-0 overflow-y-auto">

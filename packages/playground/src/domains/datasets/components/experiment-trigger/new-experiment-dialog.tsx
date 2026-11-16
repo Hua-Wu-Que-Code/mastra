@@ -9,6 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
@@ -60,6 +62,7 @@ export function NewExperimentDialog({
   initialName,
   initialDescription,
 }: NewExperimentDialogProps) {
+  useLocale();
   const contentRef = useRef<HTMLDivElement>(null);
   const targetChoice = useTargetChoice({ initialTargetType, initialTargetId });
   const datasetChoice = useDatasetChoice({ initialDatasetId, initialDatasetVersion });
@@ -116,11 +119,11 @@ export function NewExperimentDialog({
         version: datasetChoice.version,
         requestContext: requestContext.requestContext,
       });
-      toast.success('Experiment started');
+      toast.success(studioT('Experiment started'));
       onOpenChange(false);
       onSuccess?.(result.experimentId);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to start experiment');
+      toast.error(error instanceof Error ? error.message : studioT('Failed to start experiment'));
     }
   };
 
@@ -134,8 +137,10 @@ export function NewExperimentDialog({
     <Dialog open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete} pending={isRunning}>
       <DialogContent ref={contentRef} size="lg" onKeyDown={handleKeyDown}>
         <DialogHeader>
-          <DialogTitle>New experiment</DialogTitle>
-          <DialogDescription>Run every item in a dataset through an agent, workflow or scorer.</DialogDescription>
+          <DialogTitle>{studioT('New experiment')}</DialogTitle>
+          <DialogDescription>
+            {studioT('Run every item in a dataset through an agent, workflow or scorer.')}
+          </DialogDescription>
         </DialogHeader>
 
         <DialogBody>
@@ -214,7 +219,7 @@ export function NewExperimentDialog({
         </DialogBody>
 
         <DialogFooter>
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
           <RunExperimentAction onRun={run} canRun={canRun} isRunning={isRunning} />
         </DialogFooter>
       </DialogContent>

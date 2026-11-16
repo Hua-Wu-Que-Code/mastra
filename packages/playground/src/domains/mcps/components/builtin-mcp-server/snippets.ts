@@ -1,3 +1,5 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
+
 export const TOKEN_PLACEHOLDER = '<your-token>';
 
 export interface ConnectSnippet {
@@ -21,25 +23,33 @@ export function buildConnectSnippets(url: string, { protectedServer }: { protect
   return [
     {
       value: 'claude-code',
-      label: 'Claude Code',
+      get label() {
+        return studioT('Claude Code');
+      },
       lang: 'bash',
       code: `claude mcp add --transport http mastra ${shellUrl}${protectedServer ? ` --header "${authHeader}"` : ''}`,
     },
     {
       value: 'cursor',
-      label: 'Cursor',
+      get label() {
+        return 'Cursor';
+      },
       lang: 'json',
       code: JSON.stringify({ mcpServers: { mastra: { url, ...headers } } }, null, 2),
     },
     {
       value: 'vscode',
-      label: 'VS Code',
+      get label() {
+        return studioT('VS Code');
+      },
       lang: 'json',
       code: JSON.stringify({ servers: { mastra: { type: 'http', url, ...headers } } }, null, 2),
     },
     {
       value: 'inspector',
-      label: 'MCP Inspector',
+      get label() {
+        return studioT('MCP Inspector');
+      },
       lang: 'bash',
       code: `npx @modelcontextprotocol/inspector --cli ${shellUrl} --transport http${protectedServer ? ` --header "${authHeader}"` : ''} --method tools/list`,
     },

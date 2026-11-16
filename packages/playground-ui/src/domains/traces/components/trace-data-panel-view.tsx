@@ -35,6 +35,10 @@ import { TraceIcon } from '@/ds/icons/TraceIcon';
 import type { LinkComponent } from '@/ds/types/link-component';
 import { useScrollToFirstHighlight } from '@/hooks/use-scroll-to-first-highlight';
 import { useTextHighlight } from '@/hooks/use-text-highlight';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { PanelSeparator } from '@/lib/resize/separator';
 
 export type TraceDataPanelPlacement = 'traces-list' | 'trace-page';
@@ -180,6 +184,7 @@ export function TraceDataPanelView({
   onSpanViewChange,
   spanPanelSlot,
 }: TraceDataPanelViewProps) {
+  const studioLocale = useLocale();
   const isOnTracePage = placement === 'trace-page';
 
   // The side column next to the span tree hosts Messages / Feedback / Scores;
@@ -195,7 +200,7 @@ export function TraceDataPanelView({
             <Icon size="xs">
               <IconChatBubble7 />
             </Icon>
-            <span className="@max-[501px]:sr-only">Messages</span>
+            <span className="@max-[501px]:sr-only">{studioT('Messages')}</span>
           </>
         ),
       });
@@ -210,7 +215,7 @@ export function TraceDataPanelView({
               <IconChatBubble7Plus />
             </Icon>
             <span className="@max-[501px]:sr-only">
-              Feedback{feedbackTabBadge != null && <> ({feedbackTabBadge})</>}
+              <Trans id="Feedback{part0}" values={{ part0: feedbackTabBadge != null && <> ({feedbackTabBadge})</> }} />
             </span>
           </>
         ),
@@ -225,13 +230,15 @@ export function TraceDataPanelView({
             <Icon size="xs">
               <ScorersIcon />
             </Icon>
-            <span className="@max-[501px]:sr-only">Scores{scoresTabBadge != null && <> ({scoresTabBadge})</>}</span>
+            <span className="@max-[501px]:sr-only">
+              <Trans id="Scores{part0}" values={{ part0: scoresTabBadge != null && <> ({scoresTabBadge})</> }} />
+            </span>
           </>
         ),
       });
     }
     return views;
-  }, [messagesPanelSlot, feedbackTabSlot, feedbackTabBadge, scoresTabSlot, scoresTabBadge]);
+  }, [messagesPanelSlot, feedbackTabSlot, feedbackTabBadge, scoresTabSlot, scoresTabBadge, studioLocale]);
   const [uncontrolledSideView, setUncontrolledSideView] = useState<TraceSideView>();
   // Mirrors the side column's `@max-[501px]` container query: the layout collapses in CSS, but
   // tooltips render in a portal outside the container, so they need the width in JS.
@@ -324,14 +331,19 @@ export function TraceDataPanelView({
   const traceActions = traceId && (
     <>
       {!isOnTracePage && LinkComponent && traceHref && (
-        <Button size="icon-sm" variant="ghost" tooltip="Open trace page" render={<LinkComponent href={traceHref} />}>
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          tooltip={studioT('Open trace page')}
+          render={<LinkComponent href={traceHref} />}
+        >
           <IconChainLink3 />
         </Button>
       )}
       <Button
         size="icon-sm"
         variant="ghost"
-        tooltip="Download trace JSON"
+        tooltip={studioT('Download trace JSON')}
         disabled={isDownloadingTrace}
         onClick={() => downloadTraceJson(traceId)}
       >
@@ -343,7 +355,7 @@ export function TraceDataPanelView({
   const scoreAction = onEvaluateTrace && (
     <Button variant="primary" size="sm" onClick={onEvaluateTrace} disabled={!rootSpan}>
       <IconGauge />
-      Score trace
+      {studioT('Score trace')}
     </Button>
   );
 
@@ -401,7 +413,9 @@ export function TraceDataPanelView({
     <DataPanel
       open={!!traceId}
       onClose={onClose}
-      title={title ?? (isOnTracePage ? 'Trace Timeline' : `Trace ${traceId ?? ''}`)}
+      title={
+        title ?? (isOnTracePage ? studioT('Trace Timeline') : studioT('Trace {value0}', { value0: traceId ?? '' }))
+      }
       size={size}
       depth={depth}
     >
@@ -411,7 +425,7 @@ export function TraceDataPanelView({
           {isOnTracePage ? (
             <DataPanel.Header>
               <DataPanel.HeaderContent>
-                <DataPanel.Heading>Trace Timeline</DataPanel.Heading>
+                <DataPanel.Heading>{studioT('Trace Timeline')}</DataPanel.Heading>
                 {traceSummary}
               </DataPanel.HeaderContent>
               <DataPanel.HeaderActions>
@@ -428,13 +442,13 @@ export function TraceDataPanelView({
                   <DataPanel.NextPrevNav
                     onPrevious={onPrevious}
                     onNext={onNext}
-                    previousLabel="Go to previous trace"
-                    nextLabel="Go to next trace"
+                    previousLabel={studioT('Go to previous trace')}
+                    nextLabel={studioT('Go to next trace')}
                   />
                 )}
                 <DataPanel.HeaderContent>
                   <DataPanel.Heading>
-                    <span className="sr-only">Trace</span>
+                    <span className="sr-only">{studioT('Trace')}</span>
                     <DataPanel.CopyId id={traceId} maxLength={6} ellipsis={false} icon={<TraceIcon />} />
                   </DataPanel.Heading>
                 </DataPanel.HeaderContent>
@@ -444,22 +458,31 @@ export function TraceDataPanelView({
                   {onSaveAsDatasetItem && (
                     <Button
                       size="sm"
-                      tooltip="Add the full trace to a dataset"
+                      tooltip={studioT('Add the full trace to a dataset')}
                       onClick={() => onSaveAsDatasetItem({ traceId, rootSpanId: rootSpan?.spanId })}
                     >
                       <IconFloppyDisk1 />
-                      Add to dataset
+                      {studioT('Add to dataset')}
                     </Button>
                   )}
                   {traceActions}
                   <div aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-border-strong" />
-                  <DataPanel.CloseButton icon="x" onClick={onClose} label="Close trace" tooltip="Close trace" />
+                  <DataPanel.CloseButton
+                    icon="x"
+                    onClick={onClose}
+                    label={studioT('Close trace')}
+                    tooltip={studioT('Close trace')}
+                  />
                 </DataPanel.HeaderActions>
               </DataPanel.Header>
               {/* Summary row: what ran and how it ended on the left; timing, tokens and cost on the right. */}
               {!rootSpan && isLoading && (
                 <DataPanel.Header>
-                  <div role="status" aria-label="Loading trace summary" className="flex w-full items-center gap-2">
+                  <div
+                    role="status"
+                    aria-label={studioT('Loading trace summary')}
+                    className="flex w-full items-center gap-2"
+                  >
                     <Skeleton className="h-3 w-32" />
                     <Skeleton className="h-5 w-16 rounded-full" />
                     <Skeleton className="ml-auto h-3 w-48" />
@@ -495,7 +518,7 @@ export function TraceDataPanelView({
             spanPanelKey={selectedSpanId}
           >
             {!isLoading && !spans?.length ? (
-              <DataPanel.NoData>No spans found for this trace.</DataPanel.NoData>
+              <DataPanel.NoData>{studioT('No spans found for this trace.')}</DataPanel.NoData>
             ) : (
               (() => {
                 // Shared by the Spans and Timeline tabs: both views render the same
@@ -509,8 +532,8 @@ export function TraceDataPanelView({
                     <IconMagnifyingGlass aria-hidden className="ml-1 size-icon-md shrink-0 text-muted-foreground" />
                     <input
                       type="search"
-                      aria-label="Search spans"
-                      placeholder="Search spans"
+                      aria-label={studioT('Search spans')}
+                      placeholder={studioT('Search spans')}
                       value={query}
                       onChange={event => setQuery(event.target.value)}
                       className="h-full min-w-0 flex-1 bg-transparent px-1.5 text-label text-foreground outline-hidden placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:appearance-none"
@@ -519,14 +542,14 @@ export function TraceDataPanelView({
                       <Button
                         size="icon-sm"
                         variant="ghost"
-                        aria-label="Clear search"
+                        aria-label={studioT('Clear search')}
                         className="rounded-md"
                         onClick={() => setQuery('')}
                       >
                         <IconCrossMedium />
                       </Button>
                     )}
-                    <div role="group" aria-label="Span view" className="flex shrink-0 items-center gap-0.5">
+                    <div role="group" aria-label={studioT('Span view')} className="flex shrink-0 items-center gap-0.5">
                       {(
                         [
                           ['tree', 'Span tree', <IconCodeTree key="tree" />],
@@ -550,7 +573,7 @@ export function TraceDataPanelView({
                   </DataPanel.Header>
                 );
                 const noSearchResults = !isLoading && hierarchicalSpans.length === 0 && (
-                  <DataPanel.NoData>No spans match your search.</DataPanel.NoData>
+                  <DataPanel.NoData>{studioT('No spans match your search.')}</DataPanel.NoData>
                 );
                 const viewProps = {
                   hierarchicalSpans,
@@ -574,8 +597,9 @@ export function TraceDataPanelView({
                       {!isOnTracePage && !onEvaluateTrace && !onSaveAsDatasetItem && showUnavailableFeaturesMsg && (
                         <Notice variant="info" className="mb-6">
                           <Notice.Message>
-                            Evaluating traces and saving them as dataset items is available in Mastra Studio (local or
-                            deployed).
+                            {studioT(
+                              'Evaluating traces and saving them as dataset items is available in Mastra Studio (local or deployed).',
+                            )}
                           </Notice.Message>
                         </Notice>
                       )}
@@ -583,7 +607,7 @@ export function TraceDataPanelView({
                       {rootSpan && rootError && (
                         <Notice
                           variant="destructive"
-                          title={rootError.name ?? 'Error'}
+                          title={rootError.name ?? studioT('Error')}
                           action={
                             <Notice.Button
                               onClick={() => {
@@ -591,7 +615,7 @@ export function TraceDataPanelView({
                                 onSpanSelect?.(rootSpan.spanId);
                               }}
                             >
-                              View details
+                              {studioT('View details')}
                             </Notice.Button>
                           }
                           className="mb-4"

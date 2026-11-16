@@ -1,7 +1,19 @@
+import { locale } from '@mastra/playground-ui/lib/i18n';
 import { describe, expect, it } from 'vitest';
 import { getRecentMessagesSettings } from '../lib/recent-messages';
 
 describe('Recent message settings', () => {
+  describe('when the interface uses Chinese', () => {
+    it('describes the message window in Chinese', () => {
+      locale.setLocale('zh');
+      try {
+        expect(getRecentMessagesSettings(20).description).toBe('将最近 20 条消息纳入上下文。');
+      } finally {
+        locale.setLocale('en');
+      }
+    });
+  });
+
   describe.each([
     [false, undefined],
     [undefined, undefined],

@@ -3,9 +3,11 @@ import { SpanPayloadField } from './span-payload-primitives';
 import { getDelegatedTool, getDelegatedToolHref } from './span-payload-registry';
 import { BadgeWrapper } from '@/domains/chat/components/badge-wrapper';
 import { ActivityHeadline } from '@/ds/components/ai/activity';
+import { toolLabel } from '@/ds/components/ai/tool-call/tool-phrases';
 import { presentTool } from '@/ds/components/ai/tool-call/tool-presentation';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
 import { useLinkComponent } from '@/lib/framework';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -23,6 +25,7 @@ export function SpanToolNameValue({ toolName }: { toolName: string }) {
 }
 
 export function SpanPayloadTool({ value }: { value: unknown }) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   if (!isRecord(value)) return <SpanPayloadJson value={value} />;
   const call = value.type === 'tool-invocation' ? value.toolInvocation : value;
@@ -43,31 +46,38 @@ export function SpanPayloadTool({ value }: { value: unknown }) {
       <BadgeWrapper
         status={error ? 'error' : 'idle'}
         header={
-          <ActivityHeadline icon={<ToolIcon aria-hidden />} label={label} detail={detail} description={description} />
+          <ActivityHeadline
+            icon={<ToolIcon aria-hidden />}
+            label={toolLabel(label)}
+            detail={detail}
+            description={description}
+          />
         }
       >
         {hasBody && (
           <div className="flex flex-col gap-3">
             {delegated && delegatedHref && (
               <DataKeysAndValues>
-                <DataKeysAndValues.Key>{delegated.kind === 'workflow' ? 'Workflow' : 'Agent'}</DataKeysAndValues.Key>
+                <DataKeysAndValues.Key>
+                  {delegated.kind === 'workflow' ? studioT('Workflow') : studioT('Agent')}
+                </DataKeysAndValues.Key>
                 <DataKeysAndValues.ValueLink href={delegatedHref} as={Link}>
                   {delegated.key}
                 </DataKeysAndValues.ValueLink>
               </DataKeysAndValues>
             )}
             {input !== undefined && (
-              <SpanPayloadField label="Arguments">
+              <SpanPayloadField label={studioT('Arguments')}>
                 <SpanPayloadJson value={input} />
               </SpanPayloadField>
             )}
             {output !== undefined && (
-              <SpanPayloadField label="Result">
+              <SpanPayloadField label={studioT('Result')}>
                 <SpanPayloadJson value={output} />
               </SpanPayloadField>
             )}
             {errorText !== undefined && (
-              <SpanPayloadField label="Error">
+              <SpanPayloadField label={studioT('Error')}>
                 <SpanPayloadJson value={errorText} />
               </SpanPayloadField>
             )}

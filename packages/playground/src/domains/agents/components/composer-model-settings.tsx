@@ -13,8 +13,11 @@ import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-c
 import { IconArrowRotateCounterClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateCounterClockwise';
 import { IconCircleInfo } from '@mastra/playground-ui/icons/central/IconCircleInfo';
 import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconSettingsSliderHor';
-
 import { IconSettingsSliderVer } from '@mastra/playground-ui/icons/central/IconSettingsSliderVer';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useAgent } from '@mastra/react/hooks/agents';
 import { useMemory } from '@mastra/react/hooks/memory';
 import { useState } from 'react';
@@ -34,13 +37,14 @@ interface NetworkRadioProps {
 }
 
 const NetworkRadio = ({ hasMemory, hasSubAgents, disabled }: NetworkRadioProps) => {
+  useLocale();
   const isNetworkAvailable = hasMemory && hasSubAgents;
   const itemDisabled = disabled || !isNetworkAvailable;
 
   const radio = (
     <FieldItem disabled={itemDisabled}>
       <RadioGroupItem value="network" className="text-foreground" />
-      <FieldLabel>Network</FieldLabel>
+      <FieldLabel>{studioT('Network')}</FieldLabel>
     </FieldItem>
   );
 
@@ -60,7 +64,12 @@ const NetworkRadio = ({ hasMemory, hasSubAgents, disabled }: NetworkRadioProps) 
     <Tooltip>
       <TooltipTrigger asChild>{radio}</TooltipTrigger>
       <TooltipContent>
-        <p>Network is not available. Please make sure you have {requirements.join(' and ')}.</p>
+        <p>
+          <Trans
+            id="Network is not available. Please make sure you have {part0}."
+            values={{ part0: requirements.join(' and ') }}
+          />
+        </p>
       </TooltipContent>
     </Tooltip>
   );
@@ -72,12 +81,13 @@ interface StreamSubscriptionRadioProps {
 }
 
 const StreamSubscriptionRadio = ({ supported, disabled }: StreamSubscriptionRadioProps) => {
+  useLocale();
   const itemDisabled = disabled || !supported;
 
   const radio = (
     <FieldItem disabled={itemDisabled}>
       <RadioGroupItem value="streamSubscription" className="text-foreground" />
-      <FieldLabel>Stream subscription (default)</FieldLabel>
+      <FieldLabel>{studioT('Stream subscription (default)')}</FieldLabel>
     </FieldItem>
   );
 
@@ -89,13 +99,14 @@ const StreamSubscriptionRadio = ({ supported, disabled }: StreamSubscriptionRadi
     <Tooltip>
       <TooltipTrigger asChild>{radio}</TooltipTrigger>
       <TooltipContent>
-        <p>Stream subscription is not supported for this agent.</p>
+        <p>{studioT('Stream subscription is not supported for this agent.')}</p>
       </TooltipContent>
     </Tooltip>
   );
 };
 
 export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) => {
+  useLocale();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -169,7 +180,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
             variant="ghost"
             size="icon-md"
             type="button"
-            tooltip="Model settings"
+            tooltip={studioT('Model settings')}
             data-testid="composer-model-settings-trigger"
           >
             <IconSettingsSliderVer />
@@ -180,7 +191,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
             <Skeleton className="h-40 w-full" data-testid="composer-model-settings-skeleton" />
           ) : (
             <section className="@container space-y-5">
-              <Entry label="Chat Method">
+              <Entry label={studioT('Chat Method')}>
                 <RadioGroup
                   value={radioValue}
                   disabled={!canEditSettings}
@@ -202,19 +213,19 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                   {!isSupportedModel && (
                     <FieldItem disabled={!canEditSettings}>
                       <RadioGroupItem value="generateLegacy" className="text-foreground" />
-                      <FieldLabel>Generate (Legacy)</FieldLabel>
+                      <FieldLabel>{studioT('Generate (Legacy)')}</FieldLabel>
                     </FieldItem>
                   )}
                   {isSupportedModel && (
                     <FieldItem disabled={!canEditSettings}>
                       <RadioGroupItem value="generate" className="text-foreground" />
-                      <FieldLabel>Generate</FieldLabel>
+                      <FieldLabel>{studioT('Generate')}</FieldLabel>
                     </FieldItem>
                   )}
                   {!isSupportedModel && (
                     <FieldItem disabled={!canEditSettings}>
                       <RadioGroupItem value="streamLegacy" className="text-foreground" />
-                      <FieldLabel>Stream (Legacy)</FieldLabel>
+                      <FieldLabel>{studioT('Stream (Legacy)')}</FieldLabel>
                     </FieldItem>
                   )}
                   {isSupportedModel && (
@@ -223,7 +234,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                   {isSupportedModel && (
                     <FieldItem disabled={!canEditSettings}>
                       <RadioGroupItem value="stream" className="text-foreground" />
-                      <FieldLabel>Stream</FieldLabel>
+                      <FieldLabel>{studioT('Stream')}</FieldLabel>
                     </FieldItem>
                   )}
                   {isSupportedModel && (
@@ -232,7 +243,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                 </RadioGroup>
               </Entry>
 
-              <Entry label="Require Tool Approval">
+              <Entry label={studioT('Require Tool Approval')}>
                 <Checkbox
                   checked={settings?.modelSettings?.requireToolApproval}
                   disabled={!canEditSettings}
@@ -254,13 +265,15 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                   <IconCircleInfo className="size-icon-sm shrink-0" />
                   <Txt as="span" variant="caption">
                     {settings?.modelSettings?.temperature !== undefined
-                      ? 'Claude 4.5+ models only accept Temperature OR Top P. Clear Temperature to use Top P.'
-                      : 'Claude 4.5+ models only accept Temperature OR Top P. Setting Temperature will clear Top P.'}
+                      ? studioT('Claude 4.5+ models only accept Temperature OR Top P. Clear Temperature to use Top P.')
+                      : studioT(
+                          'Claude 4.5+ models only accept Temperature OR Top P. Setting Temperature will clear Top P.',
+                        )}
                   </Txt>
                 </div>
               )}
 
-              <Entry label="Temperature">
+              <Entry label={studioT('Temperature')}>
                 <div className="flex flex-row items-center justify-between gap-2">
                   <Slider
                     value={[settings?.modelSettings?.temperature ?? -0.1]}
@@ -280,12 +293,12 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                     }
                   />
                   <Txt as="p" variant="caption" tone="muted">
-                    {settings?.modelSettings?.temperature ?? 'n/a'}
+                    {settings?.modelSettings?.temperature ?? studioT('n/a')}
                   </Txt>
                 </div>
               </Entry>
 
-              <Entry label="Top P">
+              <Entry label={studioT('Top P')}>
                 <div className="flex flex-row items-center justify-between gap-2">
                   <Slider
                     disabled={!canEditSettings}
@@ -302,7 +315,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                     step={0.1}
                   />
                   <Txt as="p" variant="caption" tone="muted">
-                    {settings?.modelSettings?.topP ?? 'n/a'}
+                    {settings?.modelSettings?.topP ?? studioT('n/a')}
                   </Txt>
                 </div>
               </Entry>
@@ -316,7 +329,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                   disabled={!canEditSettings}
                   onClick={() => canEditSettings && resetAll()}
                 >
-                  Reset
+                  {studioT('Reset')}
                 </Button>
                 <Button
                   icon={<IconSettingsSliderHor />}
@@ -326,7 +339,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
                   disabled={!canEditSettings}
                   onClick={() => setAdvancedOpen(true)}
                 >
-                  Advanced settings
+                  {studioT('Advanced settings')}
                 </Button>
               </div>
             </section>
@@ -337,7 +350,7 @@ export const ComposerModelSettings = ({ agentId }: ComposerModelSettingsProps) =
       <Dialog open={advancedOpen} onOpenChange={setAdvancedOpen}>
         <DialogContent size="lg">
           <DialogHeader>
-            <DialogTitle>Advanced model settings</DialogTitle>
+            <DialogTitle>{studioT('Advanced model settings')}</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <AgentAdvancedSettingsBody canEdit={canEditSettings} />

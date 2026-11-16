@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-
 import { EmptyState } from '../EmptyState';
 import { IconCloudUpload } from '@/ds/icons/central/IconCloudUpload';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 // Matches `--duration-normal` so the fade-out finishes before the backdrop unmounts.
 const EXIT_DURATION_MS = 200;
@@ -41,12 +41,13 @@ const hasFiles = (event: DragEvent) => Array.from(event.dataTransfer?.types ?? [
 
 export function FileDropBackdrop({
   onFilesDrop,
-  label = 'Drop to upload',
-  description = 'Release to attach your files.',
+  label = studioT('Drop to upload'),
+  description = studioT('Release to attach your files.'),
   accept,
   disabled = false,
   children,
 }: FileDropBackdropProps) {
+  useLocale();
   const [isDragging, setIsDragging] = useState(false);
   const dragDepth = useRef(0);
   const onFilesDropRef = useRef(onFilesDrop);

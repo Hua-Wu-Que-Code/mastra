@@ -11,6 +11,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconPause } from '@/ds/icons/central/IconPause';
 import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
 import { useTimeDiff } from '@/hooks/use-time-diff';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDuration } from '@/utils/duration';
 
 function formatRunStatus(status?: WorkflowRunStatus) {
@@ -32,6 +34,7 @@ export function WorkflowRunStatusBadge({ status }: { status?: WorkflowRunStatus 
 }
 
 function RunDuration({ span, spansSuspension }: Omit<WorkflowRunTiming, 'waitingSince'>) {
+  useLocale();
   const elapsed = formatDuration(useTimeDiff(span));
 
   return (
@@ -40,7 +43,7 @@ function RunDuration({ span, spansSuspension }: Omit<WorkflowRunTiming, 'waiting
       variant="meta"
       tone="muted"
       className="flex items-center gap-1.5"
-      title={spansSuspension ? 'Run duration, including time spent suspended' : 'Run duration'}
+      title={spansSuspension ? studioT('Run duration, including time spent suspended') : studioT('Run duration')}
     >
       <IconStopwatch aria-hidden className="size-icon-sm" />
       <Txt as="span" variant="meta" font="mono">
@@ -51,6 +54,7 @@ function RunDuration({ span, spansSuspension }: Omit<WorkflowRunTiming, 'waiting
 }
 
 function RunWaiting({ since }: { since: number }) {
+  useLocale();
   const waiting = formatDuration(useTimeDiff({ startedAt: since }));
 
   return (
@@ -58,7 +62,7 @@ function RunWaiting({ since }: { since: number }) {
       as="span"
       variant="meta"
       className="flex items-center gap-1.5 text-warning-foreground tabular-nums"
-      title="Waiting for input"
+      title={studioT('Waiting for input')}
     >
       <IconPause aria-hidden className="size-icon-sm" />
       {waiting}
@@ -79,6 +83,7 @@ export function RunWorkflowHeader({
   timestamp?: number;
   resourceId?: string;
 }) {
+  useLocale();
   const timing = resolveRunTiming(result?.steps, status);
 
   return (
@@ -88,7 +93,7 @@ export function RunWorkflowHeader({
           <WorkflowRunStatusBadge status={status} />
           {resourceId && (
             <Badge size="md" variant="neutral" emphasis="subtle" className="min-w-0">
-              <span className="min-w-0 truncate" title={`Resource ${resourceId}`}>
+              <span className="min-w-0 truncate" title={studioT('Resource {value0}', { value0: resourceId })}>
                 {resourceId}
               </span>
             </Badge>
@@ -103,7 +108,13 @@ export function RunWorkflowHeader({
         <Txt as="span" variant="meta" font="mono" className="min-w-0 truncate" title={runId}>
           {runId}
         </Txt>
-        <CopyButton content={runId} tooltip="Copy run ID" variant="ghost" size="icon-sm" className="shrink-0" />
+        <CopyButton
+          content={runId}
+          tooltip={studioT('Copy run ID')}
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0"
+        />
         {timestamp !== undefined && Number.isFinite(timestamp) ? (
           <RelativeTimestamp value={timestamp} className="ml-auto shrink-0" />
         ) : null}

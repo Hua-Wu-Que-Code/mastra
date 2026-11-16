@@ -1,6 +1,8 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconStar } from '@mastra/playground-ui/icons/central/IconStar';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import type { MouseEvent } from 'react';
@@ -31,6 +33,7 @@ export const SkillFavoriteButton = ({
   className,
   showCount = true,
 }: SkillFavoriteButtonProps) => {
+  useLocale();
   const features = useBuilderAgentFeatures();
   const toggle = useToggleStoredSkillFavorite(skillId);
   const { data: capabilities } = useAuthCapabilities();
@@ -74,7 +77,7 @@ export const SkillFavoriteButton = ({
               <span className="tabular-nums">{favoriteCount}</span> {countLabel}
             </>
           ) : (
-            'Star'
+            studioT('Star')
           )}
         </Txt>
       )}

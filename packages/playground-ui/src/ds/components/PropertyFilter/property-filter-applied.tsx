@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/ds/components/Popover
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconLock } from '@/ds/icons/central/IconLock';
 import { MENU_SIDE_OFFSET } from '@/ds/primitives/menu-item';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type PropertyFilterAppliedProps = {
   fields: PropertyFilterField[];
@@ -57,6 +58,7 @@ type LockedTokenPillProps = {
 };
 
 function LockedTokenPill({ field, value, tooltipContent }: LockedTokenPillProps) {
+  useLocale();
   const display = lookupOptionLabel(field, value);
   const lockA11yLabel = `${field.label} filter is locked by context`;
 
@@ -71,7 +73,7 @@ function LockedTokenPill({ field, value, tooltipContent }: LockedTokenPillProps)
             aria-label={lockA11yLabel}
           >
             <ButtonsGroupText>{field.label}</ButtonsGroupText>
-            <ButtonsGroupText>is</ButtonsGroupText>
+            <ButtonsGroupText>{studioT('is')}</ButtonsGroupText>
             <ButtonsGroupText>{display}</ButtonsGroupText>
             <ButtonsGroupText>
               <IconLock />
@@ -94,6 +96,7 @@ type TextTokenPillProps = {
 };
 
 function TextTokenPill({ field, value, onChange, onRemove, disabled, autoFocus }: TextTokenPillProps) {
+  useLocale();
   // Local draft keeps the caret stable when the URL round-trip trims the
   // stored value (e.g. trailing spaces). We only re-sync from the prop when
   // the external value is genuinely different from our current (trimmed) draft.
@@ -112,12 +115,12 @@ function TextTokenPill({ field, value, onChange, onRemove, disabled, autoFocus }
   return (
     <ButtonsGroup>
       <ButtonsGroupText>{field.label}</ButtonsGroupText>
-      <ButtonsGroupText>is</ButtonsGroupText>
+      <ButtonsGroupText>{studioT('is')}</ButtonsGroupText>
       <Input
         ref={inputRef}
         disabled={disabled}
         value={draft}
-        placeholder={field.placeholder ?? `Enter ${field.label}`}
+        placeholder={field.placeholder ?? studioT('Enter {value0}', { value0: field.label })}
         onChange={e => {
           const next = e.target.value;
           setDraft(next);
@@ -141,7 +144,7 @@ function TextTokenPill({ field, value, onChange, onRemove, disabled, autoFocus }
         size="icon-md"
         type="button"
         disabled={disabled}
-        aria-label={`Remove ${field.label} filter`}
+        aria-label={studioT('Remove {value0} filter', { value0: field.label })}
         onMouseDown={e => e.preventDefault()}
         onClick={onRemove}
       >
@@ -161,12 +164,13 @@ type PickMultiTokenPillProps = {
 };
 
 function PickMultiTokenPill({ field, token, tokens, onChange, onRemove, disabled }: PickMultiTokenPillProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
 
   return (
     <ButtonsGroup>
       <ButtonsGroupText>{field.label}</ButtonsGroupText>
-      <ButtonsGroupText>is</ButtonsGroupText>
+      <ButtonsGroupText>{studioT('is')}</ButtonsGroupText>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button type="button" disabled={disabled}>
@@ -181,7 +185,7 @@ function PickMultiTokenPill({ field, token, tokens, onChange, onRemove, disabled
         size="icon-md"
         type="button"
         disabled={disabled}
-        aria-label={`Remove ${field.label} filter`}
+        aria-label={studioT('Remove {value0} filter', { value0: field.label })}
         onClick={onRemove}
       >
         <IconCrossMedium />
@@ -207,6 +211,7 @@ export function PropertyFilterApplied({
   lockedFieldIds,
   lockedTooltipContent = DEFAULT_LOCKED_TOOLTIP,
 }: PropertyFilterAppliedProps) {
+  useLocale();
   if (tokens.length === 0) return null;
 
   const lockedSet = new Set(lockedFieldIds ?? []);
@@ -272,13 +277,13 @@ export function PropertyFilterApplied({
         return (
           <ButtonsGroup key={`${token.fieldId}-${index}`}>
             <ButtonsGroupText>{field.label}</ButtonsGroupText>
-            <ButtonsGroupText>is</ButtonsGroupText>
+            <ButtonsGroupText>{studioT('is')}</ButtonsGroupText>
             <ButtonsGroupText>{stringifyTokenValue(token.value)}</ButtonsGroupText>
             <Button
               size="icon-md"
               type="button"
               disabled={disabled}
-              aria-label={`Remove ${field.label} filter`}
+              aria-label={studioT('Remove {value0} filter', { value0: field.label })}
               onClick={() => removeTokenAt(index)}
             >
               <IconCrossMedium />

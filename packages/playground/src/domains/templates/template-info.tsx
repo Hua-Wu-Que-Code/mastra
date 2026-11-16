@@ -6,6 +6,8 @@ import { IconBranch } from '@mastra/playground-ui/icons/central/IconBranch';
 import { IconCircleInfo } from '@mastra/playground-ui/icons/central/IconCircleInfo';
 import { IconPackage } from '@mastra/playground-ui/icons/central/IconPackage';
 import { GithubIcon } from '@mastra/playground-ui/icons/GithubIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 
@@ -20,6 +22,7 @@ type TemplateInfoProps = {
 };
 
 export function TemplateInfo({ title, description, githubUrl, isLoading, infoData, templateSlug }: TemplateInfoProps) {
+  useLocale();
   // Generate branch name that will be created
   const branchName = templateSlug ? `feat/install-template-${templateSlug}` : 'feat/install-template-[slug]';
 
@@ -64,18 +67,20 @@ export function TemplateInfo({ title, description, githubUrl, isLoading, infoDat
                 <div className="flex items-center gap-2">
                   <IconBranch className="h-[1em] w-[1em] text-muted-foreground" />
                   <Txt as="span" variant="subheading" tone="ink">
-                    A new Git branch will be created
+                    {studioT('A new Git branch will be created')}
                   </Txt>
                 </div>
                 <div className="space-y-1">
                   <Txt tone="muted" as="p" variant="caption">
                     <Txt as="span" variant="column">
-                      Branch name:
+                      {studioT('Branch name:')}
                     </Txt>{' '}
                     <InlineCode>{branchName}</InlineCode>
                   </Txt>
                   <Txt tone="muted" as="p" variant="caption">
-                    This ensures safe installation with easy rollback if needed. Your main branch remains unchanged.
+                    {studioT(
+                      'This ensures safe installation with easy rollback if needed. Your main branch remains unchanged.',
+                    )}
                   </Txt>
                 </div>
               </div>

@@ -113,7 +113,8 @@
     "oxfmt:format:check": "oxfmt --check . '!docs/**/*' '!examples/**/*' '!explorations/**/*' '!observability/_examples/**/*'",
     "list-oxfmt-files": "pnpm --silent list-changed-files | grep -E '\\.(js|jsx|cjs|mjs|ts|tsx|md|mdx|json|jsonc|json5|graphql|gql|css|scss|less|yml|yaml|toml)$' | grep -vE '^(docs/|examples/|explorations/|observability/_examples/)' | while IFS= read -r file; do [ ! -f \"$file\" ] || [ -L \"$file\" ] || printf '%s\\n' \"$file\"; done || true",
     "oxfmt:changed": "files=$(pnpm --silent list-oxfmt-files); [ -z \"$files\" ] || printf '%s\\n' \"$files\" | xargs oxfmt --no-error-on-unmatched-pattern",
-    "format:oxfmt": "pnpm oxfmt:format"
+    "format:oxfmt": "pnpm oxfmt:format",
+    "check:studio-i18n": "node scripts/check-studio-i18n.mjs"
   },
   "engines": {
     "node": "^22.19.0 || >=24.11.0",

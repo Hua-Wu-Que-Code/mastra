@@ -7,8 +7,10 @@ import { BADGE_COLORS, WorkflowCodeContent } from '@/ds/components/Workflow';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconListBullets } from '@/ds/icons/central/IconListBullets';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function WorkflowStepDetailContent({ requestContext }: { requestContext: Record<string, any> }) {
+  useLocale();
   const { stepDetail, closeStepDetail } = useWorkflowStepDetail();
 
   if (!stepDetail) {
@@ -29,7 +31,9 @@ export function WorkflowStepDetailContent({ requestContext }: { requestContext: 
           )}
           <div className="flex flex-col">
             <Txt variant="subheading" tone="ink">
-              {stepDetail.type === 'map-config' ? `${stepDetail.stepName} Config` : `${stepDetail.stepName} Workflow`}
+              {stepDetail.type === 'map-config'
+                ? studioT('{value0} Config', { value0: stepDetail.stepName })
+                : studioT('{value0} Workflow', { value0: stepDetail.stepName })}
             </Txt>
             {stepDetail.type === 'map-config' && stepDetail.stepId && stepDetail.stepId !== stepDetail.stepName && (
               <Txt variant="meta" tone="muted">
@@ -38,7 +42,7 @@ export function WorkflowStepDetailContent({ requestContext }: { requestContext: 
             )}
           </div>
         </div>
-        <button onClick={closeStepDetail} className="rounded p-1 hover:bg-fill-subtle" aria-label="Close">
+        <button onClick={closeStepDetail} className="rounded p-1 hover:bg-fill-subtle" aria-label={studioT('Close')}>
           <IconCrossMedium className="size-icon-md text-muted-foreground" />
         </button>
       </div>

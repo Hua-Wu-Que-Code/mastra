@@ -9,6 +9,8 @@ import { useDateRangeWheelZoom } from './hooks/useDateRangeWheelZoom';
 import type { TimelineIndexRange, TimelineState } from './lib/date-range-timeline';
 import { createDateRangeGridMarkers } from './lib/date-range-timeline-grid';
 import { createDateRangeTrackModel } from './lib/date-range-timeline-view-model';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface DateRangeTrackProps {
@@ -30,6 +32,7 @@ export function DateRangeTrack({
   onSelectionCancel,
   onZoom,
 }: DateRangeTrackProps) {
+  useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
   const pointer = useDateRangePointerGestures({
     trackRef,
@@ -66,7 +69,7 @@ export function DateRangeTrack({
     <div
       ref={trackRef}
       role="group"
-      aria-label="Date range selection area"
+      aria-label={studioT('Date range selection area')}
       className={cn(
         'relative h-12 touch-none rounded-lg bg-muted',
         pointer.interaction?.type === 'selecting' ? 'cursor-col-resize' : 'cursor-crosshair',

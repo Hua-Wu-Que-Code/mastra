@@ -9,6 +9,8 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { WorkspaceTreeView } from '@mastra/playground-ui/domains/workspace';
 import type { WorkspaceSkillInstallParams } from '@mastra/playground-ui/domains/workspace';
 import { IconArrowRotateClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateClockwise';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import {
@@ -43,6 +45,7 @@ const errorMessage = (error: unknown) =>
       : 'Unknown error';
 
 export default function Workspace() {
+  useLocale();
   const { workspaceId: workspaceIdFromPath } = useParams<{ workspaceId?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -140,13 +143,17 @@ export default function Workspace() {
       const result = await updateSkills.mutateAsync({ workspaceId: effectiveWorkspaceId });
       const failed = result.updated.filter(u => !u.success);
       if (failed.length > 0) {
-        toast.error(`Failed to update ${failed.map(u => u.skillName).join(', ')}`);
+        toast.error(studioT('Failed to update {value0}', { value0: failed.map(u => u.skillName).join(', ') }));
       } else {
-        toast.success(`${result.updated.length} skill(s) updated`);
+        toast.success(studioT('{value0} skill(s) updated', { value0: result.updated.length }));
       }
       void queryClient.invalidateQueries({ queryKey: ['workspace', effectiveWorkspaceId, 'fs'] });
     } catch (error) {
-      toast.error(`Failed to update skills: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to update skills: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
@@ -158,7 +165,7 @@ export default function Workspace() {
       try {
         await deleteFile.mutateAsync({ path, recursive: true, force: true, workspaceId: effectiveWorkspaceId });
       } catch (error) {
-        toast.error(`Failed to delete ${path}: ${errorMessage(error)}`);
+        toast.error(studioT('Failed to delete {value0}: {value1}', { value0: path, value1: errorMessage(error) }));
         throw error;
       }
       return;
@@ -166,10 +173,10 @@ export default function Workspace() {
     try {
       const result = await removeSkill.mutateAsync({ workspaceId: effectiveWorkspaceId, skillName });
       if (!result.success) throw new Error(`Failed to remove skill "${skillName}"`);
-      toast.success(`Skill "${skillName}" removed`);
+      toast.success(studioT('Skill "{value0}" removed', { value0: skillName }));
       void refetchSkills();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to remove skill');
+      toast.error(error instanceof Error ? error.message : studioT('Failed to remove skill'));
       throw error;
     }
   };
@@ -199,9 +206,18 @@ export default function Workspace() {
       if (!result.success) throw new Error('Unknown error');
       void queryClient.invalidateQueries({ queryKey: ['workspace', effectiveWorkspaceId, 'fs'] });
       void refetchSkills();
-      toast.success(`Skill "${result.skillName}" installed successfully (${result.filesWritten} files)`);
+      toast.success(
+        studioT('Skill "{value0}" installed successfully ({value1} files)', {
+          value0: result.skillName,
+          value1: result.filesWritten,
+        }),
+      );
     } catch (error) {
-      toast.error(`Failed to install skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to install skill: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
       throw error;
     }
   };
@@ -225,7 +241,7 @@ export default function Workspace() {
   if (isLoadingWorkspaces) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <Spinner fill />
       </PageLayout>
     );
@@ -235,7 +251,7 @@ export default function Workspace() {
   if (isSessionExpired) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -245,7 +261,7 @@ export default function Workspace() {
   if (isPermissionDenied) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <PermissionDenied variant="fill" resource="workspaces" />
       </PageLayout>
     );
@@ -255,7 +271,7 @@ export default function Workspace() {
   if (isWorkspaceNotSupported) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <WorkspaceNotSupported />
       </PageLayout>
     );
@@ -266,11 +282,11 @@ export default function Workspace() {
   if (genericError) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load workspace"
+          titleSlot={studioT('Failed to load workspace')}
           descriptionSlot={genericError.message}
         />
       </PageLayout>
@@ -281,7 +297,7 @@ export default function Workspace() {
   if (!isLoadingWorkspaces && workspaces.length === 0) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <NoWorkspacesInfo />
       </PageLayout>
     );
@@ -292,7 +308,7 @@ export default function Workspace() {
   if (!isLoadingInfo && !isLoadingWorkspaces && !isWorkspaceConfigured) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workspaces</h1>
+        <h1 className="sr-only">{studioT('Workspaces')}</h1>
         <WorkspaceNotConfigured />
       </PageLayout>
     );
@@ -301,17 +317,20 @@ export default function Workspace() {
   const workspaceOptions = workspaces.map(workspace => ({
     value: workspace.id,
     label: workspace.name,
-    description: workspace.source === 'agent' ? `Agent: ${workspace.agentName}` : 'Global workspace',
+    description:
+      workspace.source === 'agent'
+        ? studioT('Agent: {value0}', { value0: workspace.agentName })
+        : studioT('Global workspace'),
     end: (
       <span className="flex shrink-0 gap-1">
         {workspace.safety?.readOnly && (
           <Badge size="xs" variant="warning">
-            Read-only
+            {studioT('Read-only')}
           </Badge>
         )}
-        {workspace.capabilities.hasFilesystem && <Badge size="xs">FS</Badge>}
-        {workspace.capabilities.hasSandbox && <Badge size="xs">Sandbox</Badge>}
-        {workspace.capabilities.hasSkills && <Badge size="xs">Skills</Badge>}
+        {workspace.capabilities.hasFilesystem && <Badge size="xs">{studioT('FS')}</Badge>}
+        {workspace.capabilities.hasSandbox && <Badge size="xs">{studioT('Sandbox')}</Badge>}
+        {workspace.capabilities.hasSkills && <Badge size="xs">{studioT('Skills')}</Badge>}
       </span>
     ),
   }));
@@ -323,25 +342,25 @@ export default function Workspace() {
       headerActions={
         <div className="flex items-center gap-2">
           <Combobox
-            aria-label="Workspace"
+            aria-label={studioT('Workspace')}
             variant="ghost"
             className="w-auto"
             options={workspaceOptions}
             value={selectedWorkspace?.id}
             onValueChange={setSelectedWorkspaceId}
-            placeholder="Select workspace"
-            searchPlaceholder="Search workspaces"
-            emptyText="No workspaces found."
+            placeholder={studioT('Select workspace')}
+            searchPlaceholder={studioT('Search workspaces')}
+            emptyText={studioT('No workspaces found.')}
           />
           {isReadOnly && (
             <Badge size="xs" variant="warning">
-              Read-only
+              {studioT('Read-only')}
             </Badge>
           )}
         </div>
       }
     >
-      <h1 className="sr-only">Workspaces</h1>
+      <h1 className="sr-only">{studioT('Workspaces')}</h1>
       <div className="flex min-h-0 flex-col">
         {hasFilesystem && effectiveWorkspaceId && (
           <WorkspaceNotices
@@ -367,7 +386,9 @@ export default function Workspace() {
                       try {
                         await createDirectory.mutateAsync({ path, recursive: true, workspaceId: effectiveWorkspaceId });
                       } catch (error) {
-                        toast.error(`Failed to create ${path}: ${errorMessage(error)}`);
+                        toast.error(
+                          studioT('Failed to create {value0}: {value1}', { value0: path, value1: errorMessage(error) }),
+                        );
                         throw error;
                       }
                     }
@@ -378,7 +399,7 @@ export default function Workspace() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    tooltip="Update skills"
+                    tooltip={studioT('Update skills')}
                     disabled={updateSkills.isPending}
                     onClick={() => void handleUpdateSkills()}
                   >
@@ -409,8 +430,10 @@ export default function Workspace() {
           <div className="min-h-0 flex-1">
             <EmptyState
               variant="fill"
-              titleSlot="Filesystem resolved per request"
-              descriptionSlot="This workspace creates its filesystem when an agent runs, so its files can't be browsed here."
+              titleSlot={studioT('Filesystem resolved per request')}
+              descriptionSlot={studioT(
+                "This workspace creates its filesystem when an agent runs, so its files can't be browsed here.",
+              )}
             />
           </div>
         )}
@@ -419,8 +442,8 @@ export default function Workspace() {
           <div className="min-h-0 flex-1">
             <EmptyState
               variant="fill"
-              titleSlot="No filesystem or skills configured"
-              descriptionSlot="Add a filesystem or skills to this workspace to browse its files here."
+              titleSlot={studioT('No filesystem or skills configured')}
+              descriptionSlot={studioT('Add a filesystem or skills to this workspace to browse its files here.')}
             />
           </div>
         )}

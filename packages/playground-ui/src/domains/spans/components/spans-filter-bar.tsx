@@ -6,6 +6,7 @@ import type { TraceDatePreset } from '../../traces/types';
 import { SPAN_TIME_RANGE_PRESETS, useSpansFilterBar, useSpansFilterBarFields } from '../hooks/use-spans-filter-bar';
 import { FilterBar } from '@/ds/components/FilterBar';
 import { FILTER_BAR_TIME_RANGE_FIELD_ID } from '@/ds/components/FilterBar/filter-bar-time-range';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 // Items are rebuilt from tokens with `id: fieldId` (traceTokensToFilterBarItems); give the
 // draft that id so the chip survives the round trip without remounting.
@@ -51,6 +52,7 @@ export function SpansFilterBar({
   describeSuggestionsError,
   disabled,
 }: SpansFilterBarProps) {
+  useLocale();
   const fields = useSpansFilterBarFields({ timeRange, withTokenSearch });
   const { filterBarValue, onFilterBarChange } = useSpansFilterBar({
     tokens,
@@ -67,7 +69,7 @@ export function SpansFilterBar({
       createItemId={createItemId}
       describeSuggestionsError={describeSuggestionsError}
       maxDepth={3}
-      aria-label="Span filters"
+      aria-label={studioT('Span filters')}
       className="min-w-64 flex-1"
     >
       <FilterBar.Chips
@@ -91,7 +93,7 @@ export function SpansFilterBar({
           )
         }
       />
-      <FilterBar.Input placeholder="Filter spans" />
+      <FilterBar.Input placeholder={studioT('Filter spans')} />
     </FilterBar>
   );
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
-
 import { getFieldOptionsFromSchema, getFieldOptionAtPath, getChildFieldOptions, parseFieldPath } from './schema-utils';
 import type { FieldOption, RuleFieldSelectProps } from './types';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select/select';
 import { Txt } from '@/ds/components/Txt';
 import { Icon } from '@/ds/icons';
@@ -10,6 +10,8 @@ import { IconFontStyle } from '@/ds/icons/central/IconFontStyle';
 import { IconHashtag } from '@/ds/icons/central/IconHashtag';
 import { IconListBullets } from '@/ds/icons/central/IconListBullets';
 import { IconToggle } from '@/ds/icons/central/IconToggle';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -47,9 +49,10 @@ const FieldLevelSelect: React.FC<FieldLevelSelectProps> = ({
   options,
   value,
   onChange,
-  placeholder = 'Select field',
+  placeholder = studioT('Select field'),
   className,
 }) => {
+  useLocale();
   return (
     <div className={cn('relative', className)}>
       <Select value={value} onValueChange={onChange}>
@@ -78,6 +81,7 @@ const FieldLevelSelect: React.FC<FieldLevelSelectProps> = ({
  * Recursive field selector that shows additional dropdowns for nested objects/arrays
  */
 export const RuleFieldSelect: React.FC<RuleFieldSelectProps> = ({ schema, value, onChange, className }) => {
+  useLocale();
   // Parse the current path into segments
   const pathSegments = React.useMemo(() => parseFieldPath(value), [value]);
 
@@ -139,7 +143,7 @@ export const RuleFieldSelect: React.FC<RuleFieldSelectProps> = ({ schema, value,
   if (selectors.length === 0) {
     return (
       <Txt as="p" variant="body" tone="muted" className={className}>
-        No fields available
+        {studioT('No fields available')}
       </Txt>
     );
   }
@@ -153,7 +157,7 @@ export const RuleFieldSelect: React.FC<RuleFieldSelectProps> = ({ schema, value,
             options={selector.options}
             value={selector.value}
             onChange={newValue => handleChange(index, newValue)}
-            placeholder={index === 0 ? 'Select field' : 'Select property'}
+            placeholder={index === 0 ? studioT('Select field') : studioT('Select property')}
           />
         </React.Fragment>
       ))}

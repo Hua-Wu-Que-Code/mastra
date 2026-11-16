@@ -6,6 +6,8 @@ import { Input } from '@mastra/playground-ui/components/Input';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { useReducer } from 'react';
@@ -80,6 +82,7 @@ function editDatasetFormReducer(state: EditDatasetFormState, action: EditDataset
 }
 
 export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFormProps) {
+  useLocale();
   const [formState, dispatch] = useReducer(editDatasetFormReducer, dataset, getInitialFormState);
   const { updateDataset } = useDatasetMutations();
 
@@ -101,7 +104,7 @@ export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFor
     dispatch({ type: 'setValidationError', validationError: null });
 
     if (!formState.name.trim()) {
-      toast.error('Dataset name is required');
+      toast.error(studioT('Dataset name is required'));
       return;
     }
 
@@ -116,7 +119,7 @@ export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFor
         scorerIds: formState.scorerIds.length > 0 ? formState.scorerIds : null,
       });
 
-      toast.success('Dataset updated successfully');
+      toast.success(studioT('Dataset updated successfully'));
       onSuccess();
     } catch (err: unknown) {
       // Handle validation errors (existing items may fail new schema)
@@ -130,7 +133,7 @@ export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFor
         });
       } else {
         const error = err as { message?: string };
-        toast.error(`Failed to update dataset: ${error?.message || 'Unknown error'}`);
+        toast.error(studioT('Failed to update dataset: {value0}', { value0: error?.message || 'Unknown error' }));
       }
     }
   };
@@ -138,22 +141,22 @@ export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFor
   return (
     <Form onSubmit={handleSubmit}>
       <Field>
-        <FieldLabel required>Name</FieldLabel>
+        <FieldLabel required>{studioT('Name')}</FieldLabel>
         <Input
           required
           value={formState.name}
           onChange={e => dispatch({ type: 'setStringField', field: 'name', value: e.target.value })}
-          placeholder="Enter dataset name"
+          placeholder={studioT('Enter dataset name')}
           autoFocus
         />
       </Field>
 
       <Field>
-        <FieldLabel>Description</FieldLabel>
+        <FieldLabel>{studioT('Description')}</FieldLabel>
         <Input
           value={formState.description}
           onChange={e => dispatch({ type: 'setStringField', field: 'description', value: e.target.value })}
-          placeholder="Enter dataset description (optional)"
+          placeholder={studioT('Enter dataset description (optional)')}
         />
       </Field>
 
@@ -182,7 +185,7 @@ export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFor
 
       <div className="flex justify-end gap-2 pt-4">
         <Button icon={<IconCrossMedium />} type="button" onClick={onCancel}>
-          Cancel
+          {studioT('Cancel')}
         </Button>
         <Button
           icon={<IconCheckmark2Medium />}
@@ -190,7 +193,7 @@ export function EditDatasetForm({ dataset, onSuccess, onCancel }: EditDatasetFor
           variant="primary"
           disabled={updateDataset.isPending || !formState.name.trim()}
         >
-          {updateDataset.isPending ? 'Saving...' : 'Save changes'}
+          {updateDataset.isPending ? studioT('Saving...') : studioT('Save changes')}
         </Button>
       </div>
     </Form>

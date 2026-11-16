@@ -1,5 +1,7 @@
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { useLiveKitRecording } from '../hooks/use-livekit-recording';
 import { LiveKitRecordingPlayer } from './livekit-recording-player';
 
@@ -9,11 +11,12 @@ type RecordingStateProps = Pick<
 >;
 
 export function LiveKitRecordingState({ data, isFetching, isError, dataUpdatedAt }: RecordingStateProps) {
-  if (isFetching) return <Txt role="status">Loading recording…</Txt>;
+  useLocale();
+  if (isFetching) return <Txt role="status">{studioT('Loading recording…')}</Txt>;
   if (isError) {
     return (
       <Notice variant="destructive">
-        <Notice.Message>Unable to load the call recording.</Notice.Message>
+        <Notice.Message>{studioT('Unable to load the call recording.')}</Notice.Message>
       </Notice>
     );
   }
@@ -21,7 +24,9 @@ export function LiveKitRecordingState({ data, isFetching, isError, dataUpdatedAt
   return (
     <Notice variant="info">
       <Notice.Message>
-        No recording is available yet. It may still be processing, or recording was not enabled for this call.
+        {studioT(
+          'No recording is available yet. It may still be processing, or recording was not enabled for this call.',
+        )}
       </Notice.Message>
     </Notice>
   );

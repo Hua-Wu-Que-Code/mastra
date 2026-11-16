@@ -1,5 +1,7 @@
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { TraceIntelligenceEntityIndex, TraceIntelligenceProvider } from '@mastra/playground-ui/ee/signals';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Navigate, useSearchParams } from 'react-router';
 import { Link } from '../../lib/link';
 import { useEntityIndexUrlState } from './use-entity-index-url-state';
@@ -9,9 +11,10 @@ import { navCrumb } from '@/domains/navigation/crumbs';
 const crumbs = [navCrumb('/intelligence')];
 
 export function SignalsOverviewPage() {
+  useLocale();
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Intelligence</h1>
+      <h1 className="sr-only">{studioT('Intelligence')}</h1>
       <TraceIntelligenceProvider cacheScope="oss-studio" LinkComponent={Link}>
         <SignalsOverviewContent />
       </TraceIntelligenceProvider>

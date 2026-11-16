@@ -19,6 +19,8 @@ import { IconLab } from '@mastra/playground-ui/icons/central/IconLab';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { getShortId } from '@mastra/playground-ui/utils/id';
@@ -106,6 +108,7 @@ export function ExperimentResultPanel({
   variant = 'drawer',
   ...bodyProps
 }: ExperimentResultPanelProps) {
+  useLocale();
   const dialogTitle = title ?? (itemId ? `Experiment item ${itemId}` : `Experiment result ${result?.id ?? ''}`);
   const content = result ? (
     <ExperimentResultPanelBody result={result} onClose={onClose} {...bodyProps} />
@@ -113,7 +116,7 @@ export function ExperimentResultPanel({
     <>
       <DataPanel.Header>
         <DataPanel.Heading>
-          Experiment item
+          {studioT('Experiment item')}
           <DataPanel.CopyId id={itemId} />
         </DataPanel.Heading>
         <DataPanel.HeaderActions>
@@ -161,6 +164,7 @@ function ExperimentResultPanelBody({
   onComplete,
   feedbackTabSlot,
 }: ExperimentResultPanelBodyProps) {
+  useLocale();
   const inputStr = formatValue(result.input);
   const outputStr = formatValue(result.output);
   const outputText = getResultOutputText(result);
@@ -197,13 +201,13 @@ function ExperimentResultPanelBody({
     {
       id: 'item-id',
       icon: <IconFingerPrint1 />,
-      label: 'Item Id',
+      label: studioT('Item Id'),
       value: (
         <span className="flex items-center gap-1.5">
           <span className="font-mono" title={result.itemId}>
             {getShortId(result.itemId)}
           </span>
-          <CopyButton content={result.itemId} tooltip="Copy item ID to clipboard" variant="link" />
+          <CopyButton content={result.itemId} tooltip={studioT('Copy item ID to clipboard')} variant="link" />
         </span>
       ),
       delta: null,
@@ -213,7 +217,7 @@ function ExperimentResultPanelBody({
           {
             id: 'created',
             icon: <IconCalendar1 />,
-            label: 'Created',
+            label: studioT('Created'),
             value: formatDate(result.createdAt, 'date-time'),
             delta: null,
           },
@@ -224,7 +228,7 @@ function ExperimentResultPanelBody({
           {
             id: 'status',
             icon: <IconCircleRecord />,
-            label: 'Status',
+            label: studioT('Status'),
             value: <ReviewStatusBadge status={result.status} />,
             delta: null,
           },
@@ -235,7 +239,7 @@ function ExperimentResultPanelBody({
           {
             id: 'tags',
             icon: <IconTag />,
-            label: 'Tags',
+            label: studioT('Tags'),
             value: (
               <ResultTags
                 tags={tags}
@@ -272,13 +276,13 @@ function ExperimentResultPanelBody({
       <div className={sectionStackClass}>
         <ComparisonMetricList metrics={metrics} />
 
-        <ComparisonSection title="Input" framed actions={<CopyButton content={inputStr} />}>
+        <ComparisonSection title={studioT('Input')} framed actions={<CopyButton content={inputStr} />}>
           <ComparisonPayload value={result.input} />
         </ComparisonSection>
 
         {result.groundTruth != null && (
           <ComparisonSection
-            title="Ground Truth"
+            title={studioT('Ground Truth')}
             framed
             actions={<CopyButton content={formatValue(result.groundTruth)} />}
           >
@@ -287,13 +291,18 @@ function ExperimentResultPanelBody({
         )}
 
         {errorMessage ? (
-          <ComparisonSection title="Error" tone="negative" framed actions={<CopyButton content={errorMessage} />}>
+          <ComparisonSection
+            title={studioT('Error')}
+            tone="negative"
+            framed
+            actions={<CopyButton content={errorMessage} />}
+          >
             <Txt tone="muted" className="p-3 break-words">
               {errorMessage}
             </Txt>
           </ComparisonSection>
         ) : (
-          <ComparisonSection title="Output" framed actions={<CopyButton content={outputStr} />}>
+          <ComparisonSection title={studioT('Output')} framed actions={<CopyButton content={outputStr} />}>
             {missingTextNotice ? (
               <Txt tone="muted" className="p-3 break-words">
                 {missingTextNotice}
@@ -305,7 +314,7 @@ function ExperimentResultPanelBody({
         )}
 
         {toolCalls.length > 0 && (
-          <ComparisonSection title={`Tool calls (${toolCalls.length})`}>
+          <ComparisonSection title={studioT('Tool calls ({value0})', { value0: toolCalls.length })}>
             <SpanPayloadToolCalls toolCalls={toolCalls} />
           </ComparisonSection>
         )}
@@ -320,12 +329,12 @@ function ExperimentResultPanelBody({
       <DataPanel.Header>
         {canFlag && (
           <Button size="sm" variant="primary" onClick={() => onFlagForReview(result.id)} icon={<IconClipboard2 />}>
-            Request review
+            {studioT('Request review')}
           </Button>
         )}
         {onComplete && result.status === 'needs-review' && (
           <Button size="sm" variant="primary" onClick={onComplete} icon={<IconCircleCheck />}>
-            Mark as reviewed
+            {studioT('Mark as reviewed')}
           </Button>
         )}
         <DataPanel.HeaderActions>
@@ -334,22 +343,28 @@ function ExperimentResultPanelBody({
               size="icon-sm"
               variant="ghost"
               render={<Link href={experimentLink} />}
-              tooltip="See experiment"
-              aria-label="See experiment"
+              tooltip={studioT('See experiment')}
+              aria-label={studioT('See experiment')}
             >
               <IconLab />
             </Button>
           )}
           {result.traceId && onShowTrace && (
-            <Button size="icon-sm" variant="ghost" onClick={onShowTrace} tooltip="See trace" aria-label="See trace">
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={onShowTrace}
+              tooltip={studioT('See trace')}
+              aria-label={studioT('See trace')}
+            >
               <TraceIcon />
             </Button>
           )}
           <DataPanel.NextPrevNav
             onPrevious={onPrevious}
             onNext={onNext}
-            previousLabel="Go to previous result"
-            nextLabel="Go to next result"
+            previousLabel={studioT('Go to previous result')}
+            nextLabel={studioT('Go to next result')}
           />
           <DataPanel.CloseButton icon="x" onClick={onClose} />
         </DataPanel.HeaderActions>
@@ -359,9 +374,10 @@ function ExperimentResultPanelBody({
         <Tabs<'details' | 'feedback'> defaultTab="details" className="grid h-full min-h-0 grid-rows-[auto_1fr]">
           <DataPanel.Header>
             <TabList variant="pill-ghost" size="sm">
-              <Tab value="details">Details</Tab>
+              <Tab value="details">{studioT('Details')}</Tab>
               <Tab value="feedback">
-                Feedback{traceFeedback?.pagination?.total != null && <> ({traceFeedback.pagination.total})</>}
+                {studioT('Feedback')}
+                {traceFeedback?.pagination?.total != null && <> ({traceFeedback.pagination.total})</>}
               </Tab>
             </TabList>
           </DataPanel.Header>
@@ -406,6 +422,7 @@ type ResultTagsProps = {
 
 /** Tag badges; editable (remove via badge, add via picker) when `onTagsChange` is provided. */
 function ResultTags({ tags, selectedResults, onTagsChange, tagVocabulary, isUpdatingTags }: ResultTagsProps) {
+  useLocale();
   return (
     <div className="flex flex-wrap items-center justify-end gap-1.5">
       {tags.map(tag => (
@@ -414,7 +431,7 @@ function ResultTags({ tags, selectedResults, onTagsChange, tagVocabulary, isUpda
           {onTagsChange && (
             <button
               type="button"
-              aria-label={`Remove tag ${tag}`}
+              aria-label={studioT('Remove tag {value0}', { value0: tag })}
               disabled={isUpdatingTags}
               onClick={() => onTagsChange(tags.filter(t => t !== tag))}
               className="cursor-pointer rounded-sm hover:opacity-70 disabled:opacity-50"

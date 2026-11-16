@@ -5,6 +5,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@mastra/playground-ui/c
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { formatDuration } from '@mastra/playground-ui/utils/duration';
 import { WorkflowRunStatusInline } from './workflow-run-status-inline';
 
@@ -32,6 +36,7 @@ export function ScheduleTriggersList({
   isFetchingNextPage,
   setEndOfListElement,
 }: ScheduleTriggersListProps) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   const isTriggerLinked = (t: ScheduleTriggerResponse) => Boolean(workflowId && t.runId && t.outcome !== 'failed');
@@ -46,7 +51,7 @@ export function ScheduleTriggersList({
   if (triggers.length === 0) {
     return (
       <Txt variant="body" tone="muted" className="p-4">
-        No trigger history yet.
+        {studioT('No trigger history yet.')}
       </Txt>
     );
   }
@@ -54,10 +59,10 @@ export function ScheduleTriggersList({
   return (
     <DataList columns={COLUMNS} className="min-w-0" scrollRef={containerRef}>
       <DataList.Top>
-        <DataList.TopCell>Run</DataList.TopCell>
-        <DataList.TopCell>Status</DataList.TopCell>
-        <DataList.TopCell>Started</DataList.TopCell>
-        <DataList.TopCell>Duration</DataList.TopCell>
+        <DataList.TopCell>{studioT('Run')}</DataList.TopCell>
+        <DataList.TopCell>{studioT('Status')}</DataList.TopCell>
+        <DataList.TopCell>{studioT('Started')}</DataList.TopCell>
+        <DataList.TopCell>{studioT('Duration')}</DataList.TopCell>
         <DataList.TopCell> </DataList.TopCell>
       </DataList.Top>
 
@@ -90,8 +95,8 @@ export function ScheduleTriggersList({
                     variant="caption"
                     className="inline-flex items-center gap-1.5 whitespace-nowrap text-destructive-foreground"
                   >
-                    <IconExclamationTriangle className="size-icon-sm" />
-                    publish failed
+                    <IconExclamationTriangle />
+                    {studioT('publish failed')}
                   </Txt>
                 ) : t.run ? (
                   <WorkflowRunStatusInline status={t.run.status} />
@@ -102,7 +107,7 @@ export function ScheduleTriggersList({
                     tone="muted"
                     className="inline-flex items-center gap-1.5 whitespace-nowrap"
                   >
-                    pending
+                    {studioT('pending')}
                   </Txt>
                 )}
                 {errorMessage ? (
@@ -128,7 +133,9 @@ export function ScheduleTriggersList({
                         <IconExclamationTriangle className="size-icon-sm" />
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>Published {driftValue} after the scheduled fire time</TooltipContent>
+                    <TooltipContent>
+                      <Trans id="Published {part0} after the scheduled fire time" values={{ part0: driftValue }} />
+                    </TooltipContent>
                   </Tooltip>
                 ) : null}
               </span>

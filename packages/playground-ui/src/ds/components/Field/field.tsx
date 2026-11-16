@@ -1,11 +1,13 @@
 import { Field as FieldPrimitive } from '@base-ui/react/field';
 import { Fieldset as FieldsetPrimitive } from '@base-ui/react/fieldset';
 import * as React from 'react';
-
 import { FieldAriaContext, useFieldAriaIds } from './field-control-aria';
 import { InfoTooltip } from '@/ds/components/Tooltip';
+
 import { IconExclamationCircle } from '@/ds/icons/central/IconExclamationCircle';
 import { Icon } from '@/ds/icons/Icon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type FieldProps = Omit<FieldPrimitive.Root.Props, 'className'> & {
@@ -71,12 +73,13 @@ function FieldItem({ className, ...props }: FieldItemProps) {
 }
 
 function RequiredMark() {
+  useLocale();
   return (
     <>
       <span aria-hidden className="ml-0.5 text-destructive-foreground in-data-disabled:text-muted-foreground">
         *
       </span>{' '}
-      <span className="sr-only">(required)</span>
+      <span className="sr-only">{studioT('(required)')}</span>
     </>
   );
 }
@@ -99,9 +102,13 @@ function plainText(node: React.ReactNode) {
 /** How the info icon is named: "About <label>", from the label's text or, for a label with elements, the label itself. */
 function infoTooltipName({ label, labelId, aboutId }: { label: React.ReactNode; labelId?: string; aboutId: string }) {
   const labelText = plainText(label);
-  if (labelText) return { 'aria-label': `About ${labelText}` };
+  if (labelText) return { 'aria-label': studioT('About {value0}', { value0: labelText }) };
   if (labelId) return { 'aria-labelledby': `${aboutId} ${labelId}` };
-  return { 'aria-label': 'About this field' };
+  return {
+    get 'aria-label'() {
+      return studioT('About this field');
+    },
+  };
 }
 
 /** The info icon after a label. Outside the `<label>`, so hovering or clicking it never focuses the field. */
@@ -114,6 +121,7 @@ function FieldLabelInfo({
   label: React.ReactNode;
   labelId?: string;
 }) {
+  useLocale();
   const aboutId = React.useId();
   const name = infoTooltipName({ label, labelId, aboutId });
   const isNamedByLabel = 'aria-labelledby' in name;
@@ -123,7 +131,7 @@ function FieldLabelInfo({
       <InfoTooltip {...name}>{children}</InfoTooltip>
       {isNamedByLabel ? (
         <span id={aboutId} hidden>
-          About
+          {studioT('About')}
         </span>
       ) : null}
     </>

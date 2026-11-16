@@ -4,6 +4,8 @@ import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
 import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import { RenameExperimentDialog } from '@/domains/experiments/components/rename-experiment-dialog';
 import { RerunExperimentButton } from '@/domains/experiments/components/rerun-experiment-button';
@@ -16,6 +18,7 @@ export interface ExperimentHeaderActionsProps {
 
 /** Page-header actions for an experiment: Rerun, then the rename/delete menu. */
 export function ExperimentHeaderActions({ experiment, onDeleteClick }: ExperimentHeaderActionsProps) {
+  useLocale();
   const [renameOpen, setRenameOpen] = useState(false);
 
   // The rename route is dataset-scoped, so caller-run experiments without a dataset can't be renamed.
@@ -28,19 +31,19 @@ export function ExperimentHeaderActions({ experiment, onDeleteClick }: Experimen
       {hasMenu && (
         <DropdownMenu>
           <DropdownMenu.Trigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Experiment actions menu">
+            <Button variant="ghost" size="icon-sm" aria-label={studioT('Experiment actions menu')}>
               <IconDotGrid1x3Vertical />
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content align="end" className="w-48">
             {canRename && (
               <DropdownMenu.Item onSelect={() => setRenameOpen(true)}>
-                <IconPencil /> Rename experiment
+                <IconPencil /> {' ' + studioT('Rename experiment')}
               </DropdownMenu.Item>
             )}
             {onDeleteClick && (
               <DropdownMenu.Item onSelect={onDeleteClick} variant="destructive">
-                <TrashIcon /> Delete experiment
+                <TrashIcon /> {' ' + studioT('Delete experiment')}
               </DropdownMenu.Item>
             )}
           </DropdownMenu.Content>

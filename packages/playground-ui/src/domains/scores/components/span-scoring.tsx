@@ -6,6 +6,8 @@ import { DialogAction, DialogBody, DialogCancel, DialogDescription, DialogFooter
 import { Notice } from '@/ds/components/Notice';
 import { TextAndIcon } from '@/ds/components/Text';
 import { IconCircleInfo } from '@/ds/icons/central/IconCircleInfo';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/utils/toast';
 
 export interface SpanScoringProps {
@@ -27,6 +29,7 @@ export function SpanScoring({
   isLoadingScorers,
   onSuccess,
 }: SpanScoringProps) {
+  useLocale();
   const [selectedScorer, setSelectedScorer] = useState<string | null>(null);
   const { mutate: triggerScorer, isPending } = useTriggerScorer();
 
@@ -58,8 +61,8 @@ export function SpanScoring({
         { scorerName: selectedScorer, traceId, spanId },
         {
           onSuccess: () => {
-            toast.info('Scorer triggered', {
-              description: 'Results will appear once scoring completes.',
+            toast.info(studioT('Scorer triggered'), {
+              description: studioT('Results will appear once scoring completes.'),
             });
             onSuccess?.();
           },
@@ -74,10 +77,10 @@ export function SpanScoring({
     return (
       <>
         <DialogBody>
-          <Notice variant="destructive">Failed to load scorers.</Notice>
+          <Notice variant="destructive">{studioT('Failed to load scorers.')}</Notice>
         </DialogBody>
         <DialogFooter>
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
         </DialogFooter>
       </>
     );
@@ -87,10 +90,10 @@ export function SpanScoring({
     return (
       <>
         <DialogBody>
-          <Notice variant="info">No eligible scorers have been defined to run.</Notice>
+          <Notice variant="info">{studioT('No eligible scorers have been defined to run.')}</Notice>
         </DialogBody>
         <DialogFooter>
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
         </DialogFooter>
       </>
     );
@@ -99,11 +102,11 @@ export function SpanScoring({
   return (
     <>
       <DialogBody>
-        <DialogDescription>Select a scorer to evaluate this trace.</DialogDescription>
+        <DialogDescription>{studioT('Select a scorer to evaluate this trace.')}</DialogDescription>
         <Combobox
-          aria-label="Select scorer"
-          searchPlaceholder="Search scorers"
-          placeholder="Select a scorer"
+          aria-label={studioT('Select scorer')}
+          searchPlaceholder={studioT('Search scorers')}
+          placeholder={studioT('Select a scorer')}
           options={scorerList.map(scorer => ({
             label: scorer.name || scorer.id,
             value: scorer.id || scorer.name || '',
@@ -120,9 +123,9 @@ export function SpanScoring({
         )}
       </DialogBody>
       <DialogFooter>
-        <DialogCancel disabled={isPending}>Cancel</DialogCancel>
+        <DialogCancel disabled={isPending}>{studioT('Cancel')}</DialogCancel>
         <DialogAction disabled={!selectedScorer || isWaiting} onConfirm={handleStartScoring}>
-          {isPending ? 'Starting...' : 'Start scoring'}
+          {isPending ? studioT('Starting...') : studioT('Start scoring')}
         </DialogAction>
       </DialogFooter>
     </>

@@ -6,6 +6,7 @@ import type { WorkflowTriggerProps } from '../workflow/workflow-trigger';
 import { WorkflowTrigger } from '../workflow/workflow-trigger';
 import { Skeleton } from '@/ds/components/Skeleton';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface WorkflowRunDetailProps extends Omit<
   WorkflowTriggerProps,
@@ -22,6 +23,7 @@ export const WorkflowRunDetail = ({
   observeWorkflowStream,
   ...triggerProps
 }: WorkflowRunDetailProps) => {
+  useLocale();
   const { runSnapshot, isLoadingRunExecutionResult } = useContext(WorkflowRunContext);
 
   const observeSelectedRun = useCallback(() => {
@@ -66,7 +68,7 @@ export const WorkflowRunDetail = ({
     return (
       <div className="p-4">
         <Txt variant="body" tone="ink" className="text-center">
-          No previous run
+          {studioT('No previous run')}
         </Txt>
       </div>
     );

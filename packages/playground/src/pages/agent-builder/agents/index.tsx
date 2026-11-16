@@ -10,6 +10,8 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useStoredAgents } from '@mastra/react/hooks/agents';
 
@@ -23,6 +25,7 @@ import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-
 import { useBuilderAgentAccess } from '@/domains/agent-builder/hooks/use-builder-agent-access';
 
 export default function AgentBuilderAgentsPage() {
+  useLocale();
   const { data: currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
   const { canWrite, canUseFavorites } = useBuilderAgentAccess();
   const [search, setSearch] = useState('');
@@ -69,7 +72,7 @@ export default function AgentBuilderAgentsPage() {
       }
       return (
         <div className="flex items-center justify-center pt-10">
-          <EmptyState tone="error" titleSlot="Failed to load agents" descriptionSlot={error.message} />
+          <EmptyState tone="error" titleSlot={studioT('Failed to load agents')} descriptionSlot={error.message} />
         </div>
       );
     }
@@ -78,8 +81,8 @@ export default function AgentBuilderAgentsPage() {
       return (
         <div className="flex items-center-safe justify-center-safe">
           <EmptyState
-            titleSlot="No agents yet"
-            descriptionSlot="Start building your first agent with the Agent Builder."
+            titleSlot={studioT('No agents yet')}
+            descriptionSlot={studioT('Start building your first agent with the Agent Builder.')}
             actionSlot={
               canWrite ? (
                 <Button
@@ -87,7 +90,7 @@ export default function AgentBuilderAgentsPage() {
                   variant="primary"
                   icon={<IconPlusMedium />}
                 >
-                  Create an agent
+                  {studioT('Create an agent')}
                 </Button>
               ) : undefined
             }
@@ -107,9 +110,9 @@ export default function AgentBuilderAgentsPage() {
             <ActionRow.Start>
               <PageHeader>
                 <PageHeader.Title>
-                  <AgentIcon /> My agents
+                  <AgentIcon /> {' ' + studioT('My agents')}
                 </PageHeader.Title>
-                <PageHeader.Description>Agents you've created.</PageHeader.Description>
+                <PageHeader.Description>{studioT("Agents you've created.")}</PageHeader.Description>
               </PageHeader>
             </ActionRow.Start>
             {agents.length > 0 && canWrite && (
@@ -119,7 +122,7 @@ export default function AgentBuilderAgentsPage() {
                   variant="primary"
                   icon={<IconPlusMedium />}
                 >
-                  New agent
+                  {studioT('New agent')}
                 </Button>
               </ActionRow.End>
             )}
@@ -130,8 +133,8 @@ export default function AgentBuilderAgentsPage() {
                 <SearchInput
                   {...listSearchProps}
                   onValueChange={setSearch}
-                  label="Search agents"
-                  placeholder="Search by name or description"
+                  label={studioT('Search agents')}
+                  placeholder={studioT('Search by name or description')}
                 />
               </div>
             </ActionRow.Start>

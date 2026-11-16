@@ -38,6 +38,7 @@ import { Arriving } from '@/ds/components/Arrival';
 import { Message, MessageActions, MessageCopyButton } from '@/ds/components/Message';
 import { Notice } from '@/ds/components/Notice';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface MessageRowProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   message: MastraDBMessage;
@@ -146,6 +147,7 @@ export const MessageRow = memo(function MessageRow({
   className,
   ...rootProps
 }: MessageRowProps) {
+  const studioLocale = useLocale();
   const dbMessage = toDisplayMessage(message);
   const metadata = getMessageMetadata(message);
   const modelMetadata = hasModelList ? getModelMetadata(metadata) : undefined;
@@ -195,7 +197,7 @@ export const MessageRow = memo(function MessageRow({
                       </div>
                       {incomplete && (
                         <Txt as="span" variant="meta" className="mt-1 shrink-0">
-                          Incomplete
+                          {studioT('Incomplete')}
                         </Txt>
                       )}
                     </div>
@@ -226,12 +228,12 @@ export const MessageRow = memo(function MessageRow({
       ToolInvocation: renderTool,
       DynamicTool: renderTool,
       Error: (part: MastraErrorPart) => (
-        <Notice variant="destructive" title={part.error.name ?? 'Error'}>
+        <Notice variant="destructive" title={part.error.name ?? studioT('Error')}>
           <Notice.Message>{part.error.message}</Notice.Message>
         </Notice>
       ),
     };
-  }, [metadata, dataParts, readOnly, toolGroups, isRunning]);
+  }, [metadata, dataParts, readOnly, toolGroups, isRunning, studioLocale]);
 
   const userRenderers = useMemo<MessageRenderers>(
     () => ({

@@ -2,6 +2,10 @@ import type { MemorySearchResult, MemorySearchResponse } from '@mastra/client-js
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
@@ -23,6 +27,7 @@ export const MemorySearch = ({
   currentThreadId,
   chatInputValue,
 }: MemorySearchProps) => {
+  useLocale();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MemorySearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -194,9 +199,9 @@ export const MemorySearch = ({
   return (
     <div className={cn('flex h-full flex-col', className)} ref={dropdownRef}>
       <SearchInput
-        label="Search memory"
+        label={studioT('Search memory')}
         className="shrink-0"
-        placeholder="Search memory"
+        placeholder={studioT('Search memory')}
         value={query}
         onValueChange={handleInputChange}
         onKeyDown={handleKeyDown}
@@ -213,13 +218,13 @@ export const MemorySearch = ({
           ) : isSearching && results.length === 0 ? (
             <div className="p-4 text-center">
               <Txt variant="caption" tone="muted">
-                Searching...
+                {studioT('Searching...')}
               </Txt>
             </div>
           ) : results.length === 0 ? (
             <div className="p-4 text-center">
               <Txt variant="caption" tone="muted">
-                No results found for "{query}"
+                <Trans id='No results found for " {part0}"' values={{ part0: query }} />
               </Txt>
             </div>
           ) : (

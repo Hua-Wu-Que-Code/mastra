@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { Field, FieldDescription, FieldError, FieldLabel, Fieldset, FieldsetLegend } from '@/ds/components/Field';
 import type { FieldProps, FieldsetProps } from '@/ds/components/Field';
 import { IconLock } from '@/ds/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SettingsRowProps = Omit<FieldProps, 'children' | 'invalid' | 'orientation'> & {
@@ -38,11 +40,12 @@ const sideControlClassName =
   'flex min-w-0 items-center justify-end gap-2 [--field-max-width:13.75rem] [--field-width:auto] sm:min-w-55 sm:shrink-0';
 
 export function SettingsRowControl({ viewOnly = false, children }: { viewOnly?: boolean; children: ReactNode }) {
+  useLocale();
   if (!viewOnly) return children;
   return (
     <>
       <IconLock className="size-icon-md shrink-0" aria-hidden />
-      <span className="sr-only">View only: </span>
+      <span className="sr-only">{studioT('View only:') + ' '}</span>
       {children}
     </>
   );

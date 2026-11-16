@@ -5,6 +5,7 @@ import { ActivityItem } from '@/ds/components/ai/activity';
 import { Badge } from '@/ds/components/Badge';
 import { Txt } from '@/ds/components/Txt';
 import { IconPin } from '@/ds/icons/central/IconPin';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const CHANGE_MARK = { add: '+', change: '~', remove: '−' } as const;
 const CHANGE_LABEL = { add: 'Added', change: 'Changed', remove: 'Removed' } as const;
@@ -42,6 +43,7 @@ function toggleLabel(row: PinnedRow, open: boolean): string {
 }
 
 function PinnedRowItem({ row }: { row: PinnedRow }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const removed = row.change === 'remove';
   return (
@@ -58,9 +60,9 @@ function PinnedRowItem({ row }: { row: PinnedRow }) {
           </span>
         ) : null}
         <Txt as="span" variant="label" className={`min-w-0 truncate ${removed ? 'line-through opacity-70' : ''}`}>
-          <KnowledgePageLink pageId={row.listOf ?? row.id}>{row.name ?? 'A pinned page'}</KnowledgePageLink>
+          <KnowledgePageLink pageId={row.listOf ?? row.id}>{row.name ?? studioT('A pinned page')}</KnowledgePageLink>
         </Txt>
-        {row.listOf ? <Badge size="xs">Listing</Badge> : null}
+        {row.listOf ? <Badge size="xs">{studioT('Listing')}</Badge> : null}
         {row.scope ? (
           <Txt as="span" variant="meta" tone="muted" className="truncate">
             {row.scope}
@@ -99,6 +101,7 @@ function PinnedRowItem({ row }: { row: PinnedRow }) {
  * added, changed or removed since. Each page links to the Knowledge viewer; its delivered text opens below it.
  */
 export function PinnedKnowledgeActivity({ pinned, defaultOpen }: { pinned: PinnedKnowledge; defaultOpen?: boolean }) {
+  useLocale();
   const label = pinned.mode === 'snapshot' ? 'Pinned knowledge' : 'Pinned knowledge updated';
   return (
     <ActivityItem
@@ -109,7 +112,7 @@ export function PinnedKnowledgeActivity({ pinned, defaultOpen }: { pinned: Pinne
       defaultOpen={defaultOpen}
       data-signal-kind="state"
       data-testid="pinned-knowledge"
-      aria-label={`Signal: ${label}`}
+      aria-label={studioT('Signal: {value0}', { value0: label })}
     >
       <div className="flex flex-col gap-2">
         {pinned.rows.length ? (
@@ -120,7 +123,7 @@ export function PinnedKnowledgeActivity({ pinned, defaultOpen }: { pinned: Pinne
           </ul>
         ) : pinned.overflow ? null : (
           <Txt variant="meta" tone="muted">
-            No pinned pages
+            {studioT('No pinned pages')}
           </Txt>
         )}
         {pinned.overflow ? (

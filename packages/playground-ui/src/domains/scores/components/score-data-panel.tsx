@@ -11,6 +11,10 @@ import { IconFloppyDisk1 } from '@/ds/icons/central/IconFloppyDisk1';
 import { IconGauge } from '@/ds/icons/central/IconGauge';
 import { IconReceiptBill } from '@/ds/icons/central/IconReceiptBill';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/utils/cn';
 import { formatTimestampPrecise } from '@/utils/date-format';
 
@@ -30,7 +34,7 @@ function buildDialogTitle(sectionTitle: string, icon: React.ReactNode, score: Cl
         {sectionTitle}
       </Txt>
       <span>
-        › Score <b className="text-muted-foreground">#{score.id}</b>
+        <Trans id="› Score {part0}" values={{ part0: <b className="text-muted-foreground">#{score.id}</b> }} />
       </span>
     </>
   );
@@ -46,6 +50,7 @@ export interface ScoreDataPanelProps {
 }
 
 export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: ScoreDataPanelProps) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const [datasetDialogOpen, setDatasetDialogOpen] = useState(false);
   const isCodeBased = isCodeBasedScorer(score);
@@ -53,12 +58,17 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
 
   return (
     <>
-      <DataPanel open={!!score} onClose={onClose} title={score ? `Score ${score.id}` : 'Score'} depth={depth}>
+      <DataPanel
+        open={!!score}
+        onClose={onClose}
+        title={score ? studioT('Score {value0}', { value0: score.id }) : studioT('Score')}
+        depth={depth}
+      >
         {score && (
           <>
             <DataPanel.Header>
               <DataPanel.Heading>
-                Score
+                {studioT('Score')}
                 <DataPanel.CopyId id={score.id} />
               </DataPanel.Heading>
               <DataPanel.HeaderActions>
@@ -66,11 +76,16 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
                   <DataPanel.NextPrevNav
                     onPrevious={onPrevious}
                     onNext={onNext}
-                    previousLabel="Go to previous score"
-                    nextLabel="Go to next score"
+                    previousLabel={studioT('Go to previous score')}
+                    nextLabel={studioT('Go to next score')}
                   />
                 )}
-                <DataPanel.CloseButton icon="x" onClick={onClose} label="Close score" tooltip="Close score" />
+                <DataPanel.CloseButton
+                  icon="x"
+                  onClick={onClose}
+                  label={studioT('Close score')}
+                  tooltip={studioT('Close score')}
+                />
               </DataPanel.HeaderActions>
             </DataPanel.Header>
 
@@ -78,19 +93,19 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
               <DataKeysAndValues>
                 {score.scorer?.name != null && (
                   <>
-                    <DataKeysAndValues.Key>Scorer</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Scorer')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{String(score.scorer.name)}</DataKeysAndValues.Value>
                   </>
                 )}
                 {score.createdAt && (
                   <>
-                    <DataKeysAndValues.Key>Created</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Created')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{formatTimestampPrecise(score.createdAt)}</DataKeysAndValues.Value>
                   </>
                 )}
                 {score.traceId && (
                   <>
-                    <DataKeysAndValues.Key>Trace Id</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Trace Id')}</DataKeysAndValues.Key>
                     {paths.traceLink(score.traceId) ? (
                       <DataKeysAndValues.ValueLink href={paths.traceLink(score.traceId)} as={Link}>
                         {score.traceId}
@@ -102,7 +117,7 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
                 )}
                 {score.spanId && score.traceId && (
                   <>
-                    <DataKeysAndValues.Key>Span Id</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Span Id')}</DataKeysAndValues.Key>
                     {paths.traceLink(score.traceId, score.spanId) ? (
                       <DataKeysAndValues.ValueLink href={paths.traceLink(score.traceId, score.spanId)} as={Link}>
                         {score.spanId}
@@ -116,7 +131,7 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
 
               <div className="my-6 flex justify-end">
                 <Button size="sm" onClick={() => setDatasetDialogOpen(true)} icon={<IconFloppyDisk1 />}>
-                  Save as dataset item
+                  {studioT('Save as dataset item')}
                 </Button>
               </div>
 
@@ -130,7 +145,7 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
                 >
                   <IconGauge />
                   <Txt as="span" variant="body">
-                    Score:
+                    {studioT('Score:')}
                   </Txt>
                   <Txt
                     as="b"
@@ -141,46 +156,48 @@ export function ScoreDataPanel({ score, onClose, onPrevious, onNext, depth }: Sc
                 </div>
                 <Txt as="p" variant="body-sm" className="mt-2">
                   {score.reason ||
-                    (isCodeBased ? 'Code-based scorer does not generate a reason' : 'Step not configured')}
+                    (isCodeBased
+                      ? studioT('Code-based scorer does not generate a reason')
+                      : studioT('Step not configured'))}
                 </Txt>
               </div>
 
               <div className="grid gap-4">
                 <DataPanel.CodeSection
-                  title="Input"
+                  title={studioT('Input')}
                   dialogTitle={buildDialogTitle('Input', <IconFileArrowRightIn />, score)}
                   icon={<IconFileArrowRightIn />}
                   codeStr={JSON.stringify(score.input ?? null, null, 2)}
                 />
                 <DataPanel.CodeSection
-                  title="Output"
+                  title={studioT('Output')}
                   dialogTitle={buildDialogTitle('Output', <IconFileArrowRightOut />, score)}
                   icon={<IconFileArrowRightOut />}
                   codeStr={JSON.stringify(score.output ?? null, null, 2)}
                 />
                 <DataPanel.CodeSection
-                  title="Preprocess Prompt"
+                  title={studioT('Preprocess Prompt')}
                   dialogTitle={buildDialogTitle('Preprocess Prompt', <IconReceiptBill />, score)}
                   icon={<IconReceiptBill />}
                   codeStr={score.preprocessPrompt || naText}
                   simplified
                 />
                 <DataPanel.CodeSection
-                  title="Analyze Prompt"
+                  title={studioT('Analyze Prompt')}
                   dialogTitle={buildDialogTitle('Analyze Prompt', <IconReceiptBill />, score)}
                   icon={<IconReceiptBill />}
                   codeStr={score.analyzePrompt || naText}
                   simplified
                 />
                 <DataPanel.CodeSection
-                  title="Generate Score Prompt"
+                  title={studioT('Generate Score Prompt')}
                   dialogTitle={buildDialogTitle('Generate Score Prompt', <IconReceiptBill />, score)}
                   icon={<IconReceiptBill />}
                   codeStr={score.generateScorePrompt || naText}
                   simplified
                 />
                 <DataPanel.CodeSection
-                  title="Generate Reason Prompt"
+                  title={studioT('Generate Reason Prompt')}
                   dialogTitle={buildDialogTitle('Generate Reason Prompt', <IconReceiptBill />, score)}
                   icon={<IconReceiptBill />}
                   codeStr={score.generateReasonPrompt || naText}

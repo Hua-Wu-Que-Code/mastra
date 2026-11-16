@@ -8,6 +8,7 @@ import { Spinner } from '@/ds/components/Spinner';
 import { Txt } from '@/ds/components/Txt';
 import { IconCircleInfo } from '@/ds/icons/central/IconCircleInfo';
 import { ScorersIcon } from '@/ds/icons/ScorersIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TraceScoresListProps = {
   traceId: string;
@@ -21,6 +22,7 @@ export type TraceScoresListProps = {
  * on the trace/anchor pair so a page index never leaks across traces.
  */
 export function TraceScoresList({ traceId, spanId, onScoreSelect }: TraceScoresListProps) {
+  useLocale();
   const [page, setPage] = useState(0);
   const { data: scoresData, isLoading } = useTraceSpanScores({
     traceId,
@@ -42,7 +44,7 @@ export function TraceScoresList({ traceId, spanId, onScoreSelect }: TraceScoresL
   if (scores.length === 0) {
     return (
       <Txt variant="caption" tone="muted">
-        No scores yet. Score this trace to see results here.
+        {studioT('No scores yet. Score this trace to see results here.')}
       </Txt>
     );
   }
@@ -70,6 +72,7 @@ export function TraceScoresList({ traceId, spanId, onScoreSelect }: TraceScoresL
 }
 
 function TraceScoreLine({ score, onSelect }: { score: ClientScoreRowData; onSelect: () => void }) {
+  useLocale();
   const scorerName = String(score.scorer?.name || score.scorerId || 'Scorer');
   const reason = score.reason?.trim();
 
@@ -80,7 +83,7 @@ function TraceScoreLine({ score, onSelect }: { score: ClientScoreRowData; onSele
         <button
           type="button"
           onClick={onSelect}
-          aria-label={`Open ${scorerName} score`}
+          aria-label={studioT('Open {value0} score', { value0: scorerName })}
           className="min-w-0 cursor-pointer truncate text-left hover:text-foreground hover:underline"
         >
           {scorerName}
@@ -96,7 +99,7 @@ function TraceScoreLine({ score, onSelect }: { score: ClientScoreRowData; onSele
               render={
                 <button
                   type="button"
-                  aria-label={`Show ${scorerName} reason`}
+                  aria-label={studioT('Show {value0} reason', { value0: scorerName })}
                   className="cursor-pointer text-muted-foreground hover:text-foreground [&>svg]:size-icon-sm"
                 />
               }

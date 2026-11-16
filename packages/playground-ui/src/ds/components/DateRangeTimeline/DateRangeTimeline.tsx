@@ -5,6 +5,7 @@ import { DateRangeTrack } from './DateRangeTrack';
 import { useDateRangeTimelineState } from './hooks/useDateRangeTimelineState';
 import { createDateRangeAxisModel, createDateRangeBoundaryModel } from './lib/date-range-timeline-view-model';
 import type { DateRangeValue } from './types';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface DateRangeTimelineProps {
   value: DateRangeValue;
@@ -14,6 +15,7 @@ interface DateRangeTimelineProps {
 }
 
 export function DateRangeTimeline({ value, min, max, onCommit }: DateRangeTimelineProps) {
+  useLocale();
   const rootRef = useRef<HTMLDivElement>(null);
   const timeline = useDateRangeTimelineState({
     value,
@@ -28,7 +30,7 @@ export function DateRangeTimeline({ value, min, max, onCommit }: DateRangeTimeli
     <div
       ref={rootRef}
       role="group"
-      aria-label="Date range timeline"
+      aria-label={studioT('Date range timeline')}
       // Clip keeps stray axis labels from causing horizontal scroll; the margin lets the edge
       // handles (and their focus ring) render fully instead of being sliced in half at min/max.
       className="w-full overflow-x-clip select-none [overflow-clip-margin:0.75rem]"

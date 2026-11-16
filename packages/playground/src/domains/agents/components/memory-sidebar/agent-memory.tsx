@@ -5,6 +5,8 @@ import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-c
 import { IconFork } from '@mastra/playground-ui/icons/central/IconFork';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -30,6 +32,7 @@ interface AgentMemoryProps {
 }
 
 export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps) {
+  const studioLocale = useLocale();
   const isGatewayMemory = memoryType === 'gateway';
   const { threadInput: chatInputValue } = useThreadInput(threadId);
 
@@ -83,15 +86,15 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
     try {
       result = await cloneThread({ threadId, agentId });
     } catch {
-      toast.error('Failed to clone thread');
+      toast.error(studioT('Failed to clone thread'));
       return;
     }
-    toast.success('Thread cloned successfully');
+    toast.success(studioT('Thread cloned successfully'));
     // Navigate to the cloned thread
     if (result?.thread?.id) {
       navigate(paths.agentThreadLink(agentId, result.thread.id));
     }
-  }, [threadId, agentId, cloneThread, navigate, paths]);
+  }, [threadId, agentId, cloneThread, navigate, paths, studioLocale]);
 
   // Handle clicking on a search result to scroll to the message
   const handleResultClick = useCallback(
@@ -135,14 +138,14 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
           <div className="flex items-center justify-between">
             <div>
               <Txt as="h3" variant="subheading" tone="ink">
-                Clone Thread
+                {studioT('Clone Thread')}
               </Txt>
               <Txt variant="caption" tone="muted" className="mt-1">
-                Create a copy of this conversation
+                {studioT('Create a copy of this conversation')}
               </Txt>
             </div>
             <Button onClick={handleCloneThread} disabled={isCloning} icon={<IconFork />}>
-              {isCloning ? 'Cloning...' : 'Clone'}
+              {isCloning ? studioT('Cloning...') : studioT('Clone')}
             </Button>
           </div>
         </div>
@@ -150,7 +153,7 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
 
       <div className="border-b border-border p-4">
         <Txt as="h3" variant="subheading" tone="ink">
-          Recent Messages
+          {studioT('Recent Messages')}
         </Txt>
         <Txt variant="caption" tone="muted" className="mt-1">
           {getRecentMessagesSettings(config?.lastMessages, config?.messageHistory).description}
@@ -170,7 +173,7 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
           <div className="mb-2">
             <div className="mb-2 flex items-center gap-2">
               <Txt as="h3" variant="subheading" tone="ink">
-                Semantic Recall
+                {studioT('Semantic Recall')}
               </Txt>
               {searchMemoryData?.searchScope && (
                 <Txt
@@ -183,7 +186,9 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
                       : 'bg-badge-blue-strong text-badge-blue-foreground',
                   )}
                   title={
-                    searchScope === 'resource' ? 'Searching across all threads' : 'Searching within current thread only'
+                    searchScope === 'resource'
+                      ? studioT('Searching across all threads')
+                      : studioT('Searching within current thread only')
                   }
                 >
                   {searchScope}
@@ -202,7 +207,9 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
           ) : (
             <div className={cn(raisedSurfaceStyle, 'rounded-lg p-4')}>
               <Txt tone="muted" className="mb-3">
-                Semantic recall is not enabled for this agent. Enable it to search through conversation history.
+                {studioT(
+                  'Semantic recall is not enabled for this agent. Enable it to search through conversation history.',
+                )}
               </Txt>
               <a
                 href="https://mastra.ai/en/docs/memory/semantic-recall"
@@ -214,7 +221,7 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
                 )}
               >
                 <Txt as="span" variant="body" className="block">
-                  Learn about semantic recall
+                  {studioT('Learn about semantic recall')}
                 </Txt>
                 <IconSquareArrowTopRight className="size-icon-xs" />
               </a>
@@ -240,14 +247,14 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
                 variant="column"
                 className="rounded bg-badge-green-strong px-2 py-0.5 text-badge-green-foreground"
               >
-                Remote
+                {studioT('Remote')}
               </Txt>
               <Txt as="h3" variant="subheading" tone="ink">
-                Gateway
+                {studioT('Gateway')}
               </Txt>
             </div>
             <Txt variant="caption" tone="muted">
-              Memory is managed by the Gateway. Threads and observations are stored remotely.
+              {studioT('Memory is managed by the Gateway. Threads and observations are stored remotely.')}
             </Txt>
           </div>
         </div>

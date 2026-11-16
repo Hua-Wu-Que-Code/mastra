@@ -5,6 +5,7 @@ import { formatHierarchicalSpans } from './format-hierarchical-spans';
 import { TraceIdButton } from './trace-id-button';
 import { TraceSpanTree } from './trace-span-tree';
 import { DataDetailsPanel } from '@/ds/components/DataDetailsPanel';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface TraceDetailsViewProps {
   traceId: string;
@@ -31,6 +32,7 @@ export function TraceDetailsView({
   onSpanSelect,
   selectedSpanId,
 }: TraceDetailsViewProps) {
+  useLocale();
   const hierarchicalSpans = useMemo(() => formatHierarchicalSpans(spans ?? []), [spans]);
 
   const [expandedSpanIds, setExpandedSpanIds] = useState<string[]>([]);
@@ -49,16 +51,16 @@ export function TraceDetailsView({
     <DataDetailsPanel>
       <DataDetailsPanel.Header>
         <DataDetailsPanel.Heading className="items-center">
-          Trace
+          {studioT('Trace')}
           <TraceIdButton id={traceId} />
         </DataDetailsPanel.Heading>
         <DataDetailsPanel.CloseButton onClick={onClose} />
       </DataDetailsPanel.Header>
 
       {isLoading ? (
-        <DataDetailsPanel.LoadingData>Loading trace...</DataDetailsPanel.LoadingData>
+        <DataDetailsPanel.LoadingData>{studioT('Loading trace...')}</DataDetailsPanel.LoadingData>
       ) : hierarchicalSpans.length === 0 ? (
-        <DataDetailsPanel.NoData>No spans found for this trace.</DataDetailsPanel.NoData>
+        <DataDetailsPanel.NoData>{studioT('No spans found for this trace.')}</DataDetailsPanel.NoData>
       ) : (
         <DataDetailsPanel.Content>
           <TraceSpanTree

@@ -33,6 +33,8 @@ import { TypesafeIcon } from '@/ds/icons/TypesafeIcon';
 import { UpstageIcon } from '@/ds/icons/UpstageIcon';
 import { XaiIcon } from '@/ds/icons/XaiIcon';
 import { ZaiIcon } from '@/ds/icons/ZaiIcon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 interface ProviderLogoProps {
@@ -94,6 +96,7 @@ const fallbackProviderIcons = new Map<string, keyof typeof providerMapToIcon>([
 ]);
 
 export const ProviderLogo = ({ providerId, className = '', size = 'lg', style }: ProviderLogoProps) => {
+  useLocale();
   const [failedLogoSlug, setFailedLogoSlug] = useState<string>();
 
   const cleanedProviderId = cleanProviderIdUtil(providerId);
@@ -111,7 +114,7 @@ export const ProviderLogo = ({ providerId, className = '', size = 'lg', style }:
     return (
       <BrandMark
         role="img"
-        aria-label={`${providerId} logo`}
+        aria-label={studioT('{value0} logo', { value0: providerId })}
         className={cn('shrink-0', sizeClassName, className)}
         style={{ ...sizeStyle, ...style }}
       />
@@ -140,7 +143,7 @@ export const ProviderLogo = ({ providerId, className = '', size = 'lg', style }:
   return (
     <img
       src={`https://models.dev/logos/${logoSlug}.svg`}
-      alt={`${providerId} logo`}
+      alt={studioT('{value0} logo', { value0: providerId })}
       className={cn('shrink-0 dark:brightness-0 dark:invert', sizeClassName, className)}
       onError={() => setFailedLogoSlug(logoSlug)}
       loading="lazy"

@@ -8,8 +8,11 @@ import { ToolApprovalBadge } from '@/domains/chat/tools/badges/tool-approval-bad
 import type { ActivityStatus } from '@/ds/components/ai/activity';
 import { presentTool, ToolCallBody, ToolCallExitStatus, toolCallHasBody } from '@/ds/components/ai/tool-call';
 import type { ToolCallView } from '@/ds/components/ai/tool-call';
+import { toolLabel } from '@/ds/components/ai/tool-call/tool-phrases';
 import { Txt } from '@/ds/components/Txt';
 import { useElapsedTime } from '@/hooks/use-elapsed-time';
+
+import { useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { formatDuration, formatElapsed } from '@/utils/duration';
 
@@ -86,7 +89,7 @@ export const SandboxExecutionBadge = ({
       }}
       data-testid="sandbox-execution-badge"
       icon={<ToolIcon aria-hidden />}
-      title={label}
+      title={toolLabel(label)}
       detail={originalCommand ?? detail}
       description={description}
       status={status}

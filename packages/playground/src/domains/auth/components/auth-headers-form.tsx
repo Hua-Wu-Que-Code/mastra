@@ -2,6 +2,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { TooltipProvider } from '@mastra/playground-ui/components/Tooltip';
 import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyDisk1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useState } from 'react';
 import type { HeaderListFormItem } from '@/domains/configuration/components/header-list-form';
@@ -17,6 +19,7 @@ import { useStudioConfig } from '@/domains/configuration/context/studio-config-s
  * pass through unchanged.
  */
 export const AuthHeadersForm = () => {
+  useLocale();
   const { baseUrl, headers: storedHeaders, apiPrefix, setConfig } = useStudioConfig();
   const [headers, setHeaders] = useState<HeaderListFormItem[]>(() =>
     Object.entries(storedHeaders).map(([name, value]) => ({ name, value })),
@@ -35,7 +38,7 @@ export const AuthHeadersForm = () => {
     }
 
     setConfig({ headers: formHeaders, baseUrl, apiPrefix });
-    toast.success('Headers saved');
+    toast.success(studioT('Headers saved'));
   };
 
   const handleAddHeader = (header: HeaderListFormItem) => {
@@ -53,7 +56,7 @@ export const AuthHeadersForm = () => {
 
         <Button type="submit" className="ml-auto">
           <IconFloppyDisk1 />
-          Save headers
+          {studioT('Save headers')}
         </Button>
       </Form>
     </TooltipProvider>

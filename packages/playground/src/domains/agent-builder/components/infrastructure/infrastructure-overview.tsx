@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { BrowserSection } from './browser-section';
 import { ChannelsSection } from './channels-section';
 import { InfrastructureLoading } from './infrastructure-loading';
@@ -8,16 +9,19 @@ import { useInfrastructureStatus } from '@/domains/agent-builder/hooks/use-infra
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
 export const InfrastructureOverview = () => {
+  useLocale();
   const { hasPermission, isLoading: isLoadingPermissions } = usePermissions();
   const canViewInfrastructure = !isLoadingPermissions && hasPermission('infrastructure:read');
   const { data, isLoading, error } = useInfrastructureStatus({ enabled: canViewInfrastructure });
 
   if (isLoadingPermissions) return <InfrastructureLoading />;
   if (!canViewInfrastructure) {
-    return <InfrastructureMessage message="You do not have permission to view Agent Builder infrastructure." />;
+    return (
+      <InfrastructureMessage message={studioT('You do not have permission to view Agent Builder infrastructure.')} />
+    );
   }
   if (isLoading) return <InfrastructureLoading />;
-  if (error || !data) return <InfrastructureMessage message="Infrastructure configuration unavailable." />;
+  if (error || !data) return <InfrastructureMessage message={studioT('Infrastructure configuration unavailable.')} />;
 
   return (
     <>

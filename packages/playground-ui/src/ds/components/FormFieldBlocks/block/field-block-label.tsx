@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type FieldBlockLabelProps = {
@@ -19,6 +20,7 @@ export function FieldBlockLabel({
   size = 'default',
   className,
 }: FieldBlockLabelProps) {
+  useLocale();
   return (
     <label
       htmlFor={htmlFor}
@@ -41,7 +43,7 @@ export function FieldBlockLabel({
           >
             *
           </span>
-          <span className="sr-only"> (required)</span>
+          <span className="sr-only"> {' ' + studioT('(required)')}</span>
         </>
       ) : null}
     </label>

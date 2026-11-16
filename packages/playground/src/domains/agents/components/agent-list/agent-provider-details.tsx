@@ -3,6 +3,8 @@ import { CardTitle } from '@mastra/playground-ui/components/Card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@mastra/playground-ui/components/HoverCard';
 import { TextAndIcon } from '@mastra/playground-ui/components/Text';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useId } from 'react';
 import { ProviderLogo } from '../agent-metadata/provider-logo';
 
@@ -13,6 +15,7 @@ export interface AgentProviderDetailsProps {
 }
 
 export function AgentProviderDetails({ agentName, provider, modelId }: AgentProviderDetailsProps) {
+  useLocale();
   const titleId = useId();
 
   if (!provider) return <span>—</span>;
@@ -28,7 +31,7 @@ export function AgentProviderDetails({ agentName, provider, modelId }: AgentProv
             variant="ghost"
             size="icon-sm"
             className="pointer-events-auto"
-            aria-label={`Show model details for ${agentName}`}
+            aria-label={studioT('Show model details for {value0}', { value0: agentName })}
           >
             <span aria-hidden="true">
               <ProviderLogo providerId={provider} className="dark:invert" />
@@ -44,7 +47,7 @@ export function AgentProviderDetails({ agentName, provider, modelId }: AgentProv
         className="w-72 max-w-[calc(100vw-2rem)]"
       >
         <div className="grid gap-3">
-          <CardTitle id={titleId}>Model</CardTitle>
+          <CardTitle id={titleId}>{studioT('Model')}</CardTitle>
           <TextAndIcon className="text-foreground">
             <span aria-hidden="true">
               <ProviderLogo providerId={provider} className="dark:invert" />
@@ -52,7 +55,7 @@ export function AgentProviderDetails({ agentName, provider, modelId }: AgentProv
             <span className="overflow-wrap-anywhere min-w-0">{provider}</span>
           </TextAndIcon>
           <Txt as="span" variant="caption" tone="ink" className="overflow-wrap-anywhere min-w-0">
-            {modelId || 'No model configured'}
+            {modelId || studioT('No model configured')}
           </Txt>
         </div>
       </HoverCardContent>

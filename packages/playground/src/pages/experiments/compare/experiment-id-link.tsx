@@ -1,5 +1,7 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { ReactNode } from 'react';
 
@@ -20,6 +22,7 @@ export function ExperimentIdLink({
   /** Rendered on the right edge, e.g. a role badge. */
   trailing?: ReactNode;
 }) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const label = name || experimentId.slice(0, 8);
   return (
@@ -28,7 +31,7 @@ export function ExperimentIdLink({
       variant="ghost"
       size="sm"
       className={cn('max-w-48 min-w-0', className)}
-      aria-label={`Open experiment ${label}`}
+      aria-label={studioT('Open experiment {value0}', { value0: label })}
     >
       {role && <span aria-hidden="true" className={cn('size-1.5 shrink-0 rounded-full', dotClass[role])} />}
       <span className="min-w-0 truncate">{label}</span>

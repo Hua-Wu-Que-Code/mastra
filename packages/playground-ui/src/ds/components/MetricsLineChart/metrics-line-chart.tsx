@@ -11,6 +11,8 @@ import { CHART_MARGIN, ChartHideYAxis } from '@/ds/primitives/chart-layout';
 import { ChartPlot } from '@/ds/primitives/chart-plot';
 import { ChartTooltipPosition } from '@/ds/primitives/chart-tooltip-position';
 import { useChartDefsId } from '@/ds/primitives/use-chart-defs-id';
+
+import { useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type MetricsLineChartSeries = {
@@ -145,6 +147,7 @@ function LinePlot({
   showYAxis = true,
   markers = [],
 }: MetricsLineChartProps) {
+  useLocale();
   const id = useChartDefsId();
   const { size, onResize, ref } = useChartSize();
 

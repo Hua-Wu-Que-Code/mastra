@@ -1,6 +1,8 @@
 import { MastraClientError } from '@mastra/client-js';
 import type { CreateStoredAgentParams } from '@mastra/client-js';
 import type { AgentEditorConfig } from '@mastra/core/agent';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useMastraClient } from '@mastra/react';
 import { useStoredAgentMutations } from '@mastra/react/hooks/agents';
@@ -60,6 +62,7 @@ type EditOptions = {
 export type UseAgentCmsFormOptions = CreateOptions | EditOptions;
 
 export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?: Record<string, any>) {
+  const studioLocale = useLocale();
   const client = useMastraClient();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -339,7 +342,7 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
 
       const isValid = await form.trigger();
       if (!isValid) {
-        toast.error('Please fill in all required fields');
+        toast.error(studioT('Please fill in all required fields'));
         return;
       }
 
@@ -394,10 +397,14 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
           void queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
         }
         toast.success(
-          options.mode === 'edit' && options.saveSuccessMessage ? options.saveSuccessMessage : 'Draft saved',
+          options.mode === 'edit' && options.saveSuccessMessage ? options.saveSuccessMessage : studioT('Draft saved'),
         );
       } catch (error) {
-        toast.error(`Failed to save draft: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to save draft: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
       } finally {
         setIsSavingDraft(false);
       }
@@ -415,6 +422,8 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
       updateStoredAgent,
       queryClient,
       blocksWouldPreventSave,
+      ,
+      studioLocale,
     ],
   );
 
@@ -424,7 +433,7 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
       if (!publishVersionId) {
         const isValid = await form.trigger();
         if (!isValid) {
-          toast.error('Please fill in all required fields');
+          toast.error(studioT('Please fill in all required fields'));
           return;
         }
       }
@@ -470,7 +479,7 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
 
             const latestVersion = versionsResponse.versions[0];
             if (!latestVersion || latestVersion.id === agentDetails.activeVersionId) {
-              toast.error('No draft changes to publish. Save a draft first.');
+              toast.error(studioT('No draft changes to publish. Save a draft first.'));
               return;
             }
 
@@ -484,7 +493,7 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
             queryClient.invalidateQueries({ queryKey: ['agents'] }),
             queryClient.invalidateQueries({ queryKey: ['stored-agents'] }),
           ]);
-          toast.success('Agent published');
+          toast.success(studioT('Agent published'));
           options.onSuccess(options.agentId);
         } else {
           const sharedParams = await buildSharedParams(values);
@@ -505,12 +514,17 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
           };
 
           const created = await createStoredAgent.mutateAsync(createParams);
-          toast.success('Agent created successfully');
+          toast.success(studioT('Agent created successfully'));
           options.onSuccess(created.id);
         }
       } catch (error) {
         const action = isEdit ? 'publish' : 'create';
-        toast.error(`Failed to ${action} agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to {value0} agent: {value1}', {
+            value0: action,
+            value1: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
       } finally {
         setIsSubmitting(false);
       }
@@ -528,6 +542,8 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
       buildMemoryParams,
       queryClient,
       blocksWouldPreventSave,
+      ,
+      studioLocale,
     ],
   );
 
@@ -536,13 +552,13 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
 
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error(studioT('Please fill in all required fields'));
       return;
     }
 
     const sharedParams = await buildSharedParams(form.getValues());
     return client.getStoredAgent(options.agentId).export(sharedParams);
-  }, [buildSharedParams, client, form, isEdit, options]);
+  }, [buildSharedParams, client, form, isEdit, options, studioLocale]);
 
   const handleDownloadJson = useCallback(async () => {
     try {
@@ -556,11 +572,15 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
       anchor.download = response.fileName;
       anchor.click();
       URL.revokeObjectURL(url);
-      toast.success('Agent JSON downloaded');
+      toast.success(studioT('Agent JSON downloaded'));
     } catch (error) {
-      toast.error(`Failed to download JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to download JSON: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
-  }, [getAgentExport]);
+  }, [getAgentExport, studioLocale]);
 
   const handleOpenPr = useCallback(
     async ({ platformApiEndpoint, projectId }: { platformApiEndpoint: string; projectId: string }) => {
@@ -589,12 +609,14 @@ export function useAgentCmsForm(options: UseAgentCmsFormOptions, requestContext?
 
         const result = (await prResponse.json()) as { url: string };
         window.open(result.url, '_blank', 'noopener,noreferrer');
-        toast.success('Pull request opened');
+        toast.success(studioT('Pull request opened'));
       } catch (error) {
-        toast.error(`Failed to open PR: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to open PR: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+        );
       }
     },
-    [getAgentExport, isEdit],
+    [getAgentExport, isEdit, studioLocale],
   );
 
   const watched = useWatch({ control: form.control });

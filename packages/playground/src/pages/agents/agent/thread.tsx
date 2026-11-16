@@ -6,6 +6,8 @@ import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+import { useLocale, t as studioT } from '@mastra/playground-ui/lib/i18n';
+
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useMastraClient } from '@mastra/react';
 import { useAgent } from '@mastra/react/hooks/agents';
@@ -13,6 +15,7 @@ import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import { useMemory, useThreads } from '@mastra/react/hooks/memory';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useAccount } from '@/domains/account/account-context';
 import { AgentSidebar } from '@/domains/agents/agent-sidebar';
 import { AgentChat } from '@/domains/agents/components/agent-chat';
 import { AgentLayout } from '@/domains/agents/components/agent-layout';
@@ -38,12 +41,14 @@ import { ThreadInputProvider } from '@/domains/conversation/context/ThreadInputC
 import { AgentRunActions } from '@/domains/run-options/components/agent-run-actions';
 
 function AgentThread() {
+  const account = useAccount();
+  useLocale();
   const { agentId, threadId } = useParams();
   const client = useMastraClient();
   const { data: auth, error: authError } = useAuthCapabilities();
   const signedIn = auth && isAuthenticated(auth);
-  const userId = signedIn ? auth.user.id : undefined;
-  const canPersistDraft = auth?.enabled === false || Boolean(signedIn);
+  const userId = account?.user.id ?? (signedIn ? auth.user.id : undefined);
+  const canPersistDraft = !!account || auth?.enabled === false || Boolean(signedIn);
   const draftScope = [client.options.baseUrl, client.options.apiPrefix, userId, agentId];
   const draftKey = JSON.stringify([...draftScope, threadId ?? 'new']);
   const [searchParams] = useSearchParams();
@@ -110,8 +115,8 @@ function AgentThread() {
     return (
       <EmptyState
         tone="error"
-        titleSlot="Failed to check authentication"
-        descriptionSlot="Reload the page to try again. Your saved drafts have not been changed."
+        titleSlot={studioT('Failed to check authentication')}
+        descriptionSlot={studioT('Reload the page to try again. Your saved drafts have not been changed.')}
       />
     );
   }
@@ -124,7 +129,7 @@ function AgentThread() {
         leftSlot={
           isNewThread && !isMemoryLoading && !hasMemory ? undefined : <ThreadsPanelLoadingShell agentId={agentId!} />
         }
-        leftDrawerLabel="Threads"
+        leftDrawerLabel={studioT('Threads')}
       >
         {isNewThread ? <AgentLandingLoadingSkeleton /> : <AgentThreadLoadingSkeleton />}
       </AgentLayout>
@@ -137,7 +142,7 @@ function AgentThread() {
   }
 
   if (error) {
-    return <EmptyState tone="error" titleSlot="Failed to load agent" descriptionSlot={error.message} />;
+    return <EmptyState tone="error" titleSlot={studioT('Failed to load agent')} descriptionSlot={error.message} />;
   }
 
   if (!agent) {
@@ -193,7 +198,7 @@ function AgentThread() {
                       leftSlot={
                         hideThreadsPanel ? undefined : <AgentSidebar agentId={agentId!} threadId={actualThreadId} />
                       }
-                      leftDrawerLabel="Threads"
+                      leftDrawerLabel={studioT('Threads')}
                     >
                       <div key={actualThreadId} className="relative flex h-full min-h-0 flex-col">
                         <div className="relative grid min-h-0 flex-1">

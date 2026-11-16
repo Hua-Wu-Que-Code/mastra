@@ -1,5 +1,4 @@
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
-import { IconBook } from '@mastra/playground-ui/icons/central/IconBook';
 import { IconClipboard2 } from '@mastra/playground-ui/icons/central/IconClipboard2';
 import { IconLayoutGrid1 } from '@mastra/playground-ui/icons/central/IconLayoutGrid1';
 import { IconLibrary } from '@mastra/playground-ui/icons/central/IconLibrary';
@@ -16,6 +15,8 @@ import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 import { WorkspacesIcon } from '@mastra/playground-ui/icons/WorkspacesIcon';
+
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { CableIcon } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 
@@ -41,7 +42,9 @@ export interface NavSection {
 const isSignalsEnabled = typeof window !== 'undefined' && window.MASTRA_SIGNALS_UI === 'true';
 
 const signalsNavItem: NavItem = {
-  name: 'Intelligence',
+  get name() {
+    return studioT('Intelligence');
+  },
   url: '/intelligence',
   activePaths: ['/intelligence'],
   Icon: IconLayoutGrid1,
@@ -52,63 +55,83 @@ const signalsNavItem: NavItem = {
 export const mainNav: NavSection[] = [
   {
     key: 'primitives',
-    title: 'Primitives',
+    get title() {
+      return studioT('Primitives');
+    },
     items: [
       {
-        name: 'Agents',
+        get name() {
+          return studioT('Agents');
+        },
         url: '/agents',
         Icon: AgentIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Prompts',
+        get name() {
+          return studioT('Prompts');
+        },
         url: '/prompts',
         Icon: PromptIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Workflows',
+        get name() {
+          return studioT('Workflows');
+        },
         url: '/workflows',
         Icon: WorkflowIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Processors',
+        get name() {
+          return studioT('Processors');
+        },
         url: '/processors',
         Icon: ProcessorIcon,
         isOnMastraPlatform: false,
         foldable: true,
       },
       {
-        name: 'MCP Servers',
+        get name() {
+          return studioT('MCP Servers');
+        },
         url: '/mcps',
         Icon: McpServerIcon,
         isOnMastraPlatform: true,
         foldable: true,
       },
       {
-        name: 'Tools',
+        get name() {
+          return studioT('Tools');
+        },
         url: '/tools',
         Icon: ToolsIcon,
         isOnMastraPlatform: true,
         foldable: true,
       },
       {
-        name: 'Connections',
+        get name() {
+          return studioT('Connections');
+        },
         url: '/connections',
         Icon: CableIcon,
         isOnMastraPlatform: false,
         foldable: true,
       },
       {
-        name: 'Workspaces',
+        get name() {
+          return studioT('Workspaces');
+        },
         url: '/workspaces',
         Icon: WorkspacesIcon,
         isOnMastraPlatform: true,
         foldable: true,
       },
       {
-        name: 'Knowledge',
+        get name() {
+          return studioT('Knowledge');
+        },
         url: '/knowledge',
         Icon: IconLibrary,
         isOnMastraPlatform: false,
@@ -117,28 +140,38 @@ export const mainNav: NavSection[] = [
   },
   {
     key: 'evaluation',
-    title: 'Evaluation',
+    get title() {
+      return studioT('Evaluation');
+    },
     items: [
       {
-        name: 'Scorers',
+        get name() {
+          return studioT('Scorers');
+        },
         url: '/scorers',
         Icon: ScorersIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Datasets',
+        get name() {
+          return studioT('Datasets');
+        },
         url: '/datasets',
         Icon: DatasetsIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Experiments',
+        get name() {
+          return studioT('Experiments');
+        },
         url: '/experiments',
         Icon: ExperimentsIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Review Queue',
+        get name() {
+          return studioT('Review Queue');
+        },
         url: '/experiments/review-queue',
         Icon: IconClipboard2,
         isOnMastraPlatform: true,
@@ -147,16 +180,22 @@ export const mainNav: NavSection[] = [
   },
   {
     key: 'observability',
-    title: 'Observability',
+    get title() {
+      return studioT('Observability');
+    },
     items: [
       {
-        name: 'Metrics',
+        get name() {
+          return studioT('Metrics');
+        },
         url: '/metrics',
         Icon: MetricsIcon,
         isOnMastraPlatform: true,
       },
       {
-        name: 'Traces',
+        get name() {
+          return studioT('Traces');
+        },
         url: '/traces',
         Icon: TraceIcon,
         isOnMastraPlatform: true,
@@ -165,7 +204,9 @@ export const mainNav: NavSection[] = [
       },
       signalsNavItem,
       {
-        name: 'Logs',
+        get name() {
+          return studioT('Logs');
+        },
         url: '/logs',
         Icon: LogsIcon,
         isOnMastraPlatform: true,
@@ -175,8 +216,14 @@ export const mainNav: NavSection[] = [
 ];
 
 export const bottomNav: NavItem[] = [
-  { name: 'Settings', url: '/settings', Icon: SettingsIcon, isOnMastraPlatform: false },
-  { name: 'Resources', url: '/resources', Icon: IconBook, isOnMastraPlatform: true },
+  {
+    get name() {
+      return studioT('Settings');
+    },
+    url: '/settings',
+    Icon: SettingsIcon,
+    isOnMastraPlatform: false,
+  },
 ];
 
 const allItems: NavItem[] = [...mainNav.flatMap(s => s.items), ...bottomNav];

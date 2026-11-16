@@ -5,6 +5,8 @@ import { ComboboxPrimitive, comboboxStyles } from '@/ds/components/Combobox';
 import { Spinner } from '@/ds/components/Spinner/spinner';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { iconSizeClasses } from '@/ds/icons/icon-size-classes';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type FilterBarOptionListProps<T> = {
@@ -40,10 +42,11 @@ export function FilterBarOptionList<T>({
   isSelected,
   isLoading,
   error,
-  emptyText = 'No results.',
+  emptyText = studioT('No results.'),
   'aria-label': ariaLabel,
   'aria-multiselectable': multiselectable,
 }: FilterBarOptionListProps<T>) {
+  useLocale();
   const { describeSuggestionsError } = useFilterBarContext();
   const idle = !isLoading && error === undefined;
   return (
@@ -51,12 +54,12 @@ export function FilterBarOptionList<T>({
       {isLoading && (
         <ComboboxPrimitive.Status className={comboboxStyles.empty}>
           <Spinner size="sm" />
-          <span>Loading…</span>
+          <span>{studioT('Loading…')}</span>
         </ComboboxPrimitive.Status>
       )}
       {!isLoading && error !== undefined && (
         <ComboboxPrimitive.Status className={comboboxStyles.empty}>
-          {describeSuggestionsError?.(error) ?? "Couldn't load values."}
+          {describeSuggestionsError?.(error) ?? studioT("Couldn't load values.")}
         </ComboboxPrimitive.Status>
       )}
       <ComboboxPrimitive.Empty className={comboboxStyles.empty}>{idle ? emptyText : null}</ComboboxPrimitive.Empty>

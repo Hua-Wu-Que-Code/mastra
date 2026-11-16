@@ -1,10 +1,13 @@
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDeleteThread, useMemory, useThreads } from '@mastra/react/hooks/memory';
 import { MemorySidebar } from '@/domains/agents/components/memory-sidebar/memory-sidebar';
 
 export function AgentSidebar({ agentId, threadId }: { agentId: string; threadId: string }) {
+  useLocale();
   const requestContext = useEntityRequestContext('agent', agentId)[0];
   const { mutateAsync } = useDeleteThread(requestContext);
   const { paths, navigate } = useLinkComponent();
@@ -27,10 +30,10 @@ export function AgentSidebar({ agentId, threadId }: { agentId: string; threadId:
     try {
       await mutateAsync({ threadId: deleteId, agentId });
     } catch {
-      toast.error('Failed to delete chat');
+      toast.error(studioT('Failed to delete chat'));
       return;
     }
-    toast.success('Chat deleted successfully');
+    toast.success(studioT('Chat deleted successfully'));
     if (deleteId === threadId) {
       navigate(paths.agentNewThreadLink(agentId));
     }

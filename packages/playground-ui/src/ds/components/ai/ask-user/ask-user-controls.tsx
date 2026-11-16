@@ -6,6 +6,8 @@ import { FieldItem, FieldLabel, Fieldset } from '@/ds/components/Field';
 import { Input } from '@/ds/components/Input';
 import { RadioGroup, RadioGroupItem } from '@/ds/components/RadioGroup';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // Keep the UI-only custom choice separate from suggested answer values.
@@ -17,6 +19,7 @@ function getOptionRadioValue(optionLabel: string): string {
 }
 
 export function AskUserOptions({ children, className, ...props }: ComponentProps<typeof Fieldset>) {
+  useLocale();
   const context = useAskUserContext();
 
   const handleSingleSelectChange = (radioValue: unknown) => {
@@ -30,7 +33,7 @@ export function AskUserOptions({ children, className, ...props }: ComponentProps
 
   if (context.selectionMode === 'multi_select') {
     return (
-      <Fieldset aria-label="Answer options" {...props} className={cn('gap-2', className)}>
+      <Fieldset aria-label={studioT('Answer options')} {...props} className={cn('gap-2', className)}>
         {children}
       </Fieldset>
     );
@@ -108,6 +111,7 @@ export type AskUserTextAnswerProps = Omit<
 >;
 
 export function AskUserTextAnswer({ disabled = false, ...props }: AskUserTextAnswerProps) {
+  useLocale();
   const context = useAskUserContext();
 
   const handleAnswerTextChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +129,7 @@ export function AskUserTextAnswer({ disabled = false, ...props }: AskUserTextAns
     <Input
       type="text"
       aria-labelledby={props['aria-label'] ? undefined : context.questionId}
-      placeholder="Type your answer"
+      placeholder={studioT('Type your answer')}
       size="sm"
       {...props}
       disabled={context.disabled || disabled}
@@ -144,9 +148,10 @@ export interface AskUserCustomAnswerProps {
 
 export function AskUserCustomAnswer({
   className,
-  label = 'Other…',
-  inputLabel = 'Your answer',
+  label = studioT('Other…'),
+  inputLabel = studioT('Your answer'),
 }: AskUserCustomAnswerProps) {
+  useLocale();
   const context = useAskUserContext();
 
   const handleRowClick = (event: MouseEvent<HTMLDivElement>) => {
@@ -166,7 +171,7 @@ export function AskUserCustomAnswer({
   return (
     <FieldItem
       role="group"
-      aria-label="Custom answer"
+      aria-label={studioT('Custom answer')}
       aria-disabled={context.disabled || undefined}
       disabled={context.disabled}
       onClick={handleRowClick}

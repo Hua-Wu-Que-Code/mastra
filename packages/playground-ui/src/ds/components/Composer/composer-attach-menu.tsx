@@ -9,6 +9,8 @@ import { IconFileText } from '@/ds/icons/central/IconFileText';
 import { IconImages1 } from '@/ds/icons/central/IconImages1';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export interface ComposerAttachAction {
@@ -32,9 +34,28 @@ export interface ComposerAttachMenuProps {
 
 const SOURCES = [
   // `capture` is ignored on desktop browsers, so the camera entry only shows where it opens a camera.
-  { key: 'camera', label: 'Camera', icon: <IconCamera2 />, className: 'pointer-fine:hidden' },
-  { key: 'photos', label: 'Photos', icon: <IconImages1 /> },
-  { key: 'files', label: 'Files', icon: <IconFileText /> },
+  {
+    key: 'camera',
+    get label() {
+      return studioT('Camera');
+    },
+    icon: <IconCamera2 />,
+    className: 'pointer-fine:hidden',
+  },
+  {
+    key: 'photos',
+    get label() {
+      return studioT('Photos');
+    },
+    icon: <IconImages1 />,
+  },
+  {
+    key: 'files',
+    get label() {
+      return studioT('Files');
+    },
+    icon: <IconFileText />,
+  },
 ];
 
 /**
@@ -45,10 +66,11 @@ export function ComposerAttachMenu({
   onFiles,
   accept,
   disabled,
-  label = 'Add attachment',
+  label = studioT('Add attachment'),
   size = 'icon-sm',
   actions = [],
 }: ComposerAttachMenuProps) {
+  useLocale();
   const sheet = useIsMobile(DIALOG_DRAWER_BREAKPOINT_PX);
   const [sheetOpen, setSheetOpen] = useState(false);
   // The inputs live outside the portaled menu so closing it after a pick doesn't unmount them before the

@@ -10,10 +10,13 @@ import { Skeleton } from '@/ds/components/Skeleton';
 import { Txt } from '@/ds/components/Txt';
 import { FileIcon, Icon, SearchIcon, SkillIcon } from '@/ds/icons';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /** Icon button that swaps the tree for the search panel, like VS Code's search view. */
 export function WorkspaceSearchToggle() {
+  useLocale();
   const { isSearching, setSearching, searchFiles, searchSkills } = useWorkspaceContext();
   if (!searchFiles && !searchSkills) return null;
 
@@ -21,7 +24,7 @@ export function WorkspaceSearchToggle() {
     <Button
       variant="ghost"
       size="icon-sm"
-      tooltip="Search files and skills"
+      tooltip={studioT('Search files and skills')}
       aria-pressed={isSearching}
       onClick={() => setSearching(!isSearching)}
     >
@@ -39,11 +42,12 @@ export function WorkspaceSearch() {
 const countLabel = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
 function AsideTitle() {
+  useLocale();
   const { fileCount, skillCount } = useWorkspaceContext();
   return (
     <Txt as="span" variant="label" tone="muted" className="block min-w-0">
       <Metadata singleLine>
-        <Metadata.Item>{fileCount === undefined ? 'Files' : countLabel(fileCount, 'File')}</Metadata.Item>
+        <Metadata.Item>{fileCount === undefined ? studioT('Files') : countLabel(fileCount, 'File')}</Metadata.Item>
         {skillCount === undefined ? null : <Metadata.Item>{countLabel(skillCount, 'Skill')}</Metadata.Item>}
       </Metadata>
     </Txt>
@@ -52,6 +56,7 @@ function AsideTitle() {
 
 // Mounted only while searching, so reopening the search starts from an empty input.
 function SearchInput() {
+  useLocale();
   const { setSearching, setQuery } = useWorkspaceContext();
   const [value, setValue] = useState('');
   const [, startTransition] = useTransition();
@@ -62,8 +67,8 @@ function SearchInput() {
         type="search"
         size="sm"
         autoFocus
-        aria-label="Search query"
-        placeholder="Search files and skills"
+        aria-label={studioT('Search query')}
+        placeholder={studioT('Search files and skills')}
         value={value}
         onChange={event => {
           const next = event.target.value;
@@ -74,7 +79,7 @@ function SearchInput() {
           if (event.key === 'Escape') setSearching(false);
         }}
       />
-      <Button variant="ghost" size="icon-sm" tooltip="Close search" onClick={() => setSearching(false)}>
+      <Button variant="ghost" size="icon-sm" tooltip={studioT('Close search')} onClick={() => setSearching(false)}>
         <IconCrossMedium />
       </Button>
     </div>
@@ -82,6 +87,7 @@ function SearchInput() {
 }
 
 export function WorkspaceSearchResults() {
+  useLocale();
   const { workspaceId, query, activeFilePath, setActiveFilePath, searchFiles, searchSkills } = useWorkspaceContext();
   const { data, isLoading, isError, error } = useWorkspaceSearch({
     workspaceId: workspaceId,
@@ -92,7 +98,12 @@ export function WorkspaceSearchResults() {
   });
 
   if (!query.trim()) {
-    return <EmptyState titleSlot="Search files and skills" descriptionSlot="Type to find matching content." />;
+    return (
+      <EmptyState
+        titleSlot={studioT('Search files and skills')}
+        descriptionSlot={studioT('Type to find matching content.')}
+      />
+    );
   }
   if (isLoading) {
     return (
@@ -103,10 +114,10 @@ export function WorkspaceSearchResults() {
     );
   }
   if (isError) return <WorkspaceError error={error} fallback="Search failed." className="m-2" />;
-  if (!data?.length) return <EmptyState titleSlot="No results" />;
+  if (!data?.length) return <EmptyState titleSlot={studioT('No results')} />;
 
   return (
-    <ul aria-label="Search results" className="flex flex-col py-1">
+    <ul aria-label={studioT('Search results')} className="flex flex-col py-1">
       {data.map(hit => (
         <li key={hit.path}>
           <button

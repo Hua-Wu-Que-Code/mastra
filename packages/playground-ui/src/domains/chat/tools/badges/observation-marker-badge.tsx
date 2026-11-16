@@ -7,6 +7,7 @@ import { agentGlyph } from '@/ds/components/AgentIndicator';
 import { Activity, ActivityContent, ActivityHeadline, ActivityTrigger } from '@/ds/components/ai/activity';
 import type { ActivityStatus } from '@/ds/components/ai/activity';
 import { ToolCallOutput } from '@/ds/components/ai/tool-call';
+import { t as studioT } from '@/lib/i18n';
 
 const ThinkingGlyph = agentGlyph('thinking');
 const MemoryGlyph = agentGlyph('memory');
@@ -90,7 +91,7 @@ function markerLine(toolName: string, state: MarkerState, omData: OmMarkerData):
     case 'loading':
       return {
         icon,
-        label: isReflection ? 'Reflecting' : 'Observing',
+        label: isReflection ? studioT('Reflecting') : studioT('Observing'),
         detail: pendingTokens(omData.tokensToObserve),
         status: 'running',
       };
@@ -121,28 +122,28 @@ function markerLine(toolName: string, state: MarkerState, omData: OmMarkerData):
     case 'disconnected':
       return {
         icon: <Unplug />,
-        label: isReflection ? 'Reflection interrupted' : 'Observation interrupted',
+        label: isReflection ? studioT('Reflection interrupted') : studioT('Observation interrupted'),
         detail: pendingTokens(omData.tokensToObserve),
         status: 'idle',
       };
     case 'failed':
       return {
         icon,
-        label: isReflection ? 'Reflection' : 'Observation',
+        label: isReflection ? studioT('Reflection') : studioT('Observation'),
         status: 'error',
         body: errorBody,
       };
     case 'buffering':
       return {
         icon,
-        label: isReflection ? 'Buffering reflection' : 'Buffering observations',
+        label: isReflection ? studioT('Buffering reflection') : studioT('Buffering observations'),
         detail: pendingTokens(omData.tokensToBuffer),
         status: 'running',
       };
     case 'buffering-complete':
       return {
         icon,
-        label: isReflection ? 'Buffered reflection' : 'Buffered observations',
+        label: isReflection ? studioT('Buffered reflection') : studioT('Buffered observations'),
         detail: tokenFlow(omData.tokensBuffered, omData.bufferedTokens),
         status: 'idle',
         body: (
@@ -155,7 +156,7 @@ function markerLine(toolName: string, state: MarkerState, omData: OmMarkerData):
     case 'buffering-failed':
       return {
         icon,
-        label: isReflection ? 'Buffered reflection' : 'Buffered observations',
+        label: isReflection ? studioT('Buffered reflection') : studioT('Buffered observations'),
         status: 'error',
         body: errorBody,
       };

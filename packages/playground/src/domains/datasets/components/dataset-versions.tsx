@@ -2,6 +2,8 @@
 
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { useDatasetVersions } from '@mastra/react/hooks/datasets';
 import { useEffect } from 'react';
@@ -36,6 +38,7 @@ export function DatasetVersions({
   align,
   'aria-label': ariaLabel,
 }: DatasetVersionsProps) {
+  useLocale();
   const {
     data: versions = [],
     isLoading,
@@ -52,14 +55,16 @@ export function DatasetVersions({
 
   const latestVersion = versions.find(version => version.isCurrent)?.version ?? currentVersion;
   const options = versions.map(version => ({
-    label: version.isCurrent ? `Latest (v${version.version})` : `v${version.version}`,
+    label: version.isCurrent
+      ? studioT('Latest (v{value0})', { value0: version.version })
+      : studioT('v{value0}', { value0: version.version }),
     value: String(version.version),
     description: describeCreatedAt(version.createdAt),
   }));
 
   if (versions.length === 0 && latestVersion != null) {
     options.push({
-      label: `Latest (v${latestVersion})`,
+      label: studioT('Latest (v{value0})', { value0: latestVersion }),
       value: String(latestVersion),
       description: describeCreatedAt(datasetCreatedAt),
     });
@@ -73,9 +78,9 @@ export function DatasetVersions({
         const nextVersion = Number(nextValue);
         onValueChange(nextVersion === latestVersion ? null : nextVersion);
       }}
-      placeholder={isLoading ? 'Loading versions...' : 'Select version'}
-      searchPlaceholder="Search versions"
-      emptyText="No versions found."
+      placeholder={isLoading ? studioT('Loading versions...') : studioT('Select version')}
+      searchPlaceholder={studioT('Search versions')}
+      emptyText={studioT('No versions found.')}
       className={className}
       disabled={isLoading || options.length === 0}
       variant={variant}

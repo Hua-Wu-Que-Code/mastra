@@ -1,4 +1,6 @@
 import { Button } from '@mastra/playground-ui/components/Button';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import { AgentMetadataList, AgentMetadataListItem } from './agent-metadata-list';
 
@@ -22,6 +24,7 @@ export const AgentMetadataExpandableList = <T,>({
   renderItem,
   limit = AGENT_METADATA_LIST_LIMIT,
 }: AgentMetadataExpandableListProps<T>) => {
+  useLocale();
   const [isExpanded, setIsExpanded] = useState(false);
   const hiddenCount = Math.max(items.length - limit, 0);
   const visibleItems = isExpanded ? items : items.slice(0, limit);
@@ -41,7 +44,7 @@ export const AgentMetadataExpandableList = <T,>({
             data-testid="agent-metadata-expandable-toggle"
             onClick={() => setIsExpanded(expanded => !expanded)}
           >
-            {isExpanded ? 'Show less' : `+${hiddenCount}`}
+            {isExpanded ? studioT('Show less') : `+${hiddenCount}`}
           </Button>
         </AgentMetadataListItem>
       )}

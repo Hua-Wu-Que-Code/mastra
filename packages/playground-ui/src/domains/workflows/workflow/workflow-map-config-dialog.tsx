@@ -3,6 +3,7 @@ import { Button } from '@/ds/components/Button';
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/ds/components/Dialog';
 import { WorkflowCodeContent } from '@/ds/components/Workflow';
 import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface WorkflowMapConfigDialogProps {
   stepName: string;
@@ -10,18 +11,21 @@ export interface WorkflowMapConfigDialogProps {
 }
 
 export function WorkflowMapConfigDialog({ stepName, mapConfig }: WorkflowMapConfigDialogProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <Button icon={<IconEyeOpen />} type="button" size="sm" onClick={() => setOpen(true)}>
-        Map config
+        {studioT('Map config')}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent size="xl">
           <DialogHeader>
-            <DialogTitle>{stepName} config</DialogTitle>
+            <DialogTitle>
+              {stepName} {' ' + studioT('config')}
+            </DialogTitle>
           </DialogHeader>
           <DialogBody>
             <WorkflowCodeContent data={mapConfig} />

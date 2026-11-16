@@ -2,6 +2,8 @@ import { Breadcrumb, Crumb } from '@mastra/playground-ui/components/Breadcrumb';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { Header } from '@mastra/playground-ui/components/Header';
 import { IconArrowRotateClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateClockwise';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import type { WorkspaceMode } from '../../layouts/types';
@@ -34,13 +36,18 @@ export const EditTopBar = ({
   primaryAction,
   mobileExtra,
 }: EditTopBarProps) => {
+  useLocale();
   const toggleLabel = mode === 'test' ? 'Switch to Edit mode' : 'Switch to View mode';
 
   return (
     <Header className="h-10 min-h-10 gap-2 overflow-hidden px-2">
-      <Breadcrumb label="Agent navigation" className="min-w-0 flex-1 overflow-hidden" listClassName="min-w-0">
+      <Breadcrumb
+        label={studioT('Agent navigation')}
+        className="min-w-0 flex-1 overflow-hidden"
+        listClassName="min-w-0"
+      >
         <Crumb as={Link} to="/agent-builder/agents" data-testid="agent-builder-back-to-list">
-          Agent list
+          {studioT('Agent list')}
         </Crumb>
         <Crumb as="span" isCurrent data-testid="agent-builder-title">
           <AgentBuilderTitle isLoading={isLoading} />

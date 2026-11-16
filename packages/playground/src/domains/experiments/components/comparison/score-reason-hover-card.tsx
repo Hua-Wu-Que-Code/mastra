@@ -1,6 +1,7 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@mastra/playground-ui/components/HoverCard';
 import { MarkdownRenderer } from '@mastra/playground-ui/components/MarkdownRenderer';
 import { IconCircleInfo } from '@mastra/playground-ui/icons/central/IconCircleInfo';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface ScoreReasonHoverCardProps {
   scorerId: string;
@@ -14,6 +15,7 @@ export interface ScoreReasonHoverCardProps {
 }
 
 export function ScoreReasonHoverCard({ scorerId, reason, nested = false }: ScoreReasonHoverCardProps) {
+  useLocale();
   const iconClassName = 'text-muted-foreground hover:text-foreground [&>svg]:size-icon-sm';
 
   return (
@@ -27,7 +29,7 @@ export function ScoreReasonHoverCard({ scorerId, reason, nested = false }: Score
           ) : (
             <button
               type="button"
-              aria-label={`Show ${scorerId} reason`}
+              aria-label={studioT('Show {value0} reason', { value0: scorerId })}
               className={`cursor-pointer ${iconClassName}`}
             />
           )

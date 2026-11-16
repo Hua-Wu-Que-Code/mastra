@@ -13,6 +13,7 @@ import {
   histogramPlan,
   zoomWindow,
 } from '@/domains/observability/lib/histogram-buckets';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /** Compares selections, not instants: only filter or date changes move the chart's `now`. */
 const SELECTION_CLOCK = new Date(0);
@@ -24,6 +25,7 @@ const SELECTION_CLOCK = new Date(0);
  * Dragging across bars narrows the list to their time span as a custom range.
  */
 export function TracesExplorerHistogram() {
+  useLocale();
   const {
     rootSource,
     withQueryTrace,
@@ -103,8 +105,8 @@ export function TracesExplorerHistogram() {
 
   return (
     <ObservabilityHistogram
-      label="Traces over time"
-      resourceLabel="Traces"
+      label={studioT('Traces over time')}
+      resourceLabel={studioT('Traces')}
       buckets={buckets}
       isLoading={isLoading}
       isError={isError}

@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react';
-
 import { formatSnapshotCutoff, formatSnapshotWindow, traceLabel } from './signal-formatting';
 import { snapshotTickLabel, timelineDayLabels, timelineTickPositions } from './snapshot-timeline-data';
+
 import type { ThemeSnapshot } from './types';
 import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { IconPause } from '@/ds/icons/central/IconPause';
 import { IconPlay } from '@/ds/icons/central/IconPlay';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TimelineMarkerKind = 'selected' | 'compare-point';
 
@@ -35,11 +36,12 @@ export function TimelineTrack({
   grabbedIndex?: number;
   onTickSelect: (index: number) => void;
 }) {
+  useLocale();
   const positions = timelineTickPositions(snapshots);
   const dayLabels = timelineDayLabels(snapshots);
 
   return (
-    <div aria-label="Snapshot landmarks" className="relative mx-2 h-12 min-w-40 flex-1" role="group">
+    <div aria-label={studioT('Snapshot landmarks')} className="relative mx-2 h-12 min-w-40 flex-1" role="group">
       <div aria-hidden="true" className="absolute inset-x-0 top-4 h-0.5 -translate-y-1/2 rounded-full bg-border" />
       {snapshots.map((snapshot, index) => {
         const marker = markers.get(index);
@@ -97,6 +99,7 @@ export function SnapshotTimeline({
   onPlayingChange: (isPlaying: boolean) => void;
   onSnapshotChange: (index: number) => void;
 }) {
+  useLocale();
   const snapshot = snapshots[selectedIndex];
 
   if (!snapshot) return null;
@@ -114,7 +117,7 @@ export function SnapshotTimeline({
   ];
 
   return (
-    <section aria-label="Snapshot timeline" className="space-y-4">
+    <section aria-label={studioT('Snapshot timeline')} className="space-y-4">
       {snapshots.length > 1 ? (
         <div className="px-3 py-2.5 sm:px-4">
           <TimelineTrack
@@ -128,13 +131,13 @@ export function SnapshotTimeline({
       <div className="flex flex-wrap items-center gap-3">
         {snapshots.length > 1 ? (
           <Button
-            aria-label={isPlaying ? 'Pause snapshots' : 'Play snapshots'}
+            aria-label={isPlaying ? studioT('Pause snapshots') : studioT('Play snapshots')}
             onClick={() => onPlayingChange(!isPlaying)}
             size="sm"
             type="button"
             icon={isPlaying ? <IconPause aria-hidden="true" /> : <IconPlay aria-hidden="true" />}
           >
-            {isPlaying ? 'Pause' : 'Play'}
+            {isPlaying ? studioT('Pause') : studioT('Play')}
           </Button>
         ) : null}
         <Txt variant="caption" tone="muted" className="tabular-nums" data-testid="snapshot-summary">

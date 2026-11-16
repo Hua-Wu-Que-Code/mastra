@@ -1,5 +1,6 @@
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Textarea } from '@mastra/playground-ui/components/Textarea';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface ExperimentDescriptionFieldProps {
   description: string;
@@ -12,13 +13,14 @@ export function ExperimentDescriptionField({
   onDescriptionChange,
   disabled,
 }: ExperimentDescriptionFieldProps) {
+  useLocale();
   return (
     <Field>
-      <FieldLabel>Description</FieldLabel>
+      <FieldLabel>{studioT('Description')}</FieldLabel>
       <Textarea
         value={description}
         onChange={event => onDescriptionChange(event.target.value)}
-        placeholder="Optional"
+        placeholder={studioT('Optional')}
         rows={2}
         disabled={disabled}
       />

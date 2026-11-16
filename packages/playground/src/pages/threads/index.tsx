@@ -5,10 +5,13 @@ import {
   withThreadSelection,
 } from '@mastra/playground-ui/domains/observability';
 import { ThreadsExplorerBody } from '@mastra/playground-ui/domains/threads/components/threads-explorer-body';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useNavigate, useSearchParams } from 'react-router';
 import { traceScoreLink } from '@/lib/app-routing';
 
 export default function ThreadsPage() {
+  useLocale();
   const { enabled, isLoading } = useThreadQueryAvailable();
   const navigate = useNavigate();
   // The open thread, time range, filters and sort live in the URL, so they survive a reload and can be shared.
@@ -19,8 +22,10 @@ export default function ThreadsPage() {
       enabled={enabled}
       isLoading={isLoading}
       heading="Threads"
-      title="Query threads capability not activated"
-      description="Your observability storage does not support thread row queries. Switch to a store that declares the thread-query-rows capability to list threads."
+      title={studioT('Query threads capability not activated')}
+      description={studioT(
+        'Your observability storage does not support thread row queries. Switch to a store that declares the thread-query-rows capability to list threads.',
+      )}
     >
       <ThreadsExplorerBody
         urlState={{ searchParams, setSearchParams }}

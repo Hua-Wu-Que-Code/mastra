@@ -19,6 +19,8 @@ import {
   createLogsPropertyFilterFields,
   neutralizeLogsFilterTokens,
 } from '@mastra/playground-ui/domains/logs/log-filters';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useUrlSort } from '@mastra/playground-ui/sort/use-url-sort';
 import { useLogs } from '@mastra/react/hooks/logs';
 import { useEntityNames, useEnvironments, useServiceNames, useTags, useTraceSpans } from '@mastra/react/hooks/traces';
@@ -32,6 +34,7 @@ import { traceScoreLink } from '@/lib/app-routing';
 const crumbs = [navCrumb('/logs')];
 
 export default function LogsPage() {
+  useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const url = useLogsUrlState(searchParams, setSearchParams);
@@ -178,9 +181,9 @@ export default function LogsPage() {
   if (logsError) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />} actionRow={actionRow}>
-        <h1 className="sr-only">Logs</h1>
+        <h1 className="sr-only">{studioT('Logs')}</h1>
         <div className="flex h-full items-center justify-center">
-          <LogsErrorContent error={logsError} resource="logs" errorTitle="Failed to load logs" />
+          <LogsErrorContent error={logsError} resource="logs" errorTitle={studioT('Failed to load logs')} />
         </div>
       </PageLayout>
     );
@@ -191,7 +194,7 @@ export default function LogsPage() {
   if (logs.length === 0 && !isLoadingLogs && !contentFiltersApplied) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />} actionRow={actionRow}>
-        <h1 className="sr-only">Logs</h1>
+        <h1 className="sr-only">{studioT('Logs')}</h1>
         <NoLogsInfo datePreset={url.datePreset} dateFrom={url.selectedDateFrom} dateTo={url.selectedDateTo} />
       </PageLayout>
     );
@@ -199,7 +202,7 @@ export default function LogsPage() {
 
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />} actionRow={actionRow}>
-      <h1 className="sr-only">Logs</h1>
+      <h1 className="sr-only">{studioT('Logs')}</h1>
       <LogsListView
         logs={logs}
         isLoading={isLoadingLogs}

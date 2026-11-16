@@ -1,5 +1,7 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconArrowBoxRight } from '@mastra/playground-ui/icons/central/IconArrowBoxRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useSSOLogin } from '@mastra/react/hooks/auth';
 import type { LoginConfig, SSOConfig } from '@mastra/react/hooks/auth';
 import { withStudioBasePath } from '@/lib/studio-base-path';
@@ -40,6 +42,7 @@ import { LogIn } from 'lucide-react';
  * ```
  */
 export function LoginButton({ config, redirectUri, className, loginUrl = '/login' }: LoginButtonProps) {
+  useLocale();
   const { mutate: login, isPending } = useSSOLogin();
 
   if (!config) return null;
@@ -62,7 +65,7 @@ export function LoginButton({ config, redirectUri, className, loginUrl = '/login
     return (
       <Button onClick={handleSSOLogin} disabled={isPending} className={className}>
         {sso?.icon && <span className="mr-2">{sso.icon}</span>}
-        {sso?.text || 'Sign in'}
+        {sso?.text || studioT('Sign in')}
       </Button>
     );
   }
@@ -78,7 +81,7 @@ export function LoginButton({ config, redirectUri, className, loginUrl = '/login
 
   return (
     <Button icon={<IconArrowBoxRight />} onClick={handleCredentialsLogin} className={className}>
-      Sign in
+      {studioT('Sign in')}
     </Button>
   );
 }

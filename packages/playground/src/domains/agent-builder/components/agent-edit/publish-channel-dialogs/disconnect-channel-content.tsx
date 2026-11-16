@@ -6,6 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDisconnectChannel } from '@mastra/react/hooks/agents';
 import type { ChannelPlatformInfo } from '@mastra/react/hooks/agents';
@@ -18,37 +22,41 @@ export interface DisconnectChannelContentProps {
 }
 
 export function DisconnectChannelContent({ platform, agentId, onCancel, onClose }: DisconnectChannelContentProps) {
+  useLocale();
   const { mutateAsync: disconnect, isPending } = useDisconnectChannel({ platform: platform.id });
 
   const handleConfirm = async () => {
     try {
       await disconnect(agentId);
-      toast.success(`${platform.name} disconnected`);
+      toast.success(studioT('{value0} disconnected', { value0: platform.name }));
       onClose();
     } catch (err) {
       const e = err as Error & { body?: { error?: string } };
-      toast.error(e.body?.error || e.message || 'Failed to disconnect channel');
+      toast.error(e.body?.error || e.message || studioT('Failed to disconnect channel'));
     }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Are you sure?</DialogTitle>
+        <DialogTitle>{studioT('Are you sure?')}</DialogTitle>
         <DialogDescription>
-          Your agent will be removed from <span className="text-foreground">{platform.name}</span>.
+          <Trans
+            id="Your agent will be removed from {part0}."
+            values={{ part0: <span className="text-foreground">{platform.name}</span> }}
+          />
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
         <Button onClick={onCancel} disabled={isPending}>
-          Cancel
+          {studioT('Cancel')}
         </Button>
         <DialogAction
           onConfirm={handleConfirm}
           disabled={isPending}
           data-testid={`publish-channel-dialog-${platform.id}-disconnect-confirm`}
         >
-          {isPending ? 'Disconnecting…' : 'Confirm'}
+          {isPending ? studioT('Disconnecting…') : studioT('Confirm')}
         </DialogAction>
       </DialogFooter>
     </>

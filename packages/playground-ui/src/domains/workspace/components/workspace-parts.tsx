@@ -14,6 +14,8 @@ import { WorkspaceSearchResults } from './workspace-search';
 import { WorkspaceTree as TreeBody } from './workspace-tree';
 import { EmptyState } from '@/ds/components/EmptyState';
 import { ScrollArea } from '@/ds/components/ScrollArea';
+
+import { useLocale, t as studioT } from '@/lib/i18n';
 import { CollapsiblePanel } from '@/lib/resize/collapsible-panel';
 import { PanelGroup } from '@/lib/resize/panel-group';
 import { PanelSeparator } from '@/lib/resize/separator';
@@ -30,6 +32,7 @@ export function WorkspaceRoot({ children, ...props }: WorkspaceRootProps) {
 
 /** An empty workspace (or one whose root folder doesn't exist yet) gets a single empty state instead of two panes. */
 function WorkspaceRootBody({ children }: { children: ReactNode }) {
+  useLocale();
   const { workspaceId } = useWorkspaceContext();
   const { data, error } = useWorkspaceDirectory({ workspaceId: workspaceId, path: ROOT_PATH });
   const isEmpty = data ? data.length === 0 : is404NotFoundError(error);
@@ -38,8 +41,8 @@ function WorkspaceRootBody({ children }: { children: ReactNode }) {
     return (
       <EmptyState
         variant="fill"
-        titleSlot="This workspace is empty"
-        descriptionSlot="Files written by your agents will show up here."
+        titleSlot={studioT('This workspace is empty')}
+        descriptionSlot={studioT('Files written by your agents will show up here.')}
         actionSlot={
           <div className="flex flex-wrap items-center justify-center gap-2">
             <WorkspaceCreateDirectory labeled />
@@ -117,8 +120,9 @@ export function WorkspaceActiveFileHeader({ children }: { children: ReactNode })
 }
 
 export function WorkspaceActiveFileContent({ renderPreview }: { renderPreview?: WorkspacePreviewFactory }) {
+  useLocale();
   const { activeFilePath } = useWorkspaceContext();
-  if (!activeFilePath) return <EmptyState variant="fill" titleSlot="Select a file" />;
+  if (!activeFilePath) return <EmptyState variant="fill" titleSlot={studioT('Select a file')} />;
   return (
     <ScrollArea className="min-h-0 flex-1">
       <ActiveFileBody renderPreview={renderPreview} />

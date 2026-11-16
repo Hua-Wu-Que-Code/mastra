@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { SettingsGroup, SettingsTitle } from '@mastra/playground-ui/new/settings';
 import { useStudioConfig } from '../context/studio-config-state';
 import { StudioConnectionForm } from './studio-connection-form';
@@ -8,13 +9,18 @@ import { StudioConnectionForm } from './studio-connection-form';
  * they change (they load after the first render, and saving writes them back).
  */
 export function StudioConnectionSettings() {
+  useLocale();
   const { baseUrl, apiPrefix, headers } = useStudioConfig();
   const configKey = JSON.stringify([baseUrl, apiPrefix ?? '', headers]);
 
   return (
     <SettingsGroup>
-      <SettingsTitle info="The Mastra instance the studio talks to, the path in front of its API routes, and the headers sent with every request.">
-        Mastra connection
+      <SettingsTitle
+        info={studioT(
+          'The Mastra instance the studio talks to, the path in front of its API routes, and the headers sent with every request.',
+        )}
+      >
+        {studioT('Mastra connection')}
       </SettingsTitle>
       <StudioConnectionForm key={configKey} initialConfig={{ baseUrl, apiPrefix, headers }} />
     </SettingsGroup>

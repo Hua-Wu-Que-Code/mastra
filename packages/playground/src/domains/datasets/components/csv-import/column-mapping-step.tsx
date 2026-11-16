@@ -3,6 +3,8 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconDotGrid2x3 } from '@mastra/playground-ui/icons/central/IconDotGrid2x3';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { createPortal } from 'react-dom';
 import type { ColumnMapping, FieldType } from '../../hooks/use-column-mapping';
@@ -15,13 +17,47 @@ export interface ColumnMappingStepProps {
 
 // Zone configuration for display
 const ZONES: { id: FieldType; label: string; description: string; required?: boolean }[] = [
-  { id: 'input', label: 'Input', description: 'Data passed to target', required: true },
-  { id: 'groundTruth', label: 'Ground Truth', description: 'Ground truth for comparison' },
-  { id: 'metadata', label: 'Metadata', description: 'Additional context' },
-  { id: 'ignore', label: 'Ignore', description: 'Not imported' },
+  {
+    id: 'input',
+    get label() {
+      return studioT('Input');
+    },
+    get description() {
+      return studioT('Data passed to target');
+    },
+    required: true,
+  },
+  {
+    id: 'groundTruth',
+    get label() {
+      return studioT('Ground Truth');
+    },
+    get description() {
+      return studioT('Ground truth for comparison');
+    },
+  },
+  {
+    id: 'metadata',
+    get label() {
+      return studioT('Metadata');
+    },
+    get description() {
+      return studioT('Additional context');
+    },
+  },
+  {
+    id: 'ignore',
+    get label() {
+      return studioT('Ignore');
+    },
+    get description() {
+      return studioT('Not imported');
+    },
+  },
 ];
 
 export function ColumnMappingStep({ headers, mapping, onMappingChange }: ColumnMappingStepProps) {
+  useLocale();
   // Handle drag end - move column to new zone
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) {
@@ -49,7 +85,7 @@ export function ColumnMappingStep({ headers, mapping, onMappingChange }: ColumnM
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex flex-col gap-4">
         <Txt as="p" variant="body" tone="muted">
-          Drag columns to assign them to dataset fields
+          {studioT('Drag columns to assign them to dataset fields')}
         </Txt>
 
         {ZONES.map(zone => {
@@ -84,7 +120,7 @@ export function ColumnMappingStep({ headers, mapping, onMappingChange }: ColumnM
                   >
                     {isEmpty && !snapshot.isDraggingOver && (
                       <Txt as="span" variant="caption" tone="muted" className="italic">
-                        {needsAttention ? 'Drag at least one column here' : 'No columns assigned'}
+                        {needsAttention ? studioT('Drag at least one column here') : studioT('No columns assigned')}
                       </Txt>
                     )}
 
@@ -137,7 +173,7 @@ export function ColumnMappingStep({ headers, mapping, onMappingChange }: ColumnM
         {/* Validation message */}
         {!inputHasColumns && (
           <Txt as="p" variant="body" className="text-warning-foreground">
-            At least one column must be mapped to Input
+            {studioT('At least one column must be mapped to Input')}
           </Txt>
         )}
       </div>

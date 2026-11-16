@@ -2,6 +2,8 @@ import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { IconChevronLeftMedium } from '@/ds/icons/central/IconChevronLeftMedium';
 import { IconChevronRightMedium } from '@/ds/icons/central/IconChevronRightMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 export const EXAMPLES_PAGE_SIZE = 5;
 
@@ -15,22 +17,23 @@ export function ExamplesPager({
   offset: number;
   onOffsetChange: (offset: number) => void;
 }) {
+  useLocale();
   const totalPages = Math.max(1, Math.ceil(traceCount / EXAMPLES_PAGE_SIZE));
   const page = Math.floor(offset / EXAMPLES_PAGE_SIZE) + 1;
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label="Example pages" className="mt-3 flex items-center gap-3">
+    <nav aria-label={studioT('Example pages')} className="mt-3 flex items-center gap-3">
       <Button
         icon={<IconChevronLeftMedium />}
         size="sm"
         disabled={page <= 1}
         onClick={() => onOffsetChange((page - 2) * EXAMPLES_PAGE_SIZE)}
       >
-        Previous
+        {studioT('Previous')}
       </Button>
       <Txt as="span" variant="caption" tone="muted" className="tabular-nums">
-        Page {page} of {totalPages}
+        <Trans id="Page {part0} of {part1}" values={{ part0: page, part1: totalPages }} />
       </Txt>
       <Button
         icon={<IconChevronRightMedium />}
@@ -38,7 +41,7 @@ export function ExamplesPager({
         disabled={page >= totalPages}
         onClick={() => onOffsetChange(page * EXAMPLES_PAGE_SIZE)}
       >
-        Next
+        {studioT('Next')}
       </Button>
     </nav>
   );

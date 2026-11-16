@@ -5,6 +5,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { createMetricsFilterBarFields } from '@mastra/playground-ui/domains/metrics/metrics-filters';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import { metricsCrumbs } from '../metrics-crumbs';
 import { MetricsCapabilityError } from './metrics-capability-error';
@@ -21,15 +23,16 @@ const filterFieldsWithoutDiscovery = createMetricsFilterBarFields({
 
 /** Keep dashboard queries unmounted until the observability store supports them. */
 export function MetricsStorageGate({ children }: { children: ReactNode }) {
+  useLocale();
   const { supportsMetrics, isLoading, error } = useObservabilityStorageCapabilities();
 
   if (isLoading) {
     return (
       <MetricsPageLayout filterFields={filterFieldsWithoutDiscovery}>
         <div className="flex h-full items-center justify-center gap-2">
-          <Spinner aria-label="Loading storage capabilities" />
+          <Spinner aria-label={studioT('Loading storage capabilities')} />
           <Txt as="span" variant="caption" tone="muted">
-            Loading storage capabilities
+            {studioT('Loading storage capabilities')}
           </Txt>
         </div>
       </MetricsPageLayout>
@@ -38,7 +41,7 @@ export function MetricsStorageGate({ children }: { children: ReactNode }) {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={metricsCrumbs} />}>
-        <h1 className="sr-only">Metrics</h1>
+        <h1 className="sr-only">{studioT('Metrics')}</h1>
         <div className="flex h-full items-center justify-center">
           <MetricsCapabilityError error={error} />
         </div>
@@ -50,8 +53,10 @@ export function MetricsStorageGate({ children }: { children: ReactNode }) {
   return (
     <MetricsPageLayout filterFields={filterFieldsWithoutDiscovery}>
       <EmptyState
-        titleSlot="Metrics are not available with your current storage"
-        descriptionSlot="Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Mastra configuration."
+        titleSlot={studioT('Metrics are not available with your current storage')}
+        descriptionSlot={studioT(
+          'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Mastra configuration.',
+        )}
         actionSlot={
           <Button
             variant="ghost"
@@ -65,7 +70,7 @@ export function MetricsStorageGate({ children }: { children: ReactNode }) {
 
             icon={<IconSquareArrowTopRight />}
           >
-            Metrics documentation
+            {studioT('Metrics documentation')}
           </Button>
         }
         variant="fill"

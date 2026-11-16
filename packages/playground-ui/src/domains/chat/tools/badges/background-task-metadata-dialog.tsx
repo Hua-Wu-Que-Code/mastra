@@ -14,6 +14,10 @@ import { Txt } from '@/ds/components/Txt';
 import { IconLoadingCircle } from '@/ds/icons/central/IconLoadingCircle';
 import { IconShareAndroid } from '@/ds/icons/central/IconShareAndroid';
 import { useTimeDiff } from '@/hooks/use-time-diff';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { toSigFigs } from '@/utils/number';
 
 interface BackgroundTaskMetadataProps {
@@ -33,6 +37,7 @@ const BackgroundTaskMetadata = ({
   open,
   onOpenChange,
 }: BackgroundTaskMetadataProps) => {
+  useLocale();
   const { data: task } = useGetBackgroundTaskById({
     backgroundTaskId: backgroundTaskTaskId,
     queryOptions: { enabled: !!backgroundTaskCompletedAt || !!backgroundTaskSuspendedAt },
@@ -89,33 +94,33 @@ const BackgroundTaskMetadata = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Background Task Metadata</DialogTitle>
-          <DialogDescription>View the metadata of the background task.</DialogDescription>
+          <DialogTitle>{studioT('Background Task Metadata')}</DialogTitle>
+          <DialogDescription>{studioT('View the metadata of the background task.')}</DialogDescription>
         </DialogHeader>
 
         <DialogBody>
           <div className="space-y-2">
-            <Txt tone="muted">Background Task Duration</Txt>
+            <Txt tone="muted">{studioT('Background Task Duration')}</Txt>
             <Txt variant="body" tone="ink">
-              {toSigFigs(timeDiff, 3)}ms
+              <Trans id="{part0} ms" values={{ part0: toSigFigs(timeDiff, 3) }} />
             </Txt>
           </div>
 
           <div className="space-y-2">
-            <Txt tone="muted">Background Task Arguments</Txt>
+            <Txt tone="muted">{studioT('Background Task Arguments')}</Txt>
             {argSlot}
           </div>
 
           {suspendPayloadSlot !== undefined && suspendPayload && (
             <div className="space-y-2">
-              <Txt tone="muted">Background Task Suspend Data</Txt>
+              <Txt tone="muted">{studioT('Background Task Suspend Data')}</Txt>
               {suspendPayloadSlot}
             </div>
           )}
 
           {resultSlot !== undefined && result && (
             <div className="space-y-2">
-              <Txt tone="muted">Background Task Result</Txt>
+              <Txt tone="muted">{studioT('Background Task Result')}</Txt>
               {resultSlot}
             </div>
           )}
@@ -135,13 +140,14 @@ export interface BackgroundTaskMetadataDialogTriggerProps {
 }
 
 export const BackgroundTaskMetadataDialogTrigger = ({ backgroundTask }: BackgroundTaskMetadataDialogTriggerProps) => {
+  useLocale();
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <Button
         variant="default"
         size="icon-md"
-        tooltip="Show background task information"
+        tooltip={studioT('Show background task information')}
         onClick={() => setIsOpen(s => !s)}
       >
         {backgroundTask.completedAt || backgroundTask.suspendedAt ? (

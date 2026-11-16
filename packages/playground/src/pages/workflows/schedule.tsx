@@ -12,6 +12,10 @@ import { IconPause } from '@mastra/playground-ui/icons/central/IconPause';
 import { IconPlay } from '@mastra/playground-ui/icons/central/IconPlay';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useSchedule, useScheduleTriggers, useToggleSchedule } from '@mastra/react/hooks/schedules';
@@ -38,6 +42,7 @@ function MetaItem({ label, children }: { label: string; children: React.ReactNod
 }
 
 export default function SchedulePage() {
+  useLocale();
   const { scheduleId } = useParams<{ scheduleId: string }>();
   const crumbs = [
     navCrumb('/workflows'),
@@ -78,7 +83,12 @@ export default function SchedulePage() {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
         <h1 className="sr-only">{scheduleId}</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load schedule" descriptionSlot={error.message} />
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load schedule')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -93,11 +103,11 @@ export default function SchedulePage() {
         <ActionRow>
           <ActionRow.End>
             <Button render={<Link to={paths.schedulesLink()} />} variant="ghost" icon={<IconArrowLeft />}>
-              Back to schedules
+              {studioT('Back to schedules')}
             </Button>
             {workflowId ? (
               <Button icon={<WorkflowIcon />} render={<Link to={paths.workflowLink(workflowId)} />} variant="ghost">
-                Open workflow
+                {studioT('Open workflow')}
               </Button>
             ) : null}
             {schedule && schedule.status !== 'completed' ? (
@@ -105,7 +115,8 @@ export default function SchedulePage() {
                 onClick={() => {
                   const action = schedule.status === 'active' ? 'pause' : 'resume';
                   toggle.mutate(action, {
-                    onSuccess: () => toast.success(action === 'pause' ? 'Schedule paused' : 'Schedule resumed'),
+                    onSuccess: () =>
+                      toast.success(action === 'pause' ? studioT('Schedule paused') : studioT('Schedule resumed')),
                     onError: error => toast.error(error.message),
                   });
                 }}
@@ -115,12 +126,12 @@ export default function SchedulePage() {
                 {schedule.status === 'active' ? (
                   <>
                     <IconPause />
-                    Pause
+                    {studioT('Pause')}
                   </>
                 ) : (
                   <>
                     <IconPlay />
-                    Resume
+                    {studioT('Resume')}
                   </>
                 )}
               </Button>
@@ -133,7 +144,7 @@ export default function SchedulePage() {
       {schedule ? (
         <div className="grid h-full grid-cols-[minmax(0,20rem)_1fr] gap-4 overflow-hidden">
           <div className="flex h-fit flex-col gap-4 rounded-md border border-border p-4">
-            <MetaItem label={agentId ? 'Agent' : 'Workflow'}>
+            <MetaItem label={agentId ? studioT('Agent') : studioT('Workflow')}>
               {workflowId ? (
                 <Link to={paths.workflowLink(workflowId)} className="text-foreground hover:underline">
                   {workflowId}
@@ -146,13 +157,13 @@ export default function SchedulePage() {
                 '—'
               )}
             </MetaItem>
-            <MetaItem label={schedule.cron ? 'Cron' : 'Runs at'}>
+            <MetaItem label={schedule.cron ? studioT('Cron') : studioT('Runs at')}>
               <Txt as="span" variant="body" font="mono">
                 {schedule.cron ?? (schedule.runAt ? new Date(schedule.runAt).toLocaleString() : '—')}
               </Txt>
               {schedule.endAt ? (
                 <span className="ml-2 text-caption text-muted-foreground">
-                  until {new Date(schedule.endAt).toLocaleString()}
+                  <Trans id="until {part0}" values={{ part0: new Date(schedule.endAt).toLocaleString() }} />
                 </span>
               ) : null}
               {schedule.timezone ? (
@@ -161,22 +172,22 @@ export default function SchedulePage() {
                 </Txt>
               ) : null}
             </MetaItem>
-            <MetaItem label="Status">
+            <MetaItem label={studioT('Status')}>
               <ScheduleStatusText status={schedule.status} />
             </MetaItem>
-            <MetaItem label="Next fire">
+            <MetaItem label={studioT('Next fire')}>
               {schedule.nextFireAt ? <RelativeTimestamp value={schedule.nextFireAt} /> : '—'}
             </MetaItem>
           </div>
 
           <div className="overflow-y-auto" data-testid="schedule-triggers-panel">
             <Txt variant="body" className="mb-3">
-              Trigger history
+              {studioT('Trigger history')}
             </Txt>
             {triggersError ? (
               <EmptyState
                 tone="error"
-                titleSlot="Failed to load trigger history"
+                titleSlot={studioT('Failed to load trigger history')}
                 descriptionSlot={triggersError.message}
               />
             ) : (

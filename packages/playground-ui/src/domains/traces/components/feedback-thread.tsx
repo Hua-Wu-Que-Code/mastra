@@ -30,6 +30,8 @@ import { IconClipboard2 } from '@/ds/icons/central/IconClipboard2';
 import { IconDotGrid1x3Horizontal } from '@/ds/icons/central/IconDotGrid1x3Horizontal';
 import { Icon } from '@/ds/icons/Icon';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate } from '@/utils/date-format';
 
 type FeedbackThreadProps = {
@@ -57,10 +59,11 @@ type FeedbackThreadProps = {
 
 // The server defaults `reviewStatus` to `needs-review`, so a missing value means the same.
 function FeedbackReviewStatusBadge({ status }: { status: FeedbackItem['reviewStatus'] }) {
+  useLocale();
   const resolved = status === 'reviewed' ? 'reviewed' : 'needs-review';
   return (
     <ReviewStatusBadge data-slot="feedback-review-status" status={resolved}>
-      {resolved === 'reviewed' ? 'Reviewed' : 'Needs review'}
+      {resolved === 'reviewed' ? studioT('Reviewed') : studioT('Needs review')}
     </ReviewStatusBadge>
   );
 }
@@ -87,6 +90,7 @@ function FeedbackItems({
   onMarkReviewed,
   pendingFeedbackId,
 }: FeedbackItemsProps) {
+  useLocale();
   const rows = items.map((fb, index) => {
     const ts = new Date(fb.timestamp);
     const author = feedbackAuthorLabel(fb);
@@ -99,7 +103,7 @@ function FeedbackItems({
     // A pending comment has no stored record yet, so there is nothing to review or delete.
     const status = fb.isPending ? (
       <Txt as="span" variant="meta" tone="muted" data-slot="feedback-pending">
-        Sending…
+        {studioT('Sending…')}
       </Txt>
     ) : (
       <FeedbackReviewStatusBadge status={fb.reviewStatus} />
@@ -111,7 +115,7 @@ function FeedbackItems({
         <DropdownMenu>
           <DropdownMenu.Trigger
             render={
-              <Button size="icon-sm" variant="ghost" aria-label="Feedback actions">
+              <Button size="icon-sm" variant="ghost" aria-label={studioT('Feedback actions')}>
                 <IconDotGrid1x3Horizontal />
               </Button>
             }
@@ -125,7 +129,7 @@ function FeedbackItems({
                 <Icon size="xs">
                   <IconClipboard2 />
                 </Icon>
-                Mark reviewed
+                {studioT('Mark reviewed')}
               </DropdownMenu.Item>
             )}
             {canDelete && (
@@ -133,7 +137,7 @@ function FeedbackItems({
                 <Icon size="xs">
                   <TrashIcon />
                 </Icon>
-                Delete feedback
+                {studioT('Delete feedback')}
               </DropdownMenu.Item>
             )}
           </DropdownMenu.Content>
@@ -198,6 +202,7 @@ export function FeedbackThread({
   onMarkReviewed,
   pendingFeedbackId,
 }: FeedbackThreadProps) {
+  useLocale();
   const [text, setText] = useState('');
   const [feedbackIdToDelete, setFeedbackIdToDelete] = useState<string>();
   const sendBlocked = text.trim().length === 0 || isSubmitting;
@@ -221,7 +226,7 @@ export function FeedbackThread({
     <Comment variant={variant} className="min-h-0 gap-3">
       {/* Same size/variant as the timeline search field so switching tabs doesn't shift the layout. */}
       <form
-        aria-label="Leave feedback"
+        aria-label={studioT('Leave feedback')}
         className="flex w-full items-center gap-2"
         onSubmit={async event => {
           event.preventDefault();
@@ -236,13 +241,13 @@ export function FeedbackThread({
       >
         <InputGroup size="sm">
           <InputGroupInput
-            aria-label="Leave feedback"
-            placeholder="Leave feedback"
+            aria-label={studioT('Leave feedback')}
+            placeholder={studioT('Leave feedback')}
             value={text}
             onChange={event => setText(event.target.value)}
           />
           <InputGroupAddon align="inline-end">
-            <InputGroupButton type="submit" aria-label="Send feedback" disabled={sendBlocked}>
+            <InputGroupButton type="submit" aria-label={studioT('Send feedback')} disabled={sendBlocked}>
               <IconArrowUp />
             </InputGroupButton>
           </InputGroupAddon>
@@ -257,11 +262,11 @@ export function FeedbackThread({
       <div className="min-h-0 overflow-y-auto">
         {isLoadingFeedbackData ? (
           <Txt variant="body" tone="muted">
-            Loading feedback...
+            {studioT('Loading feedback...')}
           </Txt>
         ) : feedbackItems.length === 0 ? (
           <Txt variant="body" tone="muted" className="text-center">
-            No feedback yet
+            {studioT('No feedback yet')}
           </Txt>
         ) : (
           <FeedbackItems
@@ -284,7 +289,7 @@ export function FeedbackThread({
             disabled={currentPage === 0}
             onClick={() => onPageChange?.(currentPage - 1)}
           >
-            Previous
+            {studioT('Previous')}
           </Button>
           <Button
             icon={<IconChevronRightMedium />}
@@ -293,7 +298,7 @@ export function FeedbackThread({
             disabled={!hasMore}
             onClick={() => onPageChange?.(currentPage + 1)}
           >
-            Next
+            {studioT('Next')}
           </Button>
         </div>
       )}
@@ -306,15 +311,15 @@ export function FeedbackThread({
       >
         <AlertDialog.Content>
           <AlertDialog.Header>
-            <AlertDialog.Title>Delete feedback?</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Delete feedback?')}</AlertDialog.Title>
             <AlertDialog.Description>
-              This permanently deletes this feedback comment. This action cannot be undone.
+              {studioT('This permanently deletes this feedback comment. This action cannot be undone.')}
             </AlertDialog.Description>
           </AlertDialog.Header>
           <AlertDialog.Footer>
-            <AlertDialog.Cancel disabled={isDeleting}>Cancel</AlertDialog.Cancel>
+            <AlertDialog.Cancel disabled={isDeleting}>{studioT('Cancel')}</AlertDialog.Cancel>
             <Button icon={<TrashIcon />} variant="primary" disabled={isDeleting} onClick={handleDeleteConfirm}>
-              {isDeleting ? 'Deleting…' : 'Delete'}
+              {isDeleting ? studioT('Deleting…') : studioT('Delete')}
             </Button>
           </AlertDialog.Footer>
         </AlertDialog.Content>

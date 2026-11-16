@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { FeedbackOptions } from './feedback-options';
-
 import { ThreadViewByTrace } from '@/domains/traces/components/thread-view-by-trace';
 import { DataPanel } from '@/ds/components/DataPanel';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface TraceThreadPanelProps {
   /** Keep the panel mounted and toggle `open` so the drawer animates in and out. */
@@ -33,15 +33,16 @@ export function TraceThreadPanel({
   onClose,
   depth = 2,
   title,
-  closeLabel = 'Back to trace',
+  closeLabel = studioT('Back to trace'),
 }: TraceThreadPanelProps) {
+  useLocale();
   // Like the trace panel: the drawer only takes the full frame while a span detail is open.
   const [hasSelectedSpan, setHasSelectedSpan] = useState(false);
   return (
     <DataPanel
       open={open}
       onClose={onClose}
-      title={title ?? `Thread ${threadId}`}
+      title={title ?? studioT('Thread {value0}', { value0: threadId })}
       depth={depth}
       size={hasSelectedSpan ? 'full' : 'wide'}
     >
@@ -49,7 +50,7 @@ export function TraceThreadPanel({
         <DataPanel.CloseButton onClick={onClose} label={closeLabel} tooltip={closeLabel} />
         <DataPanel.HeaderContent>
           <DataPanel.Heading>
-            Thread
+            {studioT('Thread')}
             <DataPanel.CopyId id={threadId} />
           </DataPanel.Heading>
         </DataPanel.HeaderContent>

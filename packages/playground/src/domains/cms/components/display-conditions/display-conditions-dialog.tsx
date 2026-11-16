@@ -10,6 +10,8 @@ import {
 } from '@mastra/playground-ui/components/Dialog';
 import { RuleBuilder } from '@mastra/playground-ui/components/RuleBuilder';
 import { IconRuler } from '@mastra/playground-ui/icons/central/IconRuler';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { JsonSchema } from '@mastra/playground-ui/utils/json-schema';
 import type { RuleGroup } from '@mastra/playground-ui/utils/rule-engine';
 import { countLeafRules } from '@mastra/playground-ui/utils/rule-engine';
@@ -22,6 +24,7 @@ interface DisplayConditionsDialogProps {
 }
 
 export function DisplayConditionsDialog({ entityName, schema, rules, onRulesChange }: DisplayConditionsDialogProps) {
+  useLocale();
   const hasVariables = Object.keys(schema?.properties ?? {}).length > 0;
 
   if (!schema || !hasVariables) {
@@ -35,7 +38,7 @@ export function DisplayConditionsDialog({ entityName, schema, rules, onRulesChan
       <DialogTrigger
         render={
           <Button
-            tooltip={ruleCount > 0 ? `${ruleCount} rules` : 'Display Conditions'}
+            tooltip={ruleCount > 0 ? studioT('{value0} rules', { value0: ruleCount }) : studioT('Display Conditions')}
             size="icon-sm"
             variant="ghost"
             className="relative"
@@ -47,9 +50,12 @@ export function DisplayConditionsDialog({ entityName, schema, rules, onRulesChan
       />
       <DialogContent size="xl">
         <DialogHeader>
-          <DialogTitle>Display Conditions for {entityName}</DialogTitle>
+          <DialogTitle>
+            {studioT('Display Conditions for') + ' '}
+            {entityName}
+          </DialogTitle>
           <DialogDescription>
-            Configure when this entity should be displayed based on variable values.
+            {studioT('Configure when this entity should be displayed based on variable values.')}
           </DialogDescription>
         </DialogHeader>
         <DialogBody>

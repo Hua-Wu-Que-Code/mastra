@@ -1,5 +1,7 @@
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import { Field, FieldDescription, FieldLabel } from '@mastra/playground-ui/components/Field';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { useScorers } from '@/domains/scores/hooks/use-scorers';
 
 export interface ScorerSelectorProps {
@@ -16,9 +18,10 @@ export function ScorerSelector({
   setSelectedScorers,
   disabled = false,
   container,
-  label = 'Scorers (Optional)',
+  label = studioT('Scorers (Optional)'),
   helperText,
 }: ScorerSelectorProps) {
+  useLocale();
   const { data: scorers, isLoading } = useScorers();
   const options = Object.entries(scorers ?? {})
     .filter(([, scorer]) => scorer.isRegistered)
@@ -36,9 +39,9 @@ export function ScorerSelector({
         options={options}
         value={selectedScorers}
         onValueChange={setSelectedScorers}
-        placeholder="Select scorers"
-        searchPlaceholder="Search scorers"
-        emptyText="No scorers available"
+        placeholder={studioT('Select scorers')}
+        searchPlaceholder={studioT('Search scorers')}
+        emptyText={studioT('No scorers available')}
         disabled={disabled || isLoading}
         container={container}
       />

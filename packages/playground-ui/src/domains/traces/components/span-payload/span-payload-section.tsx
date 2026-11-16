@@ -11,6 +11,8 @@ import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
 import { IconMinimize45 } from '@/ds/icons/central/IconMinimize45';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SpanPayloadView = 'rich' | 'raw';
@@ -45,10 +47,11 @@ export interface SpanPayloadSectionProps {
 }
 
 function ViewToggle({ view, onChange }: { view: SpanPayloadView; onChange: (view: SpanPayloadView) => void }) {
+  useLocale();
   return (
     <div
       role="group"
-      aria-label="Payload view"
+      aria-label={studioT('Payload view')}
       data-slot="span-payload-view-toggle"
       className="flex items-center gap-1"
     >
@@ -56,8 +59,8 @@ function ViewToggle({ view, onChange }: { view: SpanPayloadView; onChange: (view
         size="icon-sm"
         variant={view === 'rich' ? 'subtle' : 'ghost'}
         aria-pressed={view === 'rich'}
-        aria-label="Preview"
-        tooltip="Preview"
+        aria-label={studioT('Preview')}
+        tooltip={studioT('Preview')}
         onClick={() => onChange('rich')}
       >
         <IconEyeOpen />
@@ -95,6 +98,7 @@ export function SpanPayloadSection({
   clip = true,
   className,
 }: SpanPayloadSectionProps) {
+  useLocale();
   const [view, setView] = useState<SpanPayloadView>(defaultView);
   const box = useCollapsibleBox();
   if (raw == null) return null;
@@ -106,7 +110,7 @@ export function SpanPayloadSection({
   const shouldClip = clip && !showJson;
   const clipped = (body: ReactNode) =>
     shouldClip ? (
-      <CollapsibleBox state={box} expandLabel="Expand">
+      <CollapsibleBox state={box} expandLabel={studioT('Expand')}>
         {body}
       </CollapsibleBox>
     ) : (
@@ -150,7 +154,7 @@ export function SpanPayloadSection({
         {shouldClip && box.isExpanded && box.isClipped && (
           <div className="flex justify-center pt-1">
             <Button size="sm" variant="ghost" icon={<IconMinimize45 />} onClick={() => box.setExpanded(false)}>
-              Collapse
+              {studioT('Collapse')}
             </Button>
           </div>
         )}

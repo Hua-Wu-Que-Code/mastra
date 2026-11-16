@@ -1,5 +1,6 @@
 import { ChartTooltip } from '@/ds/components/ChartTooltip';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function MetricsLineChartTooltip({
   active,
@@ -29,6 +30,7 @@ export function MetricsLineChartTooltip({
   /** Per-series formatters, by data key, for charts that mix units (counts and durations). */
   formatByKey?: Record<string, (value: number) => string>;
 }) {
+  useLocale();
   if (!active || !payload?.length) return null;
   // A missing reading (NaN, Infinity) shows as a dash and stays out of the total.
   const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
@@ -65,7 +67,7 @@ export function MetricsLineChartTooltip({
         {showTotal && (
           <div className="col-span-3 grid grid-cols-subgrid items-center border-t border-border pt-1">
             <Txt as="span" variant="caption" tone="muted" className="col-span-2">
-              Total
+              {studioT('Total')}
             </Txt>
             <span className="text-right font-mono text-foreground tabular-nums">
               {hasReading ? formatValue(total) : '—'}

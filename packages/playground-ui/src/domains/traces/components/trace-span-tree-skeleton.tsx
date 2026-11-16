@@ -1,5 +1,7 @@
 import { SPAN_TREE_INDENT, SPAN_TREE_PAD_Y } from './span-tree-rail';
 import { Skeleton } from '@/ds/components/Skeleton';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /** `[depth, name width]` per row: a root span, then a couple of nested levels, like a typical agent run. */
@@ -24,8 +26,9 @@ export interface TraceSpanTreeSkeletonProps {
  * so nothing jumps when the spans land.
  */
 export function TraceSpanTreeSkeleton({ className }: TraceSpanTreeSkeletonProps) {
+  useLocale();
   return (
-    <div role="status" aria-label="Loading spans" className={cn('grid gap-y-px pb-1', className)}>
+    <div role="status" aria-label={studioT('Loading spans')} className={cn('grid gap-y-px pb-1', className)}>
       {ROWS.map(([depth, width], idx) => (
         <div key={idx} className="flex pl-1" style={{ paddingBlock: SPAN_TREE_PAD_Y }}>
           <div className="flex min-w-0 flex-1" style={{ paddingLeft: depth * SPAN_TREE_INDENT }}>

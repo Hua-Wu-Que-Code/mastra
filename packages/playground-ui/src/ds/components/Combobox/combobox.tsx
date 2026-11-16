@@ -24,6 +24,8 @@ import { fieldErrorId } from '@/ds/components/FormFieldBlocks/block/field-error-
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { deprecatedErrorAria } from '@/ds/primitives/form-element';
 import type { PortalContainer } from '@/ds/primitives/portal-container';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type { ComboboxPopupWidth, ComboboxVariant } from './combobox-styles';
@@ -149,7 +151,7 @@ function getCustomOption(options: ComboboxOption[], inputValue: string): Combobo
   if (!value) return undefined;
   // A field shows the selected option's text while it's closed; that isn't a new value.
   if (options.some(option => option.value === value || optionText(option) === value)) return undefined;
-  return { label: `Use “${value}”`, value };
+  return { label: studioT('Use “{value0}”', { value0: value }), value };
 }
 
 /** Matches the label like Base UI's default filter, the text a field shows, and any keywords. */
@@ -365,9 +367,9 @@ function SingleCombobox({
   options,
   value,
   onValueChange,
-  placeholder = 'Select option',
-  searchPlaceholder = 'Search',
-  emptyText = 'No option found.',
+  placeholder = studioT('Select option'),
+  searchPlaceholder = studioT('Search'),
+  emptyText = studioT('No option found.'),
   className,
   disabled = false,
   variant = 'default',
@@ -382,6 +384,7 @@ function SingleCombobox({
   allowCustomValue = false,
   onInputValueChange,
 }: ComboboxSingleProps & ShapeProps) {
+  useLocale();
   // The search text: a field's own text, or the compact trigger's popup search.
   const [inputValue, setInputValue] = React.useState('');
   const filter = useOptionFilter();
@@ -444,9 +447,9 @@ function MultipleCombobox({
   value = EMPTY_VALUES,
   onValueChange,
   clearLabel,
-  placeholder = 'Select options',
-  searchPlaceholder = 'Search',
-  emptyText = 'No option found.',
+  placeholder = studioT('Select options'),
+  searchPlaceholder = studioT('Search'),
+  emptyText = studioT('No option found.'),
   className,
   disabled = false,
   variant = 'default',
@@ -459,6 +462,7 @@ function MultipleCombobox({
   showChevron = true,
   iconOnlyValue = false,
 }: ComboboxMultipleProps & ShapeProps) {
+  useLocale();
   const filter = useOptionFilter();
   const selectedValues = new Set(value);
   const selectedOptions = options.filter(option => selectedValues.has(option.value));

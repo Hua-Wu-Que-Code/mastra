@@ -20,6 +20,8 @@ import { Txt } from '@/ds/components/Txt/Txt';
 import { IconFilter2 } from '@/ds/icons/central/IconFilter2';
 import { focusRing } from '@/ds/primitives/transitions';
 import { formatCompactNumber, formatCost } from '@/lib/cost';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/utils/duration';
 
@@ -178,6 +180,7 @@ export function TracesListView({
   listId = 'all-traces',
   outcomeColumn = true,
 }: TracesListViewProps) {
+  useLocale();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const columns = buildTraceListColumns(columnPreferences, { outcomeColumn });
   const columnKeys = buildTraceListColumnKeys(columnPreferences, { outcomeColumn });
@@ -223,32 +226,40 @@ export function TracesListView({
             sort={sortFor('startedAt')}
             onSortChange={handleSortChange}
           >
-            Start
+            {studioT('Start')}
           </TracesDataList.SortableTopCell>
         ) : (
-          <TracesDataList.TopCell>Start</TracesDataList.TopCell>
+          <TracesDataList.TopCell>{studioT('Start')}</TracesDataList.TopCell>
         )}
-        {hasTraceColumn(columnPreferences, 'type') && <TracesDataList.TopCell>Primitive type</TracesDataList.TopCell>}
-        <TracesDataList.TopCell>Primitive name</TracesDataList.TopCell>
-        {hasTraceColumn(columnPreferences, 'input') && <TracesDataList.TopCell>Input</TracesDataList.TopCell>}
-        {hasTraceColumn(columnPreferences, 'output') && <TracesDataList.TopCell>Output</TracesDataList.TopCell>}
+        {hasTraceColumn(columnPreferences, 'type') && (
+          <TracesDataList.TopCell>{studioT('Primitive type')}</TracesDataList.TopCell>
+        )}
+        <TracesDataList.TopCell>{studioT('Primitive name')}</TracesDataList.TopCell>
+        {hasTraceColumn(columnPreferences, 'input') && (
+          <TracesDataList.TopCell>{studioT('Input')}</TracesDataList.TopCell>
+        )}
+        {hasTraceColumn(columnPreferences, 'output') && (
+          <TracesDataList.TopCell>{studioT('Output')}</TracesDataList.TopCell>
+        )}
         {outcomeColumn ? (
           <>
-            <TracesDataList.TopCell>Outcome</TracesDataList.TopCell>
-            <TracesDataList.TopCell>Stop reason</TracesDataList.TopCell>
+            <TracesDataList.TopCell>{studioT('Outcome')}</TracesDataList.TopCell>
+            <TracesDataList.TopCell>{studioT('Stop reason')}</TracesDataList.TopCell>
           </>
         ) : (
-          <TracesDataList.TopCell>Status</TracesDataList.TopCell>
+          <TracesDataList.TopCell>{studioT('Status')}</TracesDataList.TopCell>
         )}
         {hasTraceColumn(columnPreferences, 'duration') && (
-          <TracesDataList.TopCell className="justify-end text-right">Duration</TracesDataList.TopCell>
+          <TracesDataList.TopCell className="justify-end text-right">{studioT('Duration')}</TracesDataList.TopCell>
         )}
         {hasTraceColumn(columnPreferences, 'traceCount') && (
           <TracesDataList.TopCellWithTooltip
-            tooltip="Messages sent in this thread, counting the whole thread, not just the selected time range"
+            tooltip={studioT(
+              'Messages sent in this thread, counting the whole thread, not just the selected time range',
+            )}
             className="justify-end text-right"
           >
-            Messages
+            {studioT('Messages')}
           </TracesDataList.TopCellWithTooltip>
         )}
         {hasTraceColumn(columnPreferences, 'timeToFirstChunk') &&
@@ -257,14 +268,17 @@ export function TracesListView({
               sortKey="timeToFirstChunkMs"
               sort={sortFor('timeToFirstChunkMs')}
               onSortChange={handleSortChange}
-              label="Time to first chunk"
+              label={studioT('Time to first chunk')}
               align="end"
             >
-              <AbbreviatedLabel abbreviation="TTFC" title="Time to first chunk" />
+              <AbbreviatedLabel abbreviation="TTFC" title={studioT('Time to first chunk')} />
             </TracesDataList.SortableTopCell>
           ) : (
-            <TracesDataList.TopCellWithTooltip tooltip="Time to first chunk" className="justify-end text-right">
-              TTFC
+            <TracesDataList.TopCellWithTooltip
+              tooltip={studioT('Time to first chunk')}
+              className="justify-end text-right"
+            >
+              {studioT('TTFC')}
             </TracesDataList.TopCellWithTooltip>
           ))}
         {hasTraceColumn(columnPreferences, 'timeToFirstToken') &&
@@ -273,33 +287,42 @@ export function TracesListView({
               sortKey="timeToFirstTokenMs"
               sort={sortFor('timeToFirstTokenMs')}
               onSortChange={handleSortChange}
-              label="Time to first token"
+              label={studioT('Time to first token')}
               align="end"
             >
-              <AbbreviatedLabel abbreviation="TTFT" title="Time to first token" />
+              <AbbreviatedLabel abbreviation="TTFT" title={studioT('Time to first token')} />
             </TracesDataList.SortableTopCell>
           ) : (
-            <TracesDataList.TopCellWithTooltip tooltip="Time to first token" className="justify-end text-right">
-              TTFT
+            <TracesDataList.TopCellWithTooltip
+              tooltip={studioT('Time to first token')}
+              className="justify-end text-right"
+            >
+              {studioT('TTFT')}
             </TracesDataList.TopCellWithTooltip>
           ))}
-        {hasTraceColumn(columnPreferences, 'endTime') && <TracesDataList.TopCell>End</TracesDataList.TopCell>}
-        {hasTraceColumn(columnPreferences, 'environment') && (
-          <TracesDataList.TopCell>Environment</TracesDataList.TopCell>
+        {hasTraceColumn(columnPreferences, 'endTime') && (
+          <TracesDataList.TopCell>{studioT('End')}</TracesDataList.TopCell>
         )}
-        {hasTraceColumn(columnPreferences, 'model') && <TracesDataList.TopCell>Model</TracesDataList.TopCell>}
-        {hasTraceColumn(columnPreferences, 'provider') && <TracesDataList.TopCell>Provider</TracesDataList.TopCell>}
+        {hasTraceColumn(columnPreferences, 'environment') && (
+          <TracesDataList.TopCell>{studioT('Environment')}</TracesDataList.TopCell>
+        )}
+        {hasTraceColumn(columnPreferences, 'model') && (
+          <TracesDataList.TopCell>{studioT('Model')}</TracesDataList.TopCell>
+        )}
+        {hasTraceColumn(columnPreferences, 'provider') && (
+          <TracesDataList.TopCell>{studioT('Provider')}</TracesDataList.TopCell>
+        )}
         {hasTraceColumn(columnPreferences, 'inputTokens') && (
-          <TracesDataList.TopCell className="justify-end text-right">Input tokens</TracesDataList.TopCell>
+          <TracesDataList.TopCell className="justify-end text-right">{studioT('Input tokens')}</TracesDataList.TopCell>
         )}
         {hasTraceColumn(columnPreferences, 'outputTokens') && (
-          <TracesDataList.TopCell className="justify-end text-right">Output tokens</TracesDataList.TopCell>
+          <TracesDataList.TopCell className="justify-end text-right">{studioT('Output tokens')}</TracesDataList.TopCell>
         )}
         {hasTraceColumn(columnPreferences, 'totalTokens') && (
-          <TracesDataList.TopCell className="justify-end text-right">Total tokens</TracesDataList.TopCell>
+          <TracesDataList.TopCell className="justify-end text-right">{studioT('Total tokens')}</TracesDataList.TopCell>
         )}
         {hasTraceColumn(columnPreferences, 'estimatedCost') && (
-          <TracesDataList.TopCell className="justify-end text-right">Est. cost</TracesDataList.TopCell>
+          <TracesDataList.TopCell className="justify-end text-right">{studioT('Est. cost')}</TracesDataList.TopCell>
         )}
         {columnPreferences.customColumns.map(field => {
           const label = TRACE_CUSTOM_COLUMN_LABELS[field];
@@ -322,7 +345,7 @@ export function TracesListView({
                   }
                 />
                 <DropdownMenu.Content align="start">
-                  <DropdownMenu.Label>Filter by value</DropdownMenu.Label>
+                  <DropdownMenu.Label>{studioT('Filter by value')}</DropdownMenu.Label>
                   {filterValues.map(value => (
                     <DropdownMenu.Item key={value} onSelect={() => onFilterByField(field, value)}>
                       <Txt as="span" variant="body-sm" font="mono" className="min-w-0 truncate">
@@ -346,7 +369,11 @@ export function TracesListView({
         <DataListSkeletonRows columnCount={splitColumns(columns).length} />
       ) : traces.length === 0 ? (
         <TracesDataList.NoMatch
-          message={filtersApplied ? `No ${resource} found for applied filters` : `No ${resource} found yet`}
+          message={
+            filtersApplied
+              ? studioT('No {value0} found for applied filters', { value0: resource })
+              : studioT('No {value0} found yet', { value0: resource })
+          }
         />
       ) : (
         <>

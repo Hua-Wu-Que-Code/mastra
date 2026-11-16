@@ -3,6 +3,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconPlugin1 } from '@mastra/playground-ui/icons/central/IconPlugin1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useChannelPlatforms, useChannelInstallations, useDisconnectChannel } from '@mastra/react/hooks/agents';
 import type { ChannelPlatformInfo } from '@mastra/react/hooks/agents';
@@ -16,6 +18,7 @@ export interface AgentChannelsProps {
 }
 
 export const AgentChannels = ({ agentId }: AgentChannelsProps) => {
+  useLocale();
   const { data: platforms, isLoading } = useChannelPlatforms();
 
   if (isLoading) {
@@ -29,7 +32,7 @@ export const AgentChannels = ({ agentId }: AgentChannelsProps) => {
   if (!platforms || platforms.length === 0) {
     return (
       <Txt variant="caption" tone="ink">
-        No channel platforms configured.
+        {studioT('No channel platforms configured.')}
       </Txt>
     );
   }
@@ -49,6 +52,7 @@ interface ChannelRowProps {
 }
 
 function ChannelRow({ platform, agentId }: ChannelRowProps) {
+  useLocale();
   const { data: installations, isLoading } = useChannelInstallations({
     platform: platform.id,
     agentId: agentId,
@@ -68,7 +72,7 @@ function ChannelRow({ platform, agentId }: ChannelRowProps) {
   const handleDisconnect = () => {
     disconnect(agentId, {
       onError: (err: Error & { body?: { error?: string } }) => {
-        toast.error(err.body?.error || err.message || 'Failed to disconnect channel');
+        toast.error(err.body?.error || err.message || studioT('Failed to disconnect channel'));
       },
     });
   };
@@ -83,18 +87,18 @@ function ChannelRow({ platform, agentId }: ChannelRowProps) {
         </Txt>
         {activeInstallation ? (
           <Txt variant="meta" tone="muted" className="truncate">
-            {activeInstallation.displayName || 'Workspace'}
+            {activeInstallation.displayName || studioT('Workspace')}
           </Txt>
         ) : null}
       </span>
 
       {isLoading ? null : activeInstallation ? (
         <Badge variant="success" size="sm" indicator="dot">
-          Connected
+          {studioT('Connected')}
         </Badge>
       ) : !platform.isConfigured ? (
         <Badge variant="warning" size="sm" indicator="dot">
-          Not configured
+          {studioT('Not configured')}
         </Badge>
       ) : null}
 
@@ -107,11 +111,11 @@ function ChannelRow({ platform, agentId }: ChannelRowProps) {
           disabled={isDisconnecting}
           className="shrink-0"
         >
-          {isDisconnecting ? 'Removing...' : 'Remove'}
+          {isDisconnecting ? studioT('Removing...') : studioT('Remove')}
         </Button>
       ) : platform.isConfigured ? (
         <Button icon={<IconPlugin1 />} size="sm" variant="default" onClick={handleConnect} disabled={isConnecting}>
-          {isConnecting ? 'Connecting...' : 'Connect'}
+          {isConnecting ? studioT('Connecting...') : studioT('Connect')}
         </Button>
       ) : null}
     </li>

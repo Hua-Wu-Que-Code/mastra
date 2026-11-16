@@ -4,6 +4,8 @@ import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
 import { TooltipProvider } from '@mastra/playground-ui/components/Tooltip';
 import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyDisk1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useRef, useState } from 'react';
 import { useStudioConfig } from '../context/studio-config-state';
@@ -17,6 +19,7 @@ export interface StudioConfigFormProps {
 }
 
 export const StudioConfigForm = ({ initialConfig, onSave }: StudioConfigFormProps) => {
+  useLocale();
   const { setConfig } = useStudioConfig();
   // Rows keep an id so removing one doesn't hand its inputs to the next.
   const nextHeaderId = useRef(0);
@@ -43,7 +46,7 @@ export const StudioConfigForm = ({ initialConfig, onSave }: StudioConfigFormProp
 
     setConfig({ headers: formHeaders, baseUrl: url, apiPrefix });
     onSave?.();
-    toast.success('Configuration saved');
+    toast.success(studioT('Configuration saved'));
   };
 
   const handleAddHeader = (header: HeaderListFormItem) => {
@@ -57,15 +60,15 @@ export const StudioConfigForm = ({ initialConfig, onSave }: StudioConfigFormProp
   const connectionFields = [
     {
       name: 'url',
-      label: 'Mastra instance URL',
-      placeholder: 'e.g: http://localhost:4111',
+      label: studioT('Mastra instance URL'),
+      placeholder: studioT('e.g: http://localhost:4111'),
       required: true,
       defaultValue: initialConfig?.baseUrl,
     },
     {
       name: 'apiPrefix',
-      label: 'API prefix',
-      placeholder: 'e.g: /api (default)',
+      label: studioT('API prefix'),
+      placeholder: studioT('e.g: /api (default)'),
       defaultValue: initialConfig?.apiPrefix || '',
     },
   ];
@@ -83,7 +86,7 @@ export const StudioConfigForm = ({ initialConfig, onSave }: StudioConfigFormProp
         <HeaderListForm headers={headers} onAddHeader={handleAddHeader} onRemoveHeader={handleRemoveHeader} />
 
         <Button type="submit" className="mt-4 ml-auto" icon={<IconFloppyDisk1 />}>
-          Save configuration
+          {studioT('Save configuration')}
         </Button>
       </Form>
     </TooltipProvider>

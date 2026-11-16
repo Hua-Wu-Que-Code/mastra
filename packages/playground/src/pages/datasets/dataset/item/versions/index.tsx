@@ -12,6 +12,10 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { IconChanges } from '@mastra/playground-ui/icons/central/IconChanges';
 import { IconColumns3 } from '@mastra/playground-ui/icons/central/IconColumns3';
 import { IconHistory } from '@mastra/playground-ui/icons/central/IconHistory';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useDataset, useDatasetItemVersion, useDatasetItemVersions } from '@mastra/react/hooks/datasets';
@@ -48,7 +52,10 @@ function versionOptions(allVersions: DatasetItemVersion[], disabled?: Set<number
         <span className="flex w-full items-center gap-2">
           <Metadata>
             <Metadata.Item>
-              <b>v. {v.datasetVersion}</b>
+              <b>
+                {studioT('v.') + ' '}
+                {v.datasetVersion}
+              </b>
             </Metadata.Item>
             <Metadata.Item>
               <Txt as="span" variant="caption" tone="muted">
@@ -58,7 +65,7 @@ function versionOptions(allVersions: DatasetItemVersion[], disabled?: Set<number
           </Metadata>
           {v.isLatest ? (
             <Badge variant="blue" size="xs" className="ml-auto">
-              Latest
+              {studioT('Latest')}
             </Badge>
           ) : null}
         </span>
@@ -74,6 +81,7 @@ function parseVersionParam(value: string | null): number | null {
 }
 
 function DatasetItemVersionsComparePage() {
+  useLocale();
   const { datasetId, itemId } = useParams<{ datasetId: string; itemId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const crumbs: CrumbDef[] = [
@@ -87,7 +95,7 @@ function DatasetItemVersionsComparePage() {
           ? `/datasets/${encodeURIComponent(datasetId)}/items/${encodeURIComponent(itemId)}`
           : undefined,
     },
-    { id: 'dataset-item-versions', label: 'Item Version History' },
+    { id: 'dataset-item-versions', label: studioT('Item Version History') },
   ];
 
   // Whole view lives in the URL so a link reproduces it:
@@ -135,7 +143,7 @@ function DatasetItemVersionsComparePage() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Item Version History</h1>
+        <h1 className="sr-only">{studioT('Item Version History')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -144,7 +152,7 @@ function DatasetItemVersionsComparePage() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Item Version History</h1>
+        <h1 className="sr-only">{studioT('Item Version History')}</h1>
         <PermissionDenied variant="fill" resource="datasets" />
       </PageLayout>
     );
@@ -153,10 +161,10 @@ function DatasetItemVersionsComparePage() {
   if (!datasetId || !itemId) {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Item Version History</h1>
+        <h1 className="sr-only">{studioT('Item Version History')}</h1>
         <div className="grid h-full min-w-min content-start items-start overflow-x-auto overflow-y-auto">
           <div className="py-5 text-center text-muted-foreground">
-            <p>Item not found.</p>
+            <p>{studioT('Item not found.')}</p>
           </div>
         </div>
       </PageLayout>
@@ -179,23 +187,23 @@ function DatasetItemVersionsComparePage() {
           <Button variant="ghost" size="sm" onClick={() => setParam('view', isDiffView ? null : 'diff')}>
             {isDiffView ? (
               <>
-                <IconColumns3 /> Default view
+                <IconColumns3 /> {' ' + studioT('Default view')}
               </>
             ) : (
               <>
-                <IconChanges /> Diff view
+                <IconChanges /> {' ' + studioT('Diff view')}
               </>
             )}
           </Button>
         )
       }
     >
-      <h1 className="sr-only">Item Version History</h1>
+      <h1 className="sr-only">{studioT('Item Version History')}</h1>
       <div className="grid min-h-0 grid-cols-1 gap-4 md:grid-cols-2">
         <Card className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden">
           <CardHeader>
             <VersionSelect
-              label="Version"
+              label={studioT('Version')}
               value={leftNumber != null ? String(leftNumber) : ''}
               options={versionOptions(allVersions ?? [], rightNumber != null ? new Set([rightNumber]) : undefined)}
               onValueChange={val => setParam('version', Number(val))}
@@ -204,7 +212,7 @@ function DatasetItemVersionsComparePage() {
           <CardContent className="grid content-start gap-5 overflow-y-auto">
             {isLoading ? (
               <Txt as="p" variant="body" tone="muted">
-                Loading...
+                {studioT('Loading...')}
               </Txt>
             ) : leftItem ? (
               <DatasetItemDetails
@@ -213,7 +221,7 @@ function DatasetItemVersionsComparePage() {
               />
             ) : (
               <Txt as="p" variant="body" tone="muted">
-                Item data not available
+                {studioT('Item data not available')}
               </Txt>
             )}
           </CardContent>
@@ -222,9 +230,9 @@ function DatasetItemVersionsComparePage() {
         <Card className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden">
           <CardHeader>
             <VersionSelect
-              label="Compare version"
+              label={studioT('Compare version')}
               value={rightNumber != null ? String(rightNumber) : ''}
-              placeholder="Select a version to compare"
+              placeholder={studioT('Select a version to compare')}
               options={versionOptions(allVersions ?? [], leftNumber != null ? new Set([leftNumber]) : undefined)}
               onValueChange={val => setParam('compare', Number(val))}
             />
@@ -233,12 +241,12 @@ function DatasetItemVersionsComparePage() {
             {rightNumber == null ? (
               <EmptyState
                 className="h-full"
-                titleSlot="No version selected"
-                descriptionSlot="Pick a version above to compare it with the one on the left."
+                titleSlot={studioT('No version selected')}
+                descriptionSlot={studioT('Pick a version above to compare it with the one on the left.')}
               />
             ) : isRightLoading ? (
               <Txt as="p" variant="body" tone="muted">
-                Loading...
+                {studioT('Loading...')}
               </Txt>
             ) : rightItem ? (
               <DatasetItemDetails
@@ -247,7 +255,7 @@ function DatasetItemVersionsComparePage() {
               />
             ) : (
               <Txt as="p" variant="body" tone="muted">
-                Version {rightNumber} not found
+                <Trans id="Version {part0} not found" values={{ part0: rightNumber }} />
               </Txt>
             )}
           </CardContent>
@@ -261,7 +269,7 @@ function VersionSelect({
   label,
   value,
   options,
-  placeholder = 'Select version',
+  placeholder = studioT('Select version'),
   onValueChange,
 }: {
   label: string;
@@ -270,6 +278,7 @@ function VersionSelect({
   placeholder?: string;
   onValueChange: (value: string) => void;
 }) {
+  useLocale();
   return (
     <div className="grid grid-cols-[auto_1fr] items-center gap-4">
       <IconHistory className="size-icon-md opacity-50" />

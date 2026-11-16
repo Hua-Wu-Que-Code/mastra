@@ -2,6 +2,8 @@ import { useEnvironmentVariablesEditorContext } from './environment-variables-ed
 import type { EnvironmentVariablesEditorAddButtonProps } from './environment-variables-editor.types';
 import { Button } from '@/ds/components/Button';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export function EnvironmentVariablesEditorAddButton({
@@ -9,6 +11,7 @@ export function EnvironmentVariablesEditorAddButton({
   children,
   ...props
 }: EnvironmentVariablesEditorAddButtonProps) {
+  useLocale();
   const { editor, disabled, readOnly } = useEnvironmentVariablesEditorContext('EnvironmentVariablesEditor.AddButton');
 
   if (readOnly) return null;
@@ -24,7 +27,7 @@ export function EnvironmentVariablesEditorAddButton({
         onClick={() => editor.appendRow()}
         icon={<IconPlusMedium />}
       >
-        {children ?? 'Add variable'}
+        {children ?? studioT('Add variable')}
       </Button>
       <span aria-hidden="true" className="h-px flex-1 bg-border" />
     </div>

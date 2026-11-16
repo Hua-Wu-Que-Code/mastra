@@ -19,6 +19,7 @@ import type { TracesListViewTrace } from '@/domains/traces/components/traces-lis
 import { useTraceColumnPreferences } from '@/domains/traces/hooks/use-trace-column-preferences';
 import { withoutUnrecordedStreamingColumns } from '@/domains/traces/trace-list-columns';
 import { ActionRow } from '@/ds/components/ActionRow';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type ThreadsExplorerBodyProps = {
   /** The open thread. The host keeps it (e.g. in the URL) so it survives a reload. */
@@ -37,6 +38,7 @@ export function ThreadsExplorerBody({
   onOpenScore,
   urlState,
 }: ThreadsExplorerBodyProps) {
+  useLocale();
   const filters = useObservabilityListFilters(urlState);
   const { timeRange, tokens, groups, sort } = filters;
   const withQueryTrace = useTraceQueryAvailable().enabled;
@@ -82,7 +84,7 @@ export function ThreadsExplorerBody({
 
   return (
     <>
-      <h1 className="sr-only">Threads</h1>
+      <h1 className="sr-only">{studioT('Threads')}</h1>
       <ObservabilityListBody
         toolbar={
           <>
@@ -110,7 +112,7 @@ export function ThreadsExplorerBody({
         }
         error={
           isError ? (
-            <TracesErrorContent error={error} resource="threads" errorTitle="Failed to load threads" />
+            <TracesErrorContent error={error} resource="threads" errorTitle={studioT('Failed to load threads')} />
           ) : undefined
         }
         empty={
@@ -145,7 +147,7 @@ export function ThreadsExplorerBody({
         open={!!selectedThreadId}
         threadId={selectedThreadId ?? ''}
         depth={1}
-        closeLabel="Close"
+        closeLabel={studioT('Close')}
         withQueryTrace={withQueryTrace}
         withFeedback={withFeedback}
         onOpenScore={onOpenScore}

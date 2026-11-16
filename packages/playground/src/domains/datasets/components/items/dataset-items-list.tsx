@@ -6,6 +6,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowOutOfBox } from '@mastra/playground-ui/icons/central/IconArrowOutOfBox';
 import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { z } from 'zod';
@@ -86,6 +88,7 @@ export function DatasetItemsList({
   sort,
   onSortChange,
 }: DatasetItemsListProps) {
+  useLocale();
   const { containerRef, getRowProps } = useDataListKeyboard({
     count: items.length,
     // Arrow/page navigation opens the focused item, keeping the side panel in sync.
@@ -152,7 +155,7 @@ export function DatasetItemsList({
           <DataList.TopSelectCell
             checked={isIndeterminate ? 'indeterminate' : isAllSelected}
             onToggle={handleSelectAllToggle}
-            aria-label="Select all items"
+            aria-label={studioT('Select all items')}
           />
         )}
         {isSelectionActive ? (
@@ -163,7 +166,7 @@ export function DatasetItemsList({
       </DataList.Top>
 
       {items.length === 0 && searchQuery ? (
-        <DataList.NoMatch message="No items match your search" />
+        <DataList.NoMatch message={studioT('No items match your search')} />
       ) : (
         <>
           {items.map((item, index) => {
@@ -213,7 +216,7 @@ export function DatasetItemsList({
                 <DataList.SelectCell
                   checked={selectedIds.has(item.id)}
                   onToggle={shiftKey => handleToggleSelection(item.id, shiftKey, allIds)}
-                  aria-label={`Select item ${item.id}`}
+                  aria-label={studioT('Select item {value0}', { value0: item.id })}
                 />
                 <DataList.RowButton
                   colStart={2}
@@ -245,29 +248,31 @@ interface EmptyDatasetItemListProps {
 }
 
 function EmptyDatasetItemList({ onAddClick, onImportClick, onImportJsonClick }: EmptyDatasetItemListProps) {
+  useLocale();
   return (
     <EmptyState
-      titleSlot="No items yet"
+      titleSlot={studioT('No items yet')}
       descriptionSlot={
         <>
-          Add items to this dataset to use them <br />
-          in experiment runs.
+          {studioT('Add items to this dataset to use them') + ' '}
+          <br />
+          {studioT('in experiment runs.')}
         </>
       }
       actionSlot={
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2">
-            <CreateButton variant="primary" onClick={onAddClick} tooltip="Add an item">
-              New item
+            <CreateButton variant="primary" onClick={onAddClick} tooltip={studioT('Add an item')}>
+              {studioT('New item')}
             </CreateButton>
             {onImportClick && (
               <Button onClick={onImportClick} icon={<IconArrowOutOfBox />}>
-                Import CSV
+                {studioT('Import CSV')}
               </Button>
             )}
             {onImportJsonClick && (
               <Button onClick={onImportJsonClick} icon={<IconFileText />}>
-                Import JSON
+                {studioT('Import JSON')}
               </Button>
             )}
           </div>
@@ -277,7 +282,7 @@ function EmptyDatasetItemList({ onAddClick, onImportClick, onImportJsonClick }: 
 
             icon={<IconSquareArrowTopRight />}
           >
-            Datasets documentation
+            {studioT('Datasets documentation')}
           </Button>
         </div>
       }

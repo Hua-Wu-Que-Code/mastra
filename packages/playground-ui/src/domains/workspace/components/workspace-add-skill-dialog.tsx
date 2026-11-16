@@ -7,7 +7,6 @@ import {
 import type { SkillsShSkill } from '@mastra/react/hooks/workspace';
 import { useState, useCallback, useMemo } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import {
   Dialog,
   DialogAction,
   DialogBody,
@@ -36,6 +35,10 @@ import { SkillIcon } from '@/ds/icons/SkillIcon';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 export interface WritableMount {
@@ -103,6 +106,7 @@ export function WorkspaceAddSkillDialog({
   writableMounts,
   installedSkillPaths,
 }: AddSkillDialogProps) {
+  useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<SkillsShSkill | null>(null);
   const [selectedMount, setSelectedMount] = useState<string>();
@@ -200,14 +204,14 @@ export function WorkspaceAddSkillDialog({
     <Dialog open={open} onOpenChange={handleOpenChange} pending={isInstalling}>
       <DialogContent size="xl" className="h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Add Skill</DialogTitle>
-          <DialogDescription>Search and install skills from the community registry</DialogDescription>
+          <DialogTitle>{studioT('Add Skill')}</DialogTitle>
+          <DialogDescription>{studioT('Search and install skills from the community registry')}</DialogDescription>
         </DialogHeader>
 
         <DialogBody layout="fill">
           <SearchInput
-            label="Search skills"
-            placeholder="Search skills"
+            label={studioT('Search skills')}
+            placeholder={studioT('Search skills')}
             value={searchQuery}
             onValueChange={handleSearch}
           />
@@ -215,7 +219,7 @@ export function WorkspaceAddSkillDialog({
           <div className="flex min-h-0 flex-1 gap-4">
             <div className="flex min-h-0 w-1/2 flex-col">
               <Txt as="p" variant="eyebrow" tone="muted" className="mb-2">
-                {hasSearchResults ? 'Search Results' : 'Popular Skills'}
+                {hasSearchResults ? studioT('Search Results') : studioT('Popular Skills')}
               </Txt>
               <ScrollArea className="flex-1 rounded-lg border border-border">
                 <ScrollAreaViewport
@@ -232,7 +236,7 @@ export function WorkspaceAddSkillDialog({
                   ) : displaySkills.length === 0 ? (
                     <EmptyState
                       className="flex-1"
-                      titleSlot={hasSearchResults ? 'No skills found' : 'No skills available'}
+                      titleSlot={hasSearchResults ? studioT('No skills found') : studioT('No skills available')}
                     />
                   ) : (
                     <div className="space-y-1 p-2">
@@ -266,7 +270,7 @@ export function WorkspaceAddSkillDialog({
                                       className="inline-flex items-center gap-1 rounded bg-info-subtle px-1.5 py-0.5 text-info-subtle-foreground"
                                     >
                                       <IconCheckmark2Medium className="size-icon-xs" />
-                                      Installed
+                                      {studioT('Installed')}
                                     </Txt>
                                   )}
                                 </div>
@@ -292,11 +296,11 @@ export function WorkspaceAddSkillDialog({
 
             <div className="flex min-h-0 w-1/2 flex-col">
               <Txt as="p" variant="eyebrow" tone="muted" className="mb-2">
-                Preview
+                {studioT('Preview')}
               </Txt>
               <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border">
                 {!selectedSkill ? (
-                  <EmptyState variant="fill" iconSlot={<IconPackage />} titleSlot="Select a skill to preview" />
+                  <EmptyState variant="fill" iconSlot={<IconPackage />} titleSlot={studioT('Select a skill to preview')} />
                 ) : (
                   <>
                     <div className="border-b border-border bg-card p-4">
@@ -318,7 +322,10 @@ export function WorkspaceAddSkillDialog({
                             <span className="flex items-center gap-1">
                               <IconArrowInbox className="size-icon-xs" />
                               <Txt as="span" variant="caption" className="block">
-                                {selectedSkill.installs.toLocaleString()} installs
+                                <Trans
+                                  id="{part0} installs"
+                                  values={{ part0: selectedSkill.installs.toLocaleString() }}
+                                />
                               </Txt>
                             </span>
                           </div>
@@ -329,7 +336,7 @@ export function WorkspaceAddSkillDialog({
                             target="_blank"
                             rel="noopener noreferrer"
                             className={cn(quietTextHover, controlStateColorTransition)}
-                            title="View on GitHub"
+                            title={studioT('View on GitHub')}
                           >
                             <IconSquareArrowTopRight className="size-icon-md" />
                           </a>
@@ -351,7 +358,7 @@ export function WorkspaceAddSkillDialog({
                       <EmptyState
                         className="flex-1"
                         iconSlot={<IconPackage />}
-                        titleSlot="Preview unavailable"
+                        titleSlot={studioT('Preview unavailable')}
                         actionSlot={
                           skillsUrl && (
                             <a
@@ -361,7 +368,7 @@ export function WorkspaceAddSkillDialog({
                               className="flex items-center gap-1 text-info-indicator hover:underline"
                             >
                               <Txt as="span" variant="caption" className="block">
-                                View on skills.sh{' '}
+                                {studioT('View on skills.sh')}{' '}
                               </Txt>
                               <IconSquareArrowTopRight className="size-icon-xs" />
                             </a>
@@ -378,7 +385,7 @@ export function WorkspaceAddSkillDialog({
           {selectedSkill && writableMounts && writableMounts.length > 1 && (
             <Field orientation="horizontal" className={cn(raisedSurfaceStyle, 'gap-3 rounded-lg p-3')}>
               <IconFolder1 className="size-icon-md shrink-0 text-muted-foreground" />
-              <FieldLabel className="whitespace-nowrap">Install to</FieldLabel>
+              <FieldLabel className="whitespace-nowrap">{studioT('Install to')}</FieldLabel>
               <Select value={installMount} onValueChange={setSelectedMount}>
                 <SelectTrigger className="flex-1">
                   <SelectValue />
@@ -409,17 +416,21 @@ export function WorkspaceAddSkillDialog({
                 const mount = writableMounts.find(m => skillPath.startsWith(m.path + '/') || skillPath === m.path);
                 return mount ? (
                   <Txt as="span" variant="caption" tone="muted" className="mr-auto">
-                    Installed at {mount.path}
+                    <Trans id="Installed at {part0}" values={{ part0: mount.path }} />
                   </Txt>
                 ) : null;
               })()}
-            <DialogCancel>Cancel</DialogCancel>
+            <DialogCancel>{studioT('Cancel')}</DialogCancel>
             <DialogAction
               onConfirm={handleInstall}
               disabled={!parsedSource || isSelectedSkillInstalled}
               data-testid="install-skill-button"
             >
-              {isInstalling ? 'Installing...' : isSelectedSkillInstalled ? 'Already installed' : 'Install'}
+              {isInstalling
+                ? studioT('Installing...')
+                : isSelectedSkillInstalled
+                  ? studioT('Already installed')
+                  : studioT('Install')}
             </DialogAction>
           </DialogFooter>
         )}

@@ -5,6 +5,8 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '
 import type { InputGroupInputProps, InputGroupProps } from '@/ds/components/InputGroup';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconMagnifyingGlass } from '@/ds/icons/central/IconMagnifyingGlass';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { useKeydown } from '@/lib/keyboard';
 import { mergeRefs } from '@/lib/merge-refs';
 
@@ -65,6 +67,7 @@ export function SearchInput({
   ref,
   ...inputProps
 }: SearchInputProps) {
+  useLocale();
   const [ownText, setOwnText] = useState(defaultValue);
   // Typed text waiting on the debounce, and the parent's value it was typed over. It shows only
   // while its search is still pending and that value hasn't moved: once the search is applied,
@@ -138,7 +141,7 @@ export function SearchInput({
           its spot still lands on the addon, which focuses the input. */}
       <InputGroupAddon align="inline-end" aria-hidden={!hasButton}>
         <InputGroupButton
-          aria-label={onClose ? 'Close search' : 'Clear search'}
+          aria-label={onClose ? studioT('Close search') : studioT('Clear search')}
           className={hasButton ? undefined : 'invisible'}
           inert={!hasButton}
           onClick={() => {

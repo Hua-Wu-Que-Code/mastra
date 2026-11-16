@@ -1,7 +1,7 @@
 import { useState } from 'react';
-
 import { Button } from '../../../ds/components/Button';
 import { CodeEditor } from '../../../ds/components/CodeEditor';
+
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import {
 } from '../../../ds/components/Dialog';
 import { Txt } from '../../../ds/components/Txt';
 import { IconShareAndroid } from '@/ds/icons/central/IconShareAndroid';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface NetworkChoiceMetadataProps {
   selectionReason: string;
@@ -21,6 +22,7 @@ interface NetworkChoiceMetadataProps {
 }
 
 const NetworkChoiceMetadata = ({ selectionReason, open, onOpenChange, input }: NetworkChoiceMetadataProps) => {
+  useLocale();
   let inputSlot = null;
 
   if (input) {
@@ -35,13 +37,13 @@ const NetworkChoiceMetadata = ({ selectionReason, open, onOpenChange, input }: N
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Agent Network Metadata</DialogTitle>
-          <DialogDescription>View the metadata of the agent's network choice.</DialogDescription>
+          <DialogTitle>{studioT('Agent Network Metadata')}</DialogTitle>
+          <DialogDescription>{studioT("View the metadata of the agent's network choice.")}</DialogDescription>
         </DialogHeader>
 
         <DialogBody>
           <div className="space-y-2">
-            <Txt tone="muted">Selection Reason</Txt>
+            <Txt tone="muted">{studioT('Selection Reason')}</Txt>
             <Txt as="p" variant="body" tone="ink">
               {selectionReason}
             </Txt>
@@ -49,7 +51,7 @@ const NetworkChoiceMetadata = ({ selectionReason, open, onOpenChange, input }: N
 
           {inputSlot && (
             <div className="space-y-2">
-              <Txt tone="muted">Input</Txt>
+              <Txt tone="muted">{studioT('Input')}</Txt>
               {inputSlot}
             </div>
           )}
@@ -68,11 +70,17 @@ export const NetworkChoiceMetadataDialogTrigger = ({
   selectionReason,
   input,
 }: NetworkChoiceMetadataDialogTriggerProps) => {
+  useLocale();
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <Button variant="default" size="icon-md" tooltip="Show selection reason" onClick={() => setIsOpen(s => !s)}>
-        <IconShareAndroid className="text-muted-foreground" />
+      <Button
+        variant="default"
+        size="icon-md"
+        tooltip={studioT('Show selection reason')}
+        onClick={() => setIsOpen(s => !s)}
+      >
+        <IconShareAndroid className="size-5 text-muted-foreground" />
       </Button>
 
       <NetworkChoiceMetadata

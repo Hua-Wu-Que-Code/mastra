@@ -16,6 +16,7 @@ import type { ResolvedView, WidgetKindProps } from '../../widget-kind';
 import type { ScoresOptions } from './options';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
 import { MetricsLineChart } from '@/ds/components/MetricsLineChart';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /** Scores aren't problems, so no warm hues; past five scorers the colors repeat. */
 const SCORER_COLORS = [
@@ -39,6 +40,7 @@ export function ScoresWidget({
   actions,
   alert,
 }: WidgetKindProps<ScoresOptions>) {
+  useLocale();
   const [view] = views;
   // Scores show their first view only, so the title is plain; with somewhere to expand to, an action links there.
   const title = viewTitle(widget, [view], 0, () => {}, expand);
@@ -58,7 +60,10 @@ export function ScoresWidget({
         alertAction(alert, widget, view, {
           page: gate.page,
           values: [
-            { label: view.label?.trim() || widget.title?.trim() || 'Scores', value: { query: view.options.average } },
+            {
+              label: view.label?.trim() || widget.title?.trim() || studioT('Scores'),
+              value: { query: view.options.average },
+            },
           ],
         }),
       )}

@@ -1,4 +1,6 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations, useScoresByExperimentId } from '@mastra/react/hooks/datasets';
 import { useCallback, useMemo } from 'react';
@@ -19,6 +21,7 @@ export interface ExperimentItemPanelProps {
  * animates in and out; `currentItemId` drives `open`. Inline, it renders only while an item is open.
  */
 export function ExperimentItemPanel({ withQueryTrace, withFeedback, variant }: ExperimentItemPanelProps) {
+  const studioLocale = useLocale();
   const {
     currentItemId: itemId,
     experimentId,
@@ -47,10 +50,10 @@ export function ExperimentItemPanel({ withQueryTrace, withFeedback, variant }: E
         await updateExperimentResult.mutateAsync({ datasetId, experimentId, resultId, status: 'needs-review' });
         toast('Result flagged for review');
       } catch {
-        toast.error('Failed to flag result for review');
+        toast.error(studioT('Failed to flag result for review'));
       }
     },
-    [datasetId, experimentId, updateExperimentResult],
+    [datasetId, experimentId, updateExperimentResult, studioLocale],
   );
   const completeResult = useCallback(
     async (resultId: string) => {
@@ -58,10 +61,10 @@ export function ExperimentItemPanel({ withQueryTrace, withFeedback, variant }: E
         await updateExperimentResult.mutateAsync({ datasetId, experimentId, resultId, status: 'complete' });
         toast('Result marked as reviewed');
       } catch {
-        toast.error('Failed to complete result');
+        toast.error(studioT('Failed to complete result'));
       }
     },
-    [datasetId, experimentId, updateExperimentResult],
+    [datasetId, experimentId, updateExperimentResult, studioLocale],
   );
 
   const resultScores = result ? scoresByItemId?.[result.itemId] : undefined;
@@ -76,7 +79,10 @@ export function ExperimentItemPanel({ withQueryTrace, withFeedback, variant }: E
         isLoadingResults || hasNextPage ? (
           <DataPanel.LoadingData />
         ) : (
-          <DataPanel.NoData>No loaded result for item "{itemId}".</DataPanel.NoData>
+          <DataPanel.NoData>
+            {studioT('No loaded result for item "')}
+            {itemId}".
+          </DataPanel.NoData>
         )
       }
       scores={resultScores}

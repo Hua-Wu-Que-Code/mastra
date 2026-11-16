@@ -4,6 +4,8 @@ import { StepsHeadingContext } from './steps-context';
 import { Txt } from '@/ds/components/Txt';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { transitions } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type StepProps = {
@@ -19,6 +21,7 @@ export type StepProps = {
 };
 
 export function Step({ title, description, action, done, className, children }: StepProps) {
+  useLocale();
   const headingLevel = useContext(StepsHeadingContext);
 
   return (
@@ -34,7 +37,7 @@ export function Step({ title, description, action, done, className, children }: 
           )}
         >
           {done ? (
-            <IconCheckmark2Medium className="size-icon-sm" aria-label="Done" />
+            <IconCheckmark2Medium className="size-icon-sm" aria-label={studioT('Done')} />
           ) : (
             <Txt as="span" variant="column" className="before:content-[counter(ds-step)]" aria-hidden />
           )}

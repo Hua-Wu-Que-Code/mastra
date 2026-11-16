@@ -3,6 +3,7 @@ import type { McpEventSignalInfo, SignalData } from './signal-data';
 import { NotificationActivity } from '@/ds/components/ai/activity';
 import { Badge } from '@/ds/components/Badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip/tooltip';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type NotificationSignalNoticeProps = {
   signal: SignalData;
@@ -27,17 +28,20 @@ const getMcpEventTitle = (info: McpEventSignalInfo) => {
   return info.kind === 'mcp-event-subscription-ended' ? `${title} (subscription ended)` : title;
 };
 
-const GapBadge = () => (
-  <Tooltip>
-    <TooltipTrigger render={<span />}>
-      <Badge size="xs" variant="amber">
-        gap
-      </Badge>
-      <span className="sr-only">{MCP_EVENT_GAP_MESSAGE}</span>
-    </TooltipTrigger>
-    <TooltipContent>{MCP_EVENT_GAP_MESSAGE}</TooltipContent>
-  </Tooltip>
-);
+const GapBadge = () => {
+  useLocale();
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span />}>
+        <Badge size="xs" variant="amber">
+          {studioT('gap')}
+        </Badge>
+        <span className="sr-only">{MCP_EVENT_GAP_MESSAGE}</span>
+      </TooltipTrigger>
+      <TooltipContent>{MCP_EVENT_GAP_MESSAGE}</TooltipContent>
+    </Tooltip>
+  );
+};
 
 export const NotificationSignalNotice = ({ signal, defaultOpen }: NotificationSignalNoticeProps) => {
   const notification = getNotificationMetadata(signal);

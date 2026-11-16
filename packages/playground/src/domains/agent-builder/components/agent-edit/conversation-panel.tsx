@@ -1,4 +1,6 @@
 import type { StoredSkillResponse } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgentMessages } from '@mastra/react/hooks/agents';
 import { useAllProviderTools } from '@mastra/react/hooks/tool-providers';
 import { createContext, useContext, useMemo } from 'react';
@@ -189,6 +191,7 @@ const ConversationMessageList = () => {
 };
 
 const ConversationComposer = () => {
+  useLocale();
   // Debounced so the composer doesn't flicker enabled/disabled when the stream
   // flag briefly drops between builder runs — same signal as the layout guard.
   const isRunning = useStreamRunningDebounced();
@@ -204,7 +207,7 @@ const ConversationComposer = () => {
       disabled={isRunning}
       isRunning={isRunning}
       canSubmit={trimmed.length > 0 && !isRunning}
-      placeholder="Tell the builder what to change"
+      placeholder={studioT('Tell the builder what to change')}
       inputTestId="agent-builder-conversation-input"
       submitTestId="agent-builder-conversation-submit"
       containerTestId="agent-builder-conversation-composer"

@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { StudioConfigProvider } from '../studio-config-context';
 import { useStudioConfig } from '../studio-config-state';
 import { authDisabledCapabilities } from './fixtures/capabilities';
+import { adminSession, creatorSession } from '@/domains/account/__tests__/fixtures/session';
+import { AccountContext } from '@/domains/account/account-context';
 import { server } from '@/test/msw-server';
 
 const BASE_URL = 'http://localhost:4111';
@@ -149,5 +151,33 @@ describe('StudioConfigProvider instance status probe', () => {
 
     await waitFor(() => expect(readConfig().isLoading).toBe(false));
     expect(readConfig().baseUrl).toBe(BASE_URL);
+  });
+});
+
+describe('StudioConfigProvider managed accounts', () => {
+  describe.each([creatorSession, adminSession])('when $user.role has a stale saved connection', account => {
+    it('uses the authenticated endpoint without importing another identity', async () => {
+      window.localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          baseUrl: 'http://old.example',
+          headers: { Authorization: 'Bearer old-account' },
+          apiPrefix: '/old-api',
+        }),
+      );
+      server.use(http.get(`${BASE_URL}/api/auth/capabilities`, () => HttpResponse.json(authDisabledCapabilities)));
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <AccountContext.Provider value={account}>
+            <StudioConfigProvider endpoint={BASE_URL}>
+              <ConfigProbe />
+            </StudioConfigProvider>
+          </AccountContext.Provider>
+        </QueryClientProvider>,
+      );
+      await waitFor(() => expect(readConfig().isLoading).toBe(false));
+      expect(readConfig()).toMatchObject({ baseUrl: BASE_URL, apiPrefix: '/api', headers: {} });
+      expect(readConfig().headers.Authorization).toBeUndefined();
+    });
   });
 });

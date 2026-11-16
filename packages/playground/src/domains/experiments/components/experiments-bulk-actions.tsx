@@ -2,6 +2,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@mastra/playground-ui/components/Tooltip';
 import { IconChanges } from '@mastra/playground-ui/icons/central/IconChanges';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { DeleteExperimentsButton } from './delete-experiments-button';
 
 export interface ExperimentsBulkActionsProps {
@@ -19,6 +21,7 @@ export function ExperimentsBulkActions({
   onCompare,
   compareDisabledReason,
 }: ExperimentsBulkActionsProps) {
+  useLocale();
   const selectedCount = selectedIds.length;
   const isEmpty = selectedCount === 0;
 
@@ -30,10 +33,10 @@ export function ExperimentsBulkActions({
         disabled={isEmpty}
         iconEnd={isEmpty ? undefined : <IconCrossMedium />}
         onClick={onClearSelection}
-        tooltip={isEmpty ? undefined : 'Clear selection'}
+        tooltip={isEmpty ? undefined : studioT('Clear selection')}
         className="mr-2 tabular-nums"
       >
-        {selectedCount} selected
+        {selectedCount} {' ' + studioT('selected')}
       </Button>
       <DeleteExperimentsButton experimentIds={selectedIds} onDeleted={onClearSelection} />
       {compareDisabledReason ? (
@@ -41,14 +44,14 @@ export function ExperimentsBulkActions({
         <Tooltip>
           <TooltipTrigger render={<span className="cursor-not-allowed" tabIndex={0} />}>
             <Button size="sm" disabled tabIndex={-1} icon={<IconChanges />}>
-              Compare
+              {studioT('Compare')}
             </Button>
           </TooltipTrigger>
           <TooltipContent>{compareDisabledReason}</TooltipContent>
         </Tooltip>
       ) : (
         <Button size="sm" onClick={onCompare} icon={<IconChanges />}>
-          Compare
+          {studioT('Compare')}
         </Button>
       )}
     </div>

@@ -1,8 +1,8 @@
 import { EqualNot } from 'lucide-react';
 import * as React from 'react';
-
 import type { ConditionOperator } from '../types';
 import type { RuleOperatorSelectProps } from './types';
+
 import { OPERATOR_LABELS, OPERATORS } from './types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select/select';
 import { Icon } from '@/ds/icons';
@@ -17,6 +17,8 @@ import { IconListBullets } from '@/ds/icons/central/IconListBullets';
 import { IconMathEquals } from '@/ds/icons/central/IconMathEquals';
 import { IconPageCross } from '@/ds/icons/central/IconPageCross';
 import { IconPageTextSearch } from '@/ds/icons/central/IconPageTextSearch';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -41,13 +43,14 @@ const OPERATOR_ICONS: Record<ConditionOperator, React.ReactNode> = {
  * Select component for choosing a rule operator
  */
 export const RuleOperatorSelect: React.FC<RuleOperatorSelectProps> = ({ value, onChange, operators, className }) => {
+  useLocale();
   const operatorList = operators ?? OPERATORS;
 
   return (
     <div className={cn('relative', className)}>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger className="bg-muted text-foreground" size="sm">
-          <SelectValue placeholder="Select operator" />
+          <SelectValue placeholder={studioT('Select operator')} />
         </SelectTrigger>
         <SelectContent>
           {operatorList.map(operator => (

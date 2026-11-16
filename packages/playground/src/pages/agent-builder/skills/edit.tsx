@@ -1,5 +1,7 @@
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { SkillSimpleForm } from '@mastra/playground-ui/domains/skills/skill-simple-form';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthCapabilities, useCurrentUser } from '@mastra/react/hooks/auth';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
@@ -82,6 +84,7 @@ interface ReadyProps {
 }
 
 const AgentBuilderSkillEditReady = ({ id, initialUserMessage }: ReadyProps) => {
+  useLocale();
   const formMethods = useFormContext<SkillEditFormValues>();
   const autosave = useAutosaveSkill({ skillId: id });
 
@@ -132,7 +135,7 @@ const AgentBuilderSkillEditReady = ({ id, initialUserMessage }: ReadyProps) => {
 
   return (
     <SkillWorkspaceLayout
-      title={name || 'Untitled skill'}
+      title={name || studioT('Untitled skill')}
       rightAside={
         <AutosaveIndicator status={autosave.status} lastError={autosave.lastError} onRetry={autosave.retry} />
       }

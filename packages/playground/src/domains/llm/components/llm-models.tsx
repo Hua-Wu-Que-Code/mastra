@@ -1,6 +1,8 @@
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxOption, ComboboxProps } from '@mastra/playground-ui/components/Combobox';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
 import { useMemo } from 'react';
 import { useAllModels, useFilteredModels } from '../hooks/use-filtered-models';
@@ -33,6 +35,7 @@ export const LLMModels = ({
   disabled,
   'aria-label': ariaLabel,
 }: LLMModelsProps) => {
+  useLocale();
   const { data: dataProviders, isLoading: providersLoading } = useLLMProviders();
   const providers = dataProviders?.providers || [];
 
@@ -61,9 +64,9 @@ export const LLMModels = ({
       options={modelOptions}
       value={value}
       onValueChange={onValueChange}
-      placeholder="Select model"
-      searchPlaceholder="Search models"
-      emptyText="No models found"
+      placeholder={studioT('Select model')}
+      searchPlaceholder={studioT('Search models')}
+      emptyText={studioT('No models found')}
       // Model ids are long and look alike past the provider prefix, so give them room.
       popupWidth="lg"
       variant={variant}

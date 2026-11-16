@@ -1,17 +1,20 @@
 import { EmptyState } from '@mastra/playground-ui/components/EmptyState';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useSchedules } from '@mastra/react/hooks/schedules';
 import { useState } from 'react';
 import { SchedulesList } from './schedules-list';
 import type { SchedulesSort } from './schedules-list';
 
 export function SchedulesPage({ workflowId }: { workflowId?: string } = {}) {
+  useLocale();
   const { data: schedules, isLoading, error } = useSchedules(workflowId ? { workflowId } : {});
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SchedulesSort>();
 
   if (error) {
-    return <EmptyState tone="error" titleSlot="Failed to load schedules" descriptionSlot={error.message} />;
+    return <EmptyState tone="error" titleSlot={studioT('Failed to load schedules')} descriptionSlot={error.message} />;
   }
 
   return (
@@ -20,8 +23,8 @@ export function SchedulesPage({ workflowId }: { workflowId?: string } = {}) {
         <SearchInput
           {...listSearchProps}
           onValueChange={setSearch}
-          label="Search schedules"
-          placeholder="Search by id or workflow"
+          label={studioT('Search schedules')}
+          placeholder={studioT('Search by id or workflow')}
         />
       </div>
       <div className="overflow-y-auto">

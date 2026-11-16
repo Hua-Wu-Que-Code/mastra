@@ -1,4 +1,5 @@
 import type { SpanInputMessage } from '@mastra/core/observability';
+import { t as studioT } from '@/lib/i18n';
 
 export type Scalar = string | number | boolean;
 
@@ -16,25 +17,102 @@ const hasItems = (value: unknown): value is unknown[] => Array.isArray(value) &&
 
 /** Single-line values, shown as labelled rows. Ids get a copy button. */
 export const SCALAR_FIELDS = [
-  { key: 'toolName', label: 'Tool' },
-  { key: 'toolCallId', label: 'Tool call id', copy: true },
-  { key: 'stepNumber', label: 'Step' },
-  { key: 'finishReason', label: 'Finish reason' },
-  { key: 'totalChunks', label: 'Chunks' },
-  { key: 'chunkCount', label: 'Chunks' },
-  { key: 'retryCount', label: 'Retries' },
-  { key: 'messageId', label: 'Message id', copy: true },
-  { key: 'fromCache', label: 'From cache' },
-  { key: 'providerExecuted', label: 'Provider executed' },
+  {
+    key: 'toolName',
+    get label() {
+      return studioT('Tool');
+    },
+  },
+  {
+    key: 'toolCallId',
+    get label() {
+      return studioT('Tool call id');
+    },
+    copy: true,
+  },
+  {
+    key: 'stepNumber',
+    get label() {
+      return studioT('Step');
+    },
+  },
+  {
+    key: 'finishReason',
+    get label() {
+      return studioT('Finish reason');
+    },
+  },
+  {
+    key: 'totalChunks',
+    get label() {
+      return studioT('Chunks');
+    },
+  },
+  {
+    key: 'chunkCount',
+    get label() {
+      return studioT('Chunks');
+    },
+  },
+  {
+    key: 'retryCount',
+    get label() {
+      return studioT('Retries');
+    },
+  },
+  {
+    key: 'messageId',
+    get label() {
+      return studioT('Message id');
+    },
+    copy: true,
+  },
+  {
+    key: 'fromCache',
+    get label() {
+      return studioT('From cache');
+    },
+  },
+  {
+    key: 'providerExecuted',
+    get label() {
+      return studioT('Provider executed');
+    },
+  },
 ] as const;
 
 /** Large secondary context, collapsed because it is rarely why someone opened the span. */
 const CONTEXT_FIELDS = [
-  { key: 'result', label: 'Result' },
-  { key: 'model', label: 'Model' },
-  { key: 'tools', label: 'Tools' },
-  { key: 'toolChoice', label: 'Tool choice' },
-  { key: 'activeTools', label: 'Active tools' },
+  {
+    key: 'result',
+    get label() {
+      return studioT('Result');
+    },
+  },
+  {
+    key: 'model',
+    get label() {
+      return studioT('Model');
+    },
+  },
+  {
+    key: 'tools',
+    get label() {
+      return studioT('Tools');
+    },
+  },
+  {
+    key: 'toolChoice',
+    get label() {
+      return studioT('Tool choice');
+    },
+  },
+  {
+    key: 'activeTools',
+    get label() {
+      return studioT('Active tools');
+    },
+  },
 ] as const;
 
 /**

@@ -1,3 +1,4 @@
+import { t as studioT } from '@/lib/i18n';
 /**
  * Conversion between a saved view (`SavedViewState` from `@mastra/core/storage`) and the URL state of
  * the observability list pages. Applying a view writes the URL the user would get by setting the same
@@ -136,7 +137,13 @@ const TRACE_FIELD_OPERATORS = operatorsByField(
         withTimeToFirstChunk: true,
         withTimeToFirstToken: true,
       }),
-      { id: 'tags', label: 'Tags', operators: TRACE_TAGS_OPERATORS },
+      {
+        id: 'tags',
+        get label() {
+          return studioT('Tags');
+        },
+        operators: TRACE_TAGS_OPERATORS,
+      },
     ],
     true,
     'spans.',

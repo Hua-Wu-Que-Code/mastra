@@ -4,6 +4,8 @@ import { ViewPlugin } from '@codemirror/view';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import { CodeEditor } from '@/ds/components/CodeEditor';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /** A top-level key or item whose value spans several lines, in `JSON.stringify(value, null, 2)` output. */
@@ -80,6 +82,7 @@ export function SpanPayloadJson({
   foldRoot = false,
   className,
 }: SpanPayloadJsonProps) {
+  useLocale();
   const extensions = [...(foldNested ? [foldNestedValues] : []), ...(foldRoot ? [foldRootValue] : [])];
   return (
     <CodeEditor
@@ -89,7 +92,7 @@ export function SpanPayloadJson({
       lineNumbers={false}
       showCopyButton={false}
       variant="embedded"
-      aria-label="JSON payload"
+      aria-label={studioT('JSON payload')}
       data-slot="span-payload-json"
       extensions={extensions.length > 0 ? extensions : undefined}
       className={cn(!bare && cn(raisedSurfaceStyle, 'rounded-lg p-3'), className)}

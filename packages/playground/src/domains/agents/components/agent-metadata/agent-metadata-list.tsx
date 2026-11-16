@@ -1,4 +1,6 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 
 export interface AgentMetadataListProps {
@@ -23,9 +25,10 @@ export interface AgentMetadataListEmptyProps {
 }
 
 export const AgentMetadataListEmpty = ({ children }: AgentMetadataListEmptyProps) => {
+  useLocale();
   return (
     <Txt variant="caption" tone="muted" data-slot="metadata-empty">
-      <span aria-hidden="true">None</span>
+      <span aria-hidden="true">{studioT('None')}</span>
       <span className="sr-only">{children}</span>
     </Txt>
   );

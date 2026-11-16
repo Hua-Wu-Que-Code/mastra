@@ -23,6 +23,8 @@ import { MENU_SIDE_OFFSET } from '@/ds/primitives/menu-item';
 import { passwordManagerOptOutProps } from '@/ds/primitives/password-manager-autofill';
 import { usePortalContainer } from '@/ds/primitives/portal-container';
 import { useIsApplePlatform } from '@/hooks/use-keyboard-shortcut-label';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type Step = 'field' | 'operator' | 'value';
@@ -36,7 +38,9 @@ const EMPTY_ITEMS: readonly Item[] = [];
 const ADVANCED_FIELD_ID = '__filter-bar-advanced__';
 const ADVANCED_FIELD: FilterBarField = {
   id: ADVANCED_FIELD_ID,
-  label: 'Advanced filter…',
+  get label() {
+    return studioT('Advanced filter…');
+  },
   icon: IconCodeBrackets,
   operators: [],
 };
@@ -65,12 +69,13 @@ export function FilterBarInput(props: FilterBarInputProps) {
 }
 
 function FilterBarInputImpl({
-  placeholder = 'Filter',
+  placeholder = studioT('Filter'),
   className,
-  'aria-label': ariaLabel = 'Add filter',
+  'aria-label': ariaLabel = studioT('Add filter'),
   groupId,
   onLeave,
 }: FilterBarInputProps) {
+  useLocale();
   const ctx = useFilterBarContext();
   const container = usePortalContainer();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -386,7 +391,7 @@ function FilterBarInputImpl({
             >
               {step === 'field' && (
                 <FilterBarOptionList<FilterBarField>
-                  aria-label="Fields"
+                  aria-label={studioT('Fields')}
                   getKey={f => f.id}
                   renderOption={f => (
                     <>
@@ -398,20 +403,20 @@ function FilterBarInputImpl({
                       )}
                     </>
                   )}
-                  emptyText="No matching field."
+                  emptyText={studioT('No matching field.')}
                 />
               )}
               {step === 'operator' && (
                 <FilterBarOptionList<FilterBarOperator>
-                  aria-label="Operators"
+                  aria-label={studioT('Operators')}
                   getKey={o => o.id}
                   renderOption={o => o.label}
-                  emptyText="No matching operator."
+                  emptyText={studioT('No matching operator.')}
                 />
               )}
               {step === 'value' && valueStep.hasOptions && (
                 <FilterBarOptionList<FilterBarOption>
-                  aria-label="Values"
+                  aria-label={studioT('Values')}
                   aria-multiselectable={valueStep.isMany || undefined}
                   getKey={o => o.value}
                   renderOption={option => <FilterBarOptionLabel option={option} />}
@@ -419,14 +424,16 @@ function FilterBarInputImpl({
                   isLoading={valueStep.isLoading}
                   error={valueStep.error}
                   emptyText={
-                    valueStep.allowFreeText ? 'No suggestions. Press Enter to use your text.' : 'No matching value.'
+                    valueStep.allowFreeText
+                      ? studioT('No suggestions. Press Enter to use your text.')
+                      : studioT('No matching value.')
                   }
                 />
               )}
               {step === 'value' && !valueStep.hasSuggestions && (
                 <div className="flex items-center justify-between gap-2 py-1 pr-1 pl-[.9em]">
                   <Txt variant="caption" tone="muted">
-                    {valueStep.validationMessage ?? 'Type a value'}
+                    {valueStep.validationMessage ?? studioT('Type a value')}
                   </Txt>
                   <Button
                     size="sm"
@@ -435,7 +442,7 @@ function FilterBarInputImpl({
                     onMouseDown={e => e.preventDefault()}
                     onClick={() => valueStep.submitFreeText()}
                   >
-                    Apply
+                    {studioT('Apply')}
                     <Kbd size="xs">↵</Kbd>
                   </Button>
                 </div>
@@ -448,7 +455,7 @@ function FilterBarInputImpl({
                     onMouseDown={e => e.preventDefault()}
                     onClick={() => valueStep.commitDone()}
                   >
-                    Done
+                    {studioT('Done')}
                     <Kbd size="xs">{modEnterLabel}</Kbd>
                   </Button>
                 </div>

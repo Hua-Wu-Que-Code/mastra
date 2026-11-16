@@ -4,6 +4,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useStoredSkills } from '@mastra/react/hooks/agents';
 import { useCurrentUser } from '@mastra/react/hooks/auth';
 import { useState } from 'react';
@@ -49,6 +51,7 @@ interface PageProps {
 }
 
 const AgentBuilderSkillViewPage = ({ skill }: PageProps) => {
+  useLocale();
   const navigate = useNavigate();
   const { hasPermission, rbacEnabled } = usePermissions();
   const canCopy = !rbacEnabled || hasPermission('stored-skills:write');
@@ -67,7 +70,7 @@ const AgentBuilderSkillViewPage = ({ skill }: PageProps) => {
           size="icon-sm"
           variant="ghost"
           onClick={() => navigate('/agent-builder/skills', { viewTransition: true })}
-          tooltip="Skills list"
+          tooltip={studioT('Skills list')}
           data-testid="skill-view-back-button"
         >
           <IconArrowLeft />
@@ -88,7 +91,7 @@ const AgentBuilderSkillViewPage = ({ skill }: PageProps) => {
               data-testid="skill-view-copy-button"
               icon={<IconPlusMedium />}
             >
-              Copy to my skills
+              {studioT('Copy to my skills')}
             </Button>
           )}
         </div>

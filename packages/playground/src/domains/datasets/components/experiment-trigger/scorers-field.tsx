@@ -9,6 +9,8 @@ import {
   ComboboxValue,
 } from '@mastra/playground-ui/components/Combobox';
 import { Field, FieldDescription, FieldLabel } from '@mastra/playground-ui/components/Field';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { sameValue } from './experiment-trigger-options';
 import type { FieldPopupContainer, ScorerOption } from './experiment-trigger-options';
 import { ScorerItem } from './scorer-item';
@@ -30,12 +32,17 @@ export interface ScorersFieldProps {
 }
 
 export function ScorersField({ scorerIds, usesDefaultScorers, onScorerIdsChange, container }: ScorersFieldProps) {
+  useLocale();
   const options = useScorerOptions();
 
   return (
     <Field>
-      <FieldLabel info="Grade each output automatically. Outputs are saved either way, so you can always review them yourself.">
-        Scorers
+      <FieldLabel
+        info={studioT(
+          'Grade each output automatically. Outputs are saved either way, so you can always review them yourself.',
+        )}
+      >
+        {studioT('Scorers')}
       </FieldLabel>
       <ComboboxRoot
         multiple
@@ -53,18 +60,18 @@ export function ScorersField({ scorerIds, usesDefaultScorers, onScorerIdsChange,
                   <ComboboxChip key={item.value}>{item.label}</ComboboxChip>
                 ))}
                 <ComboboxChipsInput
-                  placeholder={items.length === 0 ? 'No scoring, read the outputs yourself' : undefined}
+                  placeholder={items.length === 0 ? studioT('No scoring, read the outputs yourself') : undefined}
                 />
               </>
             )}
           </ComboboxValue>
         </ComboboxChips>
         <ComboboxContent container={container}>
-          <ComboboxEmpty>No scorers registered</ComboboxEmpty>
+          <ComboboxEmpty>{studioT('No scorers registered')}</ComboboxEmpty>
           <ComboboxList>{(item: ScorerOption) => <ScorerItem key={item.value} scorer={item} />}</ComboboxList>
         </ComboboxContent>
       </ComboboxRoot>
-      {usesDefaultScorers && <FieldDescription>The dataset's default scorers.</FieldDescription>}
+      {usesDefaultScorers && <FieldDescription>{studioT("The dataset's default scorers.")}</FieldDescription>}
     </Field>
   );
 }

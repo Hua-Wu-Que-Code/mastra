@@ -5,6 +5,10 @@ import { ModelPicker, cleanProviderId } from '@mastra/playground-ui/domains/llm'
 import type { ModelPickerProvider } from '@mastra/playground-ui/domains/llm';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
 import { usePlaygroundModelOptional } from '../context/playground-model-context';
 import { useBuilderFilteredModels, useBuilderFilteredProviders, useBuilderModelPolicy } from '@/domains/agent-builder';
@@ -14,6 +18,7 @@ import { useAllModels } from '@/domains/llm/hooks/use-filtered-models';
 import { useFilteredProviders } from '@/domains/llm/hooks/use-filtered-providers';
 
 export const ComposerModelSwitcher = () => {
+  useLocale();
   const selection = usePlaygroundModelOptional();
   const { data: dataProviders, isLoading: providersLoading } = useLLMProviders();
   const policy = useBuilderModelPolicy();
@@ -67,7 +72,7 @@ export const ComposerModelSwitcher = () => {
       value={fullProviderId ? { provider: fullProviderId, model: selectedModel } : undefined}
       onValueChange={({ provider, model }) => setModel(provider, model)}
       defaultModel={agentModel && { provider: resolveProviderId(agentModel.provider), model: agentModel.model }}
-      reset={resetModel && { label: "Reset to the agent's model", onClick: resetModel }}
+      reset={resetModel && { label: studioT("Reset to the agent's model"), onClick: resetModel }}
       openOnSelectedProvider
       triggerClassName="max-w-48"
     />
@@ -75,6 +80,7 @@ export const ComposerModelSwitcher = () => {
 };
 
 export const ComposerModelWarning = () => {
+  useLocale();
   const selection = usePlaygroundModelOptional();
   const { data: dataProviders, isLoading: providersLoading } = useLLMProviders();
   const policy = useBuilderModelPolicy();
@@ -124,7 +130,7 @@ export const ComposerModelWarning = () => {
                 <code className="rounded bg-warning-subtle px-1 py-0.5 break-all text-warning-subtle-foreground">
                   {provider}/{selectedModel}
                 </code>{' '}
-                is no longer allowed by admin policy. Pick a different model.
+                {studioT('is no longer allowed by admin policy. Pick a different model.')}
               </>
             )}
           </Txt>
@@ -134,11 +140,16 @@ export const ComposerModelWarning = () => {
         <div className="flex max-w-full min-w-0 items-start gap-1 text-warning-foreground">
           <IconExclamationTriangle className="mt-0.5 size-icon-xs shrink-0" />
           <Txt as="span" variant="caption" className="min-w-0 break-words">
-            Set{' '}
-            <code className="rounded bg-warning-subtle px-1 py-0.5 break-all text-warning-subtle-foreground">
-              {envVar}
-            </code>{' '}
-            to use this provider
+            <Trans
+              id="Set {part0} to use this provider"
+              values={{
+                part0: (
+                  <code className="rounded bg-warning-subtle px-1 py-0.5 break-all text-warning-subtle-foreground">
+                    {envVar}
+                  </code>
+                ),
+              }}
+            />
           </Txt>
         </div>
       )}

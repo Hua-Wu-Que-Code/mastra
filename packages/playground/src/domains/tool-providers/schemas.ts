@@ -1,3 +1,4 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { z } from 'zod';
 
 /**
@@ -60,7 +61,10 @@ export function validateToolProviders(
         if (seenConnectionIds.has(connection.connectionId)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Connection "${connection.connectionId}" is already pinned to ${toolkit}`,
+            message: studioT('Connection "{value0}" is already pinned to {value1}', {
+              value0: connection.connectionId,
+              value1: toolkit,
+            }),
             path: [...basePath, providerId, 'connections', toolkit, index, 'connectionId'],
           });
         } else {
@@ -75,7 +79,10 @@ export function validateToolProviders(
       if (bucket.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `Tool "${slug}" requires at least one connection for ${meta.toolkit}`,
+          message: studioT('Tool "{value0}" requires at least one connection for {value1}', {
+            value0: slug,
+            value1: meta.toolkit,
+          }),
           path: [...basePath, providerId, 'tools', slug],
         });
       }

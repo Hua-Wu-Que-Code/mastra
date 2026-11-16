@@ -4,6 +4,8 @@ import { DataList, DataListSkeleton, useDataListKeyboard } from '@mastra/playgro
 import { getShortId } from '@mastra/playground-ui/components/Text';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import type { ExperimentListMetrics } from '@mastra/react/hooks/experiments';
 import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
@@ -116,6 +118,7 @@ function ExperimentRow({
   leadingCell?: ReactNode;
   children: ReactNode;
 }) {
+  useLocale();
   const colStart = leadingCell ? 2 : undefined;
   const { paths, Link } = useLinkComponent();
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -155,8 +158,8 @@ function ExperimentRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          tooltip="Delete experiment"
-          aria-label={`Delete experiment ${exp.name ?? exp.id}`}
+          tooltip={studioT('Delete experiment')}
+          aria-label={studioT('Delete experiment {value0}', { value0: exp.name ?? exp.id })}
           onClick={(e: MouseEvent) => {
             e.stopPropagation();
             onDelete();
@@ -188,6 +191,7 @@ export function ExperimentsList({
   sort,
   onSortChange,
 }: ExperimentsListProps) {
+  useLocale();
   const datasetMap = useMemo(() => {
     const map = new Map<string, string>();
     datasets?.forEach(ds => map.set(ds.id, ds.name));
@@ -264,7 +268,7 @@ export function ExperimentsList({
             <DataList.TopSelectCell
               checked={selectAllState}
               onToggle={() => selection.onToggleAll(filteredData.map(exp => exp.id))}
-              aria-label="Select all experiments"
+              aria-label={studioT('Select all experiments')}
             />
             <DataList.TopCells colStart={2}>
               {headerCells}
@@ -280,7 +284,7 @@ export function ExperimentsList({
       </DataList.Top>
 
       {filteredData.length === 0 && !hasNextPage ? (
-        <DataList.NoMatch message="No experiments match your filters" />
+        <DataList.NoMatch message={studioT('No experiments match your filters')} />
       ) : null}
 
       {filteredData.map((exp, index) => {
@@ -325,7 +329,7 @@ export function ExperimentsList({
                   checked={isSelected}
                   disabled={isDisabled}
                   onToggle={() => selection.onToggleSelection(exp.id)}
-                  aria-label={`Select experiment ${exp.id}`}
+                  aria-label={studioT('Select experiment {value0}', { value0: exp.id })}
                 />
               )
             }

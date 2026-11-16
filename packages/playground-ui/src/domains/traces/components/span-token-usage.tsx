@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { getTokenUsageRows } from './span-token-usage.utils';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TokenUsage = UsageStats;
 
@@ -23,8 +24,9 @@ export function SpanTokenUsage({ usage, className }: SpanTokenUsageProps) {
 }
 
 function TokenUsageRows({ usage }: { usage: UsageStats | undefined }) {
+  useLocale();
   return getTokenUsageRows(usage)?.map(({ label, total, breakdown }) => (
-    <Row key={label} label={`${label} tokens`}>
+    <Row key={label} label={studioT('{value0} tokens', { value0: label })}>
       {total.toLocaleString()}
       {breakdown && (
         <Txt as="span" variant="caption" tone="muted">

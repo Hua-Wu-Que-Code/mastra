@@ -2,6 +2,8 @@ import { Column } from '@mastra/playground-ui/components/Columns';
 import { Metadata } from '@mastra/playground-ui/components/Metadata';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { useDatasetVersions } from '@mastra/react/hooks/datasets';
 
@@ -18,6 +20,7 @@ export function DatasetCompareVersionToolbar({
   versionB,
   onVersionChange,
 }: DatasetCompareVersionToolbarProps) {
+  useLocale();
   const { data: versions } = useDatasetVersions({
     datasetId: datasetId,
     queryOptions: { enabled: Boolean(datasetId) },
@@ -54,8 +57,8 @@ export function DatasetCompareVersionToolbar({
         value={versionA ?? ''}
         onValueChange={(val: string) => onVersionChange?.(val, versionB ?? '')}
       >
-        <SelectTrigger aria-label="Version A" size="md">
-          <SelectValue placeholder="Select version" />
+        <SelectTrigger aria-label={studioT('Version A')} size="md">
+          <SelectValue placeholder={studioT('Select version')} />
         </SelectTrigger>
         <SelectContent>
           {options.map(option => (
@@ -70,8 +73,8 @@ export function DatasetCompareVersionToolbar({
         value={versionB ?? ''}
         onValueChange={(val: string) => onVersionChange?.(versionA ?? '', val)}
       >
-        <SelectTrigger aria-label="Version B" size="md">
-          <SelectValue placeholder="Select an option" />
+        <SelectTrigger aria-label={studioT('Version B')} size="md">
+          <SelectValue placeholder={studioT('Select an option')} />
         </SelectTrigger>
         <SelectContent>
           {options.map(option => (

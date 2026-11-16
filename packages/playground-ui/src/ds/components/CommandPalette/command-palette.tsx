@@ -1,12 +1,14 @@
 import type { ComponentPropsWithoutRef, HTMLAttributes, ReactNode } from 'react';
-
 import { CommandDialog, CommandInput, CommandItem, CommandList, CommandShortcut } from '@/ds/components/Command';
 import { Kbd } from '@/ds/components/Kbd';
+
 import { ScrollArea, ScrollAreaViewport } from '@/ds/components/ScrollArea';
 import { Txt } from '@/ds/components/Txt';
 import { inputSurfaceAndFocusWithinStyle } from '@/ds/primitives/form-element';
 import { overlaySurfaceStyle } from '@/ds/primitives/raised-surface';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './command-palette.css';
@@ -239,6 +241,7 @@ function CommandPaletteItem({
 }
 
 function CommandPaletteFooter({ label }: { label: string }) {
+  useLocale();
   return (
     <div className="command-palette-footer pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 px-3 pt-3 pb-2 text-meta text-muted-foreground">
       <span className="truncate">{label}</span>
@@ -246,7 +249,7 @@ function CommandPaletteFooter({ label }: { label: string }) {
         <Kbd size="sm">↑</Kbd>
         <Kbd size="sm">↓</Kbd>
         <Kbd size="sm">↵</Kbd>
-        <Kbd size="sm">Esc</Kbd>
+        <Kbd size="sm">{studioT('Esc')}</Kbd>
       </span>
     </div>
   );

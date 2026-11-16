@@ -24,7 +24,6 @@ export const GlobalShortcuts = () => {
     'g$+t': () => navigate('/traces'),
     'g$+l': () => navigate('/logs'),
     'g$+,': () => navigate('/settings'),
-    'g$+h': () => navigate('/resources'),
   });
 
   return null;

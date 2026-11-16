@@ -13,10 +13,13 @@ import type { TableTabProps } from './table-frame';
 import { MetricsTable } from '@/ds/components/MetricsTable';
 import type { MetricsTableSort } from '@/ds/components/MetricsTable';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const isAggregate = (query: DashboardQuery | undefined) => query !== undefined && aggregateSource(query) !== undefined;
 
 export function TableView(props: TableTabProps & { index: number; page: DashboardPageContext }) {
+  useLocale();
   const { view, index, page, widget, onDrilldown, state, onStateChange, results, onRetry, projectLabel } = props;
   const { options, queries } = view;
   const onClick = useDrilldown(widget, view, onDrilldown);
@@ -86,11 +89,14 @@ export function TableView(props: TableTabProps & { index: number; page: Dashboar
           onRowClick={onClick && (row => onClick(rowDrilldown(options, row)))}
           pageSize={options.pageSize}
           isLoading={isLoading}
-          empty={options.emptyMessage ?? 'No data'}
+          empty={options.emptyMessage ?? studioT('No data')}
         />
         {content?.truncated && content.limit !== undefined && (
           <Txt variant="caption" tone="muted" className="pt-2">
-            Showing the {formatCount(content.limit)} busiest; sorting covers only these.
+            <Trans
+              id="Showing the {part0} busiest; sorting covers only these."
+              values={{ part0: formatCount(content.limit) }}
+            />
           </Txt>
         )}
       </ChartArea>

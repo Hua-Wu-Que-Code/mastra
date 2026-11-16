@@ -19,6 +19,8 @@ import { IconStar } from '@mastra/playground-ui/icons/central/IconStar';
 import { IconTarget } from '@mastra/playground-ui/icons/central/IconTarget';
 import { ScorersIcon } from '@mastra/playground-ui/icons/ScorersIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { focusRing } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
@@ -74,6 +76,7 @@ export interface ComparisonSideTitleProps {
 
 /** Title of one comparison side: a menu to view or rename the experiment, and its Baseline/Contender badge. */
 export function ComparisonSideTitle({ role, label, experiment, onSetBaseline }: ComparisonSideTitleProps) {
+  useLocale();
   const { Link } = useLinkComponent();
   const [renameOpen, setRenameOpen] = useState(false);
   const shortId = experiment ? (getShortId(experiment.id) ?? experiment.id) : null;
@@ -94,11 +97,11 @@ export function ComparisonSideTitle({ role, label, experiment, onSetBaseline }: 
           />
           <DropdownMenu.Content align="start" className="min-w-48">
             <DropdownMenu.Item render={<Link href={`/experiments/${experiment.id}`} />}>
-              <IconChainLink3 /> View experiment
+              <IconChainLink3 /> {' ' + studioT('View experiment')}
             </DropdownMenu.Item>
             {canRename && (
               <DropdownMenu.Item onSelect={() => setRenameOpen(true)}>
-                <IconPencil /> Rename experiment
+                <IconPencil /> {' ' + studioT('Rename experiment')}
               </DropdownMenu.Item>
             )}
           </DropdownMenu.Content>
@@ -113,7 +116,7 @@ export function ComparisonSideTitle({ role, label, experiment, onSetBaseline }: 
               render={
                 <button
                   type="button"
-                  aria-label="Set as baseline"
+                  aria-label={studioT('Set as baseline')}
                   onClick={onSetBaseline}
                   className={cn('cursor-pointer rounded-[7px] hover:brightness-110', focusRing)}
                 />
@@ -123,7 +126,7 @@ export function ComparisonSideTitle({ role, label, experiment, onSetBaseline }: 
                 {label}
               </Badge>
             </TooltipTrigger>
-            <TooltipContent>Set as baseline</TooltipContent>
+            <TooltipContent>{studioT('Set as baseline')}</TooltipContent>
           </Tooltip>
         ) : (
           <Badge
@@ -163,6 +166,7 @@ export function ComparisonSideSummary({
   versionMismatch,
   showUsage = false,
 }: ComparisonSideSummaryProps) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const { isMetricVisible } = useCompareMetricPreferences();
 
@@ -179,7 +183,7 @@ export function ComparisonSideSummary({
               {
                 id: 'target',
                 icon: experiment.targetType === 'agent' ? <AgentIcon /> : <IconTarget />,
-                label: experiment.targetType === 'agent' ? 'Agent' : 'Target',
+                label: experiment.targetType === 'agent' ? studioT('Agent') : studioT('Target'),
                 value:
                   experiment.targetType === 'agent' ? (
                     <Link href={paths.agentLink(experiment.targetId)} className="min-w-0 truncate hover:underline">
@@ -197,7 +201,7 @@ export function ComparisonSideSummary({
               {
                 id: 'dataset-version',
                 icon: <IconHistory />,
-                label: 'Dataset version',
+                label: studioT('Dataset version'),
                 value: (
                   <ComparisonDatasetVersion
                     datasetId={experiment.datasetId}
@@ -214,7 +218,7 @@ export function ComparisonSideSummary({
               {
                 id: 'created-at',
                 icon: <IconCalendar1 />,
-                label: 'Created',
+                label: studioT('Created'),
                 value: formatDate(createdAt, 'date'),
                 delta: null,
               },
@@ -231,7 +235,7 @@ export function ComparisonSideSummary({
           {
             id: 'total-cost',
             icon: <IconCoins />,
-            label: 'Total cost',
+            label: studioT('Total cost'),
             value: formatCostValue(usage.cost, usage.costUnit),
             rawValue: usage.cost,
             delta: usage.costUnit === baselineMetrics?.costUnit ? trend(usage.cost, baselineMetrics?.cost) : null,
@@ -246,7 +250,7 @@ export function ComparisonSideSummary({
           {
             id: 'avg-duration',
             icon: <IconClock />,
-            label: 'Avg duration',
+            label: studioT('Avg duration'),
             value: formatDuration(metrics.averageDurationMs) ?? '-',
             rawValue: metrics.averageDurationMs,
             delta: trend(metrics.averageDurationMs, baselineMetrics?.averageDurationMs),
@@ -262,7 +266,7 @@ export function ComparisonSideSummary({
           {
             id: 'avg-score',
             icon: <IconGauge />,
-            label: 'Avg score',
+            label: studioT('Avg score'),
             value: formatScore(metrics.averageScore),
             rawValue: metrics.averageScore,
             delta: trend(metrics.averageScore, baselineMetrics?.averageScore),
@@ -275,7 +279,7 @@ export function ComparisonSideSummary({
           {
             id: 'total-tokens',
             icon: <IconHashtag />,
-            label: 'Total tokens',
+            label: studioT('Total tokens'),
             value: formatTokenCount(usage.tokens),
             rawValue: usage.tokens,
             delta: trend(usage.tokens, baselineMetrics?.tokens),
@@ -290,7 +294,7 @@ export function ComparisonSideSummary({
           {
             id: 'errors',
             icon: <IconExclamationCircle />,
-            label: 'Errors',
+            label: studioT('Errors'),
             value: String(metrics.errorCount),
             delta: trend(metrics.errorCount, baselineMetrics?.errorCount),
             formatDelta: String,
@@ -312,7 +316,7 @@ export function ComparisonSideSummary({
   if (visibleMetrics.length === 0) return null;
 
   return (
-    <ComparisonSection title="Summary" collapsible={false}>
+    <ComparisonSection title={studioT('Summary')} collapsible={false}>
       <ComparisonMetricList metrics={visibleMetrics} />
     </ComparisonSection>
   );

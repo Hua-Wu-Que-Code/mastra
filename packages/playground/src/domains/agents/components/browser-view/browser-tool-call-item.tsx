@@ -6,6 +6,8 @@ import type { BrowserToolCallEntry } from '@mastra/playground-ui/domains/agents/
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconLoadingCircle } from '@mastra/playground-ui/icons/central/IconLoadingCircle';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
@@ -79,6 +81,7 @@ interface BrowserToolCallItemProps {
 }
 
 export function BrowserToolCallItem({ entry }: BrowserToolCallItemProps) {
+  useLocale();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const displayName = getDisplayName(entry.toolName);
@@ -115,7 +118,7 @@ export function BrowserToolCallItem({ entry }: BrowserToolCallItemProps) {
         <div className="space-y-2 px-3 pb-2">
           <div>
             <Txt variant="column" tone="muted" className="pb-1">
-              Arguments
+              {studioT('Arguments')}
             </Txt>
             <CodeEditor data={displayArgs} data-testid="browser-tool-args" />
           </div>
@@ -123,7 +126,7 @@ export function BrowserToolCallItem({ entry }: BrowserToolCallItemProps) {
           {entry.result !== undefined && entry.result !== null && (
             <div>
               <Txt variant="column" tone="muted" className="pb-1">
-                Result
+                {studioT('Result')}
               </Txt>
               {typeof entry.result === 'string' ? (
                 <Code

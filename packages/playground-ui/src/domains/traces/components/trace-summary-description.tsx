@@ -11,6 +11,8 @@ import { IconDollar } from '@/ds/icons/central/IconDollar';
 import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
 import type { LinkComponent } from '@/ds/types/link-component';
 import { formatCompactNumber, formatCost } from '@/lib/cost';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate, formatTimestampPrecise } from '@/utils/date-format';
 import { formatDuration, formatDurationPrecise } from '@/utils/duration';
 
@@ -46,6 +48,7 @@ export interface TraceEntityMetaProps {
 
 /** The trace's root entity (agent, workflow…) as a `DataPanel.Meta` pill; renders nothing without a name or id. */
 export function TraceEntityMeta({ rootSpan, entityHref, LinkComponent }: TraceEntityMetaProps) {
+  useLocale();
   const entityName = rootSpan.entityName || rootSpan.entityId;
   if (!entityName) return null;
 
@@ -58,7 +61,7 @@ export function TraceEntityMeta({ rootSpan, entityHref, LinkComponent }: TraceEn
       as={LinkComponent ?? 'a'}
       href={entityHref}
       icon={<EntityIcon />}
-      tooltip={`See ${formattedEntityType.toLowerCase()}`}
+      tooltip={studioT('See {value0}', { value0: formattedEntityType.toLowerCase() })}
     >
       {entityName}
     </DataPanel.Meta>
@@ -75,9 +78,10 @@ export interface TraceStatusMetaProps {
 
 /** The trace's status badge as a `DataPanel.Meta` item. */
 export function TraceStatusMeta({ rootSpan }: TraceStatusMetaProps) {
+  useLocale();
   return (
     // `px-0`: the badge is already a pill, so it sits flush with the panel's content edge.
-    <DataPanel.Meta tooltip="Trace status" className="px-0">
+    <DataPanel.Meta tooltip={studioT('Trace status')} className="px-0">
       <TraceStatusValue status={computeTraceStatus(rootSpan)} />
     </DataPanel.Meta>
   );
@@ -101,6 +105,7 @@ export function TraceSummaryDescription({
   showEntity = true,
   showStatus = true,
 }: TraceSummaryDescriptionProps) {
+  useLocale();
   const startedAt = rootSpan.startedAt ? new Date(rootSpan.startedAt) : null;
   const endedAt = rootSpan.endedAt ? new Date(rootSpan.endedAt) : null;
   const duration = formatDuration(getSpanDurationMs(startedAt, endedAt));
@@ -113,24 +118,27 @@ export function TraceSummaryDescription({
       {showEntity && <TraceEntityMeta rootSpan={rootSpan} entityHref={entityHref} LinkComponent={LinkComponent} />}
       {showStatus && <TraceStatusMeta rootSpan={rootSpan} />}
       {startedAtTimestamp && exactStartedAtTimestamp && (
-        <DataPanel.Meta icon={<IconCalendarClock4 />} tooltip={`Started at ${exactStartedAtTimestamp}`}>
+        <DataPanel.Meta
+          icon={<IconCalendarClock4 />}
+          tooltip={studioT('Started at {value0}', { value0: exactStartedAtTimestamp })}
+        >
           {startedAtTimestamp}
         </DataPanel.Meta>
       )}
       {duration && exactDuration && (
-        <DataPanel.Meta icon={<IconStopwatch />} tooltip={`Duration ${exactDuration}`}>
+        <DataPanel.Meta icon={<IconStopwatch />} tooltip={studioT('Duration {value0}', { value0: exactDuration })}>
           {duration}
         </DataPanel.Meta>
       )}
       {usage && (
         <>
-          <DataPanel.Meta icon={<IconArrowWallDown />} tooltip="Input tokens">
+          <DataPanel.Meta icon={<IconArrowWallDown />} tooltip={studioT('Input tokens')}>
             {usage.inputTokens === undefined ? '—' : formatCompactNumber(usage.inputTokens)}
           </DataPanel.Meta>
-          <DataPanel.Meta icon={<IconArrowUpWall />} tooltip="Output tokens">
+          <DataPanel.Meta icon={<IconArrowUpWall />} tooltip={studioT('Output tokens')}>
             {usage.outputTokens === undefined ? '—' : formatCompactNumber(usage.outputTokens)}
           </DataPanel.Meta>
-          <DataPanel.Meta icon={<IconDollar />} tooltip="Estimated cost">
+          <DataPanel.Meta icon={<IconDollar />} tooltip={studioT('Estimated cost')}>
             {usage.estimatedCost === undefined ? '—' : formatCost(usage.estimatedCost, usage.costUnit)}
           </DataPanel.Meta>
         </>

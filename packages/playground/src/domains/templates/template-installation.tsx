@@ -3,6 +3,10 @@ import { ProcessStepList, ProcessStepProgressBar } from '@mastra/playground-ui/c
 import type { ProcessStep } from '@mastra/playground-ui/components/Steps';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconCircleX } from '@mastra/playground-ui/icons/central/IconCircleX';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { Container } from './shared';
 
@@ -14,6 +18,7 @@ type TemplateInstallationProps = {
 };
 
 export function TemplateInstallation({ name, streamResult, runId, workflowInfo }: TemplateInstallationProps) {
+  useLocale();
   const phase = streamResult?.phase || 'initializing';
   const workflowState = streamResult?.payload?.workflowState;
   const currentStep = streamResult?.payload?.currentStep;
@@ -78,7 +83,7 @@ export function TemplateInstallation({ name, streamResult, runId, workflowInfo }
         </Txt>
         {(streamResult?.runId || runId) && (
           <Txt as="p" variant="caption" tone="muted" className="mt-2">
-            Run ID: {streamResult?.runId ?? runId}
+            <Trans id="Run ID: {part0}" values={{ part0: streamResult?.runId ?? runId }} />
           </Txt>
         )}
       </div>
@@ -101,7 +106,7 @@ export function TemplateInstallation({ name, streamResult, runId, workflowInfo }
         >
           <IconCircleX />
           <Txt as="span" variant="body" className="block">
-            {error || 'Something went wrong'}
+            {error || studioT('Something went wrong')}
           </Txt>
         </div>
       )}
@@ -114,7 +119,7 @@ export function TemplateInstallation({ name, streamResult, runId, workflowInfo }
         <div className={cn('text-muted-foreground', 'grid justify-items-center gap-4 text-center')}>
           <Spinner />
           <Txt as="p" variant="body">
-            This may take some time...
+            {studioT('This may take some time...')}
           </Txt>
         </div>
       )}

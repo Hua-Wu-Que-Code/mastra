@@ -1,4 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export type DurationUnit = 'ms' | 's' | 'min' | 'h';
@@ -69,6 +71,7 @@ export function ClockDial({ date }: { date: Date }) {
 }
 
 export function DurationDial({ amount, unit }: { amount: number; unit: DurationUnit }) {
+  useLocale();
   const scale = Math.max({ h: 24, ms: 1000, s: 60, min: 60 }[unit], Math.ceil(amount / 10) * 10);
   return (
     <DialFace tickAngles={DURATION_TICK_ANGLES}>
@@ -82,7 +85,7 @@ export function DurationDial({ amount, unit }: { amount: number; unit: DurationU
         {scale} {unit}
       </text>
       <text x={DIAL_CENTER} y={106} textAnchor="middle" className="fill-placeholder font-body text-meta">
-        scale
+        {studioT('scale')}
       </text>
     </DialFace>
   );

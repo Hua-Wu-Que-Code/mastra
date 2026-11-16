@@ -3,6 +3,8 @@ import type { ModelPickerModel, ModelPickerProvider } from './model-picker-types
 import { Badge } from '@/ds/components/Badge';
 import { CommandItem } from '@/ds/components/Command';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatModelName } from '@/utils/model';
 
 interface ModelPickerOptionProps {
@@ -22,6 +24,7 @@ export function ModelPickerOption({
   onSelect,
   renderProviderIcon,
 }: ModelPickerOptionProps) {
+  useLocale();
   const name = formatModelName(model.id);
   return (
     <CommandItem
@@ -36,7 +39,7 @@ export function ModelPickerOption({
       <span className="truncate">{name}</span>
       {isDefault ? (
         <Badge variant="blue" size="xs">
-          Default
+          {studioT('Default')}
         </Badge>
       ) : null}
       {selected ? <IconCheckmark2Medium aria-hidden className="ml-auto shrink-0" /> : null}

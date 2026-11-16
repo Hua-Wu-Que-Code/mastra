@@ -1,3 +1,5 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
+
 /**
  * Permissive UI-side detector for "model not allowed" errors surfaced by the
  * agent-builder save/autosave flows. Matches any error object carrying
@@ -7,7 +9,7 @@
  */
 export function isModelNotAllowedError(error: unknown) {
   if (error && typeof error === 'object' && 'code' in error && error.code === 'MODEL_NOT_ALLOWED') {
-    return { message: error instanceof Error ? error.message : 'Model is not allowed' };
+    return { message: error instanceof Error ? error.message : studioT('Model is not allowed') };
   }
 
   return null;

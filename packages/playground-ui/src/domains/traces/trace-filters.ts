@@ -55,6 +55,7 @@ import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
 import { IconTag } from '@/ds/icons/central/IconTag';
 import { IconThumbUpSimple } from '@/ds/icons/central/IconThumbUpSimple';
 import { IconUser } from '@/ds/icons/central/IconUser';
+import { t as studioT } from '@/lib/i18n';
 
 export type {
   TraceFilterGroup,
@@ -73,19 +74,59 @@ export type EntityOptions = { label: string; entityType: EntityTypeValue };
 export { ROOT_ENTITY_TYPES };
 
 export const ROOT_ENTITY_TYPE_OPTIONS = [
-  { label: 'Agent', entityType: ROOT_ENTITY_TYPES.AGENT },
-  { label: 'Workflow', entityType: ROOT_ENTITY_TYPES.WORKFLOW },
-  { label: 'Scorer', entityType: ROOT_ENTITY_TYPES.SCORER },
-  { label: 'Ingest', entityType: ROOT_ENTITY_TYPES.INGEST },
-  { label: 'Classifier', entityType: ROOT_ENTITY_TYPES.CLASSIFIER },
+  {
+    get label() {
+      return studioT('Agent');
+    },
+    entityType: ROOT_ENTITY_TYPES.AGENT,
+  },
+  {
+    get label() {
+      return studioT('Workflow');
+    },
+    entityType: ROOT_ENTITY_TYPES.WORKFLOW,
+  },
+  {
+    get label() {
+      return studioT('Scorer');
+    },
+    entityType: ROOT_ENTITY_TYPES.SCORER,
+  },
+  {
+    get label() {
+      return studioT('Ingest');
+    },
+    entityType: ROOT_ENTITY_TYPES.INGEST,
+  },
+  {
+    get label() {
+      return studioT('Classifier');
+    },
+    entityType: ROOT_ENTITY_TYPES.CLASSIFIER,
+  },
 ] as const satisfies readonly EntityOptions[];
 
 export type TraceStatusFilter = 'running' | 'success' | 'error';
 
 export const TRACE_STATUS_OPTIONS = [
-  { label: 'Running', value: 'running' },
-  { label: 'Success', value: 'success' },
-  { label: 'Error', value: 'error' },
+  {
+    get label() {
+      return studioT('Running');
+    },
+    value: 'running',
+  },
+  {
+    get label() {
+      return studioT('Success');
+    },
+    value: 'success',
+  },
+  {
+    get label() {
+      return studioT('Error');
+    },
+    value: 'error',
+  },
 ] as const satisfies readonly { label: string; value: TraceStatusFilter }[];
 
 /** Field ids for "synthetic" filter entries — they live in dedicated URL params
@@ -127,8 +168,18 @@ export const TRACE_LIST_MODE_VALUES = new Set(['traces', 'branches'] as const);
 export type { TraceListMode };
 
 export const TRACE_LIST_MODE_OPTIONS = [
-  { label: 'Traces (default)', value: 'traces' },
-  { label: 'Branches', value: 'branches' },
+  {
+    get label() {
+      return studioT('Traces (default)');
+    },
+    value: 'traces',
+  },
+  {
+    get label() {
+      return studioT('Branches');
+    },
+    value: 'branches',
+  },
 ] as const satisfies readonly { label: string; value: TraceListMode }[];
 export const TRACE_DATE_PRESET_PARAM = 'datePreset';
 export const TRACE_DATE_FROM_PARAM = 'dateFrom';
@@ -292,19 +343,93 @@ export function hasAnyTraceFilterParams(params: URLSearchParams): boolean {
 
 /** Every operator the trace query API supports, keyed by the UI id that goes in the URL. */
 export const TRACE_FILTER_BAR_OPERATORS: (FilterBarOperator & { id: TraceFilterOperatorId })[] = [
-  { id: 'is', label: 'is', widensTo: 'in' },
-  { id: 'isNot', label: 'is not', widensTo: 'notIn' },
-  { id: 'in', label: 'is any of', arity: 'many' },
-  { id: 'notIn', label: 'is none of', arity: 'many' },
-  { id: 'exists', label: 'exists', arity: 'none' },
-  { id: 'notExists', label: 'does not exist', arity: 'none' },
-  { id: 'gt', label: 'greater than' },
-  { id: 'gte', label: 'at least' },
-  { id: 'lt', label: 'less than' },
-  { id: 'lte', label: 'at most' },
-  { id: 'matches', label: 'matches', freeText: true },
-  { id: 'notMatches', label: 'does not match', freeText: true },
-  { id: 'hasAllTokens', label: 'contains words', freeText: true },
+  {
+    id: 'is',
+    get label() {
+      return studioT('is');
+    },
+    widensTo: 'in',
+  },
+  {
+    id: 'isNot',
+    get label() {
+      return studioT('is not');
+    },
+    widensTo: 'notIn',
+  },
+  {
+    id: 'in',
+    get label() {
+      return studioT('is any of');
+    },
+    arity: 'many',
+  },
+  {
+    id: 'notIn',
+    get label() {
+      return studioT('is none of');
+    },
+    arity: 'many',
+  },
+  {
+    id: 'exists',
+    get label() {
+      return studioT('exists');
+    },
+    arity: 'none',
+  },
+  {
+    id: 'notExists',
+    get label() {
+      return studioT('does not exist');
+    },
+    arity: 'none',
+  },
+  {
+    id: 'gt',
+    get label() {
+      return studioT('greater than');
+    },
+  },
+  {
+    id: 'gte',
+    get label() {
+      return studioT('at least');
+    },
+  },
+  {
+    id: 'lt',
+    get label() {
+      return studioT('less than');
+    },
+  },
+  {
+    id: 'lte',
+    get label() {
+      return studioT('at most');
+    },
+  },
+  {
+    id: 'matches',
+    get label() {
+      return studioT('matches');
+    },
+    freeText: true,
+  },
+  {
+    id: 'notMatches',
+    get label() {
+      return studioT('does not match');
+    },
+    freeText: true,
+  },
+  {
+    id: 'hasAllTokens',
+    get label() {
+      return studioT('contains words');
+    },
+    freeText: true,
+  },
 ];
 
 export const TRACE_STRING_OPERATORS: TraceFilterOperatorId[] = ['is', 'isNot', 'in', 'notIn', 'exists', 'notExists'];

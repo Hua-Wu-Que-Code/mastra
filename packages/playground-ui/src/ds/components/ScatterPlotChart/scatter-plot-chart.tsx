@@ -6,6 +6,8 @@ import {
   getScatterPlotPointColor,
 } from './scatter-plot-chart-utils';
 import { CHART_LABEL_COLOR, CHART_TICK_FONT_SIZE, Colors } from '@/ds/tokens';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_POINT_SIZE = 48;
@@ -50,6 +52,7 @@ export function ScatterPlotChart({
   onPointClick,
   className,
 }: ScatterPlotChartProps) {
+  useLocale();
   const isClickable = typeof onPointClick === 'function';
   const fillsContainer = height === '100%';
 
@@ -62,7 +65,7 @@ export function ScatterPlotChart({
         )}
         style={{ height }}
       >
-        No data to display
+        {studioT('No data to display')}
       </div>
     );
   }

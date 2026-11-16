@@ -4,6 +4,8 @@ import { ActivatedSkillsProvider } from '@mastra/playground-ui/domains/agents/co
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useAgent, useAgentVersions, useAgentVersion, useStoredAgent } from '@mastra/react/hooks/agents';
 import { useMemory } from '@mastra/react/hooks/memory';
@@ -22,6 +24,7 @@ import { useMastraPlatform } from '@/lib/mastra-platform/hooks/use-mastra-platfo
 import { RouteSidePanel } from '@/lib/route-side-panel';
 
 function AgentPlayground() {
+  useLocale();
   const { agentId } = useParams();
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
 
@@ -148,15 +151,15 @@ function AgentPlayground() {
 
   // A 404 is authoritative even if a previous fetch left stale data in the cache.
   if (error && is404NotFoundError(error)) {
-    return <div className="py-4 text-center">Agent not found</div>;
+    return <div className="py-4 text-center">{studioT('Agent not found')}</div>;
   }
 
   if (error) {
-    return <EmptyState tone="error" titleSlot="Failed to load agent" descriptionSlot={error.message} />;
+    return <EmptyState tone="error" titleSlot={studioT('Failed to load agent')} descriptionSlot={error.message} />;
   }
 
   if (!codeAgent) {
-    return <div className="py-4 text-center">Agent not found</div>;
+    return <div className="py-4 text-center">{studioT('Agent not found')}</div>;
   }
 
   return (

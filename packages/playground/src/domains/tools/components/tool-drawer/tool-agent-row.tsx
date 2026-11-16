@@ -3,6 +3,8 @@ import { DataList } from '@mastra/playground-ui/components/DataList';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { ToolAgent } from '../../hooks/use-tool-agents';
 
 export interface ToolAgentRowProps {
@@ -13,6 +15,7 @@ export interface ToolAgentRowProps {
 
 /** One agent in "Used by": the whole row links to the agent, except the current one, which is marked instead. */
 export function ToolAgentRow({ agent, isCurrent }: ToolAgentRowProps) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   const name = (
@@ -32,7 +35,7 @@ export function ToolAgentRow({ agent, isCurrent }: ToolAgentRowProps) {
         {name}
         <DataList.Cell>
           <Badge variant="neutral" emphasis="subtle">
-            Current
+            {studioT('Current')}
           </Badge>
         </DataList.Cell>
       </DataList.RowStatic>

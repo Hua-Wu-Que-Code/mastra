@@ -3,13 +3,15 @@ import { Button } from '../Button';
 import type { ButtonProps } from '../Button';
 import { useJSONSchemaFormField } from './json-schema-form-field-context';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type JSONSchemaFormFieldRemoveProps = Omit<ButtonProps, 'onClick' | 'tooltip' | 'children' | 'size'> & {
   tooltip?: React.ReactNode;
   children?: React.ReactNode;
 };
 
-export function FieldRemove({ children, tooltip = 'Remove field', ...props }: JSONSchemaFormFieldRemoveProps) {
+export function FieldRemove({ children, tooltip = studioT('Remove field'), ...props }: JSONSchemaFormFieldRemoveProps) {
+  useLocale();
   const { remove } = useJSONSchemaFormField();
 
   return (

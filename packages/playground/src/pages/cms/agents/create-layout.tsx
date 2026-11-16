@@ -4,15 +4,26 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Outlet, useLocation } from 'react-router';
 import { PageBreadcrumbs } from '@/components/ui/page-breadcrumbs';
 import { AgentCmsFormShell } from '@/domains/agents/components/agent-cms-form-shell';
 import { useAgentCmsForm } from '@/domains/agents/hooks/use-agent-cms-form';
 import { navCrumb } from '@/domains/navigation/crumbs';
 
-const crumbs = [navCrumb('/agents'), { id: 'create-agent', label: 'Create agent' }];
+const crumbs = [
+  navCrumb('/agents'),
+  {
+    id: 'create-agent',
+    get label() {
+      return studioT('Create agent');
+    },
+  },
+];
 
 function CreateLayoutWrapper() {
+  useLocale();
   const { navigate, paths } = useLinkComponent();
   const location = useLocation();
 
@@ -26,14 +37,14 @@ function CreateLayoutWrapper() {
       {isSubmitting ? (
         <>
           <Spinner className="h-4 w-4" />
-          Creating...
+          {studioT('Creating...')}
         </>
       ) : (
         <>
           <Icon>
             <IconCheckmark2Medium />
           </Icon>
-          Create agent
+          {studioT('Create agent')}
         </>
       )}
     </Button>
@@ -41,7 +52,7 @@ function CreateLayoutWrapper() {
 
   return (
     <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />} headerActions={actions}>
-      <h1 className="sr-only">Create agent</h1>
+      <h1 className="sr-only">{studioT('Create agent')}</h1>
       <AgentCmsFormShell
         form={form}
         mode="create"

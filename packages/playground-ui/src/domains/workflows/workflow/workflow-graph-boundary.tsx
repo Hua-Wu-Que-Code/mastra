@@ -7,6 +7,8 @@ import { CopyButton } from '@/ds/components/CopyButton';
 import { ErrorBoundary } from '@/ds/components/ErrorBoundary';
 import { Txt } from '@/ds/components/Txt';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export function WorkflowGraphBoundary({
@@ -16,10 +18,11 @@ export function WorkflowGraphBoundary({
   stepGraph: SerializedStepFlowEntry[];
   children: ReactNode;
 }) {
+  useLocale();
   if (stepGraph.length === 0) {
     return (
       <Txt variant="caption" tone="muted" role="status" className="p-4">
-        This workflow has no steps to display.
+        {studioT('This workflow has no steps to display.')}
       </Txt>
     );
   }
@@ -32,22 +35,22 @@ export function WorkflowGraphBoundary({
           <div role="alert" className="nodrag nopan nowheel h-full overflow-auto p-4">
             <div className={cn(raisedSurfaceStyle, 'space-y-3 rounded-lg p-4')}>
               <Txt as="h3" variant="subheading" tone="ink">
-                Graph unavailable
+                {studioT('Graph unavailable')}
               </Txt>
               <Txt variant="caption" tone="muted">
-                Studio could not display this workflow graph.
+                {studioT('Studio could not display this workflow graph.')}
               </Txt>
               <Txt variant="meta" tone="muted" className="break-words">
                 {error.message}
               </Txt>
-              <Button onClick={reset}>Try again</Button>
+              <Button onClick={reset}>{studioT('Try again')}</Button>
               <details>
                 <summary className="cursor-pointer">
                   <Txt as="span" variant="caption" className="block">
-                    View workflow definition
+                    {studioT('View workflow definition')}
                   </Txt>
                 </summary>
-                <CopyButton content={definition} tooltip="Copy workflow definition" />
+                <CopyButton content={definition} tooltip={studioT('Copy workflow definition')} />
                 <Code
                   className="mt-2 max-h-64 overflow-auto text-meta break-words whitespace-pre-wrap"
                   code={definition}

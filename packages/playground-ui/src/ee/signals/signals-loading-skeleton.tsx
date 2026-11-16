@@ -1,4 +1,5 @@
 import { Skeleton } from '@/ds/components/Skeleton';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 function DistributionSkeleton() {
   return (
@@ -26,23 +27,25 @@ function AnalysisSkeletons() {
 }
 
 export function SignalsFrameLoadingSkeleton() {
+  useLocale();
   return (
-    <section aria-label="Loading snapshot flow" className="space-y-5" role="status">
-      <span className="sr-only">Loading snapshot flow</span>
+    <section aria-label={studioT('Loading snapshot flow')} className="space-y-5" role="status">
+      <span className="sr-only">{studioT('Loading snapshot flow')}</span>
       <AnalysisSkeletons />
     </section>
   );
 }
 
 export function SignalsLoadingSkeleton() {
+  useLocale();
   return (
     <div
-      aria-label="Loading trace intelligence"
+      aria-label={studioT('Loading trace intelligence')}
       className="space-y-5 p-4 lg:p-6"
       data-testid="signals-loading-skeleton"
       role="status"
     >
-      <span className="sr-only">Loading trace intelligence</span>
+      <span className="sr-only">{studioT('Loading trace intelligence')}</span>
       <div className="space-y-3">
         <Skeleton className="h-5 w-24" />
         <Skeleton className="h-7 w-96 max-w-full" />

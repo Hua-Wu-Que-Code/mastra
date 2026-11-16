@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { SettingsContainer, SettingsGroup, SettingsTitle } from '@mastra/playground-ui/new/settings';
 import type { ToolRun } from '../utils/tool-run';
 import { ToolResponseBody } from './tool-response-body';
@@ -11,10 +12,11 @@ export interface ToolResponseProps {
 }
 
 export function ToolResponse({ isRunning, lastRun }: ToolResponseProps) {
+  useLocale();
   return (
     <SettingsGroup className="h-full">
       <ToolSectionHeader action={!isRunning && lastRun && <ToolRunStatus run={lastRun} />}>
-        <SettingsTitle>Response</SettingsTitle>
+        <SettingsTitle>{studioT('Response')}</SettingsTitle>
       </ToolSectionHeader>
       <SettingsContainer
         className={cn('grid min-h-48 flex-1', isRunning || !lastRun ? 'content-center' : 'content-start')}

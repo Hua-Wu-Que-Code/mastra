@@ -9,6 +9,10 @@ import { IconCodeBrackets } from '@mastra/playground-ui/icons/central/IconCodeBr
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconSquareBehindSquare1 } from '@mastra/playground-ui/icons/central/IconSquareBehindSquare1';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -60,6 +64,7 @@ export const JsonObjectEditor = ({
   labelTooltip,
   headerActions,
 }: JsonObjectEditorProps) => {
+  useLocale();
   const valueStr = JSON.stringify(value ?? {});
   const formattedValue = JSON.stringify(value ?? {}, null, 2);
   const [draft, setDraft] = useState<string>(formattedValue);
@@ -95,12 +100,12 @@ export const JsonObjectEditor = ({
     try {
       parsedContext = JSON.parse(draft);
     } catch {
-      toast.error('Invalid JSON');
+      toast.error(studioT('Invalid JSON'));
       return;
     }
     const result = jsonObjectSchema.safeParse(parsedContext);
     if (!result.success) {
-      toast.error(`${label} must be a JSON object`);
+      toast.error(studioT('{value0} must be a JSON object', { value0: label }));
       return;
     }
     onSave(result.data);
@@ -115,7 +120,7 @@ export const JsonObjectEditor = ({
 
   const handleFormat = async () => {
     if (!isValidJson(draft)) {
-      toast.error('Invalid JSON');
+      toast.error(studioT('Invalid JSON'));
       return;
     }
 
@@ -146,7 +151,9 @@ export const JsonObjectEditor = ({
       <div>
         <Field>
           <div className="flex items-center justify-between">
-            <FieldLabel info={labelTooltip}>{label} (JSON)</FieldLabel>
+            <FieldLabel info={labelTooltip}>
+              {label} {' ' + studioT('(JSON)')}
+            </FieldLabel>
 
             <div className="flex items-center gap-2">
               {headerActions}
@@ -158,7 +165,9 @@ export const JsonObjectEditor = ({
                     </Icon>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Format the {label} JSON</TooltipContent>
+                <TooltipContent>
+                  <Trans id="Format the {part0} JSON" values={{ part0: label }} />
+                </TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -169,20 +178,24 @@ export const JsonObjectEditor = ({
                     </Icon>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Copy {label}</TooltipContent>
+                <TooltipContent>
+                  <Trans id="Copy {part0}" values={{ part0: label }} />
+                </TooltipContent>
               </Tooltip>
             </div>
           </div>
 
           {presets && Object.keys(presets).length > 0 && (
             <Field>
-              <FieldLabel className="sr-only">{label} preset</FieldLabel>
+              <FieldLabel className="sr-only">
+                {label} {' ' + studioT('preset')}
+              </FieldLabel>
               <Select value={selectedPreset} onValueChange={handlePresetChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a preset" />
+                  <SelectValue placeholder={studioT('Select a preset')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__custom__">Custom</SelectItem>
+                  <SelectItem value="__custom__">{studioT('Custom')}</SelectItem>
                   {Object.keys(presets).map(key => (
                     <SelectItem key={key} value={key}>
                       {key}
@@ -202,14 +215,14 @@ export const JsonObjectEditor = ({
               variant="default"
               size="icon-md"
               type="button"
-              tooltip={`Revert ${label} changes`}
+              tooltip={studioT('Revert {value0} changes', { value0: label })}
               onClick={handleRevert}
             >
               <IconCrossMedium />
             </Button>
           )}
           <Button icon={<IconCheckmark2Medium />} type="button" onClick={handleSave}>
-            Save
+            {studioT('Save')}
           </Button>
         </div>
       </div>

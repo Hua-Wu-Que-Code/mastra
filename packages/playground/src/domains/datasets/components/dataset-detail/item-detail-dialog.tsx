@@ -18,6 +18,8 @@ import { IconHashtag } from '@mastra/playground-ui/icons/central/IconHashtag';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
@@ -46,6 +48,7 @@ export function ItemDetailDialog({
   onItemChange,
   dialogLevel = 1,
 }: ItemDetailDialogProps) {
+  useLocale();
   const { updateItem, deleteItem, purgeItem } = useDatasetMutations();
 
   // Edit mode state
@@ -101,7 +104,7 @@ export function ItemDetailDialog({
     try {
       parsedInput = JSON.parse(inputValue);
     } catch {
-      toast.error('Input must be valid JSON');
+      toast.error(studioT('Input must be valid JSON'));
       return;
     }
 
@@ -111,7 +114,7 @@ export function ItemDetailDialog({
       try {
         parsedGroundTruth = JSON.parse(groundTruthValue);
       } catch {
-        toast.error('Ground Truth must be valid JSON');
+        toast.error(studioT('Ground Truth must be valid JSON'));
         return;
       }
     }
@@ -122,7 +125,7 @@ export function ItemDetailDialog({
       try {
         parsedMetadata = JSON.parse(metadataValue);
       } catch {
-        toast.error('Metadata must be valid JSON');
+        toast.error(studioT('Metadata must be valid JSON'));
         return;
       }
     }
@@ -133,7 +136,7 @@ export function ItemDetailDialog({
       try {
         parsedTrajectory = JSON.parse(trajectoryValue);
       } catch {
-        toast.error('Expected Trajectory must be valid JSON');
+        toast.error(studioT('Expected Trajectory must be valid JSON'));
         return;
       }
     }
@@ -144,7 +147,7 @@ export function ItemDetailDialog({
       try {
         parsedRequestContext = JSON.parse(requestContextValue);
       } catch {
-        toast.error('Request Context must be valid JSON');
+        toast.error(studioT('Request Context must be valid JSON'));
         return;
       }
     }
@@ -160,10 +163,14 @@ export function ItemDetailDialog({
         requestContext: parsedRequestContext,
       });
 
-      toast.success('Item updated successfully');
+      toast.success(studioT('Item updated successfully'));
       setIsEditing(false);
     } catch (error) {
-      toast.error(`Failed to update item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to update item: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
@@ -188,29 +195,37 @@ export function ItemDetailDialog({
   const handleDeleteConfirm = async () => {
     try {
       await deleteItem.mutateAsync({ datasetId, itemId: item.id });
-      toast.success('Item deleted successfully');
+      toast.success(studioT('Item deleted successfully'));
       setShowDeleteConfirm(false);
       onClose(); // Close the SideDialog after successful deletion
     } catch (error) {
-      toast.error(`Failed to delete item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to delete item: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
   const handlePurgeConfirm = async () => {
     try {
       await purgeItem.mutateAsync({ datasetId, itemId: item.id });
-      toast.success('Item data purged successfully');
+      toast.success(studioT('Item data purged successfully'));
       setShowPurgeConfirm(false);
       onClose();
     } catch (error) {
-      toast.error(`Failed to purge item data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to purge item data: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
   return (
     <SideDialog
-      dialogTitle="Dataset Item"
-      dialogDescription={`Item: ${item.id}`}
+      dialogTitle={studioT('Dataset Item')}
+      dialogDescription={studioT('Item: {value0}', { value0: item.id })}
       isOpen={isOpen}
       onClose={onClose}
       level={dialogLevel}
@@ -223,13 +238,13 @@ export function ItemDetailDialog({
         {!isEditing && (
           <div className="ml-auto flex items-center gap-2">
             <Button size="sm" onClick={handleEdit} icon={<IconPencil />}>
-              Edit
+              {studioT('Edit')}
             </Button>
             <Button size="sm" onClick={handleDelete} icon={<TrashIcon />}>
-              Delete
+              {studioT('Delete')}
             </Button>
             <Button variant="destructive" size="sm" onClick={() => setShowPurgeConfirm(true)} icon={<IconEraser />}>
-              Purge data
+              {studioT('Purge data')}
             </Button>
           </div>
         )}
@@ -260,15 +275,15 @@ export function ItemDetailDialog({
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialog.Content>
           <AlertDialog.Header>
-            <AlertDialog.Title>Delete Item</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Delete Item')}</AlertDialog.Title>
             <AlertDialog.Description>
-              Are you sure you want to delete this item? This action cannot be undone.
+              {studioT('Are you sure you want to delete this item? This action cannot be undone.')}
             </AlertDialog.Description>
           </AlertDialog.Header>
           <AlertDialog.Footer>
-            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
             <AlertDialog.Action onClick={handleDeleteConfirm}>
-              {deleteItem.isPending ? 'Deleting...' : 'Yes, delete'}
+              {deleteItem.isPending ? studioT('Deleting...') : studioT('Yes, delete')}
             </AlertDialog.Action>
           </AlertDialog.Footer>
         </AlertDialog.Content>
@@ -277,14 +292,15 @@ export function ItemDetailDialog({
       <AlertDialog open={showPurgeConfirm} onOpenChange={setShowPurgeConfirm}>
         <AlertDialog.Content>
           <AlertDialog.Header>
-            <AlertDialog.Title>Purge Item Data</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Purge Item Data')}</AlertDialog.Title>
             <AlertDialog.Description>
-              Permanently scrub this item's data from every dataset version and linked experiment result? The item
-              history remains for reproducibility, but its stored data cannot be recovered.
+              {studioT(
+                "Permanently scrub this item's data from every dataset version and linked experiment result? The item history remains for reproducibility, but its stored data cannot be recovered.",
+              )}
             </AlertDialog.Description>
           </AlertDialog.Header>
           <AlertDialog.Footer>
-            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
             {/* Deliberately a Button rather than AlertDialog.Action: Action is a
                 Close that dismisses the dialog on click regardless of
                 preventDefault, which would hide the pending state and a failed
@@ -296,7 +312,7 @@ export function ItemDetailDialog({
               onClick={() => void handlePurgeConfirm()}
               disabled={purgeItem.isPending}
             >
-              {purgeItem.isPending ? 'Purging...' : 'Purge data'}
+              {purgeItem.isPending ? studioT('Purging...') : studioT('Purge data')}
             </Button>
           </AlertDialog.Footer>
         </AlertDialog.Content>
@@ -309,6 +325,7 @@ export function ItemDetailDialog({
  * Read-only view of the dataset item details
  */
 function ReadOnlyContent({ item }: { item: DatasetItem }) {
+  useLocale();
   const metadataDisplay = item.metadata ? JSON.stringify(item.metadata, null, 2) : null;
   const trajectoryDisplay = item.expectedTrajectory ? JSON.stringify(item.expectedTrajectory, null, 2) : null;
   const requestContextDisplay = item.requestContext ? JSON.stringify(item.requestContext, null, 2) : null;
@@ -317,7 +334,7 @@ function ReadOnlyContent({ item }: { item: DatasetItem }) {
     <>
       <SideDialog.Header>
         <SideDialog.Heading>
-          <IconFileArrowRightIn /> Dataset Item
+          <IconFileArrowRightIn /> {' ' + studioT('Dataset Item')}
         </SideDialog.Heading>
         <TextAndIcon>
           <IconHashtag /> {item.id}
@@ -328,14 +345,14 @@ function ReadOnlyContent({ item }: { item: DatasetItem }) {
         <KeyValueList
           data={[
             {
-              label: 'Created',
+              label: studioT('Created'),
               value: formatDate(item.createdAt, 'date-time') ?? '',
               key: 'createdAt',
             },
             ...(item.datasetVersion != null
               ? [
                   {
-                    label: 'Version',
+                    label: studioT('Version'),
                     value: `v${item.datasetVersion}`,
                     key: 'version',
                   },
@@ -345,28 +362,38 @@ function ReadOnlyContent({ item }: { item: DatasetItem }) {
         />
 
         <SideDialog.CodeSection
-          title="Input"
+          title={studioT('Input')}
           icon={<IconFileArrowRightIn />}
           codeStr={JSON.stringify(item.input, null, 2)}
         />
 
         {item.groundTruth !== null && item.groundTruth !== undefined && (
           <SideDialog.CodeSection
-            title="Ground Truth"
+            title={studioT('Ground Truth')}
             icon={<IconFileArrowRightOut />}
             codeStr={JSON.stringify(item.groundTruth, null, 2)}
           />
         )}
 
         {trajectoryDisplay && (
-          <SideDialog.CodeSection title="Expected Trajectory" icon={<IconDirection1 />} codeStr={trajectoryDisplay} />
+          <SideDialog.CodeSection
+            title={studioT('Expected Trajectory')}
+            icon={<IconDirection1 />}
+            codeStr={trajectoryDisplay}
+          />
         )}
 
         {requestContextDisplay && (
-          <SideDialog.CodeSection title="Request Context" icon={<IconCodeBrackets />} codeStr={requestContextDisplay} />
+          <SideDialog.CodeSection
+            title={studioT('Request Context')}
+            icon={<IconCodeBrackets />}
+            codeStr={requestContextDisplay}
+          />
         )}
 
-        {metadataDisplay && <SideDialog.CodeSection title="Metadata" icon={<IconTag />} codeStr={metadataDisplay} />}
+        {metadataDisplay && (
+          <SideDialog.CodeSection title={studioT('Metadata')} icon={<IconTag />} codeStr={metadataDisplay} />
+        )}
       </div>
     </>
   );
@@ -406,22 +433,23 @@ function EditModeContent({
   onCancel,
   isSaving,
 }: EditModeContentProps) {
+  useLocale();
   return (
     <>
       <SideDialog.Header>
         <SideDialog.Heading>
-          <IconPencil /> Edit Item
+          <IconPencil /> {' ' + studioT('Edit Item')}
         </SideDialog.Heading>
       </SideDialog.Header>
 
       <div className="space-y-6">
         <Field>
-          <FieldLabel required>Input (JSON)</FieldLabel>
+          <FieldLabel required>{studioT('Input (JSON)')}</FieldLabel>
           <CodeEditor value={inputValue} onChange={setInputValue} showCopyButton={false} className="min-h-[120px]" />
         </Field>
 
         <Field>
-          <FieldLabel>Ground Truth (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Ground Truth (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={groundTruthValue}
             onChange={setGroundTruthValue}
@@ -431,7 +459,7 @@ function EditModeContent({
         </Field>
 
         <Field>
-          <FieldLabel>Expected Trajectory (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Expected Trajectory (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={trajectoryValue}
             onChange={setTrajectoryValue}
@@ -441,7 +469,7 @@ function EditModeContent({
         </Field>
 
         <Field>
-          <FieldLabel>Request Context (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Request Context (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={requestContextValue}
             onChange={setRequestContextValue}
@@ -451,7 +479,7 @@ function EditModeContent({
         </Field>
 
         <Field>
-          <FieldLabel>Metadata (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Metadata (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={metadataValue}
             onChange={setMetadataValue}
@@ -462,10 +490,10 @@ function EditModeContent({
 
         <div className="flex justify-end gap-2 pt-4">
           <Button icon={<IconCrossMedium />} onClick={onCancel} disabled={isSaving}>
-            Cancel
+            {studioT('Cancel')}
           </Button>
           <Button icon={<IconCheckmark2Medium />} variant="primary" onClick={onSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save changes'}
+            {isSaving ? studioT('Saving...') : studioT('Save changes')}
           </Button>
         </div>
       </div>

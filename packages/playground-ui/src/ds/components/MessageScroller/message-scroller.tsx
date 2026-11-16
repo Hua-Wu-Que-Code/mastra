@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import {
   AUTO_SCROLL_ATTACH_THRESHOLD,
   DEFAULT_REACH_START_THRESHOLD,
@@ -23,7 +22,6 @@ import type {
   MessageScrollerScrollable,
 } from './message-scroller-context';
 
-import {
   VISIBILITY_EPSILON,
   getCurrentAnchorId,
   getFollowTarget,
@@ -31,13 +29,15 @@ import {
   getScrollTarget,
 } from './message-scroller-geometry';
 import type { MessageScrollerItemRecord } from './message-scroller-geometry';
+
 import { glideContent } from './message-scroller-glide';
 import { startTrip } from './message-scroller-trip';
 import type { TripAnimation } from './message-scroller-trip';
 import { createVisibilityStore } from './message-scroller-visibility-store';
-
 import { IconArrowDown } from '@/ds/icons/central/IconArrowDown';
 import { overlaySurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { mergeRefs } from '@/lib/merge-refs';
 import { cn } from '@/lib/utils';
 
@@ -871,6 +871,7 @@ export const MessageScrollerButton = React.forwardRef<HTMLButtonElement, Message
     { behavior = 'smooth', direction = 'end', className, children, onClick, tabIndex, type = 'button', ...props },
     ref,
   ) => {
+    useLocale();
     const { scrollToEnd, scrollToStart } = useRequiredMessageScrollerActionsContext('MessageScrollerButton');
     const { start, end } = useRequiredMessageScrollerScrollableContext('MessageScrollerButton');
     const active = direction === 'start' ? start : end;
@@ -904,7 +905,9 @@ export const MessageScrollerButton = React.forwardRef<HTMLButtonElement, Message
         {children ?? (
           <>
             <IconArrowDown className="size-icon-md" aria-hidden />
-            <span className="sr-only">{direction === 'end' ? 'Scroll to end' : 'Scroll to start'}</span>
+            <span className="sr-only">
+              {direction === 'end' ? studioT('Scroll to end') : studioT('Scroll to start')}
+            </span>
           </>
         )}
       </button>

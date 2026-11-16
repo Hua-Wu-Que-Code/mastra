@@ -29,6 +29,8 @@ import { BreakdownText } from './breakdown-text';
 import { MetricsTable } from '@/ds/components/MetricsTable';
 import type { MetricsTableColumn, MetricsTableSort } from '@/ds/components/MetricsTable';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 type UsageTotals = ReturnType<typeof useMetricsUsageTotals>;
 
@@ -91,6 +93,7 @@ export function BreakdownTable({
   limit,
   ...frame
 }: BreakdownTableProps) {
+  useLocale();
   const scope = useMetricsScope();
   const [sort, setSort] = useState<MetricsTableSort>(DEFAULT_SORT);
   const [metric, setMetric] = useState<ChangeMetric>('count');
@@ -155,20 +158,20 @@ export function BreakdownTable({
   };
   const projectColumn: MetricsTableColumn<BreakdownRow> = {
     id: 'project',
-    header: 'Project',
+    header: studioT('Project'),
     width: 'minmax(8rem,2fr)',
     cell: row => <BreakdownText text={projectName(row)} />,
   };
   const resourceColumn: MetricsTableColumn<BreakdownRow> = {
     id: 'resource',
-    header: 'Resource',
+    header: studioT('Resource'),
     width: 'minmax(6rem,1fr)',
     cell: row => <BreakdownText text={row.resource ?? DASH} />,
   };
   const errorColumns: MetricsTableColumn<BreakdownRow>[] = [
     {
       id: 'errorRate',
-      header: 'Errors',
+      header: studioT('Errors'),
       align: 'end',
       sortValue: row => row.errorRate,
       cell: row => (
@@ -177,7 +180,7 @@ export function BreakdownTable({
     },
     {
       id: 'p95',
-      header: 'P95 latency',
+      header: studioT('P95 latency'),
       align: 'end',
       sortValue: row => row.p95,
       cell: row => <BreakdownFigure muted>{row.p95 === undefined ? DASH : formatDuration(row.p95)}</BreakdownFigure>,
@@ -186,14 +189,14 @@ export function BreakdownTable({
   const usageColumns: MetricsTableColumn<BreakdownRow>[] = [
     {
       id: 'tokens',
-      header: 'Tokens',
+      header: studioT('Tokens'),
       align: 'end',
       sortValue: row => row.tokens,
       cell: row => <BreakdownFigure muted>{row.tokens === undefined ? DASH : formatCount(row.tokens)}</BreakdownFigure>,
     },
     {
       id: 'cost',
-      header: 'Cost',
+      header: studioT('Cost'),
       align: 'end',
       sortValue: row => row.cost,
       cell: row => (
@@ -213,7 +216,7 @@ export function BreakdownTable({
   };
   const changeColumn: MetricsTableColumn<BreakdownRow> = {
     id: 'change',
-    header: '% Change',
+    header: studioT('% Change'),
     align: 'end',
     description: <BreakdownChangeDescription window={window} label={comparedLabel(tab, metric)} />,
     // Sorted by the change shown: biggest rise first, biggest fall first the other way. New rows
@@ -240,7 +243,7 @@ export function BreakdownTable({
       <ChartArea>
         <MetricsTable
           key={tab}
-          aria-label={`${NAME_HEADER[tab]} breakdown`}
+          aria-label={studioT('{value0} breakdown', { value0: NAME_HEADER[tab] })}
           columns={columns}
           rows={rows}
           getRowKey={row => row.key}
@@ -254,7 +257,10 @@ export function BreakdownTable({
         />
         {!isLoading && truncated && (
           <Txt variant="caption" tone="muted" className="pt-2">
-            Showing the {formatCount(limit)} busiest; sorting covers only these.
+            <Trans
+              id="Showing the {part0} busiest; sorting covers only these."
+              values={{ part0: formatCount(limit) }}
+            />
           </Txt>
         )}
       </ChartArea>

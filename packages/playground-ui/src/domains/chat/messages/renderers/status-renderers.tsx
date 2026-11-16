@@ -4,21 +4,27 @@ import type {
   TripwireRendererProps,
   WarningRendererProps,
 } from '@mastra/react/ui';
-
 import { TripwireNotice } from '../tripwire-notice';
 import { Notice } from '@/ds/components/Notice';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
-export const ErrorStatusRenderer = ({ text }: ErrorRendererProps) => (
-  <Notice variant="destructive" title="Error">
-    <Notice.Message>{text}</Notice.Message>
-  </Notice>
-);
+export const ErrorStatusRenderer = ({ text }: ErrorRendererProps) => {
+  useLocale();
+  return (
+    <Notice variant="destructive" title={studioT('Error')}>
+      <Notice.Message>{text}</Notice.Message>
+    </Notice>
+  );
+};
 
-export const WarningStatusRenderer = ({ text }: WarningRendererProps) => (
-  <Notice variant="warning" title="Warning">
-    <Notice.Message>{text}</Notice.Message>
-  </Notice>
-);
+export const WarningStatusRenderer = ({ text }: WarningRendererProps) => {
+  useLocale();
+  return (
+    <Notice variant="warning" title={studioT('Warning')}>
+      <Notice.Message>{text}</Notice.Message>
+    </Notice>
+  );
+};
 
 export const TripwireStatusRenderer = ({ text, tripwire }: TripwireRendererProps) => (
   <TripwireNotice reason={text} tripwire={tripwire} />

@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@/lib/i18n';
 import type { ReactNode } from 'react';
 import { PageLayout } from '../PageLayout/page-layout';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
@@ -36,13 +37,14 @@ export function FormLayout({
   LinkComponent: Link = 'a',
   children,
 }: FormLayoutProps) {
+  useLocale();
   return (
     <PageLayout>
       <SettingsLayout
         header={
           <PageHeader>
             <PageHeader.Eyebrow>
-              <Link href={backHref} aria-label={`Back to ${backLabel}`}>
+              <Link href={backHref} aria-label={studioT('Back to {value0}', { value0: backLabel })}>
                 <Icon size="xs">
                   <IconArrowLeft aria-hidden />
                 </Icon>

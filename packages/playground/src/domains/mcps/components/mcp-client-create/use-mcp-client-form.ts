@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useForm } from 'react-hook-form';
 
 export interface MCPClientFormValues {
@@ -13,6 +14,7 @@ export interface MCPClientFormValues {
 }
 
 export const useMCPClientForm = (defaultValues?: Partial<MCPClientFormValues>) => {
+  useLocale();
   const form = useForm<MCPClientFormValues>({
     defaultValues: {
       name: '',
@@ -30,19 +32,19 @@ export const useMCPClientForm = (defaultValues?: Partial<MCPClientFormValues>) =
       const errors: Record<string, { type: string; message: string }> = {};
 
       if (!values.name.trim()) {
-        errors.name = { type: 'required', message: 'Name is required' };
+        errors.name = { type: 'required', message: studioT('Name is required') };
       }
 
       if (!values.serverName.trim()) {
-        errors.serverName = { type: 'required', message: 'Server name is required' };
+        errors.serverName = { type: 'required', message: studioT('Server name is required') };
       }
 
       if (values.serverType === 'http' && !values.url.trim()) {
-        errors.url = { type: 'required', message: 'URL is required for HTTP servers' };
+        errors.url = { type: 'required', message: studioT('URL is required for HTTP servers') };
       }
 
       if (values.serverType === 'stdio' && !values.command.trim()) {
-        errors.command = { type: 'required', message: 'Command is required for stdio servers' };
+        errors.command = { type: 'required', message: studioT('Command is required for stdio servers') };
       }
 
       return {

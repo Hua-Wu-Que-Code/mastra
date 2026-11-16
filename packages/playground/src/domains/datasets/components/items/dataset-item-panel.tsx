@@ -10,6 +10,8 @@ import { IconHistory } from '@mastra/playground-ui/icons/central/IconHistory';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import type { ReactNode } from 'react';
@@ -72,6 +74,7 @@ export function DatasetItemPanel({
   variant = 'drawer',
   ...bodyProps
 }: DatasetItemPanelProps) {
+  useLocale();
   const id = item?.id ?? itemId;
   const title = `Dataset item ${id ?? ''}`;
   const content = item ? (
@@ -80,9 +83,9 @@ export function DatasetItemPanel({
   ) : itemId ? (
     <>
       <DataPanel.Header>
-        <DataPanel.Heading>Dataset item</DataPanel.Heading>
+        <DataPanel.Heading>{studioT('Dataset item')}</DataPanel.Heading>
         <DataPanel.HeaderActions>
-          <DataPanel.CloseButton icon="x" onClick={onClose} tooltip="Close detail panel" />
+          <DataPanel.CloseButton icon="x" onClick={onClose} tooltip={studioT('Close detail panel')} />
         </DataPanel.HeaderActions>
       </DataPanel.Header>
       {fallback}
@@ -110,6 +113,7 @@ type DatasetItemPanelBodyProps = Omit<DatasetItemPanelProps, 'item' | 'itemId' |
 };
 
 function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }: DatasetItemPanelBodyProps) {
+  useLocale();
   const { navigate } = useLinkComponent();
   const { updateItem, deleteItem } = useDatasetMutations();
 
@@ -158,7 +162,7 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
     try {
       parsedInput = JSON.parse(inputValue);
     } catch {
-      toast.error('Input must be valid JSON');
+      toast.error(studioT('Input must be valid JSON'));
       return;
     }
 
@@ -168,7 +172,7 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       try {
         parsedGroundTruth = JSON.parse(groundTruthValue);
       } catch {
-        toast.error('Ground Truth must be valid JSON');
+        toast.error(studioT('Ground Truth must be valid JSON'));
         return;
       }
     }
@@ -179,7 +183,7 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       try {
         parsedMetadata = JSON.parse(metadataValue);
       } catch {
-        toast.error('Metadata must be valid JSON');
+        toast.error(studioT('Metadata must be valid JSON'));
         return;
       }
     }
@@ -190,7 +194,7 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       try {
         parsedTrajectory = JSON.parse(trajectoryValue);
       } catch {
-        toast.error('Expected Trajectory must be valid JSON');
+        toast.error(studioT('Expected Trajectory must be valid JSON'));
         return;
       }
     }
@@ -201,12 +205,12 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       try {
         const parsed = JSON.parse(toolMocksValue);
         if (!Array.isArray(parsed)) {
-          toast.error('Tool Mocks must be a JSON array');
+          toast.error(studioT('Tool Mocks must be a JSON array'));
           return;
         }
         parsedToolMocks = parsed as DatasetItemToolMock[];
       } catch {
-        toast.error('Tool Mocks must be valid JSON');
+        toast.error(studioT('Tool Mocks must be valid JSON'));
         return;
       }
     } else {
@@ -219,7 +223,7 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       try {
         parsedRequestContext = JSON.parse(requestContextValue);
       } catch {
-        toast.error('Request Context must be valid JSON');
+        toast.error(studioT('Request Context must be valid JSON'));
         return;
       }
     }
@@ -236,7 +240,7 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
         requestContext: parsedRequestContext,
       });
 
-      toast.success('Item updated successfully');
+      toast.success(studioT('Item updated successfully'));
       setIsEditing(false);
       setValidationErrors(null);
     } catch (error) {
@@ -245,7 +249,11 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       if (schemaError) {
         setValidationErrors(schemaError);
       } else {
-        toast.error(`Failed to update item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to update item: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
       }
     }
   };
@@ -280,23 +288,32 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
   const handleDeleteConfirm = async () => {
     try {
       await deleteItem.mutateAsync({ datasetId, itemId: item.id });
-      toast.success('Item deleted successfully');
+      toast.success(studioT('Item deleted successfully'));
       setShowDeleteConfirm(false);
       onClose(); // Close the panel after successful deletion
     } catch (error) {
-      toast.error(`Failed to delete item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to delete item: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
   return (
     <>
       <DataPanel.Header>
-        <DataPanel.Heading>Dataset item</DataPanel.Heading>
+        <DataPanel.Heading>{studioT('Dataset item')}</DataPanel.Heading>
         <DataPanel.HeaderActions>
           {!isEditing && (
             <DropdownMenu>
               <DropdownMenu.Trigger asChild>
-                <Button size="icon-sm" variant="ghost" tooltip="Open actions menu" aria-label="Open actions menu">
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  tooltip={studioT('Open actions menu')}
+                  aria-label={studioT('Open actions menu')}
+                >
                   <IconDotGrid1x3Vertical />
                 </Button>
               </DropdownMenu.Trigger>
@@ -307,15 +324,15 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
                   }
                 >
                   <IconHistory />
-                  Item versions
+                  {studioT('Item versions')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item onSelect={() => setIsEditing(true)}>
                   <IconPencil />
-                  Edit
+                  {studioT('Edit')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item onSelect={() => setShowDeleteConfirm(true)} variant="destructive">
                   <TrashIcon />
-                  Delete item
+                  {studioT('Delete item')}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu>
@@ -323,10 +340,10 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
           <DataPanel.NextPrevNav
             onPrevious={onPrevious}
             onNext={onNext}
-            previousLabel="Go to previous item"
-            nextLabel="Go to next item"
+            previousLabel={studioT('Go to previous item')}
+            nextLabel={studioT('Go to next item')}
           />
-          <DataPanel.CloseButton icon="x" onClick={onClose} tooltip="Close detail panel" />
+          <DataPanel.CloseButton icon="x" onClick={onClose} tooltip={studioT('Close detail panel')} />
         </DataPanel.HeaderActions>
       </DataPanel.Header>
 
@@ -359,15 +376,15 @@ function DatasetItemPanelBody({ datasetId, item, items, onItemChange, onClose }:
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialog.Content>
           <AlertDialog.Header>
-            <AlertDialog.Title>Delete Item</AlertDialog.Title>
+            <AlertDialog.Title>{studioT('Delete Item')}</AlertDialog.Title>
             <AlertDialog.Description>
-              Are you sure you want to delete this item? This action cannot be undone.
+              {studioT('Are you sure you want to delete this item? This action cannot be undone.')}
             </AlertDialog.Description>
           </AlertDialog.Header>
           <AlertDialog.Footer>
-            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
             <AlertDialog.Action onClick={handleDeleteConfirm}>
-              {deleteItem.isPending ? 'Deleting...' : 'Yes, delete'}
+              {deleteItem.isPending ? studioT('Deleting...') : studioT('Yes, delete')}
             </AlertDialog.Action>
           </AlertDialog.Footer>
         </AlertDialog.Content>

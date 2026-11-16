@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
 import { IconVoiceSimple } from '@mastra/playground-ui/icons/central/IconVoiceSimple';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMastraPackages } from '@mastra/react/hooks/configuration';
 import { useState } from 'react';
 import { LiveKitRecordingContent } from './livekit-recording-content';
@@ -17,6 +19,7 @@ type TraceSpans = Awaited<ReturnType<MastraClient['getTraceLight']>>['spans'];
 
 /** Owns the review dialog for one trace. Callers key this component by traceId. */
 export function LiveKitRecordingReview({ traceId, spans }: { traceId: string; spans?: TraceSpans }) {
+  useLocale();
   const { data: packages } = useMastraPackages();
   const [open, setOpen] = useState(false);
   const calls = spans?.filter(
@@ -29,13 +32,13 @@ export function LiveKitRecordingReview({ traceId, spans }: { traceId: string; sp
     <>
       <Button size="sm" onClick={() => setOpen(true)}>
         <IconVoiceSimple />
-        Review audio
+        {studioT('Review audio')}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent size="lg">
           <DialogHeader>
-            <DialogTitle>Review Audio</DialogTitle>
-            <DialogDescription>Listen to the call associated with this trace.</DialogDescription>
+            <DialogTitle>{studioT('Review Audio')}</DialogTitle>
+            <DialogDescription>{studioT('Listen to the call associated with this trace.')}</DialogDescription>
           </DialogHeader>
           <DialogBody>{open && <LiveKitRecordingContent traceId={traceId} />}</DialogBody>
         </DialogContent>

@@ -1,12 +1,14 @@
 import { useMastraClient } from '@mastra/react';
 import { makeSSOLoginRequest } from '@mastra/react/hooks/auth';
 import { useState } from 'react';
-
 import { Button } from '@/ds/components/Button';
 import { EmptyState } from '@/ds/components/EmptyState';
+
 import type { EmptyStateProps } from '@/ds/components/EmptyState';
 import { IconArrowBoxRight } from '@/ds/icons/central/IconArrowBoxRight';
 import { IconClockSnooze } from '@/ds/icons/central/IconClockSnooze';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 export type SessionExpiredProps = {
@@ -14,6 +16,7 @@ export type SessionExpiredProps = {
 };
 
 export function SessionExpired({ variant }: SessionExpiredProps) {
+  useLocale();
   const client = useMastraClient();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -24,7 +27,7 @@ export function SessionExpired({ variant }: SessionExpiredProps) {
       window.location.href = url;
     } catch {
       setIsRedirecting(false);
-      toast.error('Could not start the login. Try again.');
+      toast.error(studioT('Could not start the login. Try again.'));
     }
   };
 
@@ -32,11 +35,11 @@ export function SessionExpired({ variant }: SessionExpiredProps) {
     <EmptyState
       variant={variant}
       iconSlot={<IconClockSnooze />}
-      titleSlot="Session Expired"
-      descriptionSlot="Your session has expired. Please log in again to continue."
+      titleSlot={studioT('Session Expired')}
+      descriptionSlot={studioT('Your session has expired. Please log in again to continue.')}
       actionSlot={
         <Button icon={<IconArrowBoxRight />} variant="default" onClick={logIn} disabled={isRedirecting}>
-          {isRedirecting ? 'Redirecting...' : 'Log in'}
+          {isRedirecting ? studioT('Redirecting...') : studioT('Log in')}
         </Button>
       }
     />

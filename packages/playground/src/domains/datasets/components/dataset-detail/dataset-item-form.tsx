@@ -7,6 +7,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { DatasetFieldErrors } from '../dataset-field-errors';
 
 /** Schema validation error from API */
@@ -55,23 +57,24 @@ export function EditModeContent({
   onCancel,
   isSaving,
 }: EditModeContentProps) {
+  useLocale();
   return (
     <>
       <div className="mb-4">
         <Txt as="h3" variant="heading" className="flex items-center gap-2">
-          <IconPencil className="size-icon-lg" /> Edit Item
+          <IconPencil className="size-icon-lg" /> {' ' + studioT('Edit Item')}
         </Txt>
       </div>
 
       <div className="space-y-6">
         <Field invalid={validationErrors?.field === 'input'}>
-          <FieldLabel required>Input (JSON)</FieldLabel>
+          <FieldLabel required>{studioT('Input (JSON)')}</FieldLabel>
           <CodeEditor value={inputValue} onChange={setInputValue} showCopyButton={false} className="min-h-[120px]" />
           {validationErrors?.field === 'input' && <DatasetFieldErrors field="input" errors={validationErrors.errors} />}
         </Field>
 
         <Field invalid={validationErrors?.field === 'groundTruth'}>
-          <FieldLabel>Ground Truth (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Ground Truth (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={groundTruthValue}
             onChange={setGroundTruthValue}
@@ -84,7 +87,7 @@ export function EditModeContent({
         </Field>
 
         <Field>
-          <FieldLabel>Expected Trajectory (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Expected Trajectory (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={trajectoryValue}
             onChange={setTrajectoryValue}
@@ -94,11 +97,11 @@ export function EditModeContent({
         </Field>
 
         <Field invalid={validationErrors?.field === 'toolMocks'}>
-          <FieldLabel>Tool Mocks (JSON array, optional)</FieldLabel>
+          <FieldLabel>{studioT('Tool Mocks (JSON array, optional)')}</FieldLabel>
           <FieldDescription>
-            Ordered static mocks served in place of executing the tool. Each entry is{' '}
-            <code>{`{ "toolName", "args", "output" }`}</code>. Calling a mocked tool with non-matching args fails the
-            item; unmocked tools run live.
+            {studioT('Ordered static mocks served in place of executing the tool. Each entry is')}{' '}
+            <code>{`{ "toolName", "args", "output" }`}</code>
+            {studioT('. Calling a mocked tool with non-matching args fails the item; unmocked tools run live.')}
           </FieldDescription>
           <CodeEditor
             value={toolMocksValue}
@@ -112,7 +115,7 @@ export function EditModeContent({
         </Field>
 
         <Field>
-          <FieldLabel>Request Context (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Request Context (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={requestContextValue}
             onChange={setRequestContextValue}
@@ -122,7 +125,7 @@ export function EditModeContent({
         </Field>
 
         <Field>
-          <FieldLabel>Metadata (JSON, optional)</FieldLabel>
+          <FieldLabel>{studioT('Metadata (JSON, optional)')}</FieldLabel>
           <CodeEditor
             value={metadataValue}
             onChange={setMetadataValue}
@@ -133,10 +136,10 @@ export function EditModeContent({
 
         <div className="flex gap-2 pt-4">
           <Button icon={<IconCheckmark2Medium />} variant="primary" onClick={onSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save changes'}
+            {isSaving ? studioT('Saving...') : studioT('Save changes')}
           </Button>
           <Button icon={<IconCrossMedium />} onClick={onCancel} disabled={isSaving}>
-            Cancel
+            {studioT('Cancel')}
           </Button>
         </div>
       </div>

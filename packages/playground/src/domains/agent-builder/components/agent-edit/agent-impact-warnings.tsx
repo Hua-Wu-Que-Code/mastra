@@ -1,4 +1,8 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useStoredAgentDependents } from '@mastra/react/hooks/agents';
 
 const MAX_DEPENDENTS_SHOWN = 5;
@@ -35,6 +39,7 @@ interface AgentImpactWarningsProps {
 }
 
 export const AgentImpactWarnings = ({ agentId, variant, enabled = true }: AgentImpactWarningsProps) => {
+  useLocale();
   const { data, isLoading, isError } = useStoredAgentDependents({
     agentId: agentId,
     queryOptions: { enabled: Boolean(agentId) && enabled },
@@ -69,7 +74,7 @@ export const AgentImpactWarnings = ({ agentId, variant, enabled = true }: AgentI
           </ul>
           {overflow > 0 && (
             <Txt as="p" variant="caption" data-testid="agent-impact-dependents-more" className="mt-1">
-              and {overflow} more
+              <Trans id="and {part0} more" values={{ part0: overflow }} />
             </Txt>
           )}
         </div>

@@ -20,6 +20,8 @@ import { IconArrowDown } from '@/ds/icons/central/IconArrowDown';
 import { IconArrowUp } from '@/ds/icons/central/IconArrowUp';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const ORDERING_HINTS = {
   strict: 'Steps must run exactly in this order, with nothing in between.',
@@ -44,6 +46,7 @@ export function TrajectoryEditor({
   onStepsChange,
   toolNames,
 }: TrajectoryEditorProps) {
+  useLocale();
   const updateStep = (id: string, patch: Partial<TrajectoryStepRow>) =>
     onStepsChange(current => current.map(step => (step.id === id ? { ...step, ...patch } : step)));
   const removeStep = (id: string) => onStepsChange(current => current.filter(step => step.id !== id));
@@ -59,7 +62,7 @@ export function TrajectoryEditor({
     <div className="grid gap-4">
       <div className="grid gap-1.5">
         <SegmentedControl
-          aria-label="Step ordering"
+          aria-label={studioT('Step ordering')}
           size="sm"
           value={ordering}
           onValueChange={value => {
@@ -103,7 +106,7 @@ export function TrajectoryEditor({
           icon={<IconPlusMedium />}
           onClick={() => onStepsChange(current => [...current, newTrajectoryStep()])}
         >
-          Add step
+          {studioT('Add step')}
         </Button>
       </div>
     </div>
@@ -133,6 +136,7 @@ function TrajectoryStepItem({
   onMoveDown,
   onRemove,
 }: TrajectoryStepItemProps) {
+  useLocale();
   const label = `Step ${position}`;
   const details = recordedDetails(step);
 
@@ -152,7 +156,7 @@ function TrajectoryStepItem({
               if (stepType && isStepTypeOption(stepType)) onChange({ stepType, recorded: undefined });
             }}
           >
-            <SelectTrigger size="sm" aria-label={`${label} type`}>
+            <SelectTrigger size="sm" aria-label={studioT('{value0} type', { value0: label })}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -167,8 +171,8 @@ function TrajectoryStepItem({
         {isToolStepType(step.stepType) && toolNames.length > 0 ? (
           <div className="min-w-0 flex-1">
             <Select value={step.name} onValueChange={name => onChange({ name: name ?? '' })}>
-              <SelectTrigger size="sm" aria-label={`${label} name`}>
-                <SelectValue placeholder="Pick a tool" />
+              <SelectTrigger size="sm" aria-label={studioT('{value0} name', { value0: label })}>
+                <SelectValue placeholder={studioT('Pick a tool')} />
               </SelectTrigger>
               <SelectContent>
                 {/* Keep a name typed before switching to a tool step pickable, so it isn't silently lost. */}
@@ -183,8 +187,8 @@ function TrajectoryStepItem({
         ) : (
           <Input
             size="sm"
-            aria-label={`${label} name`}
-            placeholder={isToolStepType(step.stepType) ? 'Tool name' : 'Step name'}
+            aria-label={studioT('{value0} name', { value0: label })}
+            placeholder={isToolStepType(step.stepType) ? studioT('Tool name') : studioT('Step name')}
             value={step.name}
             onChange={event => onChange({ name: event.target.value })}
             className="min-w-0 flex-1"
@@ -194,7 +198,7 @@ function TrajectoryStepItem({
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Move ${label.toLowerCase()} up`}
+            aria-label={studioT('Move {value0} up', { value0: label.toLowerCase() })}
             disabled={isFirst}
             onClick={onMoveUp}
           >
@@ -203,13 +207,18 @@ function TrajectoryStepItem({
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Move ${label.toLowerCase()} down`}
+            aria-label={studioT('Move {value0} down', { value0: label.toLowerCase() })}
             disabled={isLast}
             onClick={onMoveDown}
           >
             <IconArrowDown />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={`Remove ${label.toLowerCase()}`} onClick={onRemove}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={studioT('Remove {value0}', { value0: label.toLowerCase() })}
+            onClick={onRemove}
+          >
             <TrashIcon />
           </Button>
         </div>
@@ -217,26 +226,26 @@ function TrajectoryStepItem({
 
       {details.length > 0 && (
         <Txt as="p" variant="caption" tone="muted" className="pl-8">
-          Also expects the recorded {details.join(', ')}
+          <Trans id="Also expects the recorded {part0}" values={{ part0: details.join(', ') }} />
         </Txt>
       )}
 
       {isToolStepType(step.stepType) && (
         <Collapsible>
           <CollapsibleTrigger
-            aria-label={`${label} expected args`}
+            aria-label={studioT('{value0} expected args', { value0: label })}
             className="flex items-center gap-1.5 rounded-sm pl-8"
           >
             <DisclosureChevron direction="right" />
             <Txt as="span" variant="caption" tone="muted">
-              Expected args
+              {studioT('Expected args')}
             </Txt>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2 pl-8">
             <CodeEditor
               value={step.toolArgs}
               onChange={toolArgs => onChange({ toolArgs })}
-              aria-label={`${label} expected args JSON`}
+              aria-label={studioT('{value0} expected args JSON', { value0: label })}
               showFormatButton={Boolean(step.toolArgs.trim())}
               className="min-h-[100px]"
             />

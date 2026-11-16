@@ -10,6 +10,10 @@ import { Txt } from '@/ds/components/Txt';
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { focusRing, transitions } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 export type TaskListItem = TaskItem;
@@ -29,6 +33,7 @@ export interface TaskListProgressProps extends Omit<ComponentProps<'span'>, 'chi
 }
 
 export const TaskListProgress = ({ tasks, className, ...props }: TaskListProgressProps) => {
+  useLocale();
   const completed = tasks.filter(task => task.status === 'completed').length;
   return (
     <TooltipProvider delayDuration={0}>
@@ -37,7 +42,7 @@ export const TaskListProgress = ({ tasks, className, ...props }: TaskListProgres
           render={
             <span
               role="progressbar"
-              aria-label="Task completion"
+              aria-label={studioT('Task completion')}
               aria-valuemin={0}
               aria-valuemax={tasks.length}
               aria-valuenow={completed}
@@ -58,7 +63,7 @@ export const TaskListProgress = ({ tasks, className, ...props }: TaskListProgres
           }
         />
         <TooltipContent>
-          {completed}/{tasks.length} completed
+          <Trans id="{part0}/{part1} completed" values={{ part0: completed, part1: tasks.length }} />
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -196,6 +201,7 @@ export const TaskList = ({
   className,
   ...props
 }: TaskListProps) => {
+  useLocale();
   const [open, setOpen] = useState(defaultOpen);
   const listId = useId();
   const completed = tasks.filter(task => task.status === 'completed').length;
@@ -218,7 +224,7 @@ export const TaskList = ({
 
   return (
     <TaskListContainer
-      aria-label="Task list"
+      aria-label={studioT('Task list')}
       data-testid="task-list"
       data-collapsed={open ? undefined : ''}
       onClick={open ? undefined : () => changeOpen(true)}
@@ -264,7 +270,7 @@ export const TaskList = ({
         </div>
         <button
           type="button"
-          aria-label={open ? 'Collapse tasks' : 'Show all tasks'}
+          aria-label={open ? studioT('Collapse tasks') : studioT('Show all tasks')}
           aria-expanded={open}
           aria-controls={listId}
           onClick={event => {

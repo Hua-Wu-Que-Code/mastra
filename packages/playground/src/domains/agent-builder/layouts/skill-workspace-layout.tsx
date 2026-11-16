@@ -1,6 +1,8 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
@@ -38,6 +40,7 @@ export const SkillWorkspaceLayout = ({
   form,
   deleteAction,
 }: SkillWorkspaceLayoutProps) => {
+  useLocale();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>('chat');
 
@@ -49,7 +52,7 @@ export const SkillWorkspaceLayout = ({
           size="icon-sm"
           variant="ghost"
           onClick={() => navigate('/agent-builder/skills', { viewTransition: true })}
-          tooltip="Skills list"
+          tooltip={studioT('Skills list')}
           data-testid="skill-edit-back-button"
         >
           <IconArrowLeft />
@@ -70,7 +73,7 @@ export const SkillWorkspaceLayout = ({
         <div className="px-4 pt-4 pb-2 md:hidden">
           <div
             role="tablist"
-            aria-label="Workspace view"
+            aria-label={studioT('Workspace view')}
             className={cn(
               raisedSurfaceStyle,
               'relative mx-auto flex h-control-lg w-full max-w-sm items-center rounded-full p-0.5',
@@ -98,7 +101,7 @@ export const SkillWorkspaceLayout = ({
               )}
             >
               <Txt as="span" variant="subheading" className="block">
-                Chat
+                {studioT('Chat')}
               </Txt>
             </button>
             <button
@@ -115,7 +118,7 @@ export const SkillWorkspaceLayout = ({
               )}
             >
               <Txt as="span" variant="subheading" className="block">
-                Configuration
+                {studioT('Configuration')}
               </Txt>
             </button>
           </div>

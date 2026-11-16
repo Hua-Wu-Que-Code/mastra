@@ -5,12 +5,14 @@ import { CodeEditor } from '@mastra/playground-ui/components/CodeEditor';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@mastra/playground-ui/components/Collapsible';
 import { DisclosureChevron } from '@mastra/playground-ui/components/DisclosureChevron';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 /** Prefix the server stamps on occurrences sent with "Send test event". */
 export const TEST_EVENT_ID_PREFIX = 'mastra-test-';
 
 /** One occurrence: id, time and a test badge; its data expands below. */
 export function McpEventOccurrenceRow({ occurrence }: { occurrence: McpServerEventOccurrence }) {
+  useLocale();
   return (
     <Card>
       <Collapsible>
@@ -21,7 +23,7 @@ export function McpEventOccurrenceRow({ occurrence }: { occurrence: McpServerEve
           </Txt>
           {occurrence.eventId.startsWith(TEST_EVENT_ID_PREFIX) && (
             <Badge size="xs" variant="amber" emphasis="subtle">
-              test
+              {studioT('test')}
             </Badge>
           )}
           <Txt as="span" variant="caption" font="mono" tone="muted" className="shrink-0">
@@ -36,7 +38,7 @@ export function McpEventOccurrenceRow({ occurrence }: { occurrence: McpServerEve
             lineNumbers={false}
             showCopyButton={false}
             variant="embedded"
-            aria-label={`Event ${occurrence.eventId} data`}
+            aria-label={studioT('Event {value0} data', { value0: occurrence.eventId })}
             className="px-3 pb-3"
           />
         </CollapsibleContent>

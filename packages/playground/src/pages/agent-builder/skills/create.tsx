@@ -1,5 +1,7 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useStoredSkills } from '@mastra/react/hooks/agents';
 import { useStoredWorkspaces } from '@mastra/react/hooks/workspace';
 import { Navigate, useNavigate } from 'react-router';
@@ -8,6 +10,7 @@ import { useBuilderSettings } from '@/domains/agent-builder/hooks/use-builder-se
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
 export default function AgentBuilderSkillsCreate() {
+  useLocale();
   const { hasPermission, rbacEnabled } = usePermissions();
   const canWrite = !rbacEnabled || hasPermission('stored-skills:write');
   // Warm caches the edit page needs on first paint.
@@ -30,7 +33,7 @@ export default function AgentBuilderSkillsCreate() {
               viewTransition: true,
             })
           }
-          tooltip="Skills list"
+          tooltip={studioT('Skills list')}
         >
           <IconArrowLeft />
         </Button>

@@ -7,6 +7,8 @@ import {
   jsonSchemaToFields,
 } from '@mastra/playground-ui/components/JSONSchemaForm';
 import type { SchemaField } from '@mastra/playground-ui/components/JSONSchemaForm';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { JsonSchema } from '@mastra/playground-ui/utils/json-schema';
 import { Ajv } from 'ajv';
@@ -57,6 +59,7 @@ function parseSchemaText(text: string): { schema: SchemaValue; error: string | n
  * The visual editor only owns its initial fields, so a JSON edit remounts it with the parsed fields.
  */
 export function SchemaEditorPane({ label, value, onChange, onValidityChange }: SchemaEditorPaneProps) {
+  useLocale();
   const [jsonText, setJsonText] = useState(() => stringify(value));
   const [parseError, setParseError] = useState<string | null>(null);
   const [form, setForm] = useState(() => ({ key: 0, fields: toFields(value) }));
@@ -105,13 +108,13 @@ export function SchemaEditorPane({ label, value, onChange, onValidityChange }: S
             )}
           </JSONSchemaForm.FieldList>
           <JSONSchemaForm.AddField variant="ghost" size="sm" className="mt-2">
-            Add field
+            {studioT('Add field')}
           </JSONSchemaForm.AddField>
         </JSONSchemaForm.Root>
       </Card>
 
       <Field invalid={Boolean(parseError)} className="flex min-h-0 flex-col">
-        <FieldLabel className="sr-only">{`${label} JSON`}</FieldLabel>
+        <FieldLabel className="sr-only">{studioT('{value0} JSON', { value0: label })}</FieldLabel>
         <CodeEditor
           value={jsonText}
           onChange={handleJsonChange}
@@ -126,12 +129,13 @@ export function SchemaEditorPane({ label, value, onChange, onValidityChange }: S
 }
 
 function SchemaFieldRow({ field, parentPath, depth }: { field: SchemaField; parentPath: string[]; depth: number }) {
+  useLocale();
   return (
     <JSONSchemaForm.Field field={field} parentPath={parentPath} depth={depth}>
       <div className="flex flex-wrap items-center gap-2 py-1">
         <div className="flex min-w-48 flex-1 items-center gap-2">
-          <JSONSchemaForm.FieldName placeholder="Field name" className="min-w-0 flex-1" />
-          <JSONSchemaForm.FieldType placeholder="Type" />
+          <JSONSchemaForm.FieldName placeholder={studioT('Field name')} className="min-w-0 flex-1" />
+          <JSONSchemaForm.FieldType placeholder={studioT('Type')} />
         </div>
         <div className="flex items-center gap-2">
           <JSONSchemaForm.FieldOptional />
@@ -151,7 +155,7 @@ function SchemaFieldRow({ field, parentPath, depth }: { field: SchemaField; pare
           )}
         </JSONSchemaForm.FieldList>
         <JSONSchemaForm.AddField variant="ghost" size="sm">
-          Add nested field
+          {studioT('Add nested field')}
         </JSONSchemaForm.AddField>
       </JSONSchemaForm.NestedFields>
     </JSONSchemaForm.Field>

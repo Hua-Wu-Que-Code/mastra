@@ -11,6 +11,8 @@ import { FormSubmitRow } from '@mastra/playground-ui/lib/form/components/form-su
 import { DynamicForm } from '@mastra/playground-ui/lib/form/dynamic-form';
 import { isEmptyZodObject } from '@mastra/playground-ui/lib/form/is-empty-zod-object';
 import { getFormShapeError, parseJsonDraft, validateJsonDraft } from '@mastra/playground-ui/lib/form/json-draft';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { SettingsContainer, SettingsGroup, SettingsTitle } from '@mastra/playground-ui/new/settings';
 import { useRef, useState } from 'react';
 import type { ZodType } from 'zod';
@@ -36,6 +38,7 @@ export function ToolRequest({
   requestContextEntityType,
   requestContextEntityId,
 }: ToolRequestProps) {
+  useLocale();
   const hasInputFields = !isEmptyZodObject(zodInputSchema);
   const [draft, setDraft] = useState<RequestDraft>({ view: 'form', value: undefined });
   // The Form view is uncontrolled: state here would only re-render this tree on every keystroke.
@@ -64,7 +67,7 @@ export function ToolRequest({
 
   const submitProps = {
     isSubmitLoading: isRunning,
-    submitButtonLabel: 'Run',
+    submitButtonLabel: studioT('Run'),
     submitButtonIcon: <IconPlay />,
     submitButtonVariant: 'primary',
   } as const;
@@ -81,7 +84,7 @@ export function ToolRequest({
                   <Icon size="sm">
                     <IconInputForm />
                   </Icon>
-                  Form
+                  {studioT('Form')}
                 </Tab>
                 <Tab value="json" disabled={isRunning}>
                   <Icon size="sm">
@@ -94,7 +97,7 @@ export function ToolRequest({
           </div>
         }
       >
-        <SettingsTitle>Request</SettingsTitle>
+        <SettingsTitle>{studioT('Request')}</SettingsTitle>
       </ToolSectionHeader>
       <SettingsContainer>
         <div className="p-4">
@@ -110,7 +113,7 @@ export function ToolRequest({
                     setErrors([]);
                   }}
                   editable={!isRunning}
-                  aria-label="Request JSON"
+                  aria-label={studioT('Request JSON')}
                 />
                 {errors.length > 0 && (
                   <FieldError>
@@ -138,7 +141,7 @@ export function ToolRequest({
             >
               {!hasInputFields && (
                 <Txt variant="body-sm" tone="muted" className="pb-4">
-                  This tool takes no input. Run it as is.
+                  {studioT('This tool takes no input. Run it as is.')}
                 </Txt>
               )}
             </DynamicForm>

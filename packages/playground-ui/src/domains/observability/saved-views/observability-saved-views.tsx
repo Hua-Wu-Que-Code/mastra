@@ -6,6 +6,8 @@ import { useHostedSavedViews } from './use-hosted-saved-views';
 import type { SavedViewColumnsControl } from './use-hosted-saved-views';
 import { useObservabilityHeaderSlot } from '@/domains/observability/components/observability-header-slot';
 import { SavedViewPicker } from '@/ds/components/SavedViews/saved-view-picker';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import type { SetURLSearchParamsLike } from '@/lib/sort/use-url-sort';
 import { cn } from '@/lib/utils';
 
@@ -53,6 +55,7 @@ function HostedSavedViewsBar({
   canEdit,
   canCreate = true,
 }: ObservabilitySavedViewsProps & SavedViewsContextValue) {
+  useLocale();
   const headerSlot = useObservabilityHeaderSlot();
   const views = useHostedSavedViews({
     page,
@@ -70,7 +73,7 @@ function HostedSavedViewsBar({
     <SavedViewPicker
       views={views}
       defaultLabel={DEFAULT_LABELS[page]}
-      aria-label="Saved views"
+      aria-label={studioT('Saved views')}
       newViewSettings={{ state: { schemaVersion: 1, page, filters: [] } }}
       describeView={view => (view.settings.record?.scope === 'org' ? 'Shared' : undefined)}
       canEdit={view => !canEdit || !view.settings.record || canEdit(view.settings.record)}

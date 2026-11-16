@@ -6,15 +6,31 @@ import { IconChatBubbles } from '@/ds/icons/central/IconChatBubbles';
 import { IconGanttChart } from '@/ds/icons/central/IconGanttChart';
 import { Icon } from '@/ds/icons/Icon';
 import { TraceIcon } from '@/ds/icons/TraceIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type ObservabilityView = 'traces' | 'spans' | 'threads';
 
 const DEFAULT_VIEWS: ObservabilityView[] = ['traces', 'spans'];
 
 const VIEW_TABS: Record<ObservabilityView, { icon: ReactNode; label: string }> = {
-  traces: { icon: <TraceIcon />, label: 'Traces' },
-  spans: { icon: <IconGanttChart />, label: 'Spans' },
-  threads: { icon: <IconChatBubbles />, label: 'Threads' },
+  traces: {
+    icon: <TraceIcon />,
+    get label() {
+      return studioT('Traces');
+    },
+  },
+  spans: {
+    icon: <IconGanttChart />,
+    get label() {
+      return studioT('Spans');
+    },
+  },
+  threads: {
+    icon: <IconChatBubbles />,
+    get label() {
+      return studioT('Threads');
+    },
+  },
 };
 
 export interface TracesSpansSwitchProps {
@@ -26,8 +42,9 @@ export interface TracesSpansSwitchProps {
 
 /** Page tabs between the observability lists. The host decides what switching a view does. */
 export function TracesSpansSwitch({ current, views = DEFAULT_VIEWS, onViewChange }: TracesSpansSwitchProps) {
+  useLocale();
   return (
-    <nav aria-label="Observability views">
+    <nav aria-label={studioT('Observability views')}>
       <Tabs value={current} defaultTab={current} onValueChange={onViewChange}>
         <TabList variant="pill-ghost">
           {views.map(view => (
@@ -46,8 +63,9 @@ export function TracesSpansSwitch({ current, views = DEFAULT_VIEWS, onViewChange
 
 /** Holds the tabs' place while the store capabilities that decide whether they show are loading. */
 export function TracesSpansSwitchSkeleton() {
+  useLocale();
   return (
-    <div role="status" aria-label="Loading views" className="flex min-h-control-md items-center gap-0.5">
+    <div role="status" aria-label={studioT('Loading views')} className="flex min-h-control-md items-center gap-0.5">
       <Skeleton className="h-control-md w-20 rounded-full" />
       <Skeleton className="h-control-md w-20 rounded-full" />
     </div>

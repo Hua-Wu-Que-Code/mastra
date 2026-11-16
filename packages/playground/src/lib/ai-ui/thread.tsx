@@ -36,11 +36,15 @@ import { MessageRow } from '@mastra/playground-ui/domains/chat/messages/message-
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { IconArrowUp } from '@mastra/playground-ui/icons/central/IconArrowUp';
 import { IconMicrophone } from '@mastra/playground-ui/icons/central/IconMicrophone';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
+
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { useSpeechRecognition } from '@mastra/react';
 import { useReadAloud } from '@mastra/react/hooks/voice';
-
 import type { MessageFactoryPart } from '@mastra/react/ui';
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AttachFileMenu } from './attachments/attach-file-menu';
@@ -51,6 +55,7 @@ import { BracketOverlay } from './components/bracket-overlay';
 import { useComposerAutofocus } from './hooks/use-composer-autofocus';
 import { SuggestedPromptList } from './suggested-prompt-list';
 import { TaskPanel } from './task-panel';
+import { useAccount } from '@/domains/account/account-context';
 import { BrowserThumbnail, useBrowserSession } from '@/domains/agents';
 import { AgentChannelsCard } from '@/domains/agents/components/agent-channels/agent-channels-card';
 import { ChatMessagesLoadingSkeleton } from '@/domains/agents/components/agent-loading-skeletons';
@@ -137,6 +142,7 @@ const ThreadContent = ({
   onLoadPrevious,
   isLoadingPrevious,
 }: ThreadProps) => {
+  useLocale();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { draft, updateDraft } = useThreadInput(threadId);
 
@@ -148,7 +154,7 @@ const ThreadContent = ({
     readAloud,
     stop: stopSpeaking,
   } = useReadAloud(agentId, requestContext, {
-    onError: error => toast.error(error instanceof Error ? error.message : 'Voice generation failed.'),
+    onError: error => toast.error(error instanceof Error ? error.message : studioT('Voice generation failed.')),
   });
 
   const { hasSession, viewMode } = useBrowserSession();
@@ -219,7 +225,7 @@ const ThreadContent = ({
                 <ChatShell.Column
                   data-testid="thread-history-older-skeleton"
                   aria-busy="true"
-                  aria-label="Loading older messages"
+                  aria-label={studioT('Loading older messages')}
                   className="py-3"
                 >
                   <ChatMessagesLoadingSkeleton />
@@ -320,6 +326,7 @@ export const Thread = (props: ThreadProps) => (
 );
 
 const ThreadWelcome = ({ agentName }: { agentName?: string }) => {
+  useLocale();
   return (
     <div data-testid="thread-welcome" className="flex w-full flex-col items-center gap-4">
       <div className="starter-heading">
@@ -331,7 +338,10 @@ const ThreadWelcome = ({ agentName }: { agentName?: string }) => {
         tone="muted"
         className="starter-heading mx-auto max-w-2xl text-center font-normal text-balance"
       >
-        What can <span className="font-medium text-foreground">{agentName || 'this agent'}</span> do for you today?
+        <Trans
+          id="What can {part0} do for you today?"
+          values={{ part0: <span className="font-medium text-foreground">{agentName || studioT('this agent')}</span> }}
+        />
       </Txt>
     </div>
   );
@@ -354,6 +364,7 @@ const AgentComposer = ({
   runOptionsSlot,
   refreshThreadList,
 }: AgentComposerProps) => {
+  useLocale();
   const { threadInput: text, setThreadInput, updateDraft, draftStatus } = useThreadInput(threadId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { annotations, takeAnnotations, restoreAnnotations } = useChatAnnotations();
@@ -370,6 +381,7 @@ const AgentComposer = ({
   const { attachments, toCoreUserMessages, clear, restore, isAddingAttachments } = useComposerAttachments();
   const { isRunning, canSendWhileStreaming, cancelRun } = useChatRunning();
   const [sendPulseKey, setSendPulseKey] = useState(0);
+  const account = useAccount();
   const { canExecute } = usePermissions();
   const canExecuteAgent = canExecute('agents');
   const inputDisabled = !canExecuteAgent || Boolean(draftStatus?.restoring);
@@ -380,7 +392,8 @@ const AgentComposer = ({
 
   const isEmpty = text.trim().length === 0 && attachments.length === 0 && annotations.length === 0;
   const sendBlocked = isRunning && !canSendWhileStreaming;
-  const showModelSwitcher = Boolean(agentId && !hasModelList && !hideModelSwitcher);
+  const canSelectModel = !account || account.user.role === 'admin';
+  const showModelSwitcher = Boolean(canSelectModel && agentId && !hasModelList && !hideModelSwitcher);
   const shownError = submitError || draftStatus?.error;
 
   const submit = async () => {
@@ -453,7 +466,7 @@ const AgentComposer = ({
       )}
       {draftStatus?.restoring && (
         <Txt variant="caption" role="status" className="sr-only">
-          Restoring draft…
+          {studioT('Restoring draft…')}
         </Txt>
       )}
       <ComposerFileDrop disabled={!canExecuteAgent || draftStatus?.restoring}>
@@ -471,7 +484,11 @@ const AgentComposer = ({
               <ComposerInput
                 ref={textareaRef}
                 value={text}
-                placeholder={canExecuteAgent ? 'Enter your message' : "You don't have permission to execute agents"}
+                placeholder={
+                  canExecuteAgent
+                    ? studioT('Enter your message')
+                    : studioT("You don't have permission to execute agents")
+                }
                 onChange={event => {
                   setThreadInput(event.target.value);
                 }}
@@ -515,6 +532,7 @@ const AgentComposer = ({
 };
 
 const SpeechInput = ({ agentId, onTranscript }: { agentId?: string; onTranscript: (text: string) => void }) => {
+  useLocale();
   const [requestContext] = useEntityRequestContext('agent', agentId ?? '');
   const { start, stop, isListening } = useSpeechRecognition({ agentId, requestContext });
 
@@ -523,7 +541,7 @@ const SpeechInput = ({ agentId, onTranscript }: { agentId?: string; onTranscript
       variant="ghost"
       size="icon-md"
       type="button"
-      tooltip={isListening ? 'Stop dictation' : 'Start dictation'}
+      tooltip={isListening ? studioT('Stop dictation') : studioT('Start dictation')}
       onClick={() => (isListening ? stop() : start(onTranscript))}
     >
       {isListening ? <CircleStopIcon /> : <IconMicrophone />}
@@ -598,6 +616,7 @@ const ComposerSendButton = ({
   canSendWhileStreaming,
   onCancel,
 }: ComposerSendButtonProps) => {
+  useLocale();
   const { isAddingAttachments } = useComposerAttachments();
   const draftCanSteerRun = canSendWhileStreaming && !isEmpty;
   if (isRunning && !draftCanSteerRun) {
@@ -606,7 +625,7 @@ const ComposerSendButton = ({
         variant="primary"
         size="icon-md"
         type="button"
-        tooltip="Cancel"
+        tooltip={studioT('Cancel')}
         onClick={event => {
           // Send turns into Cancel under the pointer: a double-click on Send must not cancel.
           if (event.detail > 1) return;
@@ -623,7 +642,7 @@ const ComposerSendButton = ({
       type="submit"
       variant="primary"
       size="icon-md"
-      tooltip={canExecute ? 'Send' : 'No permission to execute'}
+      tooltip={canExecute ? studioT('Send') : studioT('No permission to execute')}
       disabled={!canExecute || isEmpty || isAddingAttachments}
     >
       <IconArrowUp />

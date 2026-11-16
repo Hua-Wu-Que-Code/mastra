@@ -1,3 +1,4 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { JSONSchema7 } from 'json-schema';
 
 /**
@@ -8,11 +9,15 @@ const CONTENT_SCHEMA: JSONSchema7 = {
     { type: 'string' },
     {
       type: 'object',
-      description: 'Structured content (format 2 with parts)',
+      get description() {
+        return studioT('Structured content (format 2 with parts)');
+      },
     },
     {
       type: 'array',
-      description: 'Content parts array',
+      get description() {
+        return studioT('Content parts array');
+      },
       items: { type: 'object' },
     },
   ],
@@ -32,21 +37,29 @@ const MESSAGE_SCHEMA: JSONSchema7 = {
  */
 const SCORER_RUN_INPUT_FOR_AGENT: JSONSchema7 = {
   type: 'object',
-  description: 'ScorerRunInputForAgent',
+  get description() {
+    return studioT('ScorerRunInputForAgent');
+  },
   properties: {
     inputMessages: {
       type: 'array',
-      description: 'User input messages (MastraDBMessage[])',
+      get description() {
+        return studioT('User input messages (MastraDBMessage[])');
+      },
       items: MESSAGE_SCHEMA,
     },
     rememberedMessages: {
       type: 'array',
-      description: 'Messages from memory (MastraDBMessage[])',
+      get description() {
+        return studioT('Messages from memory (MastraDBMessage[])');
+      },
       items: MESSAGE_SCHEMA,
     },
     systemMessages: {
       type: 'array',
-      description: 'System messages (CoreMessage[])',
+      get description() {
+        return studioT('System messages (CoreMessage[])');
+      },
       items: {
         type: 'object',
         properties: {
@@ -58,7 +71,9 @@ const SCORER_RUN_INPUT_FOR_AGENT: JSONSchema7 = {
     },
     taggedSystemMessages: {
       type: 'object',
-      description: 'Tagged system messages (Record<string, CoreSystemMessage[]>)',
+      get description() {
+        return studioT('Tagged system messages (Record<string, CoreSystemMessage[]>)');
+      },
       additionalProperties: {
         type: 'array',
         items: {
@@ -81,7 +96,9 @@ const SCORER_RUN_INPUT_FOR_AGENT: JSONSchema7 = {
  */
 const SCORER_RUN_OUTPUT_FOR_AGENT: JSONSchema7 = {
   type: 'array',
-  description: 'ScorerRunOutputForAgent (MastraDBMessage[])',
+  get description() {
+    return studioT('ScorerRunOutputForAgent (MastraDBMessage[])');
+  },
   items: MESSAGE_SCHEMA,
 };
 
@@ -93,22 +110,30 @@ const SCORER_RUN_OUTPUT_FOR_AGENT: JSONSchema7 = {
 const SCORER_AGENT_INPUT_SCHEMA: JSONSchema7 = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   type: 'object',
-  description: 'Scorer input for agent-type scorers (scoringInputSchema)',
+  get description() {
+    return studioT('Scorer input for agent-type scorers (scoringInputSchema)');
+  },
   properties: {
     runId: {
       type: 'string',
-      description: 'Run ID (optional)',
+      get description() {
+        return studioT('Run ID (optional)');
+      },
     },
     input: SCORER_RUN_INPUT_FOR_AGENT,
     output: SCORER_RUN_OUTPUT_FOR_AGENT,
     additionalContext: {
       type: 'object',
-      description: 'Additional context (optional)',
+      get description() {
+        return studioT('Additional context (optional)');
+      },
       additionalProperties: true,
     },
     requestContext: {
       type: 'object',
-      description: 'Request context (optional)',
+      get description() {
+        return studioT('Request context (optional)');
+      },
       additionalProperties: true,
     },
   },
@@ -123,26 +148,38 @@ const SCORER_AGENT_INPUT_SCHEMA: JSONSchema7 = {
 const SCORER_CUSTOM_INPUT_SCHEMA: JSONSchema7 = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   type: 'object',
-  description: 'Scorer input for custom scorers (scoringInputSchema)',
+  get description() {
+    return studioT('Scorer input for custom scorers (scoringInputSchema)');
+  },
   properties: {
     runId: {
       type: 'string',
-      description: 'Run ID (optional)',
+      get description() {
+        return studioT('Run ID (optional)');
+      },
     },
     input: {
-      description: 'Input to the entity being scored (any)',
+      get description() {
+        return studioT('Input to the entity being scored (any)');
+      },
     },
     output: {
-      description: 'Output from the entity being scored (any)',
+      get description() {
+        return studioT('Output from the entity being scored (any)');
+      },
     },
     additionalContext: {
       type: 'object',
-      description: 'Additional context (optional)',
+      get description() {
+        return studioT('Additional context (optional)');
+      },
       additionalProperties: true,
     },
     requestContext: {
       type: 'object',
-      description: 'Request context (optional)',
+      get description() {
+        return studioT('Request context (optional)');
+      },
       additionalProperties: true,
     },
   },
@@ -155,7 +192,9 @@ const SCORER_CUSTOM_INPUT_SCHEMA: JSONSchema7 = {
  */
 const SCORER_OUTPUT_SCHEMA: JSONSchema7 = {
   $schema: 'http://json-schema.org/draft-07/schema#',
-  description: 'Scorer ground truth (any shape)',
+  get description() {
+    return studioT('Scorer ground truth (any shape)');
+  },
 };
 
 /**

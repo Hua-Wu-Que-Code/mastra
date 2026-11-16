@@ -14,6 +14,7 @@ import { presentTool, ToolCallOutput } from '@/ds/components/ai/tool-call';
 import { MarkdownRenderer } from '@/ds/components/MarkdownRenderer';
 import { Metadata } from '@/ds/components/Metadata';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /** The tools `Knowledge.createTools()` gives an agent. */
 export const KNOWLEDGE_TOOLS = new Set([
@@ -239,6 +240,7 @@ const DEPTH_INDENT = ['', 'pl-4', 'pl-8'] as const;
 
 /** A `knowledge_list` result as an indented tree: each name links to its page (scopes to their scope page), with its ref and child count. */
 function ListTree({ entries }: { entries: ListEntry[] }) {
+  useLocale();
   return (
     <ul className="flex max-h-64 flex-col gap-1 overflow-auto" data-testid="knowledge-list-entries">
       {entries.map((entry, index) => (
@@ -253,7 +255,7 @@ function ListTree({ entries }: { entries: ListEntry[] }) {
             {entry.ref !== entry.name ? <Meta>{entry.ref}</Meta> : null}
             {entry.children ? (
               <Meta>
-                {entry.children} {entry.children === 1 ? 'child' : 'children'}
+                {entry.children} {entry.children === 1 ? studioT('child') : studioT('children')}
               </Meta>
             ) : null}
           </div>
@@ -303,7 +305,9 @@ export function knowledgeCard(
       if (!Array.isArray(output.results)) return null;
       const hits = output.results.filter(isRecord);
       return {
-        title: 'Searched Knowledge',
+        get title() {
+          return studioT('Searched Knowledge');
+        },
         detail: str(args.query),
         body: hits.length ? (
           <ul className="flex flex-col gap-1.5">
@@ -323,7 +327,7 @@ export function knowledgeCard(
             })}
           </ul>
         ) : (
-          <Meta>No matches</Meta>
+          <Meta>{studioT('No matches')}</Meta>
         ),
       };
     }
@@ -333,7 +337,9 @@ export function knowledgeCard(
         if (!Array.isArray(output.scopes)) return null;
         const scopes = output.scopes.filter(isRecord);
         return {
-          title: 'Listed Knowledge scopes',
+          get title() {
+            return studioT('Listed Knowledge scopes');
+          },
           body: (
             <ul className="flex flex-col gap-1">
               {scopes.map(scope => (
@@ -356,7 +362,9 @@ export function knowledgeCard(
       const mentionedIn = asNotes(output.mentionedIn);
       const childScopes = Array.isArray(output.childScopes) ? output.childScopes.filter(isRecord) : [];
       return {
-        title: 'Read',
+        get title() {
+          return studioT('Read');
+        },
         detail: withExtent(page.name, extent),
         body: (
           <div className="flex flex-col gap-2">
@@ -366,10 +374,15 @@ export function knowledgeCard(
             {page.body ? <Body markdown={page.body} refIds={resultRefIds(page, [...notes, ...mentionedIn])} /> : null}
             <ReadLines page={output.page} />
             {notes.length ? <NoteList notes={notes} /> : null}
-            {children.length ? <Meta>Child pages: {children.map(child => child.name).join(', ')}</Meta> : null}
+            {children.length ? (
+              <Meta>
+                {studioT('Child pages:') + ' '}
+                {children.map(child => child.name).join(', ')}
+              </Meta>
+            ) : null}
             {childScopes.length ? (
               <Meta>
-                Child scopes:{' '}
+                {studioT('Child scopes:')}{' '}
                 {childScopes
                   .map(scope =>
                     scope.address ? `${String(scope.name)} (${String(scope.address)})` : String(scope.name),
@@ -379,7 +392,7 @@ export function knowledgeCard(
             ) : null}
             {mentionedIn.length ? (
               <div className="flex flex-col gap-1">
-                <Meta>Mentioned in</Meta>
+                <Meta>{studioT('Mentioned in')}</Meta>
                 <NoteList notes={mentionedIn} />
               </div>
             ) : null}
@@ -393,7 +406,13 @@ export function knowledgeCard(
       const op = str(args.op);
       if (op === 'delete') {
         // The page no longer exists, so name it without a link.
-        return { title: 'Deleted page', detail: page.name, body: <PageLine page={page} linked={false} /> };
+        return {
+          get title() {
+            return studioT('Deleted page');
+          },
+          detail: page.name,
+          body: <PageLine page={page} linked={false} />,
+        };
       }
       const title =
         op === 'move' ? 'Moved page' : op === 'merge' ? 'Merged page' : args.page ? 'Updated page' : 'Created page';
@@ -407,8 +426,18 @@ export function knowledgeCard(
           <div className="flex flex-col gap-2">
             <PageLine page={page} />
             {extent ? <Meta>{extent.summary}</Meta> : null}
-            {op === 'merge' && str(args.page) ? <Meta>Merged {str(args.page)} into this page</Meta> : null}
-            {typeof page.version === 'number' ? <Meta>Version {page.version}</Meta> : null}
+            {op === 'merge' && str(args.page) ? (
+              <Meta>
+                {studioT('Merged') + ' '}
+                {str(args.page)} {' ' + studioT('into this page')}
+              </Meta>
+            ) : null}
+            {typeof page.version === 'number' ? (
+              <Meta>
+                {studioT('Version') + ' '}
+                {page.version}
+              </Meta>
+            ) : null}
             {description ? <Meta>{description}</Meta> : null}
             {body ? <Body markdown={body} refIds={resultRefIds(page, [])} /> : null}
           </div>
@@ -416,13 +445,24 @@ export function knowledgeCard(
       };
     }
     case 'knowledge_note': {
-      if (str(output.removed)) return { title: 'Removed note', body: <Meta>Note {String(output.removed)}</Meta> };
+      if (str(output.removed))
+        return {
+          get title() {
+            return studioT('Removed note');
+          },
+          body: (
+            <Meta>
+              {studioT('Note') + ' '}
+              {String(output.removed)}
+            </Meta>
+          ),
+        };
       const [note] = asNotes([output.note]);
       if (!note) return null;
       const pageRef = str(args.page);
       const pageId = str(output.page);
       return {
-        title: str(args.op) === 'restamp' ? 'Restamped note' : 'Added note',
+        title: str(args.op) === 'restamp' ? studioT('Restamped note') : studioT('Added note'),
         detail: pageRef,
         body: (
           <div className="flex flex-col gap-1">
@@ -431,7 +471,8 @@ export function knowledgeCard(
             </Txt>
             {pageId ? (
               <Meta>
-                On <PageLink page={{ id: pageId, name: pageRef ?? 'the page' }} />
+                {studioT('On') + ' '}
+                <PageLink page={{ id: pageId, name: pageRef ?? 'the page' }} />
               </Meta>
             ) : null}
           </div>
@@ -444,14 +485,18 @@ export function knowledgeCard(
       const pageRef = str(args.page);
       const audience = output.audience.filter((entry): entry is string => typeof entry === 'string');
       return {
-        title: str(args.op) === 'unpin' ? 'Unpinned page' : 'Pinned page',
+        title: str(args.op) === 'unpin' ? studioT('Unpinned page') : studioT('Pinned page'),
         detail: pageRef,
         body: (
           <div className="flex flex-col gap-1">
             <Meta>
               <PageLink page={{ id: pageId, name: pageRef ?? 'the page' }} />
             </Meta>
-            <Meta>{audience.length ? `Pinned for ${audience.join(', ')}` : 'No longer pinned for anyone'}</Meta>
+            <Meta>
+              {audience.length
+                ? studioT('Pinned for {value0}', { value0: audience.join(', ') })
+                : studioT('No longer pinned for anyone')}
+            </Meta>
           </div>
         ),
       };
@@ -462,12 +507,16 @@ export function knowledgeCard(
       const from = str(args.from);
       const more = str(output.nextCursor) || output.more !== undefined;
       return {
-        title: from ? 'Listed pages' : 'Listed Knowledge scopes',
+        title: from ? studioT('Listed pages') : studioT('Listed Knowledge scopes'),
         detail: from,
         body: (
           <div className="flex flex-col gap-2">
-            {entries.length ? <ListTree entries={entries} /> : <Meta>{from ? 'No pages under it' : 'No scopes'}</Meta>}
-            {more ? <Meta>More entries not shown</Meta> : null}
+            {entries.length ? (
+              <ListTree entries={entries} />
+            ) : (
+              <Meta>{from ? studioT('No pages under it') : studioT('No scopes')}</Meta>
+            )}
+            {more ? <Meta>{studioT('More entries not shown')}</Meta> : null}
           </div>
         ),
       };

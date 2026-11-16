@@ -9,6 +9,8 @@ import { SpanTimelineRow, TimelineGridlines } from './span-timeline-row';
 import { TimelineTimingRows } from './trace-span-timeline-markers';
 import { TraceSpanTreeLoading } from './trace-span-tree';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /** Axis ticks are approximate gridline marks, so two decimals are enough: `250 ms`, `3.74 s`. */
@@ -53,6 +55,7 @@ export function TraceSpanTimeline({
   leadingSlot,
   streamingTimings,
 }: TraceSpanTimelineProps) {
+  useLocale();
   if (isLoading) return <TraceSpanTreeLoading />;
 
   const overallLatency = getOverallLatency(hierarchicalSpans);
@@ -65,7 +68,7 @@ export function TraceSpanTimeline({
         {/* Header row: empty name cell, then the axis on the same track as the bars. */}
         <div />
         <div className={TIMELINE_TRACK_PADDING}>
-          <div aria-label="Trace time axis" className="relative h-6 tabular-nums">
+          <div aria-label={studioT('Trace time axis')} className="relative h-6 tabular-nums">
             <TimelineGridlines />
             {TIMELINE_TICKS.map((tick, index) => (
               <Txt

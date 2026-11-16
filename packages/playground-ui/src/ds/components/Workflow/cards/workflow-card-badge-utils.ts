@@ -11,6 +11,7 @@ import { IconListBullets } from '@/ds/icons/central/IconListBullets';
 import { IconPlayCircle } from '@/ds/icons/central/IconPlayCircle';
 import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
+import { t as studioT } from '@/lib/i18n';
 
 export type WorkflowCardIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -108,7 +109,7 @@ export const getConditionIndicator = (type?: string): WorkflowCardIndicator | un
 
   return {
     id: `condition-${type}`,
-    label: CONDITION_LABELS[type] ?? `${type} condition`,
+    label: CONDITION_LABELS[type] ?? studioT('{value0} condition', { value0: type }),
     icon,
     color,
   };
@@ -164,7 +165,7 @@ export const getNodeIndicators = (props: WorkflowCardBadgesProps): WorkflowCardI
   if (isSleepNode) {
     indicators.push({
       id: props.date ? 'sleep-until' : 'sleep',
-      label: props.date ? 'Sleep until step' : 'Sleep step',
+      label: props.date ? studioT('Sleep until step') : studioT('Sleep step'),
       icon: props.date ? BADGE_ICONS.sleepUntil : BADGE_ICONS.sleep,
       color: BADGE_COLORS.sleep,
     });
@@ -173,7 +174,9 @@ export const getNodeIndicators = (props: WorkflowCardBadgesProps): WorkflowCardI
   if (props.canSuspend) {
     indicators.push({
       id: 'suspend',
-      label: 'Suspend/resume step',
+      get label() {
+        return studioT('Suspend/resume step');
+      },
       icon: BADGE_ICONS.suspend,
       color: BADGE_COLORS.suspend,
     });
@@ -182,7 +185,9 @@ export const getNodeIndicators = (props: WorkflowCardBadgesProps): WorkflowCardI
   if (props.isParallel) {
     indicators.push({
       id: 'parallel',
-      label: 'Parallel step',
+      get label() {
+        return studioT('Parallel step');
+      },
       icon: BADGE_ICONS.parallel,
       color: BADGE_COLORS.parallel,
     });
@@ -191,7 +196,9 @@ export const getNodeIndicators = (props: WorkflowCardBadgesProps): WorkflowCardI
   if (isNestedWorkflow) {
     indicators.push({
       id: 'workflow',
-      label: 'Nested workflow step',
+      get label() {
+        return studioT('Nested workflow step');
+      },
       icon: BADGE_ICONS.workflow,
       color: BADGE_COLORS.workflow,
     });
@@ -200,7 +207,9 @@ export const getNodeIndicators = (props: WorkflowCardBadgesProps): WorkflowCardI
   if (isForEachNode) {
     indicators.push({
       id: 'foreach',
-      label: 'Foreach step',
+      get label() {
+        return studioT('Foreach step');
+      },
       icon: BADGE_ICONS.forEach,
       color: BADGE_COLORS.forEach,
     });
@@ -209,7 +218,9 @@ export const getNodeIndicators = (props: WorkflowCardBadgesProps): WorkflowCardI
   if (isMapNode) {
     indicators.push({
       id: 'map',
-      label: 'Map step',
+      get label() {
+        return studioT('Map step');
+      },
       icon: BADGE_ICONS.map,
       color: BADGE_COLORS.map,
     });

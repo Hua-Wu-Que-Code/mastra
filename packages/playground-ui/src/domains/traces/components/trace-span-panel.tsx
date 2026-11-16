@@ -11,6 +11,7 @@ import { Button } from '@/ds/components/Button';
 import { IconChatBubbles } from '@/ds/icons/central/IconChatBubbles';
 import { useLinkComponent } from '@/lib/framework';
 import type { LinkComponentPaths } from '@/lib/framework';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type TraceDataPanelViewProps = ComponentProps<typeof TraceDataPanelView>;
 
@@ -137,6 +138,7 @@ export function TraceSpanPanel({
   spanFeedbackTabBadge,
   spanFeedbackTabSlot,
 }: TraceSpanPanelProps) {
+  useLocale();
   const { data: spanDetailData, isLoading: isLoadingSpanDetail } = useSpanDetail({
     traceId: traceId,
     spanId: selectedSpanId ?? '',
@@ -196,7 +198,7 @@ export function TraceSpanPanel({
           showFullThreadAction
             ? ({ compact }) => (
                 <Button
-                  tooltip={compact ? 'Open full thread' : undefined}
+                  tooltip={compact ? studioT('Open full thread') : undefined}
                   icon={<IconChatBubbles />}
                   variant="ghost"
                   size="sm"
@@ -204,7 +206,7 @@ export function TraceSpanPanel({
                   className="@max-[501px]:w-control-sm @max-[501px]:rounded-full @max-[501px]:px-0 @max-[501px]:[&>[data-slot=button-icon]]:ml-0"
                   onClick={() => onFullThreadOpenChange(true)}
                 >
-                  <span className="@max-[501px]:sr-only">Open full thread</span>
+                  <span className="@max-[501px]:sr-only">{studioT('Open full thread')}</span>
                 </Button>
               )
             : undefined

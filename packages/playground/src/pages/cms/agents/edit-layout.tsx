@@ -12,6 +12,8 @@ import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyD
 import { IconPullRequest } from '@mastra/playground-ui/icons/central/IconPullRequest';
 import { IconRocket } from '@mastra/playground-ui/icons/central/IconRocket';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgent, useAgentVersion, useAgentVersions, useStoredAgent } from '@mastra/react/hooks/agents';
 import { useCallback, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
@@ -66,6 +68,7 @@ function EditFormContent({
   isCodeSourceAgent?: boolean;
   editorConfig?: NonNullable<GetAgentResponse>['editor'];
 }) {
+  useLocale();
   const [, setSearchParams] = useSearchParams();
   const { pathname } = useLocation();
 
@@ -73,11 +76,11 @@ function EditFormContent({
   const isViewingPreviousVersion = isViewingVersion && selectedVersionId !== latestVersionId;
 
   const banner = isViewingPreviousVersion ? (
-    <Notice variant="info" title="This is a previous version" className="mb-4">
-      <Notice.Message>You are seeing a specific version of the agent.</Notice.Message>
+    <Notice variant="info" title={studioT('This is a previous version')} className="mb-4">
+      <Notice.Message>{studioT('You are seeing a specific version of the agent.')}</Notice.Message>
       <div className="flex items-center gap-2">
         <Button icon={<IconEyeOpen />} type="button" variant="default" size="sm" onClick={() => setSearchParams({})}>
-          View latest version
+          {studioT('View latest version')}
         </Button>
         <Button
           icon={<IconRocket />}
@@ -87,7 +90,7 @@ function EditFormContent({
           onClick={() => void handlePublish(selectedVersionId ?? undefined)}
           disabled={selectedVersionId === activeVersionId}
         >
-          Publish this version
+          {studioT('Publish this version')}
         </Button>
       </div>
     </Notice>
@@ -124,8 +127,8 @@ function EditFormContent({
     >
       {isEditorLocked ? (
         <div className="p-4">
-          <Notice variant="info" title="Editing disabled">
-            <Notice.Message>This code-defined agent has disabled Studio editing.</Notice.Message>
+          <Notice variant="info" title={studioT('Editing disabled')}>
+            <Notice.Message>{studioT('This code-defined agent has disabled Studio editing.')}</Notice.Message>
           </Notice>
         </div>
       ) : (
@@ -136,6 +139,7 @@ function EditFormContent({
 }
 
 function EditLayoutWrapper() {
+  useLocale();
   const { agentId } = useParams<{ agentId: string }>();
   const { navigate, paths } = useLinkComponent();
   const routerNavigate = useNavigate();
@@ -277,7 +281,7 @@ function EditLayoutWrapper() {
               disabled={isSavingDraft || isSubmitting}
               icon={<IconArrowInbox />}
             >
-              Download JSON
+              {studioT('Download JSON')}
             </Button>
             <Button
               variant="primary"
@@ -293,7 +297,7 @@ function EditLayoutWrapper() {
               }}
             >
               <IconPullRequest />
-              Open PR
+              {studioT('Open PR')}
             </Button>
           </>
         ) : null
@@ -308,12 +312,12 @@ function EditLayoutWrapper() {
             {isSavingDraft ? (
               <>
                 <Spinner className="h-4 w-4" />
-                Saving...
+                {studioT('Saving...')}
               </>
             ) : (
               <>
                 <IconFloppyDisk1 />
-                Save
+                {studioT('Save')}
               </>
             )}
           </Button>
@@ -330,12 +334,12 @@ function EditLayoutWrapper() {
             {isSubmitting ? (
               <>
                 <Spinner className="h-4 w-4" />
-                Publishing...
+                {studioT('Publishing...')}
               </>
             ) : (
               <>
                 <IconCheckmark2Medium />
-                {isViewingPreviousVersion ? 'Publish this version' : 'Publish'}
+                {isViewingPreviousVersion ? studioT('Publish this version') : studioT('Publish')}
               </>
             )}
           </Button>
@@ -349,7 +353,7 @@ function EditLayoutWrapper() {
       <h1 className="sr-only">{agentId}</h1>
       {isNotFound ? (
         <>
-          <EmptyState variant="fill" titleSlot="Agent not found" />
+          <EmptyState variant="fill" titleSlot={studioT('Agent not found')} />
           <div className="hidden">
             <EditFormContent
               agentId={agentId ?? ''}

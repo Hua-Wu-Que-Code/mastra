@@ -2,6 +2,7 @@ import type { RequestContextEntityType } from '@mastra/playground-ui/domains/req
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { IconKey2 } from '@mastra/playground-ui/icons/central/IconKey2';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useState } from 'react';
 import { JsonObjectEditor } from './json-object-editor';
@@ -14,20 +15,21 @@ interface RequestContextPopoverProps {
 }
 
 export function RequestContextPopover({ entityType, entityId }: RequestContextPopoverProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const [requestContext, setRequestContext] = useEntityRequestContext(entityType, entityId);
   const presets = useRequestContextPresets();
 
   const handleSave = (value: Record<string, any>) => {
     setRequestContext(value);
-    toast.success('Request context saved locally');
+    toast.success(studioT('Request context saved locally'));
     setOpen(false);
   };
 
   return (
-    <RunActionPopover label="Request context" icon={<IconKey2 />} open={open} onOpenChange={setOpen}>
+    <RunActionPopover label={studioT('Request context')} icon={<IconKey2 />} open={open} onOpenChange={setOpen}>
       <JsonObjectEditor
-        label="Request Context"
+        label={studioT('Request Context')}
         presets={presets}
         value={requestContext}
         onSave={handleSave}

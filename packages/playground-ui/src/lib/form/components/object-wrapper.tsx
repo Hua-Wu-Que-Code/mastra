@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ds/compon
 import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { Txt } from '@/ds/components/Txt';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function ObjectWrapper({ label, children }: ObjectWrapperProps) {
   if (label === ROOT_FIELD_KEY || label === '') return <div className="flex flex-col gap-2">{children}</div>;
@@ -14,6 +15,7 @@ export function ObjectWrapper({ label, children }: ObjectWrapperProps) {
 }
 
 function ObjectGroup({ label, children }: Pick<ObjectWrapperProps, 'label' | 'children'>) {
+  useLocale();
   const path = useContext(FieldPathContext);
   const { expanded, invalid, setExpanded } = useSectionDisclosure(path, false);
 
@@ -31,7 +33,7 @@ function ObjectGroup({ label, children }: Pick<ObjectWrapperProps, 'label' | 'ch
         </span>
         {invalid && (
           <Txt as="span" variant="meta" className="ml-auto shrink-0 text-destructive-foreground">
-            Needs input
+            {studioT('Needs input')}
           </Txt>
         )}
       </CollapsibleTrigger>

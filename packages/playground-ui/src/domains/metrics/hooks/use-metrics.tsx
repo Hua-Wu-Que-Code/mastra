@@ -1,21 +1,48 @@
-/* eslint-disable react-refresh/only-export-components */
 import { useMetricsQueryFilters } from '@mastra/react/hooks/metrics';
+/* eslint-disable react-refresh/only-export-components */
 import type { MetricsQueryFilters } from '@mastra/react/hooks/metrics';
 import { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
-
 import { buildMetricsDimensionalFilter } from '../metrics-filters';
+
 import type { MetricsDimensionalFilter } from '../metrics-filters';
 import { AggregateLimiterProvider } from './aggregate-limiter-provider';
 import type { PropertyFilterToken } from '@/ds/components/PropertyFilter/types';
+
+import { t as studioT } from '@/lib/i18n';
 import { formatShortDate } from '@/utils/date-format';
 
 const DATE_PRESETS = [
-  { label: 'Last 24 hours', value: '24h' },
-  { label: 'Last 3 days', value: '3d' },
-  { label: 'Last 7 days', value: '7d' },
-  { label: 'Last 14 days', value: '14d' },
-  { label: 'Last 30 days', value: '30d' },
+  {
+    get label() {
+      return studioT('Last 24 hours');
+    },
+    value: '24h',
+  },
+  {
+    get label() {
+      return studioT('Last 3 days');
+    },
+    value: '3d',
+  },
+  {
+    get label() {
+      return studioT('Last 7 days');
+    },
+    value: '7d',
+  },
+  {
+    get label() {
+      return studioT('Last 14 days');
+    },
+    value: '14d',
+  },
+  {
+    get label() {
+      return studioT('Last 30 days');
+    },
+    value: '30d',
+  },
 ] as const;
 
 export type DatePreset = (typeof DATE_PRESETS)[number]['value'] | 'custom';

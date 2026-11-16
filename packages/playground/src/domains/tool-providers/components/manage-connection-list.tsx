@@ -5,6 +5,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { IconChevronRightMedium } from '@mastra/playground-ui/icons/central/IconChevronRightMedium';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { ManageableConnection } from './manage-connection-dialog';
 
 interface ManageConnectionListProps {
@@ -24,6 +26,7 @@ export const ManageConnectionList = ({
   addingConnection = false,
   disabled = false,
 }: ManageConnectionListProps) => {
+  useLocale();
   return (
     <>
       <DialogBody data-testid={`${testIdPrefix}-list`}>
@@ -41,7 +44,9 @@ export const ManageConnectionList = ({
                   data-testid={`${testIdPrefix}-list-item-${connection.connectionId}`}
                   className="flex w-full items-center justify-between gap-2 text-left outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:ring-2 focus-visible:after:ring-border-focus"
                 >
-                  <EntityName className="truncate">{connection.label?.trim() || 'Unnamed connection'}</EntityName>
+                  <EntityName className="truncate">
+                    {connection.label?.trim() || studioT('Unnamed connection')}
+                  </EntityName>
                   <Icon className="shrink-0 text-muted-foreground">
                     <IconChevronRightMedium />
                   </Icon>
@@ -66,7 +71,7 @@ export const ManageConnectionList = ({
                 <IconPlusMedium />
               </Icon>
             )}
-            Add connection
+            {studioT('Add connection')}
           </Button>
         </DialogFooter>
       )}

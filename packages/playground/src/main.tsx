@@ -1,3 +1,4 @@
+import { initializeLocale } from '@mastra/playground-ui/lib/i18n';
 import { StrictMode } from 'react';
 
 import '@/index.css';
@@ -7,6 +8,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 
 export function startStudio() {
+  const disposeLocale = initializeLocale();
+  import.meta.hot?.dispose(disposeLocale);
   if (import.meta.env.DEV && import.meta.env.VITE_REACT_GRAB === 'true') {
     void import('react-grab');
   }

@@ -8,6 +8,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { IconEyeOpen } from '@mastra/playground-ui/icons/central/IconEyeOpen';
 import { IconRocket } from '@mastra/playground-ui/icons/central/IconRocket';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useMastraClient } from '@mastra/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -65,6 +67,7 @@ function CmsPromptBlocksEditForm({
   activeVersionId,
   onClearVersion,
 }: CmsPromptBlocksEditFormProps) {
+  const studioLocale = useLocale();
   const client = useMastraClient();
   const queryClient = useQueryClient();
   const { navigate, paths } = useLinkComponent();
@@ -106,7 +109,7 @@ function CmsPromptBlocksEditForm({
   const handleSaveDraft = useCallback(async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error(studioT('Please fill in all required fields'));
       return;
     }
 
@@ -115,18 +118,20 @@ function CmsPromptBlocksEditForm({
       const params = buildUpdateParams(form.getValues());
       await updateStoredPromptBlock.mutateAsync(params);
       form.reset(form.getValues());
-      toast.success('Draft saved');
+      toast.success(studioT('Draft saved'));
     } catch (error) {
-      toast.error(`Failed to save draft: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to save draft: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
     } finally {
       setIsSavingDraft(false);
     }
-  }, [form, updateStoredPromptBlock]);
+  }, [form, updateStoredPromptBlock, studioLocale]);
 
   const handlePublish = useCallback(async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error(studioT('Please fill in all required fields'));
       return;
     }
 
@@ -148,14 +153,16 @@ function CmsPromptBlocksEditForm({
       void queryClient.invalidateQueries({ queryKey: ['stored-prompt-blocks'] });
       void queryClient.invalidateQueries({ queryKey: ['stored-prompt-block'] });
       void queryClient.invalidateQueries({ queryKey: ['prompt-block-versions', blockId] });
-      toast.success('Prompt block published');
+      toast.success(studioT('Prompt block published'));
       navigate(paths.promptBlocksLink());
     } catch (error) {
-      toast.error(`Failed to publish: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to publish: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
     } finally {
       setIsSubmitting(false);
     }
-  }, [form, updateStoredPromptBlock, client, blockId, navigate, paths, queryClient]);
+  }, [form, updateStoredPromptBlock, client, blockId, navigate, paths, queryClient, studioLocale]);
 
   const handlePublishVersion = useCallback(async () => {
     if (isViewingPreviousVersion && selectedVersionId) {
@@ -165,17 +172,31 @@ function CmsPromptBlocksEditForm({
         void queryClient.invalidateQueries({ queryKey: ['stored-prompt-blocks'] });
         void queryClient.invalidateQueries({ queryKey: ['stored-prompt-block'] });
         void queryClient.invalidateQueries({ queryKey: ['prompt-block-versions', blockId] });
-        toast.success('Version published');
+        toast.success(studioT('Version published'));
         navigate(paths.promptBlocksLink());
       } catch (error) {
-        toast.error(`Failed to publish version: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to publish version: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
       } finally {
         setIsSubmitting(false);
       }
     } else {
       await handlePublish();
     }
-  }, [handlePublish, isViewingPreviousVersion, selectedVersionId, client, blockId, queryClient, navigate, paths]);
+  }, [
+    handlePublish,
+    isViewingPreviousVersion,
+    selectedVersionId,
+    client,
+    blockId,
+    queryClient,
+    navigate,
+    paths,
+    studioLocale,
+  ]);
 
   return (
     <AgentEditLayout
@@ -195,11 +216,11 @@ function CmsPromptBlocksEditForm({
       }
     >
       {isViewingPreviousVersion && (
-        <Notice variant="info" title="This is a previous version" className="m-4 mb-0">
-          <Notice.Message>You are seeing a specific version of the prompt block.</Notice.Message>
+        <Notice variant="info" title={studioT('This is a previous version')} className="m-4 mb-0">
+          <Notice.Message>{studioT('You are seeing a specific version of the prompt block.')}</Notice.Message>
           <div className="flex gap-2">
             <Button icon={<IconEyeOpen />} type="button" variant="default" size="sm" onClick={onClearVersion}>
-              View latest version
+              {studioT('View latest version')}
             </Button>
             <Button
               icon={<IconRocket />}
@@ -209,7 +230,7 @@ function CmsPromptBlocksEditForm({
               onClick={handlePublishVersion}
               disabled={selectedVersionId === activeVersionId || isSubmitting}
             >
-              {isSubmitting ? 'Publishing...' : 'Publish this version'}
+              {isSubmitting ? studioT('Publishing...') : studioT('Publish this version')}
             </Button>
           </div>
         </Notice>
@@ -222,6 +243,7 @@ function CmsPromptBlocksEditForm({
 }
 
 function CmsPromptBlocksEditPage() {
+  useLocale();
   const { promptBlockId: blockId } = useParams<{ promptBlockId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedVersionId = searchParams.get('versionId');
@@ -272,8 +294,8 @@ function CmsPromptBlocksEditPage() {
     return (
       <PageLayout variant="fit" breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
         <h1 className="sr-only">{blockId}</h1>
-        <AgentEditLayout leftSlot={<EmptyState variant="fill" titleSlot="Prompt block not found" />}>
-          <EmptyState variant="fill" titleSlot="Prompt block not found" />
+        <AgentEditLayout leftSlot={<EmptyState variant="fill" titleSlot={studioT('Prompt block not found')} />}>
+          <EmptyState variant="fill" titleSlot={studioT('Prompt block not found')} />
         </AgentEditLayout>
       </PageLayout>
     );

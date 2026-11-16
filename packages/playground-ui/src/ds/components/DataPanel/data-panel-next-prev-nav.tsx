@@ -2,6 +2,7 @@ import { Button } from '@/ds/components/Button';
 import type { ButtonProps } from '@/ds/components/Button';
 import { IconArrowDown } from '@/ds/icons/central/IconArrowDown';
 import { IconArrowUp } from '@/ds/icons/central/IconArrowUp';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface DataPanelNextPrevNavProps {
   onPrevious?: () => void;
@@ -15,10 +16,11 @@ export interface DataPanelNextPrevNavProps {
 export function DataPanelNextPrevNav({
   onPrevious,
   onNext,
-  previousLabel = 'Go to previous',
-  nextLabel = 'Go to next',
+  previousLabel = studioT('Go to previous'),
+  nextLabel = studioT('Go to next'),
   variant = 'ghost',
 }: DataPanelNextPrevNavProps) {
+  useLocale();
   return (
     <>
       <Button size="icon-sm" variant={variant} tooltip={previousLabel} onClick={onPrevious} disabled={!onPrevious}>

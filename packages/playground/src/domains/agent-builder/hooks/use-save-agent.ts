@@ -1,4 +1,6 @@
 import type { StoredSkillResponse } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useStoredAgentMutations } from '@mastra/react/hooks/agents';
 import { useCallback } from 'react';
@@ -23,6 +25,7 @@ export function useSaveAgent({
   onSuccess,
   silent = false,
 }: UseSaveAgentArgs) {
+  const studioLocale = useLocale();
   const { updateStoredAgent } = useStoredAgentMutations({ agentId: agentId });
   const defaultVisibility = useDefaultVisibility();
 
@@ -56,7 +59,7 @@ export function useSaveAgent({
           ...metadataField,
           ...toolProvidersField,
         });
-        if (!silent) toast.success('Agent updated');
+        if (!silent) toast.success(studioT('Agent updated'));
         onSuccess?.(agentId);
         return updated;
       } catch (error) {
@@ -64,12 +67,25 @@ export function useSaveAgent({
         if (policyDetails) {
           toast.error(policyDetails.message);
         } else {
-          toast.error(`Failed to save agent: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          toast.error(
+            studioT('Failed to save agent: {value0}', {
+              value0: error instanceof Error ? error.message : 'Unknown error',
+            }),
+          );
         }
         throw error;
       }
     },
-    [agentId, availableAgentTools, availableSkills, updateStoredAgent, onSuccess, defaultVisibility, silent],
+    [
+      agentId,
+      availableAgentTools,
+      availableSkills,
+      updateStoredAgent,
+      onSuccess,
+      defaultVisibility,
+      silent,
+      studioLocale,
+    ],
   );
 
   return { save, isSaving: updateStoredAgent.isPending };

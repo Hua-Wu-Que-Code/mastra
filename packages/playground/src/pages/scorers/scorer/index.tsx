@@ -8,6 +8,8 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import { useUrlSort } from '@mastra/playground-ui/sort/use-url-sort';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
@@ -32,6 +34,7 @@ const crumbs = [navCrumb('/scorers'), scorerCrumb];
 const SCORES_SORT_KEYS: readonly ScoresSortKey[] = ['date', 'score'];
 
 export default function Scorer() {
+  const studioLocale = useLocale();
   const { scorerId } = useParams() as { scorerId: string };
   const [searchParams, setSearchParams] = useSearchParams();
   const scoreIdFromUrl = searchParams.get('scoreId') ?? undefined;
@@ -40,7 +43,7 @@ export default function Scorer() {
   const navigate = useNavigate();
   const [selectedEntityOption, setSelectedEntityOption] = useState<EntityOptions | undefined>({
     value: 'all',
-    label: 'All Entities',
+    label: studioT('All Entities'),
     type: 'ALL' as const,
   });
 
@@ -91,8 +94,8 @@ export default function Scorer() {
   );
 
   const entityOptions: EntityOptions[] = useMemo(
-    () => [{ value: 'all', label: 'All Entities', type: 'ALL' as const }, ...agentOptions, ...workflowOptions],
-    [agentOptions, workflowOptions],
+    () => [{ value: 'all', label: studioT('All Entities'), type: 'ALL' as const }, ...agentOptions, ...workflowOptions],
+    [agentOptions, workflowOptions, studioLocale],
   );
 
   // Sync URL entity to state (treat missing ?entity as 'all' so browser back/forward resets the filter)
@@ -105,23 +108,23 @@ export default function Scorer() {
   useEffect(() => {
     if (scorerError) {
       const errorMessage = scorerError instanceof Error ? scorerError.message : 'Failed to load scorer';
-      toast.error(`Error loading scorer: ${errorMessage}`);
+      toast.error(studioT('Error loading scorer: {value0}', { value0: errorMessage }));
     }
-  }, [scorerError]);
+  }, [scorerError, studioLocale]);
 
   useEffect(() => {
     if (agentsError) {
       const errorMessage = agentsError instanceof Error ? agentsError.message : 'Failed to load agents';
-      toast.error(`Error loading agents: ${errorMessage}`);
+      toast.error(studioT('Error loading agents: {value0}', { value0: errorMessage }));
     }
-  }, [agentsError]);
+  }, [agentsError, studioLocale]);
 
   useEffect(() => {
     if (workflowsError) {
       const errorMessage = workflowsError instanceof Error ? workflowsError.message : 'Failed to load workflows';
-      toast.error(`Error loading workflows: ${errorMessage}`);
+      toast.error(studioT('Error loading workflows: {value0}', { value0: errorMessage }));
     }
-  }, [workflowsError]);
+  }, [workflowsError, studioLocale]);
 
   const handleSelectedEntityChange = (option: EntityOptions | undefined) => {
     if (!option?.value) return;
@@ -197,13 +200,13 @@ export default function Scorer() {
   const scorerActionsMenu = isStoredScorer ? (
     <DropdownMenu>
       <DropdownMenu.Trigger asChild>
-        <Button size="icon-lg" aria-label="Scorer actions menu">
+        <Button size="icon-lg" aria-label={studioT('Scorer actions menu')}>
           <IconDotGrid1x3Vertical />
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end" className="w-48">
         <DropdownMenu.Item onSelect={() => void navigate(`/cms/scorers/${scorerId}/edit`)}>
-          <IconPencil /> Edit scorer
+          <IconPencil /> {' ' + studioT('Edit scorer')}
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu>
@@ -237,7 +240,7 @@ export default function Scorer() {
           ) : isForbidden ? (
             <PermissionDenied resource="scorers" />
           ) : hasOtherError ? (
-            <EmptyState tone="error" titleSlot="Failed to load scorer" descriptionSlot={errorMessage} />
+            <EmptyState tone="error" titleSlot={studioT('Failed to load scorer')} descriptionSlot={errorMessage} />
           ) : (
             <NoScoresInfo onRunExperiment={() => setRunDialogOpen(true)} />
           )}
@@ -270,7 +273,7 @@ export default function Scorer() {
           <ActionRow.End>
             <ScoresColumnsMenu visibleColumns={columnsState.visibleColumns} toggleColumn={columnsState.toggleColumn} />
             <Button variant="primary" onClick={() => setRunDialogOpen(true)} icon={<IconPlusMedium />}>
-              New experiment
+              {studioT('New experiment')}
             </Button>
             {scorerActionsMenu}
           </ActionRow.End>

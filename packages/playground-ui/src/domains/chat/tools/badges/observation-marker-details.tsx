@@ -14,6 +14,8 @@ import { IconChatBubble7Plus } from '@/ds/icons/central/IconChatBubble7Plus';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { IconScript } from '@/ds/icons/central/IconScript';
 import { IconTodos } from '@/ds/icons/central/IconTodos';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDuration } from '@/utils/duration';
 
 export interface ObservationStatsProps {
@@ -59,6 +61,7 @@ export const ObservationSections = ({
   currentTask,
   suggestedResponse,
 }: ObservationSectionsProps) => {
+  useLocale();
   const hasSideSections = Boolean(currentTask || suggestedResponse);
   const observationsLabel = isReflection ? 'Reflections' : 'Observations';
 
@@ -73,12 +76,16 @@ export const ObservationSections = ({
           <ObservationRenderer observations={observations} maxHeight={maxHeight} />
         ))}
       {currentTask && (
-        <ActivityItem icon={<IconTodos />} label="Current task" aria-label="Current task">
+        <ActivityItem icon={<IconTodos />} label={studioT('Current task')} aria-label={studioT('Current task')}>
           <MarkdownRenderer className="text-caption text-foreground">{currentTask}</MarkdownRenderer>
         </ActivityItem>
       )}
       {suggestedResponse && (
-        <ActivityItem icon={<IconChatBubble7Plus />} label="Suggested response" aria-label="Suggested response">
+        <ActivityItem
+          icon={<IconChatBubble7Plus />}
+          label={studioT('Suggested response')}
+          aria-label={studioT('Suggested response')}
+        >
           <MarkdownRenderer className="text-caption text-foreground/80 italic">{suggestedResponse}</MarkdownRenderer>
         </ActivityItem>
       )}
@@ -92,6 +99,7 @@ export interface ExtractionsProps {
 }
 
 export const Extractions = ({ extractedValues, extractionFailures = [] }: ExtractionsProps) => {
+  useLocale();
   const entries = extractedValueEntries(extractedValues);
   if (entries.length === 0 && extractionFailures.length === 0) return null;
 
@@ -103,7 +111,12 @@ export const Extractions = ({ extractedValues, extractionFailures = [] }: Extrac
     .join(', ');
 
   return (
-    <ActivityItem icon={<IconCodeBrackets />} label="Extractions" detail={detail} aria-label="Extractions">
+    <ActivityItem
+      icon={<IconCodeBrackets />}
+      label={studioT('Extractions')}
+      detail={detail}
+      aria-label={studioT('Extractions')}
+    >
       {entries.map(([slug, value]) => (
         <div key={slug} className="rounded-md border border-border bg-fill-subtle p-2">
           <Txt as="p" variant="meta" tone="muted" className="uppercase">

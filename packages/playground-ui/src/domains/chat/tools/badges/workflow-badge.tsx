@@ -3,9 +3,9 @@ import { useWorkflow } from '@mastra/react/hooks/workflows';
 import { useContext, useEffect } from 'react';
 import { BackgroundTaskMetadataDialogTrigger } from './background-task-metadata-dialog';
 import type { MessageMetadata } from '@/domains/chat';
-
 import { LoadingBadge } from '@/domains/chat/components/loading-badge';
 import { NetworkChoiceMetadataDialogTrigger } from '@/domains/chat/components/network-choice-metadata-dialog';
+
 import { SectionLabel } from '@/domains/chat/components/section-label';
 import { awaitsToolApproval } from '@/domains/chat/tools/badges/awaits-tool-approval';
 import type { ToolApprovalRequest } from '@/domains/chat/tools/badges/tool-approval-badge';
@@ -28,6 +28,7 @@ import { CodeEditor } from '@/ds/components/CodeEditor';
 import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
 import { useLinkComponent } from '@/lib/framework';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const WorkflowToolIcon = agentGlyph('workflow');
 
@@ -52,6 +53,7 @@ export const WorkflowBadge = ({
   isNetwork,
   toolCalled,
 }: WorkflowBadgeProps) => {
+  useLocale();
   const { runId, status } = result || {};
   const { data: workflow, isLoading: isWorkflowLoading } = useWorkflow({
     workflowId,
@@ -123,7 +125,7 @@ export const WorkflowBadge = ({
 
           {suspendPayloadSlot !== undefined && suspendPayload && (
             <div>
-              <SectionLabel>Workflow suspend payload</SectionLabel>
+              <SectionLabel>{studioT('Workflow suspend payload')}</SectionLabel>
               {suspendPayloadSlot}
             </div>
           )}
@@ -140,6 +142,7 @@ interface WorkflowBadgeExtendedProps {
 }
 
 const WorkflowBadgeExtended = ({ workflowId, workflow, runId }: WorkflowBadgeExtendedProps) => {
+  useLocale();
   const requestContext = useEntityRequestContext('workflow', workflowId)[0];
   const { Link } = useLinkComponent();
   const { isLoadingRunExecutionResult } = useContext(WorkflowRunContext);
@@ -148,11 +151,11 @@ const WorkflowBadgeExtended = ({ workflowId, workflow, runId }: WorkflowBadgeExt
     <>
       <div className="flex items-center gap-2 pb-2">
         <Button icon={<WorkflowIcon />} render={<Link href={`/workflows/${workflowId}/graph`} />}>
-          Go to workflow
+          {studioT('Go to workflow')}
         </Button>
         {runId && (
           <Button icon={<IconEyeOpen />} render={<Link href={`/workflows/${workflowId}/graph/${runId}`} />}>
-            See run
+            {studioT('See run')}
           </Button>
         )}
       </div>

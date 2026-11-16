@@ -18,7 +18,9 @@ import {
   ToolCallOutput,
 } from '@/ds/components/ai/tool-call';
 import type { ToolCallView } from '@/ds/components/ai/tool-call';
+import { toolLabel } from '@/ds/components/ai/tool-call/tool-phrases';
 import { CodeEditor } from '@/ds/components/CodeEditor';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 function formatArgs(args: Record<string, unknown> | string): { pretty: string; parsed?: Record<string, unknown> } {
   try {
@@ -64,6 +66,7 @@ export const ToolBadge = ({
   backgroundTaskStatus,
   mcpInputRequest,
 }: ToolBadgeProps) => {
+  useLocale();
   const { pretty: argsPretty, parsed: argsObject } = formatArgs(args);
   const { icon: ToolIcon, label, detail, description } = presentTool(toolName, argsObject);
   const view: ToolCallView = {
@@ -104,7 +107,7 @@ export const ToolBadge = ({
       }}
       data-testid="tool-badge"
       icon={<ToolIcon aria-hidden />}
-      title={label}
+      title={toolLabel(label)}
       detail={detail}
       description={description}
       status={status}
@@ -134,7 +137,7 @@ export const ToolBadge = ({
 
           {suspendPayload !== undefined && suspendPayload && (
             <div>
-              <SectionLabel>Suspend payload</SectionLabel>
+              <SectionLabel>{studioT('Suspend payload')}</SectionLabel>
               {typeof suspendPayload === 'string' ? (
                 <ToolCallOutput text={suspendPayload} />
               ) : (
@@ -145,7 +148,7 @@ export const ToolBadge = ({
 
           {toolOutput.length > 0 && (
             <div>
-              <SectionLabel>Tool output</SectionLabel>
+              <SectionLabel>{studioT('Tool output')}</SectionLabel>
               <div className="h-40 overflow-y-auto">
                 <CodeEditor data={toolOutput} data-testid="tool-output" />
               </div>

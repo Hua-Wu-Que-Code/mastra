@@ -1,6 +1,8 @@
 import { TooltipProvider } from '@mastra/playground-ui/components/Tooltip';
 import { LinkComponentProvider } from '@mastra/playground-ui/lib/framework';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+
+import { locale, t } from '@mastra/playground-ui/lib/i18n';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { Route, Routes, useLocation } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -483,5 +485,16 @@ describe('Knowledge page', () => {
       const detail = await screen.findByRole('region', { name: 'Page details' });
       expect(await within(detail).findByRole('heading', { name: 'Deploy Runbook' })).toBeTruthy();
     });
+  });
+});
+
+afterEach(() => act(() => locale.setLocale('en')));
+describe('when Knowledge routes are unavailable in Chinese', () => {
+  it('translates the complete availability notice', async () => {
+    act(() => locale.setLocale('zh'));
+    server.use(http.get(api, () => HttpResponse.json({ error: 'Not found' }, { status: 404 })));
+    renderPage();
+    expect(await screen.findByRole('heading', { name: t('Knowledge browsing is not enabled') })).toBeTruthy();
+    expect(screen.queryByText('Knowledge browsing is not enabled')).toBeNull();
   });
 });

@@ -10,14 +10,16 @@ import { IconArrowUpWall } from '@/ds/icons/central/IconArrowUpWall';
 import { IconArrowWallDown } from '@/ds/icons/central/IconArrowWallDown';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { IconServer1 } from '@/ds/icons/central/IconServer1';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type RunDataTab = 'input' | 'output' | 'execution';
 
 function RunDataValue({ value }: { value: unknown }) {
+  useLocale();
   if (value === undefined) {
     return (
       <Txt className="block p-4" variant="caption" tone="muted">
-        No input recorded
+        {studioT('No input recorded')}
       </Txt>
     );
   }
@@ -32,6 +34,7 @@ function RunDataValue({ value }: { value: unknown }) {
 }
 
 export function WorkflowRunData({ input, result }: { input: unknown; result: WorkflowRunStreamResult }) {
+  useLocale();
   const output = 'result' in result ? result.result : undefined;
   const hasOutput = output !== undefined;
   const [selectedTab, setSelectedTab] = useState<RunDataTab>();
@@ -41,7 +44,7 @@ export function WorkflowRunData({ input, result }: { input: unknown; result: Wor
     <Collapsible className="border-t border-border" data-testid="workflow-run-data">
       <CollapsibleTrigger className="flex min-h-11 w-full items-center gap-2 px-5 py-3 text-caption text-muted-foreground">
         <IconServer1 aria-hidden className="size-icon-sm text-muted-foreground" />
-        <span>Run data</span>
+        <span>{studioT('Run data')}</span>
         <DisclosureChevron direction="right" className="ml-auto size-4 text-muted-foreground" />
       </CollapsibleTrigger>
       <CollapsibleContent>
@@ -49,17 +52,17 @@ export function WorkflowRunData({ input, result }: { input: unknown; result: Wor
           <TabList variant="pill" className="mb-3">
             <Tab value="input">
               <IconArrowWallDown aria-hidden className="size-icon-sm" />
-              Input
+              {studioT('Input')}
             </Tab>
             {hasOutput && (
               <Tab value="output">
                 <IconArrowUpWall aria-hidden className="size-icon-sm" />
-                Output
+                {studioT('Output')}
               </Tab>
             )}
             <Tab value="execution">
               <IconCodeBrackets aria-hidden className="size-icon-sm" />
-              Execution
+              {studioT('Execution')}
             </Tab>
           </TabList>
           <TabContent value="input" flush>

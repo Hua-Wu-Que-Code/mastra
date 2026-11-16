@@ -1,3 +1,5 @@
+import { getIntlLocale } from '@/lib/i18n/runtime';
+
 export type DateInput = Date | string | number | null | undefined;
 export type DatePreset =
   | 'date'
@@ -49,7 +51,7 @@ type FormatterKey = keyof typeof PRESET_OPTIONS;
 
 const formatters = new Map<string, Intl.DateTimeFormat>();
 
-function getFormatter(key: FormatterKey, locale?: string, timeZone?: string) {
+function getFormatter(key: FormatterKey, locale = getIntlLocale(), timeZone?: string) {
   const cacheKey = `${locale ?? ''}|${timeZone ?? ''}|${key}`;
   let formatter = formatters.get(cacheKey);
   if (!formatter) {
@@ -89,7 +91,7 @@ const LONG_RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
 
 const relativeFormatters = new Map<string, Intl.RelativeTimeFormat>();
 
-function getRelativeFormatter(locale?: string) {
+function getRelativeFormatter(locale = getIntlLocale()) {
   const key = locale ?? '';
   let formatter = relativeFormatters.get(key);
   if (!formatter) {
@@ -100,7 +102,7 @@ function getRelativeFormatter(locale?: string) {
 }
 
 /**
- * Uses the browser locale unless `locale` is given.
+ * Uses the Studio locale unless `locale` is given.
  * - `date`: date only; omits the year when it matches `now` in the requested timezone
  * - `date-time`: date, year and time to minutes, including historical dates
  * - `date-time-seconds`: date, year and time to seconds
@@ -117,7 +119,8 @@ export function formatDate(value: DateInput, preset: DatePreset, options: Format
   if (preset === 'relative-time') {
     const diff = date.getTime() - new Date(now ?? Date.now()).getTime();
     const abs = Math.abs(diff);
-    if (abs < 5_000) return 'just now';
+    const chinese = (locale ?? getIntlLocale()).startsWith('zh');
+    if (abs < 5_000) return chinese ? '刚刚' : 'just now';
     const units = [
       { limit: 60_000, size: 1_000, unit: 's' },
       { limit: 3_600_000, size: 60_000, unit: 'm' },
@@ -126,6 +129,11 @@ export function formatDate(value: DateInput, preset: DatePreset, options: Format
     ];
     const match = units.find(({ limit }) => abs < limit);
     if (!match) return formatDate(date, 'date', options);
+    if (chinese) {
+      const unit: Intl.RelativeTimeFormatUnit =
+        match.unit === 's' ? 'second' : match.unit === 'm' ? 'minute' : match.unit === 'h' ? 'hour' : 'day';
+      return getRelativeFormatter(locale).format((diff < 0 ? -1 : 1) * Math.floor(abs / match.size), unit);
+    }
     const label = `${Math.floor(abs / match.size)}${match.unit}`;
     return diff < 0 ? `${label} ago` : `in ${label}`;
   }
@@ -151,6 +159,11 @@ export function formatMoment(value: DateInput, options: FormatOptions = {}) {
   const clock = formatDate(date, 'time-seconds', options);
   const daysAgo =
     calendarDay(new Date(options.now ?? Date.now()), options.timeZone) - calendarDay(date, options.timeZone);
+  if ((options.locale ?? getIntlLocale()).startsWith('zh')) {
+    if (daysAgo === 0) return `今天 ${clock}`;
+    if (daysAgo === 1) return `昨天 ${clock}`;
+    return `${formatShortDate(date, options)} ${clock}`;
+  }
   if (daysAgo === 0) return `Today at ${clock}`;
   if (daysAgo === 1) return `Yesterday at ${clock}`;
   return `${formatShortDate(date, options)} at ${clock}`;

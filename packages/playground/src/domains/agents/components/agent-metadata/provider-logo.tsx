@@ -1,5 +1,7 @@
 import { providerMapToIcon } from '@mastra/playground-ui/domains/llm';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import { cleanProviderId as cleanProviderIdUtil } from './utils';
 
@@ -14,6 +16,7 @@ interface ProviderLogoProps {
  * Falls back to local icons if the logo fails to load
  */
 export const ProviderLogo = ({ providerId, className = '', size = 20 }: ProviderLogoProps) => {
+  useLocale();
   const [imageError, setImageError] = useState(false);
 
   // Clean provider ID (remove .chat, .x, .messages, etc. suffixes)
@@ -56,7 +59,7 @@ export const ProviderLogo = ({ providerId, className = '', size = 20 }: Provider
   return (
     <img
       src={`https://models.dev/logos/${cleanProviderId}.svg`}
-      alt={`${providerId} logo`}
+      alt={studioT('{value0} logo', { value0: providerId })}
       width={size}
       height={size}
       className={className}

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useJSONSchemaFormField } from './json-schema-form-field-context';
 import { Checkbox } from '@/ds/components/Checkbox';
 import { Field, FieldLabel } from '@/ds/components/Field';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type CheckboxProps = React.ComponentPropsWithoutRef<typeof Checkbox>;
 
@@ -11,11 +12,12 @@ export type JSONSchemaFormFieldOptionalProps = Omit<CheckboxProps, 'checked' | '
 };
 
 export function FieldOptional({
-  label = 'Optional',
+  label = studioT('Optional'),
   labelClassName,
   className,
   ...props
 }: JSONSchemaFormFieldOptionalProps) {
+  useLocale();
   const { field, update } = useJSONSchemaFormField();
 
   const handleCheckedChange = React.useCallback(

@@ -10,6 +10,7 @@ import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedi
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { McpServerIcon } from '@mastra/playground-ui/icons/McpServerIcon';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { hueFillClass, hueForName } from '@mastra/playground-ui/utils/colors';
 import { useMemo, useState } from 'react';
@@ -46,6 +47,7 @@ function mcpClientToFormValues(mcpClient: {
 }
 
 export function MCPClientList() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const mcpClients = useWatch({ control: form.control, name: 'mcpClients' }) ?? [];
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -135,11 +137,11 @@ export function MCPClientList() {
     <>
       <SubSectionRoot>
         <Section.Header>
-          <SubSectionHeader title="MCP Clients" icon={<IconMacbook />} />
+          <SubSectionHeader title={studioT('MCP Clients')} icon={<IconMacbook />} />
 
           {!readOnly && (
             <Button variant="ghost" size="sm" onClick={() => setIsCreateOpen(true)} icon={<IconPlusMedium />}>
-              Add MCP client
+              {studioT('Add MCP client')}
             </Button>
           )}
         </Section.Header>
@@ -148,11 +150,11 @@ export function MCPClientList() {
           <div className="rounded-xl border border-dashed border-border-strong py-5 text-center">
             <EmptyState
               className="py-4!"
-              titleSlot="No MCP clients configured yet."
-              descriptionSlot="Add one to get started."
+              titleSlot={studioT('No MCP clients configured yet.')}
+              descriptionSlot={studioT('Add one to get started.')}
               actionSlot={
                 <Button size="sm" onClick={() => setIsCreateOpen(true)} icon={<IconPlusMedium />}>
-                  Add MCP client
+                  {studioT('Add MCP client')}
                 </Button>
               }
             />
@@ -184,7 +186,11 @@ export function MCPClientList() {
                   <EntityContent>
                     <EntityName>{mcpClient.name}</EntityName>
                     <EntityDescription>
-                      {mcpClient.description || `${serverCount} server${serverCount !== 1 ? 's' : ''} configured`}
+                      {mcpClient.description ||
+                        studioT('{value0} server{value1} configured', {
+                          value0: serverCount,
+                          value1: serverCount !== 1 ? studioT('English plural suffix') : '',
+                        })}
                     </EntityDescription>
                   </EntityContent>
 
@@ -197,7 +203,7 @@ export function MCPClientList() {
                       }}
                       icon={<IconCrossMedium />}
                     >
-                      Remove
+                      {studioT('Remove')}
                     </Button>
                   )}
                 </Entity>
@@ -210,11 +216,11 @@ export function MCPClientList() {
       <SideDialog
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        dialogTitle="Create a new MCP Client"
-        dialogDescription="Configure an MCP client with server connection details."
+        dialogTitle={studioT('Create a new MCP Client')}
+        dialogDescription={studioT('Configure an MCP client with server connection details.')}
       >
         <SideDialog.Top>
-          <SideDialog.Heading>Create a new MCP Client</SideDialog.Heading>
+          <SideDialog.Heading>{studioT('Create a new MCP Client')}</SideDialog.Heading>
         </SideDialog.Top>
         <MCPClientCreateContent onAdd={handleAdd} />
       </SideDialog>
@@ -222,11 +228,13 @@ export function MCPClientList() {
       <SideDialog
         isOpen={viewIndex !== null}
         onClose={() => setViewIndex(null)}
-        dialogTitle={viewingClient?.name ?? 'MCP Client'}
-        dialogDescription={isViewingPersisted ? 'View MCP client configuration.' : 'Edit MCP client configuration.'}
+        dialogTitle={viewingClient?.name ?? studioT('MCP Client')}
+        dialogDescription={
+          isViewingPersisted ? studioT('View MCP client configuration.') : studioT('Edit MCP client configuration.')
+        }
       >
         <SideDialog.Top>
-          <SideDialog.Heading>{viewingClient?.name ?? 'MCP Client'}</SideDialog.Heading>
+          <SideDialog.Heading>{viewingClient?.name ?? studioT('MCP Client')}</SideDialog.Heading>
         </SideDialog.Top>
         {viewFormValues && (
           <MCPClientCreateContent
@@ -234,7 +242,7 @@ export function MCPClientList() {
             initialValues={viewFormValues}
             initialSelectedTools={viewingClient?.selectedTools}
             onAdd={readOnly ? undefined : handleUpdate}
-            submitLabel={isViewingPersisted ? 'Update tool selection' : 'Update MCP Client'}
+            submitLabel={isViewingPersisted ? studioT('Update tool selection') : studioT('Update MCP Client')}
           />
         )}
       </SideDialog>

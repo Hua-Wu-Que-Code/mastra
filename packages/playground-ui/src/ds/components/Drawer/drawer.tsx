@@ -2,10 +2,12 @@ import { Drawer as DrawerPrimitive } from '@base-ui/react/drawer';
 import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-
 import { Button } from '@/ds/components/Button';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
 import { dialogSurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // Swipe/stack transforms live in drawer.css — unreadable as Tailwind arbitrary values.
@@ -491,13 +493,22 @@ const DrawerContent = React.forwardRef<HTMLDivElement, DrawerContentProps>(
 );
 DrawerContent.displayName = 'DrawerContent';
 
-const DrawerDefaultCloseButton = () => (
-  <DrawerClose asChild>
-    <Button type="button" variant="ghost" size="icon-sm" className="absolute top-3 right-3 z-10" aria-label="Close">
-      <IconCrossMedium />
-    </Button>
-  </DrawerClose>
-);
+const DrawerDefaultCloseButton = () => {
+  useLocale();
+  return (
+    <DrawerClose asChild>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="absolute top-3 right-3 z-10"
+        aria-label={studioT('Close')}
+      >
+        <IconCrossMedium />
+      </Button>
+    </DrawerClose>
+  );
+};
 DrawerDefaultCloseButton.displayName = 'DrawerDefaultCloseButton';
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

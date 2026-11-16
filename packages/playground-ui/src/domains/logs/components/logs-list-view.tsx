@@ -4,6 +4,7 @@ import type { LogRecord } from '../types';
 import { useDataListKeyboard } from '@/ds/components/DataList';
 import type { DataListSort } from '@/ds/components/DataList';
 import { LogsDataList, LogsDataListSkeleton } from '@/ds/components/LogsDataList';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 // Fixed widths on non-flex columns prevent track shifts as the virtualizer swaps rows in/out.
 const COLUMNS = '6rem 9rem 5rem 10rem minmax(8rem,1fr) minmax(8rem,1fr)';
@@ -46,6 +47,7 @@ export function LogsListView({
   timestampSort,
   onSortChange,
 }: LogsListViewProps) {
+  useLocale();
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const virtualizer = useVirtualizer({
@@ -95,20 +97,20 @@ export function LogsListView({
       <LogsDataList.Top>
         {onSortChange ? (
           <LogsDataList.SortableTopCell sortKey="timestamp" sort={timestampSort} onSortChange={onSortChange}>
-            Date
+            {studioT('Date')}
           </LogsDataList.SortableTopCell>
         ) : (
-          <LogsDataList.TopCell>Date</LogsDataList.TopCell>
+          <LogsDataList.TopCell>{studioT('Date')}</LogsDataList.TopCell>
         )}
-        <LogsDataList.TopCell>Time</LogsDataList.TopCell>
-        <LogsDataList.TopCell>Level</LogsDataList.TopCell>
-        <LogsDataList.TopCell>Entity</LogsDataList.TopCell>
-        <LogsDataList.TopCell>Message</LogsDataList.TopCell>
-        <LogsDataList.TopCell>Data</LogsDataList.TopCell>
+        <LogsDataList.TopCell>{studioT('Time')}</LogsDataList.TopCell>
+        <LogsDataList.TopCell>{studioT('Level')}</LogsDataList.TopCell>
+        <LogsDataList.TopCell>{studioT('Entity')}</LogsDataList.TopCell>
+        <LogsDataList.TopCell>{studioT('Message')}</LogsDataList.TopCell>
+        <LogsDataList.TopCell>{studioT('Data')}</LogsDataList.TopCell>
       </LogsDataList.Top>
 
       {logs.length === 0 ? (
-        <LogsDataList.NoMatch message="No logs match your search" />
+        <LogsDataList.NoMatch message={studioT('No logs match your search')} />
       ) : (
         <>
           <LogsDataList.Spacer height={paddingTop} />

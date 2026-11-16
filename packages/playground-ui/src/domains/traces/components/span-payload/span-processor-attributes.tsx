@@ -4,6 +4,8 @@ import type { SpanRecord } from '../../types';
 import { asCoreSpan } from './span-payload-registry';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
 import { Txt } from '@/ds/components/Txt/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/utils/duration';
 
@@ -17,6 +19,7 @@ export interface SpanProcessorAttributesProps {
  * Renders nothing for a span with no recorded phase.
  */
 export function SpanProcessorAttributes({ span, className }: SpanProcessorAttributesProps) {
+  useLocale();
   const pipeline = describeProcessorPipeline(asCoreSpan(span));
   if (!pipeline) return null;
 
@@ -26,20 +29,24 @@ export function SpanProcessorAttributes({ span, className }: SpanProcessorAttrib
   return (
     <div data-slot="span-processor-attributes" className={className}>
       <DataKeysAndValues>
-        {processorName && <Row label="Processor">{processorName}</Row>}
-        <Row label="Phase">{phaseLabel}</Row>
-        {executor && <Row label="Executor">{executor === 'workflow' ? 'Workflow' : 'Legacy'}</Row>}
+        {processorName && <Row label={studioT('Processor')}>{processorName}</Row>}
+        <Row label={studioT('Phase')}>{phaseLabel}</Row>
+        {executor && (
+          <Row label={studioT('Executor')}>{executor === 'workflow' ? studioT('Workflow') : studioT('Legacy')}</Row>
+        )}
         {/* processorIndex is 0-based; the position reads 1-based. */}
-        {processorIndex !== undefined && <Row label="Pipeline position">{processorIndex + 1}</Row>}
-        {hookDurationMs !== undefined && <Row label="Hook duration">{formatDuration(hookDurationMs)}</Row>}
+        {processorIndex !== undefined && <Row label={studioT('Pipeline position')}>{processorIndex + 1}</Row>}
+        {hookDurationMs !== undefined && <Row label={studioT('Hook duration')}>{formatDuration(hookDurationMs)}</Row>}
         {tripwireAbort?.reason && (
-          <Row label="Tripwire" wrap>
+          <Row label={studioT('Tripwire')} wrap>
             {tripwireAbort.reason}
           </Row>
         )}
-        {tripwireAbort?.retry !== undefined && <Row label="Retry">{tripwireAbort.retry ? 'Yes' : 'No'}</Row>}
+        {tripwireAbort?.retry !== undefined && (
+          <Row label={studioT('Retry')}>{tripwireAbort.retry ? studioT('Yes') : studioT('No')}</Row>
+        )}
         {tripwireAbort?.metadata !== undefined && (
-          <Row label="Tripwire metadata" wrap>
+          <Row label={studioT('Tripwire metadata')} wrap>
             <Txt as="span" variant="body-sm" font="mono" className="break-all">
               {JSON.stringify(tripwireAbort.metadata)}
             </Txt>

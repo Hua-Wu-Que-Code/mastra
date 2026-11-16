@@ -1,3 +1,4 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { useFormContext } from 'react-hook-form';
 
 import { useVisibilityChangeDialog } from './use-visibility-change-dialog';
@@ -9,14 +10,23 @@ type Visibility = SkillEditFormValues['visibility'];
 
 const COPY: Record<Visibility, VisibilityCopy> = {
   public: {
-    title: 'Add this skill to your library?',
-    description: 'Adding this skill to the library means your teammates will be able to discover and use it.',
+    get title() {
+      return studioT('Add this skill to your library?');
+    },
+    get description() {
+      return studioT('Adding this skill to the library means your teammates will be able to discover and use it.');
+    },
     toast: 'Skill added to the library',
   },
   private: {
-    title: 'Remove this skill from your library?',
-    description:
-      'Removing this skill from the library means your teammates will no longer be able to discover or use it. You will be the only person with access.',
+    get title() {
+      return studioT('Remove this skill from your library?');
+    },
+    get description() {
+      return studioT(
+        'Removing this skill from the library means your teammates will no longer be able to discover or use it. You will be the only person with access.',
+      );
+    },
     toast: 'Skill removed from the library',
   },
 };

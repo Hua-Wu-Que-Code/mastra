@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Room } from 'livekit-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -54,6 +55,7 @@ function upsertSegment(
  * so the transcript lands in the same conversation.
  */
 export const useVoiceCall = ({ agentId, threadId, onCallStarted }: UseVoiceCallArgs): VoiceCallControls => {
+  const studioLocale = useLocale();
   const { baseUrl, headers } = useStudioConfig();
   const { isLiveKitAvailable } = useIsLiveKitAvailable();
   const queryClient = useQueryClient();
@@ -205,9 +207,20 @@ export const useVoiceCall = ({ agentId, threadId, onCallStarted }: UseVoiceCallA
       // Aborted by cleanup() (stop/unmount) or otherwise superseded — not a real failure.
       if (abortController.signal.aborted || superseded()) return;
       cleanup();
-      toast.error(error instanceof Error ? error.message : 'Failed to start the voice call.');
+      toast.error(error instanceof Error ? error.message : studioT('Failed to start the voice call.'));
     }
-  }, [agentId, baseUrl, cleanup, headers, isLiveKitAvailable, refreshThread, scheduleThreadRefresh, status, threadId]);
+  }, [
+    agentId,
+    baseUrl,
+    cleanup,
+    headers,
+    isLiveKitAvailable,
+    refreshThread,
+    scheduleThreadRefresh,
+    status,
+    threadId,
+    studioLocale,
+  ]);
 
   return {
     status,

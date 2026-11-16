@@ -1,16 +1,18 @@
 import { use } from 'react';
-
 import { EnvironmentVariablesEditorReadOnlyListContext } from './environment-variables-editor-context';
 import type { EnvironmentVariablesEditorReadOnlyHeaderProps } from './environment-variables-editor.types';
+
 import { DataList } from '@/ds/components/DataList/data-list';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function EnvironmentVariablesEditorReadOnlyHeader({
   className,
-  nameLabel = 'Key',
-  valueLabel = 'Value',
-  updatedAtLabel = 'Last Updated',
+  nameLabel = studioT('Key'),
+  valueLabel = studioT('Value'),
+  updatedAtLabel = studioT('Last Updated'),
   ...props
 }: EnvironmentVariablesEditorReadOnlyHeaderProps) {
+  useLocale();
   const { showIcon } = use(EnvironmentVariablesEditorReadOnlyListContext);
 
   return (

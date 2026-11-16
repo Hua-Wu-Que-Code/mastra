@@ -1,4 +1,6 @@
 import { createTool } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { z } from 'zod-v4';
@@ -9,14 +11,16 @@ import { MAX_GENERATED_INSTRUCTIONS_CHARS } from '@/domains/agent-builder/servic
 export const SET_AGENT_INSTRUCTIONS_TOOL_NAME = 'set-agent-instructions';
 
 export function useSetAgentInstructionsTool() {
+  const studioLocale = useLocale();
   const formMethods = useFormContext<AgentBuilderEditFormValues>();
 
   return useMemo(
     () =>
       createTool({
         id: SET_AGENT_INSTRUCTIONS_TOOL_NAME,
-        description:
+        description: studioT(
           'Set the agent instructions (its system prompt). Use this when the user provides or revises the body of guidance the agent should follow. Prefer a few focused paragraphs or compact bullet groups, target 1,200–2,000 characters, and stay under 2,500 characters unless the user explicitly needs more detail.',
+        ),
         inputSchema: z.object({
           instructions: z
             .string()
@@ -44,8 +48,9 @@ export function useSetAgentInstructionsTool() {
               rejected: true,
               currentLength,
               limit: MAX_GENERATED_INSTRUCTIONS_CHARS,
-              message:
+              message: studioT(
                 'Rejected because the instructions are too long. Nothing was persisted. Rewrite as 2–4 short paragraphs or compact bullet groups, targeting 1,200–2,000 characters, and call set-agent-instructions once more.',
+              ),
             };
           }
           formMethods.setValue('instructions', value, { shouldDirty: true });
@@ -57,6 +62,6 @@ export function useSetAgentInstructionsTool() {
           };
         },
       }),
-    [formMethods],
+    [formMethods, studioLocale],
   );
 }

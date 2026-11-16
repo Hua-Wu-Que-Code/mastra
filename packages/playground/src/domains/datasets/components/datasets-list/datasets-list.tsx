@@ -5,6 +5,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { DataList, useDataListKeyboard } from '@mastra/playground-ui/components/DataList';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { useMemo, useRef } from 'react';
@@ -102,11 +104,15 @@ function SelectableDatasetRow({
   onSelect: (dataset: DatasetRecord) => void;
   trailingCell: ReactNode | null;
 }) {
+  useLocale();
   return (
     <DataList.RowButton {...rowProps} featured={featured} onClick={() => onSelect(ds)}>
       <DataList.NameCell>{ds.name}</DataList.NameCell>
       <TagsCell tags={ds.tags} />
-      <DataList.TextCell>v{ds.version ?? 1}</DataList.TextCell>
+      <DataList.TextCell>
+        {studioT('v')}
+        {ds.version ?? 1}
+      </DataList.TextCell>
       <DataList.TextCell>{formatDate(ds.updatedAt, 'date-time') ?? '—'}</DataList.TextCell>
       <DataList.Cell>
         {trailingCell ??
@@ -130,6 +136,7 @@ function DatasetRow({
   rowProps: RowProps;
   trailingCell: ReactNode | null;
 }) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
   const linkRef = useRef<HTMLAnchorElement>(null);
   const hasExperimentsAction = trailingCell === null && ds.experimentCount > 0;
@@ -147,7 +154,10 @@ function DatasetRow({
       >
         <DataList.NameCell>{ds.name}</DataList.NameCell>
         <TagsCell tags={ds.tags} />
-        <DataList.TextCell>v{ds.version ?? 1}</DataList.TextCell>
+        <DataList.TextCell>
+          {studioT('v')}
+          {ds.version ?? 1}
+        </DataList.TextCell>
         <DataList.TextCell>{formatDate(ds.updatedAt, 'date-time') ?? '—'}</DataList.TextCell>
         {hasTrailingCell ? null : <DataList.Cell className="justify-center" />}
       </DataList.RowLink>
@@ -185,6 +195,7 @@ export function DatasetsList({
   sort,
   onSortChange,
 }: DatasetsListProps) {
+  useLocale();
   const enrichedDatasets = useMemo(() => {
     return datasets.map(ds => {
       const dsExperiments = experiments.filter(e => e.datasetId === ds.id);
@@ -219,28 +230,30 @@ export function DatasetsList({
             sort={sort?.key === 'name' ? sort.direction : undefined}
             onSortChange={onSortChange}
           >
-            Name
+            {studioT('Name')}
           </DataList.SortableTopCell>
         ) : (
-          <DataList.TopCell>Name</DataList.TopCell>
+          <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
         )}
-        <DataList.TopCell>Tags</DataList.TopCell>
-        <DataList.TopCell>Version</DataList.TopCell>
+        <DataList.TopCell>{studioT('Tags')}</DataList.TopCell>
+        <DataList.TopCell>{studioT('Version')}</DataList.TopCell>
         {onSortChange ? (
           <DataList.SortableTopCell
             sortKey="updatedAt"
             sort={sort?.key === 'updatedAt' ? sort.direction : undefined}
             onSortChange={onSortChange}
           >
-            Last Updated
+            {studioT('Last Updated')}
           </DataList.SortableTopCell>
         ) : (
-          <DataList.TopCell>Last Updated</DataList.TopCell>
+          <DataList.TopCell>{studioT('Last Updated')}</DataList.TopCell>
         )}
-        <DataList.TopCell>Experiments</DataList.TopCell>
+        <DataList.TopCell>{studioT('Experiments')}</DataList.TopCell>
       </DataList.Top>
 
-      {filteredData.length === 0 && !hasNextPage ? <DataList.NoMatch message="No datasets match your filters" /> : null}
+      {filteredData.length === 0 && !hasNextPage ? (
+        <DataList.NoMatch message={studioT('No datasets match your filters')} />
+      ) : null}
 
       {filteredData.map((ds, index) =>
         onSelectDataset ? (

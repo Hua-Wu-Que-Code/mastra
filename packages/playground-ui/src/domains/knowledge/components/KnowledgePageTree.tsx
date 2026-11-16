@@ -3,14 +3,17 @@ import type { KeyboardEvent } from 'react';
 
 import { scopeSource, scopeTitle } from '../lib/pageAddress';
 import { buildPageTree, childCountLabel, pageAncestorIds, visiblePageRows } from '../lib/pageTree';
+
 import { prefersMotion } from '../lib/useLeavingNodes';
 import type { KnowledgePagePayload } from '../pageTypes';
 import { KnowledgeSourceIcon } from './KnowledgeSourceIcon';
-
 import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { IconFileText } from '@/ds/icons/central/IconFileText';
+
 import { IconFolder1 } from '@/ds/icons/central/IconFolder1';
 import { IconPin } from '@/ds/icons/central/IconPin';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 /**
@@ -58,7 +61,7 @@ export function KnowledgePageTree({
   mayHaveChildren,
   onExpandedChange,
   loadMore,
-  'aria-label': ariaLabel = 'Knowledge pages',
+  'aria-label': ariaLabel = studioT('Knowledge pages'),
 }: {
   pages: KnowledgePagePayload[];
   pinnedIds?: readonly string[];
@@ -73,6 +76,7 @@ export function KnowledgePageTree({
   loadMore?: ReadonlyMap<string, () => void>;
   'aria-label'?: string;
 }) {
+  useLocale();
   const roots = useMemo(() => buildPageTree(pages), [pages]);
   const pinned = useMemo(() => new Set(pinnedIds), [pinnedIds]);
   const [expanded, setExpanded] = useState<Set<string>>(
@@ -191,7 +195,7 @@ export function KnowledgePageTree({
   };
 
   if (rows.length === 0) {
-    return <p className="px-3 py-2 text-body text-muted-foreground">No pages yet.</p>;
+    return <p className="px-3 py-2 text-body text-muted-foreground">{studioT('No pages yet.')}</p>;
   }
 
   const ancestorAt: string[] = [];
@@ -247,7 +251,11 @@ export function KnowledgePageTree({
                 <button
                   type="button"
                   tabIndex={-1}
-                  aria-label={row.expanded ? `Collapse ${row.page.name}` : `Expand ${row.page.name}`}
+                  aria-label={
+                    row.expanded
+                      ? studioT('Collapse {value0}', { value0: row.page.name })
+                      : studioT('Expand {value0}', { value0: row.page.name })
+                  }
                   className="flex size-3 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
                   onClick={event => {
                     event.stopPropagation();
@@ -274,14 +282,14 @@ export function KnowledgePageTree({
               {row.page.childCount ? (
                 <span
                   data-testid="knowledge-tree-count"
-                  aria-label={`${childCountLabel(row.page)} below`}
+                  aria-label={studioT('{value0} below', { value0: childCountLabel(row.page) })}
                   className="shrink-0 text-caption text-placeholder tabular-nums"
                 >
                   {childCountLabel(row.page)}
                 </span>
               ) : null}
               {pinned.has(row.page.id) ? (
-                <IconPin className="size-icon-xs shrink-0 text-badge-amber-indicator" aria-label="Pinned" />
+                <IconPin className="shrink-0 text-badge-amber-indicator" aria-label={studioT('Pinned')} />
               ) : null}
               {row.page.isScope && row.page.address && row.page.address !== row.page.name ? (
                 <span
@@ -302,7 +310,7 @@ export function KnowledgePageTree({
                   style={{ paddingLeft: `${depth * 12 + 42}px` }}
                   onClick={more}
                 >
-                  Load more
+                  {studioT('Load more')}
                 </button>
               ) : null;
             })}

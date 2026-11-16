@@ -4,6 +4,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Textarea } from '@mastra/playground-ui/components/Textarea';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowUp } from '@mastra/playground-ui/icons/central/IconArrowUp';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useStoredAgentMutations } from '@mastra/react/hooks/agents';
 import { useAuthCapabilities } from '@mastra/react/hooks/auth';
@@ -18,6 +20,7 @@ import { resolveStarterModel, truncateName } from './utils';
 import { useDefaultVisibility } from '@/domains/auth/hooks/use-default-visibility';
 
 export const AgentBuilderStarter = () => {
+  useLocale();
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -60,7 +63,7 @@ export const AgentBuilderStarter = () => {
         viewTransition: true,
       });
     } catch {
-      toast.error('Failed to start a new agent');
+      toast.error(studioT('Failed to start a new agent'));
     }
   };
 
@@ -82,7 +85,7 @@ export const AgentBuilderStarter = () => {
     <div className="starter-aurora flex min-h-full flex-col items-center justify-center bg-sidebar px-4 py-16">
       <div className="relative z-10 flex w-full max-w-3xl flex-col gap-6">
         <Txt font="display" as="h1" variant="title" tone="ink" className="starter-heading text-center">
-          What should we build today?
+          {studioT('What should we build today?')}
         </Txt>
 
         <Form
@@ -95,7 +98,7 @@ export const AgentBuilderStarter = () => {
             testId="agent-builder-starter-input"
             size="md"
             variant="unstyled"
-            placeholder="Describe the agent you want to build"
+            placeholder={studioT('Describe the agent you want to build')}
             value={message}
             onChange={e => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -109,7 +112,7 @@ export const AgentBuilderStarter = () => {
               type="submit"
               variant="default"
               size="icon-md"
-              tooltip="Start building"
+              tooltip={studioT('Start building')}
               disabled={isSubmitBlocked}
               data-testid="agent-builder-starter-submit"
             >

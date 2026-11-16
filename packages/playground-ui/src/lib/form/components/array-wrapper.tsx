@@ -5,8 +5,10 @@ import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { IconBrackets1 } from '@/ds/icons/central/IconBrackets1';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function ArrayWrapper({ label, children, onAddItem }: ArrayWrapperProps) {
+  useLocale();
   const readOnly = useContext(FormReadOnlyContext);
   const count = Children.count(children);
   const addButtonRef = useRef<HTMLButtonElement>(null);
@@ -23,17 +25,17 @@ export function ArrayWrapper({ label, children, onAddItem }: ArrayWrapperProps) 
             type="button"
             variant="ghost"
             size="sm"
-            aria-label={`Add ${label} item`}
+            aria-label={studioT('Add {value0} item', { value0: label })}
             onClick={onAddItem}
           >
             <IconPlusMedium />
-            Add item
+            {studioT('Add item')}
           </Button>
         )}
       </div>
       {count === 0 ? (
         <Txt as="p" variant="caption" tone="muted" className="py-2">
-          No items added
+          {studioT('No items added')}
         </Txt>
       ) : (
         <ArrayAddButtonContext value={addButtonRef}>

@@ -2,6 +2,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconSettingsSliderHor';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthCapabilities } from '@mastra/react/hooks/auth';
 import { useAllProviderTools } from '@mastra/react/hooks/tool-providers';
 import { useState } from 'react';
@@ -178,6 +180,7 @@ const EditPageLayout = () => {
 };
 
 const MobileInitialCtas = () => {
+  useLocale();
   const { next } = useWizard();
   const navigate = useNavigate();
   const { agentId } = useEditPage();
@@ -190,14 +193,14 @@ const MobileInitialCtas = () => {
         onClick={() => navigate(`/agent-builder/agents/${agentId}/view`, { viewTransition: true })}
         data-testid="agent-builder-mobile-initial-cta-chat"
       >
-        Chat with my agent
+        {studioT('Chat with my agent')}
       </Button>
       <Button
         icon={<IconSettingsSliderHor />}
         onClick={() => startViewTransition(() => next())}
         data-testid="agent-builder-mobile-initial-cta-config"
       >
-        See configuration
+        {studioT('See configuration')}
       </Button>
     </div>
   );

@@ -1,9 +1,11 @@
 import type { ThemeLearningEntity } from '@mastra/client-js';
-
 import { entityIndexMetadata } from './entity-index-model';
 import { EntityIndexStatus } from './entity-index-status';
 import { DataList } from '@/ds/components/DataList';
+
 import type { LinkComponent } from '@/ds/types/link-component';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const columns = 'minmax(12rem,1.5fr) minmax(7rem,0.6fr) minmax(8rem,0.7fr) minmax(8rem,0.7fr) minmax(12rem,1fr)';
 
@@ -15,17 +17,20 @@ export interface EntityIndexListProps {
 }
 
 export function EntityIndexList({ entities, hasSearch, getEntityHref, LinkComponent }: EntityIndexListProps) {
+  useLocale();
   return (
-    <section aria-label="Trace Intelligence agents" className="min-h-0">
+    <section aria-label={studioT('Trace Intelligence agents')} className="min-h-0">
       <DataList columns={columns} fit="container">
         <DataList.Top>
-          <DataList.TopCell>Agent</DataList.TopCell>
-          <DataList.TopCell>Traces</DataList.TopCell>
-          <DataList.TopCell>Signals set</DataList.TopCell>
-          <DataList.TopCell>Status</DataList.TopCell>
-          <DataList.TopCell>Updated</DataList.TopCell>
+          <DataList.TopCell>{studioT('Agent')}</DataList.TopCell>
+          <DataList.TopCell>{studioT('Traces')}</DataList.TopCell>
+          <DataList.TopCell>{studioT('Signals set')}</DataList.TopCell>
+          <DataList.TopCell>{studioT('Status')}</DataList.TopCell>
+          <DataList.TopCell>{studioT('Updated')}</DataList.TopCell>
         </DataList.Top>
-        {entities.length === 0 && hasSearch ? <DataList.NoMatch message="No agents match your search" /> : null}
+        {entities.length === 0 && hasSearch ? (
+          <DataList.NoMatch message={studioT('No agents match your search')} />
+        ) : null}
         {entities.map(entity => {
           const metadata = entityIndexMetadata(entity);
           const key = `${entity.entityType}:${entity.entityId}`;
@@ -33,7 +38,11 @@ export function EntityIndexList({ entities, hasSearch, getEntityHref, LinkCompon
           const cells = (
             <>
               <DataList.Cell className="min-w-0 overflow-visible text-left">
-                {isAnalyzing ? null : <span className="sr-only">Open agent {entity.entityId}</span>}
+                {isAnalyzing ? null : (
+                  <span className="sr-only">
+                    <Trans id="Open agent {part0}" values={{ part0: entity.entityId }} />
+                  </span>
+                )}
                 <span
                   aria-hidden={isAnalyzing ? undefined : true}
                   className="block overflow-clip text-ellipsis whitespace-nowrap"

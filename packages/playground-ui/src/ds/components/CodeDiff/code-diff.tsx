@@ -7,6 +7,8 @@ import type { Ref } from 'react';
 import { CodeDiffHeader } from './code-diff-header';
 import type { CodeDiffFileHeader } from './code-diff-header';
 import { useTheme } from '@/ds/components/ThemeProvider';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import './code-diff.css';
 
@@ -42,10 +44,11 @@ const PATCH_METADATA_PREFIXES = [
 ];
 
 function PatchMetadata({ patch }: { patch: string }) {
+  useLocale();
   const lines = patch.split('\n').filter(line => PATCH_METADATA_PREFIXES.some(prefix => line.startsWith(prefix)));
 
   if (lines.length === 0) {
-    return <p className="p-3 text-caption text-muted-foreground">No textual changes.</p>;
+    return <p className="p-3 text-caption text-muted-foreground">{studioT('No textual changes.')}</p>;
   }
 
   return (

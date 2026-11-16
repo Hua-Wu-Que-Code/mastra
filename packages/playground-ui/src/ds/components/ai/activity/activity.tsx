@@ -1,13 +1,15 @@
 import { createContext, useContext, useId, useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-
 import { useRelativePaths, WorkingDirectoryContext } from './use-relative-paths';
 import { ArrivalScope, useArriving } from '@/ds/components/Arrival';
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ds/components/Collapsible';
 import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { Shimmer } from '@/ds/components/Shimmer';
 import { Txt } from '@/ds/components/Txt';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type ActivityStatus = 'idle' | 'running' | 'error';
@@ -66,6 +68,7 @@ export function Activity({
   children,
   ...props
 }: ActivityProps) {
+  useLocale();
   const nested = useContext(ActivityContext) !== undefined;
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const open = controlledOpen ?? (foldable && uncontrolledOpen);
@@ -93,8 +96,8 @@ export function Activity({
       >
         {children}
         <span id={statusId} className="sr-only" aria-live="polite">
-          {status === 'running' && 'Running'}
-          {status === 'error' && 'Failed'}
+          {status === 'running' && studioT('Running')}
+          {status === 'error' && studioT('Failed')}
         </span>
       </Collapsible>
     </ActivityContext.Provider>
@@ -303,6 +306,7 @@ export const ActivityHeadline = ({
   badges,
   ...props
 }: ActivityHeadlineProps) => {
+  useLocale();
   const { status, appearance } = useActivity();
   const hasBadges = Boolean(badges);
   const labelShrinks = Boolean(description) || (appearance === 'inline' && !detail);
@@ -327,7 +331,7 @@ export const ActivityHeadline = ({
         <ActivityTrailing>
           <IconCrossMedium
             role="img"
-            aria-label="Failed"
+            aria-label={studioT('Failed')}
             className="size-icon-sm shrink-0 text-destructive-foreground"
           />
         </ActivityTrailing>

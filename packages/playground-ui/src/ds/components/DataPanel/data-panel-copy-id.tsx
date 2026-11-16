@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/ds/components/Button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { truncateString } from '@/lib/truncate-string';
 
 export interface DataPanelCopyIdProps {
@@ -18,6 +20,7 @@ export interface DataPanelCopyIdProps {
  * Truncated identifier rendered inline in a `DataPanel.Heading`; clicking copies the full value.
  */
 export function DataPanelCopyId({ id, maxLength = 12, ellipsis = true, icon }: DataPanelCopyIdProps) {
+  useLocale();
   const { isCopied, handleCopy } = useCopyToClipboard({ text: id, showToast: false });
   const [open, setOpen] = useState(false);
 
@@ -30,7 +33,7 @@ export function DataPanelCopyId({ id, maxLength = 12, ellipsis = true, icon }: D
           </Button>
         }
       />
-      <TooltipContent>{isCopied ? 'Copied to clipboard' : 'Copy to clipboard'}</TooltipContent>
+      <TooltipContent>{isCopied ? studioT('Copied to clipboard') : studioT('Copy to clipboard')}</TooltipContent>
     </Tooltip>
   );
 }

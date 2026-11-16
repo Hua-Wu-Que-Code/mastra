@@ -3,6 +3,8 @@ import { Input } from '@mastra/playground-ui/components/Input';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { SectionRoot, SubSectionRoot } from '@mastra/playground-ui/components/Section';
 import { Textarea } from '@mastra/playground-ui/components/Textarea';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Controller } from 'react-hook-form';
 
 import { useAgentEditFormContext } from '../../context/agent-edit-form-context';
@@ -11,6 +13,7 @@ import { SubSectionHeader } from '@/domains/cms/components/section/section-heade
 import { LLMProviders, LLMModels } from '@/domains/llm';
 
 export function InformationPage() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const {
     register,
@@ -21,26 +24,29 @@ export function InformationPage() {
   return (
     <ScrollArea className="h-full">
       <SectionRoot>
-        <SectionHeader title="Identity" subtitle="Define your agent's name, description, and model." />
+        <SectionHeader
+          title={studioT('Identity')}
+          subtitle={studioT("Define your agent's name, description, and model.")}
+        />
 
         <Field invalid={Boolean(errors.name)} disabled={readOnly}>
-          <FieldLabel required>Name</FieldLabel>
-          <Input placeholder="My Agent" required {...register('name')} />
+          <FieldLabel required>{studioT('Name')}</FieldLabel>
+          <Input placeholder={studioT('My Agent')} required {...register('name')} />
           <FieldError>{errors.name?.message}</FieldError>
         </Field>
 
         <Field invalid={Boolean(errors.description)} disabled={readOnly} className="pb-8">
-          <FieldLabel>Description</FieldLabel>
-          <Textarea placeholder="Describe what this agent does" {...register('description')} />
+          <FieldLabel>{studioT('Description')}</FieldLabel>
+          <Textarea placeholder={studioT('Describe what this agent does')} {...register('description')} />
           <FieldError>{errors.description?.message}</FieldError>
         </Field>
 
         <div className="border-t border-border pt-8">
           <SubSectionRoot>
-            <SubSectionHeader title="Model Configuration" />
+            <SubSectionHeader title={studioT('Model Configuration')} />
             <div className="grid grid-cols-2 gap-4">
               <Field invalid={Boolean(errors.model?.provider?.message)}>
-                <FieldLabel required>Provider</FieldLabel>
+                <FieldLabel required>{studioT('Provider')}</FieldLabel>
                 <Controller
                   name="model.provider"
                   control={control}
@@ -54,7 +60,7 @@ export function InformationPage() {
               </Field>
 
               <Field invalid={Boolean(errors.model?.name?.message)}>
-                <FieldLabel required>Model</FieldLabel>
+                <FieldLabel required>{studioT('Model')}</FieldLabel>
                 <Controller
                   name="model.name"
                   control={control}

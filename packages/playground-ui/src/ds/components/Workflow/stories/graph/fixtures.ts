@@ -2,6 +2,7 @@ import type { Edge, Node } from '@xyflow/react';
 import type { WorkflowDataEdgeData } from '../../graph/types';
 import { WORKFLOW_BOUNDARY_NODE_TYPE, WORKFLOW_DATA_EDGE_TYPE } from '../../graph/types';
 import type { WorkflowCardCondition, WorkflowStepCardViewProps } from '../../types';
+import { t as studioT } from '@/lib/i18n';
 
 export type StoryStepNode = Node<{ card: WorkflowStepCardViewProps; nested?: boolean }, 'step'>;
 export type StoryConditionNode = Node<{ conditions: WorkflowCardCondition[] }, 'condition'>;
@@ -11,13 +12,23 @@ const start = {
   id: 'start',
   type: WORKFLOW_BOUNDARY_NODE_TYPE,
   position: { x: 109, y: 0 },
-  data: { boundaryRole: 'start', label: 'Start' },
+  data: {
+    boundaryRole: 'start',
+    get label() {
+      return studioT('Start');
+    },
+  },
 };
 const end = {
   id: 'end',
   type: WORKFLOW_BOUNDARY_NODE_TYPE,
   position: { x: 109, y: 600 },
-  data: { boundaryRole: 'end', label: 'End' },
+  data: {
+    boundaryRole: 'end',
+    get label() {
+      return studioT('End');
+    },
+  },
 };
 
 function step(

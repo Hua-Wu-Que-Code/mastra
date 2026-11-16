@@ -1,3 +1,4 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 
@@ -7,17 +8,37 @@ const promptBlockFormResolver: Resolver<PromptBlockFormValues> = async values =>
   const errors: Record<string, { type: string; message: string }> = {};
 
   if (!values.name || values.name.trim() === '') {
-    errors.name = { type: 'required', message: 'Name is required' };
+    errors.name = {
+      type: 'required',
+      get message() {
+        return studioT('Name is required');
+      },
+    };
   } else if (values.name.length > 100) {
-    errors.name = { type: 'maxLength', message: 'Name must be 100 characters or less' };
+    errors.name = {
+      type: 'maxLength',
+      get message() {
+        return studioT('Name must be 100 characters or less');
+      },
+    };
   }
 
   if (values.description && values.description.length > 500) {
-    errors.description = { type: 'maxLength', message: 'Description must be 500 characters or less' };
+    errors.description = {
+      type: 'maxLength',
+      get message() {
+        return studioT('Description must be 500 characters or less');
+      },
+    };
   }
 
   if (!values.content || values.content.trim() === '') {
-    errors.content = { type: 'required', message: 'Content is required' };
+    errors.content = {
+      type: 'required',
+      get message() {
+        return studioT('Content is required');
+      },
+    };
   }
 
   return {

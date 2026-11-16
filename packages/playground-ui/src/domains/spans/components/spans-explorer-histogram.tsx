@@ -13,6 +13,7 @@ import {
   histogramPlan,
   zoomWindow,
 } from '@/domains/observability/lib/histogram-buckets';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SpansExplorerHistogramProps = {
   /** The span list's resolved time range. */
@@ -28,6 +29,7 @@ export type SpansExplorerHistogramProps = {
  * Renders nothing when the server can't aggregate spans or the window is wider than it aggregates.
  */
 export function SpansExplorerHistogram({ timeRange, where, onZoom }: SpansExplorerHistogramProps) {
+  useLocale();
   const aggregateAvailable = useSpanAggregateAvailable();
 
   const request = useMemo<AggregateSpansArgs>(
@@ -56,8 +58,8 @@ export function SpansExplorerHistogram({ timeRange, where, onZoom }: SpansExplor
 
   return (
     <ObservabilityHistogram
-      label="Spans over time"
-      resourceLabel="Spans"
+      label={studioT('Spans over time')}
+      resourceLabel={studioT('Spans')}
       buckets={buckets}
       isLoading={isLoading}
       isError={isError}

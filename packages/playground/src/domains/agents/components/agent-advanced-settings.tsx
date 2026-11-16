@@ -8,6 +8,8 @@ import { IconCodeBrackets } from '@mastra/playground-ui/icons/central/IconCodeBr
 import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyDisk1';
 import { IconSquareBehindSquare1 } from '@mastra/playground-ui/icons/central/IconSquareBehindSquare1';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -20,6 +22,7 @@ export interface AgentAdvancedSettingsBodyProps {
 }
 
 export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSettingsBodyProps) => {
+  useLocale();
   const { settings, setSettings } = useAgentSettings();
   const [providerOptionsValue, setProviderOptionsValue] = useState('');
   const [saved, setSaved] = useState(false);
@@ -82,7 +85,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
       <div className="@container/advanced">
         <div className="grid grid-cols-1 gap-2 pb-2 @xs/advanced:grid-cols-2">
           <Field>
-            <FieldLabel>Frequency Penalty</FieldLabel>
+            <FieldLabel>{studioT('Frequency Penalty')}</FieldLabel>
             <Input
               type="number"
               step="0.1"
@@ -103,7 +106,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
           </Field>
 
           <Field>
-            <FieldLabel>Presence Penalty</FieldLabel>
+            <FieldLabel>{studioT('Presence Penalty')}</FieldLabel>
             <Input
               type="number"
               step="0.1"
@@ -124,7 +127,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
           </Field>
 
           <Field>
-            <FieldLabel>Top K</FieldLabel>
+            <FieldLabel>{studioT('Top K')}</FieldLabel>
             <Input
               type="number"
               readOnly={!canEdit}
@@ -142,7 +145,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
           </Field>
 
           <Field>
-            <FieldLabel>Max Tokens</FieldLabel>
+            <FieldLabel>{studioT('Max Tokens')}</FieldLabel>
             <Input
               type="number"
               readOnly={!canEdit}
@@ -160,7 +163,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
           </Field>
 
           <Field>
-            <FieldLabel>Max Steps</FieldLabel>
+            <FieldLabel>{studioT('Max Steps')}</FieldLabel>
             <Input
               type="number"
               readOnly={!canEdit}
@@ -178,7 +181,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
           </Field>
 
           <Field>
-            <FieldLabel>Max Retries</FieldLabel>
+            <FieldLabel>{studioT('Max Retries')}</FieldLabel>
             <Input
               type="number"
               readOnly={!canEdit}
@@ -196,7 +199,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
           </Field>
 
           <Field>
-            <FieldLabel>Seed</FieldLabel>
+            <FieldLabel>{studioT('Seed')}</FieldLabel>
             <Input
               type="number"
               readOnly={!canEdit}
@@ -216,7 +219,7 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
 
         <Field invalid={Boolean(error)} className="gap-1">
           <div className="flex items-center justify-between">
-            <FieldLabel>Provider Options</FieldLabel>
+            <FieldLabel>{studioT('Provider Options')}</FieldLabel>
 
             <div className="flex items-center gap-2">
               <Tooltip>
@@ -225,25 +228,30 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
                     type="button"
                     onClick={formatProviderOptions}
                     className={buttonClass}
-                    aria-label="Format provider options"
+                    aria-label={studioT('Format provider options')}
                   >
                     <Icon>
                       <IconCodeBrackets />
                     </Icon>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Format the provider options JSON</TooltipContent>
+                <TooltipContent>{studioT('Format the provider options JSON')}</TooltipContent>
               </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button" onClick={handleCopy} className={buttonClass} aria-label="Copy provider options">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className={buttonClass}
+                    aria-label={studioT('Copy provider options')}
+                  >
                     <Icon>
                       <IconSquareBehindSquare1 />
                     </Icon>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Copy provider options</TooltipContent>
+                <TooltipContent>{studioT('Copy provider options')}</TooltipContent>
               </Tooltip>
 
               {canEdit && (
@@ -253,12 +261,12 @@ export const AgentAdvancedSettingsBody = ({ canEdit = true }: AgentAdvancedSetti
                       type="button"
                       onClick={saveProviderOptions}
                       className={buttonClass}
-                      aria-label="Save provider options"
+                      aria-label={studioT('Save provider options')}
                     >
                       <Icon>{saved ? <IconCheckmark2Medium /> : <IconFloppyDisk1 />}</Icon>
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent>{saved ? 'Saved' : 'Save provider options'}</TooltipContent>
+                  <TooltipContent>{saved ? studioT('Saved') : studioT('Save provider options')}</TooltipContent>
                 </Tooltip>
               )}
             </div>

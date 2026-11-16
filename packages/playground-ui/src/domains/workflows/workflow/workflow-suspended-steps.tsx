@@ -19,6 +19,8 @@ import { IconPlay } from '@/ds/icons/central/IconPlay';
 import { Icon } from '@/ds/icons/Icon';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { jsonSchemaToZodRuntime } from '@/lib/form/json-schema-to-zod-runtime';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { toast } from '@/utils/toast';
 
@@ -62,6 +64,7 @@ export function WorkflowSuspendedSteps({
   isStreaming,
   onResume,
 }: WorkflowSuspendedStepsProps) {
+  useLocale();
   if (isStreaming || suspendedSteps.length === 0) {
     return null;
   }
@@ -70,7 +73,7 @@ export function WorkflowSuspendedSteps({
     <section
       className={cn(panelSurfaceStyle, 'pointer-events-auto relative isolate')}
       data-testid="workflow-suspended-steps"
-      aria-label="Step suspended"
+      aria-label={studioT('Step suspended')}
     >
       <div className="max-h-[calc(100cqh-64px)] overflow-y-auto overscroll-contain rounded-[inherit]">
         <div className="flex items-center justify-between gap-3 border-b border-border bg-background px-5 py-4">
@@ -78,10 +81,10 @@ export function WorkflowSuspendedSteps({
             <Icon>
               <IconPause />
             </Icon>
-            Step suspended
+            {studioT('Step suspended')}
           </Txt>
           <Badge variant="orange" emphasis="subtle">
-            Needs input
+            {studioT('Needs input')}
           </Badge>
         </div>
 
@@ -104,7 +107,12 @@ export function WorkflowSuspendedSteps({
           );
         })}
       </div>
-      <ActivityWick status="ready" label="Needs input" className="before:hidden" style={suspendedWickStyle} />
+      <ActivityWick
+        status="ready"
+        label={studioT('Needs input')}
+        className="before:hidden"
+        style={suspendedWickStyle}
+      />
     </section>
   );
 }
@@ -117,6 +125,7 @@ interface SuspendedStepCardProps {
 }
 
 function SuspendedStepCard({ step, stepSchema, description, onResume }: SuspendedStepCardProps) {
+  useLocale();
   const [isPayloadOpen, setIsPayloadOpen] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
 
@@ -125,7 +134,7 @@ function SuspendedStepCard({ step, stepSchema, description, onResume }: Suspende
     try {
       await onResume({ stepId: step.stepId.split('.'), runId: step.runId, resumeData });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error resuming workflow');
+      toast.error(error instanceof Error ? error.message : studioT('Error resuming workflow'));
     } finally {
       setIsResuming(false);
     }
@@ -150,7 +159,7 @@ function SuspendedStepCard({ step, stepSchema, description, onResume }: Suspende
             <Icon>
               <IconArrowDownLeft />
             </Icon>
-            The step is asking
+            {studioT('The step is asking')}
           </Txt>
 
           <Collapsible open={isPayloadOpen} onOpenChange={setIsPayloadOpen}>
@@ -191,14 +200,14 @@ function SuspendedStepCard({ step, stepSchema, description, onResume }: Suspende
           <Icon>
             <IconArrowUpRight />
           </Icon>
-          Your response
+          {studioT('Your response')}
         </Txt>
 
         <div className="-mx-5">
           <WorkflowInputData
             schema={stepSchema}
             isSubmitLoading={isResuming}
-            submitButtonLabel="Resume"
+            submitButtonLabel={studioT('Resume')}
             submitButtonVariant="primary"
             submitButtonIcon={<IconPlay />}
             submitButtonFullWidth

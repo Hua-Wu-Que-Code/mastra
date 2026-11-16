@@ -6,6 +6,8 @@ import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSquare1';
 import { Icon } from '@/ds/icons/Icon';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const badgeLabel = 'shrink-0 text-placeholder';
@@ -24,6 +26,7 @@ function SignalDetail({ label, value }: { label: string; value: string }) {
 
 /** The id shortened to 6 characters like the trace and span ids; clicking copies the full value. */
 function SignalId({ id }: { id: string }) {
+  useLocale();
   const { isCopied, handleCopy } = useCopyToClipboard({ text: id, showToast: false });
   return (
     <li className="flex">
@@ -33,18 +36,18 @@ function SignalId({ id }: { id: string }) {
             <button
               type="button"
               onClick={handleCopy}
-              aria-label={`Copy signal id ${id}`}
+              aria-label={studioT('Copy signal id {value0}', { value0: id })}
               className="group flex cursor-pointer rounded-[7px] outline-hidden focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-border-focus focus-visible:outline-solid"
             />
           }
         >
           <Badge variant="neutral" emphasis="subtle" size="sm" className="group-hover:bg-fill">
-            <span className={badgeLabel}>Signal id</span>
+            <span className={badgeLabel}>{studioT('Signal id')}</span>
             {id.slice(0, 6)}
             <Icon size="xs">{isCopied ? <IconCheckmark2Medium /> : <IconSquareBehindSquare1 />}</Icon>
           </Badge>
         </TooltipTrigger>
-        <TooltipContent>{isCopied ? 'Copied to clipboard' : 'Copy to clipboard'}</TooltipContent>
+        <TooltipContent>{isCopied ? studioT('Copied to clipboard') : studioT('Copy to clipboard')}</TooltipContent>
       </Tooltip>
     </li>
   );
@@ -56,15 +59,16 @@ function SignalId({ id }: { id: string }) {
  * and skips the type and tag the bubble already conveys.
  */
 export function SignalDetails({ signal, isUser }: { signal: SignalData; isUser: boolean }) {
+  useLocale();
   const attributes = Object.entries(signal.attributes ?? {});
   return (
     <ul
-      aria-label="Signal"
+      aria-label={studioT('Signal')}
       data-slot="span-signal-details"
       className={cn('flex min-w-0 flex-wrap items-center gap-1', isUser && 'justify-end')}
     >
-      {!isUser && signal.type !== undefined && <SignalDetail label="Type" value={signal.type} />}
-      {!isUser && signal.tagName !== undefined && <SignalDetail label="Tag" value={signal.tagName} />}
+      {!isUser && signal.type !== undefined && <SignalDetail label={studioT('Type')} value={signal.type} />}
+      {!isUser && signal.tagName !== undefined && <SignalDetail label={studioT('Tag')} value={signal.tagName} />}
       {attributes.map(([key, value]) => (
         <SignalDetail key={key} label={key} value={formatSignalValue(value) ?? String(value)} />
       ))}

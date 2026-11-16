@@ -6,6 +6,10 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowOutOfBox } from '@mastra/playground-ui/icons/central/IconArrowOutOfBox';
 import { IconArrowRotateClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateClockwise';
 import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useCallback, useState } from 'react';
 import { MAX_IMPORT_LABEL } from '../../utils/json-validation';
@@ -48,11 +52,12 @@ export function JSONSourcePanel({
   validation,
   isImporting,
 }: JSONSourcePanelProps) {
+  useLocale();
   return (
     <Tabs value={tab} defaultTab="upload" onValueChange={onTabChange} className="flex h-full flex-col gap-3">
       <TabList variant="pill">
-        <Tab value="upload">Upload file</Tab>
-        <Tab value="paste">Paste JSON</Tab>
+        <Tab value="upload">{studioT('Upload file')}</Tab>
+        <Tab value="paste">{studioT('Paste JSON')}</Tab>
       </TabList>
 
       <TabContent value="upload" className={tabContentClassName}>
@@ -65,7 +70,7 @@ export function JSONSourcePanel({
 
       <TabContent value="paste" className={tabContentClassName}>
         <CodeEditor
-          aria-label="JSON items"
+          aria-label={studioT('JSON items')}
           language="json"
           lineNumbers={false}
           showCopyButton={false}
@@ -81,6 +86,7 @@ export function JSONSourcePanel({
 }
 
 function Dropzone({ onFileSelect, disabled }: { onFileSelect: (file: File) => void; disabled: boolean }) {
+  useLocale();
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleFileChange = useCallback(
@@ -138,7 +144,7 @@ function Dropzone({ onFileSelect, disabled }: { onFileSelect: (file: File) => vo
       <input
         type="file"
         accept=".json,application/json"
-        aria-label="Choose a JSON file"
+        aria-label={studioT('Choose a JSON file')}
         onChange={handleFileChange}
         disabled={disabled}
         className="absolute inset-0 cursor-pointer opacity-0"
@@ -147,13 +153,16 @@ function Dropzone({ onFileSelect, disabled }: { onFileSelect: (file: File) => vo
         <IconArrowOutOfBox className="size-icon-md" />
       </div>
       <div className="flex flex-col gap-1">
-        <Txt tone="ink">Drop a JSON file here</Txt>
+        <Txt tone="ink">{studioT('Drop a JSON file here')}</Txt>
         <Txt variant="caption" tone="muted">
-          or <span className="underline">choose a file</span> from your computer
+          <Trans
+            id="or {part0} from your computer"
+            values={{ part0: <span className="underline">{studioT('choose a file')}</span> }}
+          />
         </Txt>
       </div>
       <Txt variant="meta" tone="muted">
-        .json files containing an array of items, up to {MAX_IMPORT_LABEL}
+        <Trans id=".json files containing an array of items, up to {part0}" values={{ part0: MAX_IMPORT_LABEL }} />
       </Txt>
     </div>
   );
@@ -179,6 +188,7 @@ function FileCard({
   onReplace: () => void;
   isImporting: boolean;
 }) {
+  useLocale();
   const rows: JSONPreviewRow[] = 'rows' in validation ? validation.rows : [];
   const total = 'total' in validation ? validation.total : 0;
   const visibleRows = rows.slice(0, PREVIEW_ROW_COUNT);
@@ -200,7 +210,7 @@ function FileCard({
           onClick={onReplace}
           disabled={isImporting}
         >
-          Replace
+          {studioT('Replace')}
         </Button>
       </div>
 
@@ -217,11 +227,11 @@ function FileCard({
           </Txt>
           {!row.hasInput ? (
             <Badge variant="destructive" size="xs">
-              no input
+              {studioT('no input')}
             </Badge>
           ) : !row.hasGroundTruth ? (
             <Badge variant="warning" size="xs">
-              no groundTruth
+              {studioT('no groundTruth')}
             </Badge>
           ) : null}
         </div>
@@ -229,7 +239,7 @@ function FileCard({
 
       {total > PREVIEW_ROW_COUNT && (
         <Txt as="p" variant="meta" tone="muted" className="border-t border-border px-3 py-1.5">
-          + {total - PREVIEW_ROW_COUNT} more
+          <Trans id="+ {part0} more" values={{ part0: total - PREVIEW_ROW_COUNT }} />
         </Txt>
       )}
     </div>

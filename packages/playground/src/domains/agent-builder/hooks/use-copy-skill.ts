@@ -1,4 +1,6 @@
 import type { StoredSkillResponse } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useMastraClient } from '@mastra/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,6 +24,7 @@ export interface CopySkillParams {
  * an `origin: library-copy` tag so the UI can show provenance later.
  */
 export function useCopySkill() {
+  useLocale();
   const client = useMastraClient();
   const queryClient = useQueryClient();
 
@@ -53,10 +56,12 @@ export function useCopySkill() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['stored-skills'] });
-      toast.success('Skill copied');
+      toast.success(studioT('Skill copied'));
     },
     onError: error => {
-      toast.error(`Failed to copy skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to copy skill: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
     },
   });
 }

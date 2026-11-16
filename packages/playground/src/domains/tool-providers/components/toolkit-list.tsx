@@ -1,6 +1,8 @@
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -16,6 +18,7 @@ interface ToolkitListProps {
 }
 
 export function ToolkitList({ providerId, selectedToolkit, onSelectToolkit, selectedCount = 0 }: ToolkitListProps) {
+  useLocale();
   const { data, isLoading } = useToolkits({ providerId: providerId, queryOptions: { enabled: !!providerId } });
   const toolkits = data?.data ?? [];
 
@@ -43,7 +46,7 @@ export function ToolkitList({ providerId, selectedToolkit, onSelectToolkit, sele
           )}
         >
           <Txt as="span" variant="column" className="block">
-            All
+            {studioT('All')}
           </Txt>
         </button>
 
@@ -60,7 +63,7 @@ export function ToolkitList({ providerId, selectedToolkit, onSelectToolkit, sele
           )}
         >
           <Txt as="span" variant="column" className="block">
-            Selected
+            {studioT('Selected')}
           </Txt>
           {selectedCount > 0 && (
             <Txt

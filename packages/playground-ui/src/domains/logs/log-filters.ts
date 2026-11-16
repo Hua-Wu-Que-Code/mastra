@@ -2,6 +2,7 @@ import type { MastraClient } from '@mastra/client-js';
 import type { EntityType } from '@mastra/core/observability';
 import type { LogLevel } from './types';
 import type { PropertyFilterField, PropertyFilterToken } from '@/ds/components/PropertyFilter/types';
+import { t as studioT } from '@/lib/i18n';
 
 type ListLogsArgs = NonNullable<Parameters<MastraClient['listLogsVNext']>[0]>;
 
@@ -20,21 +21,71 @@ export const LOGS_ROOT_ENTITY_TYPES = {
 } as const satisfies Record<string, EntityTypeValue>;
 
 export const LOGS_ROOT_ENTITY_TYPE_OPTIONS = [
-  { label: 'Agent', entityType: LOGS_ROOT_ENTITY_TYPES.AGENT },
-  { label: 'Workflow', entityType: LOGS_ROOT_ENTITY_TYPES.WORKFLOW },
-  { label: 'Scorer', entityType: LOGS_ROOT_ENTITY_TYPES.SCORER },
-  { label: 'Ingest', entityType: LOGS_ROOT_ENTITY_TYPES.INGEST },
-  { label: 'Classifier', entityType: LOGS_ROOT_ENTITY_TYPES.CLASSIFIER },
+  {
+    get label() {
+      return studioT('Agent');
+    },
+    entityType: LOGS_ROOT_ENTITY_TYPES.AGENT,
+  },
+  {
+    get label() {
+      return studioT('Workflow');
+    },
+    entityType: LOGS_ROOT_ENTITY_TYPES.WORKFLOW,
+  },
+  {
+    get label() {
+      return studioT('Scorer');
+    },
+    entityType: LOGS_ROOT_ENTITY_TYPES.SCORER,
+  },
+  {
+    get label() {
+      return studioT('Ingest');
+    },
+    entityType: LOGS_ROOT_ENTITY_TYPES.INGEST,
+  },
+  {
+    get label() {
+      return studioT('Classifier');
+    },
+    entityType: LOGS_ROOT_ENTITY_TYPES.CLASSIFIER,
+  },
 ] as const satisfies readonly LogsEntityOptions[];
 
 export const LOG_LEVEL_VALUES: readonly LogLevel[] = ['debug', 'info', 'warn', 'error', 'fatal'] as const;
 
 export const LOG_LEVEL_OPTIONS = [
-  { label: 'Debug', value: 'debug' },
-  { label: 'Info', value: 'info' },
-  { label: 'Warn', value: 'warn' },
-  { label: 'Error', value: 'error' },
-  { label: 'Fatal', value: 'fatal' },
+  {
+    get label() {
+      return studioT('Debug');
+    },
+    value: 'debug',
+  },
+  {
+    get label() {
+      return studioT('Info');
+    },
+    value: 'info',
+  },
+  {
+    get label() {
+      return studioT('Warn');
+    },
+    value: 'warn',
+  },
+  {
+    get label() {
+      return studioT('Error');
+    },
+    value: 'error',
+  },
+  {
+    get label() {
+      return studioT('Fatal');
+    },
+    value: 'fatal',
+  },
 ] as const satisfies readonly { label: string; value: LogLevel }[];
 
 export const LOGS_ROOT_ENTITY_TYPE_PARAM = 'rootEntityType';
@@ -162,69 +213,165 @@ export function createLogsPropertyFilterFields({
   const fields: PropertyFilterField[] = [
     {
       id: 'rootEntityType',
-      label: 'Primitive type',
+      get label() {
+        return studioT('Primitive type');
+      },
       kind: 'pick-multi',
       searchable: false,
       options: LOGS_ROOT_ENTITY_TYPE_OPTIONS.map(o => ({ label: o.label, value: o.entityType })),
-      placeholder: 'Choose entity type',
-      emptyText: 'No entity types.',
+      get placeholder() {
+        return studioT('Choose entity type');
+      },
+      get emptyText() {
+        return studioT('No entity types.');
+      },
     },
     {
       id: 'entityName',
-      label: 'Primitive name',
+      get label() {
+        return studioT('Primitive name');
+      },
       kind: 'pick-multi',
       options: availableRootEntityNames.map(name => ({ label: name, value: name })),
-      placeholder: 'Choose entity names',
-      emptyText: 'No entity names found.',
+      get placeholder() {
+        return studioT('Choose entity names');
+      },
+      get emptyText() {
+        return studioT('No entity names found.');
+      },
       isLoading: loading?.entityNames,
     },
     {
       id: 'level',
-      label: 'Level',
+      get label() {
+        return studioT('Level');
+      },
       kind: 'pick-multi',
       searchable: false,
       options: LOG_LEVEL_OPTIONS.map(o => ({ label: o.label, value: o.value })),
-      placeholder: 'Choose level',
-      emptyText: 'No levels.',
+      get placeholder() {
+        return studioT('Choose level');
+      },
+      get emptyText() {
+        return studioT('No levels.');
+      },
     },
     {
       id: 'tags',
-      label: 'Tags',
+      get label() {
+        return studioT('Tags');
+      },
       kind: 'pick-multi',
       multi: true,
       options: availableTags.map(tag => ({ label: tag, value: tag })),
-      placeholder: 'Choose tags',
-      emptyText: 'No tags found.',
+      get placeholder() {
+        return studioT('Choose tags');
+      },
+      get emptyText() {
+        return studioT('No tags found.');
+      },
       isLoading: loading?.tags,
     },
     {
       id: 'serviceName',
-      label: 'Service Name',
+      get label() {
+        return studioT('Service Name');
+      },
       kind: 'pick-multi',
       options: availableServiceNames.map(name => ({ label: name, value: name })),
-      placeholder: 'Choose service names',
-      emptyText: 'No service names found.',
+      get placeholder() {
+        return studioT('Choose service names');
+      },
+      get emptyText() {
+        return studioT('No service names found.');
+      },
       isLoading: loading?.serviceNames,
     },
     {
       id: 'environment',
-      label: 'Environment',
+      get label() {
+        return studioT('Environment');
+      },
       kind: 'pick-multi',
       options: availableEnvironments.map(env => ({ label: env, value: env })),
-      placeholder: 'Choose environments',
-      emptyText: 'No environments found.',
+      get placeholder() {
+        return studioT('Choose environments');
+      },
+      get emptyText() {
+        return studioT('No environments found.');
+      },
       isLoading: loading?.environments,
     },
-    { id: 'traceId', label: 'Trace ID', kind: 'text' },
-    { id: 'spanId', label: 'Span ID', kind: 'text' },
-    { id: 'runId', label: 'Run ID', kind: 'text' },
-    { id: 'threadId', label: 'Thread ID', kind: 'text' },
-    { id: 'sessionId', label: 'Session ID', kind: 'text' },
-    { id: 'requestId', label: 'Request ID', kind: 'text' },
-    { id: 'resourceId', label: 'Resource ID', kind: 'text' },
-    { id: 'userId', label: 'User ID', kind: 'text' },
-    { id: 'organizationId', label: 'Organization ID', kind: 'text' },
-    { id: 'experimentId', label: 'Experiment ID', kind: 'text' },
+    {
+      id: 'traceId',
+      get label() {
+        return studioT('Trace ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'spanId',
+      get label() {
+        return studioT('Span ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'runId',
+      get label() {
+        return studioT('Run ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'threadId',
+      get label() {
+        return studioT('Thread ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'sessionId',
+      get label() {
+        return studioT('Session ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'requestId',
+      get label() {
+        return studioT('Request ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'resourceId',
+      get label() {
+        return studioT('Resource ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'userId',
+      get label() {
+        return studioT('User ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'organizationId',
+      get label() {
+        return studioT('Organization ID');
+      },
+      kind: 'text',
+    },
+    {
+      id: 'experimentId',
+      get label() {
+        return studioT('Experiment ID');
+      },
+      kind: 'text',
+    },
   ];
   const byLabel = (a: PropertyFilterField, b: PropertyFilterField) => a.label.localeCompare(b.label);
   const pickMulti = fields.filter(f => f.kind === 'pick-multi').sort(byLabel);

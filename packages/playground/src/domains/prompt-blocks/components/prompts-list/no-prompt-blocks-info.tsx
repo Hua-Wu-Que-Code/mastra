@@ -3,26 +3,31 @@ import { EmptyState } from '@mastra/playground-ui/components/EmptyState';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { useIsCmsAvailable } from '@/domains/cms/hooks/use-is-cms-available';
 
 export const NoPromptBlocksInfo = () => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const { isCmsAvailable, isLoading } = useIsCmsAvailable();
   const canCreate = !isLoading && isCmsAvailable;
 
   return (
     <EmptyState
-      titleSlot="No Prompts yet"
+      titleSlot={studioT('No Prompts yet')}
       descriptionSlot={
         canCreate ? (
           <>
-            Create a reusable prompt block and reference it <br />
-            in your agent instructions.
+            {studioT('Create a reusable prompt block and reference it') + ' '}
+            <br />
+            {studioT('in your agent instructions.')}
           </>
         ) : (
           <>
-            There are no prompt blocks yet. Prompt blocks are reusable <br />
-            content that can be referenced in your agent instructions.
+            {studioT('There are no prompt blocks yet. Prompt blocks are reusable') + ' '}
+            <br />
+            {studioT('content that can be referenced in your agent instructions.')}
           </>
         )
       }
@@ -34,7 +39,7 @@ export const NoPromptBlocksInfo = () => {
               variant="primary"
               icon={<IconPlusMedium />}
             >
-              Create prompt
+              {studioT('Create prompt')}
             </Button>
           )}
           <Button
@@ -49,7 +54,7 @@ export const NoPromptBlocksInfo = () => {
 
             icon={<IconSquareArrowTopRight />}
           >
-            Prompts documentation
+            {studioT('Prompts documentation')}
           </Button>
         </div>
       }

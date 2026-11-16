@@ -1,6 +1,8 @@
 import { ActionRow } from '@mastra/playground-ui/components/ActionRow';
 import type { FilterBarField } from '@mastra/playground-ui/components/FilterBar';
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import { metricsCrumbs } from '../metrics-crumbs';
 import { MetricsFilterBar } from './metrics-filter-bar';
@@ -13,6 +15,7 @@ type MetricsPageLayoutProps = {
 
 /** URL controls do not need storage access and remain usable on unsupported stores. */
 export function MetricsPageLayout({ children, filterFields }: MetricsPageLayoutProps) {
+  useLocale();
   return (
     <PageLayout
       breadcrumbs={<PageBreadcrumbs crumbs={metricsCrumbs} />}
@@ -24,7 +27,7 @@ export function MetricsPageLayout({ children, filterFields }: MetricsPageLayoutP
         </ActionRow>
       }
     >
-      <h1 className="sr-only">Metrics</h1>
+      <h1 className="sr-only">{studioT('Metrics')}</h1>
       {children}
     </PageLayout>
   );

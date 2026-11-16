@@ -1,6 +1,10 @@
 import type { GetAgentResponse } from '@mastra/client-js';
 import { CardContent, CardDescription, CardLink, CardTitle } from '@mastra/playground-ui/components/Card';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useId } from 'react';
 import { extractPrompt } from '../../utils/extractPrompt';
 import { AgentProviderDetails } from './agent-provider-details';
@@ -44,6 +48,7 @@ function formatCount(count: number, singular: string) {
 }
 
 export function AgentCompactCard({ agent }: AgentCompactCardProps) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
   const accessibleId = useId();
   const instructions = extractPrompt(agent.instructions).replace(/\s+/g, ' ').trim();
@@ -58,11 +63,13 @@ export function AgentCompactCard({ agent }: AgentCompactCardProps) {
       <CardLink
         LinkComponent={Link}
         href={paths.agentLink(agent.id)}
-        aria-label={`Open ${agent.name}`}
+        aria-label={studioT('Open {value0}', { value0: agent.name })}
         aria-describedby={`${accessibleId}-instructions ${accessibleId}-metadata`}
         className="absolute inset-0 group-focus-within/agent:bg-fill-subtle group-hover/agent:bg-fill-subtle"
       >
-        <span className="sr-only">Open {agent.name}</span>
+        <span className="sr-only">
+          <Trans id="Open {part0}" values={{ part0: agent.name }} />
+        </span>
       </CardLink>
 
       <CardContent density="compact" className="pointer-events-none relative grid h-full min-w-0 gap-2">
@@ -79,7 +86,9 @@ export function AgentCompactCard({ agent }: AgentCompactCardProps) {
         </CardDescription>
 
         <span id={`${accessibleId}-metadata`} className="sr-only">
-          {agent.provider ? `${agent.provider} provider. ` : 'No provider configured. '}
+          {agent.provider
+            ? studioT('{value0} provider.', { value0: agent.provider }) + ' '
+            : studioT('No provider configured.') + ' '}
           {formatCount(workflowsCount, 'workflow')}, {formatCount(agentsCount, 'agent')},{' '}
           {formatCount(toolsCount, 'tool')}.
         </span>

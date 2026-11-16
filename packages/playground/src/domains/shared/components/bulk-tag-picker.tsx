@@ -5,6 +5,10 @@ import { Popover, PopoverTrigger, PopoverContent } from '@mastra/playground-ui/c
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useState } from 'react';
 
 export function BulkTagPicker({
@@ -22,6 +26,7 @@ export function BulkTagPicker({
   onNewTag: (tag: string) => void;
   size?: ButtonProps['size'];
 }) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -32,7 +37,8 @@ export function BulkTagPicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button size={size} icon={<IconTag />}>
-          Tag {selectedCount} items
+          {studioT('Tag') + ' '}
+          {selectedCount} {' ' + studioT('items')}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2" align="end">
@@ -50,7 +56,7 @@ export function BulkTagPicker({
               setSearch('');
             }
           }}
-          placeholder="Search or create tag"
+          placeholder={studioT('Search or create tag')}
           className="mb-1 h-7 text-caption"
           autoFocus
         />
@@ -81,7 +87,7 @@ export function BulkTagPicker({
               className="w-full rounded px-2 py-1 text-left text-info-indicator hover:bg-fill-subtle"
             >
               <Txt as="span" variant="caption" className="block">
-                Create &amp; apply &quot;{search.trim()}&quot;
+                <Trans id={'Create & apply " {part0}&quot;'} values={{ part0: search.trim() }} />
               </Txt>
             </button>
           )}

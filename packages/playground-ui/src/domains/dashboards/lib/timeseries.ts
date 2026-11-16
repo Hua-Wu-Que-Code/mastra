@@ -19,6 +19,7 @@ import {
   valueExprSchema,
 } from './values';
 import type { ChartColorName, LabelledValue, ValueExpr, ValueRef } from './values';
+import { t as studioT } from '@/lib/i18n';
 
 export const timeseriesSeriesSchema = z
   .object({
@@ -220,7 +221,13 @@ const ADDITIVE = new Set<string>(['sum', 'count']);
 export function timeseriesAlertValues(options: TimeseriesOptions): LabelledValue[] {
   const values = options.series.map(s => ({ label: s.label, value: s.rangeTotal ?? s.value }));
   const total = options.total?.value;
-  if (total && total !== 'total' && !('peak' in total)) values.push({ label: 'Total', value: total });
+  if (total && total !== 'total' && !('peak' in total))
+    values.push({
+      get label() {
+        return studioT('Total');
+      },
+      value: total,
+    });
   return values;
 }
 

@@ -14,11 +14,14 @@ import { IconArrowWallDown } from '@/ds/icons/central/IconArrowWallDown';
 import { IconChevronRightMedium } from '@/ds/icons/central/IconChevronRightMedium';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconPause } from '@/ds/icons/central/IconPause';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const DIRECTION_ICONS = { input: IconArrowWallDown, output: IconArrowUpWall };
 const DIRECTION_LABELS = { input: 'Input', output: 'Output' };
 
 export function WorkflowDataInspector({ selection }: { selection: WorkflowDataSelection }) {
+  useLocale();
   const { closeStepDetail } = useWorkflowStepDetail();
   const { result } = useContext(WorkflowRunContext);
   const { name, direction, value } = useWorkflowData(selection);
@@ -32,7 +35,7 @@ export function WorkflowDataInspector({ selection }: { selection: WorkflowDataSe
 
   return (
     <section
-      aria-label="Data inspector"
+      aria-label={studioT('Data inspector')}
       className={`workflow-data-inspector ${panelSurfaceStyle} flex min-h-0 flex-col overflow-hidden`}
       onKeyDown={event => {
         if (event.key === 'Escape' && !event.defaultPrevented) {
@@ -50,14 +53,20 @@ export function WorkflowDataInspector({ selection }: { selection: WorkflowDataSe
             {name}
           </Txt>
         </div>
-        <Button ref={closeRef} variant="ghost" size="icon-sm" tooltip="Close data inspector" onClick={closeStepDetail}>
+        <Button
+          ref={closeRef}
+          variant="ghost"
+          size="icon-sm"
+          tooltip={studioT('Close data inspector')}
+          onClick={closeStepDetail}
+        >
           <IconCrossMedium />
         </Button>
       </header>
       <div className="min-h-0 overflow-auto overscroll-contain p-3">
         {value === undefined ? (
           <Txt as="p" variant="caption" tone="muted" className="p-2">
-            No {direction} recorded for this selection.
+            <Trans id="No {part0} recorded for this selection." values={{ part0: direction }} />
           </Txt>
         ) : (
           <CodeEditor
@@ -73,7 +82,7 @@ export function WorkflowDataInspector({ selection }: { selection: WorkflowDataSe
         <div className="shrink-0 border-t border-border p-2">
           <Button variant="ghost" className="w-full justify-start text-warning-foreground" onClick={closeStepDetail}>
             <IconPause />
-            Return to suspended step
+            {studioT('Return to suspended step')}
             <IconChevronRightMedium className="ml-auto" />
           </Button>
         </div>

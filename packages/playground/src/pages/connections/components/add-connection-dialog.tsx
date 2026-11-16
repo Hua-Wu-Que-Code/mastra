@@ -20,7 +20,6 @@ import { Input } from '@mastra/playground-ui/components/Input';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-
 import type { UserConnectProvider } from '@mastra/playground-ui/domains/connect';
 import {
   ProviderLogo,
@@ -31,6 +30,10 @@ import {
   supportsHeadlessAuth,
   usePendingConnect,
 } from '@mastra/playground-ui/domains/connect';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useEffect, useState } from 'react';
 
 export interface AddConnectionDialogProps {
@@ -48,6 +51,7 @@ export interface AddConnectionDialogProps {
  * closes the dialog; abandoned or failed flows offer a retry.
  */
 export function AddConnectionDialog({ providers, open, onOpenChange }: AddConnectionDialogProps) {
+  useLocale();
   const { pending, connect, cancel, settled, isCreating, createError } = usePendingConnect();
   // The provider the user picked in this dialog session; the hook's outcome
   // only drives this dialog when it belongs to this attempt.
@@ -123,27 +127,31 @@ export function AddConnectionDialog({ providers, open, onOpenChange }: AddConnec
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add connection</DialogTitle>
+          <DialogTitle>{studioT('Add connection')}</DialogTitle>
           <DialogDescription>
             {attempt
               ? collecting
-                ? `Enter the ${attempt.displayName ?? attempt.id} details to link it to your account.`
-                : `Authorize ${attempt.displayName ?? attempt.id} to link it to your account.`
-              : 'Connect one of your own accounts to this project.'}
+                ? studioT('Enter the {value0} details to link it to your account.', {
+                    value0: attempt.displayName ?? attempt.id,
+                  })
+                : studioT('Authorize {value0} to link it to your account.', {
+                    value0: attempt.displayName ?? attempt.id,
+                  })
+              : studioT('Connect one of your own accounts to this project.')}
           </DialogDescription>
         </DialogHeader>
 
         {!attempt ? (
           <DialogBody layout="fill" flush>
-            <Command className="bg-transparent" loop label="Search providers">
-              <CommandInput aria-label="Search providers" placeholder="Search providers" />
+            <Command className="bg-transparent" loop label={studioT('Search providers')}>
+              <CommandInput aria-label={studioT('Search providers')} placeholder={studioT('Search providers')} />
               <CommandList
                 scrollArea
                 scrollAreaMask
                 scrollAreaClassName="h-[min(26rem,calc(100dvh-16rem))]"
                 className="px-2 py-2"
               >
-                <CommandEmpty>No providers match your search.</CommandEmpty>
+                <CommandEmpty>{studioT('No providers match your search.')}</CommandEmpty>
                 {providers.map(provider => (
                   <CommandItem
                     key={provider.id}
@@ -181,26 +189,26 @@ export function AddConnectionDialog({ providers, open, onOpenChange }: AddConnec
             </DialogBody>
             <DialogFooter>
               <Button variant="ghost" onClick={resetAttempt}>
-                Back
+                {studioT('Back')}
               </Button>
               <Button variant="primary" disabled={missingRequired} onClick={submitForm}>
-                Connect
+                {studioT('Connect')}
               </Button>
             </DialogFooter>
           </>
         ) : failureMessage ? (
           <>
             <DialogBody>
-              <Notice variant="destructive" title="Couldn't connect">
+              <Notice variant="destructive" title={studioT("Couldn't connect")}>
                 {failureMessage}
               </Notice>
             </DialogBody>
             <DialogFooter>
               <Button variant="ghost" onClick={resetAttempt}>
-                Back
+                {studioT('Back')}
               </Button>
               <Button variant="primary" onClick={retry}>
-                Try again
+                {studioT('Try again')}
               </Button>
             </DialogFooter>
           </>
@@ -210,10 +218,13 @@ export function AddConnectionDialog({ providers, open, onOpenChange }: AddConnec
               <div className="flex flex-col items-center gap-3 py-6 text-center">
                 <Spinner />
                 <Txt as="p" variant="body">
-                  Waiting for authorization
+                  {studioT('Waiting for authorization')}
                 </Txt>
                 <Txt as="p" variant="body-sm" tone="muted">
-                  Finish signing in to {attempt.displayName ?? attempt.id} in the provider window.
+                  <Trans
+                    id="Finish signing in to {part0} in the provider window."
+                    values={{ part0: attempt.displayName ?? attempt.id }}
+                  />
                 </Txt>
                 {pending?.provider === attempt.id && pending.fallbackUrl ? (
                   <a
@@ -222,14 +233,14 @@ export function AddConnectionDialog({ providers, open, onOpenChange }: AddConnec
                     rel="noreferrer"
                     className="text-ui-md underline underline-offset-2"
                   >
-                    Open the connect window
+                    {studioT('Open the connect window')}
                   </a>
                 ) : null}
               </div>
             </DialogBody>
             <DialogFooter>
               <Button variant="ghost" disabled={isCreating} onClick={() => handleOpenChange(false)}>
-                Cancel
+                {studioT('Cancel')}
               </Button>
             </DialogFooter>
           </>

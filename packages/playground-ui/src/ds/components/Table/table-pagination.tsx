@@ -9,6 +9,7 @@ import {
   PaginationPrevious,
 } from '../Pagination/pagination';
 import { getPaginationRange } from '../Pagination/pagination-range';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TablePaginationProps = Omit<ComponentProps<'nav'>, 'children'> & {
   page: number;
@@ -17,6 +18,7 @@ export type TablePaginationProps = Omit<ComponentProps<'nav'>, 'children'> & {
 };
 
 export function TablePagination({ page, pageCount, onPageChange, ...props }: TablePaginationProps) {
+  useLocale();
   return (
     <Pagination {...props}>
       <PaginationContent>
@@ -34,7 +36,7 @@ export function TablePagination({ page, pageCount, onPageChange, ...props }: Tab
           return (
             <PaginationItem key={item.page}>
               <PaginationLink
-                aria-label={`Page ${item.page + 1}`}
+                aria-label={studioT('Page {value0}', { value0: item.page + 1 })}
                 isActive={item.page === page}
                 onClick={() => onPageChange(item.page)}
               >

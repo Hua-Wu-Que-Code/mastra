@@ -7,6 +7,10 @@ import { panelIconButtonClass } from './panel-icon-button';
 import { Kbd } from '@/ds/components/Kbd';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { Icon } from '@/ds/icons';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 /** Programmatic control over a CollapsiblePanel (distinct from the library's panel handle). */
@@ -44,6 +48,7 @@ export const CollapsiblePanel = ({
   ref,
   ...props
 }: CollapsiblePanelProps) => {
+  useLocale();
   // Physical state of the panel, as reported by onResize. It drives what is rendered.
   const [isCollapsed, setIsCollapsed] = useState(false);
   // Width the panel had right before we collapsed it. The library's `expand()`
@@ -123,7 +128,7 @@ export const CollapsiblePanel = ({
           <TooltipTrigger asChild>
             <button
               type="button"
-              aria-label="Expand panel"
+              aria-label={studioT('Expand panel')}
               onClick={expand}
               className={cn(
                 panelIconButtonClass,
@@ -139,8 +144,10 @@ export const CollapsiblePanel = ({
           </TooltipTrigger>
           <TooltipContent side={direction === 'left' ? 'right' : 'left'}>
             <span className="inline-flex items-center gap-1.5">
-              Expand panel
-              {expandShortcut && <Kbd size="xs">{expandShortcut}</Kbd>}
+              <Trans
+                id="Expand panel {part0}"
+                values={{ part0: expandShortcut && <Kbd size="xs">{expandShortcut}</Kbd> }}
+              />
             </span>
           </TooltipContent>
         </Tooltip>

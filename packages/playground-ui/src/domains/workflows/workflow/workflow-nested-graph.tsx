@@ -1,7 +1,7 @@
 import type { SerializedStepFlowEntry } from '@mastra/core/workflows';
-
 import { useMemo, useState } from 'react';
 import { useCurrentRun } from '../context/use-current-run';
+
 import { useWorkflowGraphNodes } from './use-workflow-graph-nodes';
 import { useWorkflowGraphRuntime } from './use-workflow-graph-runtime';
 import { WorkflowGraphBoundary } from './workflow-graph-boundary';
@@ -10,6 +10,7 @@ import { getWorkflowIterationScopes } from './workflow-iteration-scopes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select';
 import { Txt } from '@/ds/components/Txt';
 import { WorkflowGraphCanvas, WORKFLOW_BOUNDARY_NODE_TYPE } from '@/ds/components/Workflow';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface WorkflowNestedGraphProps {
   stepGraph: SerializedStepFlowEntry[];
@@ -38,6 +39,7 @@ function WorkflowNestedGraphContent({
   embedded,
   requestContext,
 }: WorkflowNestedGraphProps) {
+  useLocale();
   const { nodes, edges, onNodesChange } = useWorkflowGraphNodes(stepGraph);
   const { steps } = useCurrentRun();
   const iterations = getWorkflowIterationScopes(Object.keys(steps), workflowName);
@@ -66,10 +68,10 @@ function WorkflowNestedGraphContent({
       {activeIteration && (
         <div className="nodrag nopan flex items-center gap-3 border-b border-border px-4 py-2">
           <Txt as="span" variant="caption" tone="muted">
-            Iteration
+            {studioT('Iteration')}
           </Txt>
           <Select value={activeIteration.value} onValueChange={setSelectedIteration} items={iterations}>
-            <SelectTrigger aria-label="Loop item" size="sm" className="w-36">
+            <SelectTrigger aria-label={studioT('Loop item')} size="sm" className="w-36">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

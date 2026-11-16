@@ -6,6 +6,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import { IconArrowRotateCounterClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateCounterClockwise';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
@@ -31,6 +33,7 @@ export const AgentMetadataModelSwitcher = ({
   updateModel,
   resetModel,
 }: AgentMetadataModelSwitcherProps) => {
+  useLocale();
   const [originalProvider] = useState(defaultProvider);
   const [originalModel] = useState(defaultModel);
 
@@ -149,7 +152,7 @@ export const AgentMetadataModelSwitcher = ({
       <div className="flex items-center gap-2">
         <Spinner />
         <Txt as="span" tone="muted">
-          Loading providers...
+          {studioT('Loading providers...')}
         </Txt>
       </div>
     );
@@ -195,7 +198,7 @@ export const AgentMetadataModelSwitcher = ({
           {lockedLabel}
         </Txt>
         <Txt as="span" variant="meta" tone="muted" className="ml-auto shrink-0">
-          Set by admin
+          {studioT('Set by admin')}
         </Txt>
       </div>
     );
@@ -234,7 +237,7 @@ export const AgentMetadataModelSwitcher = ({
           size="icon-md"
           onClick={handleReset}
           disabled={loading}
-          tooltip="Reset to original model"
+          tooltip={studioT('Reset to original model')}
         >
           <IconArrowRotateCounterClockwise />
         </Button>
@@ -242,12 +245,12 @@ export const AgentMetadataModelSwitcher = ({
 
       {stale && (
         <div className="p-2 pt-2" data-testid="agent-metadata-model-stale-warning">
-          <Notice variant="warning" title="Model not allowed">
+          <Notice variant="warning" title={studioT('Model not allowed')}>
             <Notice.Message>
               <code className="rounded bg-fill-hover px-1 py-0.5">
                 {selectedProvider}/{selectedModel}
               </code>{' '}
-              is no longer allowed by the admin policy. Pick a different model to save changes.
+              {studioT('is no longer allowed by the admin policy. Pick a different model to save changes.')}
             </Notice.Message>
           </Notice>
         </div>
@@ -256,15 +259,17 @@ export const AgentMetadataModelSwitcher = ({
       {/* Show warning if selected provider is not connected */}
       {currentProvider && !currentProvider.connected && (
         <div className="p-2 pt-2">
-          <Notice variant="warning" title="Provider not connected">
+          <Notice variant="warning" title={studioT('Provider not connected')}>
             <Notice.Message>
-              Set the{' '}
+              {studioT('Set the')}{' '}
               <code className="rounded bg-fill-hover px-1 py-0.5">
                 {Array.isArray(currentProvider.envVar) ? currentProvider.envVar.join(', ') : currentProvider.envVar}
               </code>{' '}
-              environment{' '}
-              {Array.isArray(currentProvider.envVar) && currentProvider.envVar.length > 1 ? 'variables' : 'variable'} to
-              use this provider.
+              {studioT('environment')}{' '}
+              {Array.isArray(currentProvider.envVar) && currentProvider.envVar.length > 1
+                ? studioT('variables')
+                : studioT('variable')}{' '}
+              {' ' + studioT('to use this provider.')}
             </Notice.Message>
           </Notice>
         </div>

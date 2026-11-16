@@ -4,6 +4,8 @@ import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Section, SubSectionRoot } from '@mastra/playground-ui/components/Section';
 import { Switch } from '@mastra/playground-ui/components/Switch';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { passwordManagerOptOutProps } from '@mastra/playground-ui/primitives/password-manager-autofill';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { RuleGroup } from '@mastra/playground-ui/utils/rule-engine';
@@ -16,6 +18,7 @@ import { SectionHeader, DisplayConditionsDialog } from '@/domains/cms';
 import { SubSectionHeader } from '@/domains/cms/components/section/section-header';
 
 export function WorkflowsPage() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const { data: workflows } = useWorkflows();
@@ -88,18 +91,20 @@ export function WorkflowsPage() {
     <ScrollArea className="h-full">
       <div className="flex flex-col gap-4">
         <SectionHeader
-          title="Workflows"
-          subtitle={`Select workflows this agent can trigger.${count > 0 ? ` (${count} selected)` : ''}`}
+          title={studioT('Workflows')}
+          subtitle={studioT('Select workflows this agent can trigger.{value0}', {
+            value0: count > 0 ? ` (${count} selected)` : '',
+          })}
         />
 
         <SubSectionRoot>
           <Section.Header>
-            <SubSectionHeader title="Available Workflows" icon={<WorkflowIcon />} />
+            <SubSectionHeader title={studioT('Available Workflows')} icon={<WorkflowIcon />} />
           </Section.Header>
 
           <SearchInput
-            label="Search workflows"
-            placeholder="Search workflows"
+            label={studioT('Search workflows')}
+            placeholder={studioT('Search workflows')}
             value={search}
             onValueChange={setSearch}
           />

@@ -40,6 +40,10 @@ import { IconLoadingCircle } from '@mastra/playground-ui/icons/central/IconLoadi
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
 import { IconZap } from '@mastra/playground-ui/icons/central/IconZap';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -74,6 +78,7 @@ interface MessageRowProps {
 type RequireApprovalMetadata = NonNullable<MastraDBMessageMetadata['requireApprovalMetadata']>;
 
 const ToolApprovalPrompt = ({ toolCallId, toolName }: { toolCallId: string; toolName: string }) => {
+  useLocale();
   const { approveToolCall, declineToolCall } = useStreamApproval();
   const [pending, setPending] = useState<'approve' | 'decline' | null>(null);
   const decided = pending !== null;
@@ -91,7 +96,7 @@ const ToolApprovalPrompt = ({ toolCallId, toolName }: { toolCallId: string; tool
   return (
     <ToolCard testId="agent-builder-chat-tool-approval" className="border-transparent bg-muted">
       <Txt as="p" variant="caption" tone="ink" className="pb-2">
-        Approval required for <InlineCode>{toolName}</InlineCode>
+        <Trans id="Approval required for {part0}" values={{ part0: <InlineCode>{toolName}</InlineCode> }} />
       </Txt>
       <div className="flex items-center gap-2">
         <Button
@@ -99,26 +104,26 @@ const ToolApprovalPrompt = ({ toolCallId, toolName }: { toolCallId: string; tool
           onClick={handleApprove}
           disabled={decided}
           data-testid="agent-builder-chat-tool-approve"
-          aria-label={`Approve ${toolName}`}
+          aria-label={studioT('Approve {value0}', { value0: toolName })}
         >
           <Icon>
             {pending === 'approve' ? <IconLoadingCircle className="animate-spin" /> : <IconCheckmark2Medium />}
           </Icon>
-          Approve
+          {studioT('Approve')}
         </Button>
         <Button
           variant="ghost"
           onClick={handleDecline}
           disabled={decided}
           data-testid="agent-builder-chat-tool-decline"
-          aria-label={`Decline ${toolName}`}
+          aria-label={studioT('Decline {value0}', { value0: toolName })}
         >
           {pending === 'decline' && (
             <Icon>
               <IconLoadingCircle className="animate-spin" />
             </Icon>
           )}
-          Decline
+          {studioT('Decline')}
         </Button>
       </div>
     </ToolCard>
@@ -294,6 +299,7 @@ export const Txtmessage = ({
 };
 
 export const ErrorMessage = ({ error, onRetry }: { error: ParsedStreamError; onRetry: (() => void) | null }) => {
+  useLocale();
   return (
     <Card
       className="flex max-w-[80%] flex-col gap-3 border-warning-edge bg-warning-subtle p-4"
@@ -304,7 +310,7 @@ export const ErrorMessage = ({ error, onRetry }: { error: ParsedStreamError; onR
         <IconExclamationTriangle className="mt-0.5 size-icon-md shrink-0 text-warning-foreground" aria-hidden />
         <div className="flex min-w-0 flex-col gap-1">
           <Txt as="p" variant="subheading" tone="ink">
-            Something went wrong while building the agent.
+            {studioT('Something went wrong while building the agent.')}
           </Txt>
           <Txt
             as="p"
@@ -328,7 +334,7 @@ export const ErrorMessage = ({ error, onRetry }: { error: ParsedStreamError; onR
                 data-testid="agent-builder-chat-error-retry"
                 icon={<IconArrowRotateClockwise aria-hidden />}
               >
-                Try again
+                {studioT('Try again')}
               </Button>
             )}
             <CollapsibleTrigger
@@ -340,7 +346,7 @@ export const ErrorMessage = ({ error, onRetry }: { error: ParsedStreamError; onR
               )}
               data-testid="agent-builder-chat-error-details-trigger"
             >
-              Details
+              {studioT('Details')}
             </CollapsibleTrigger>
           </div>
           <CollapsibleContent>
@@ -360,7 +366,7 @@ export const ErrorMessage = ({ error, onRetry }: { error: ParsedStreamError; onR
               data-testid="agent-builder-chat-error-retry"
               icon={<IconArrowRotateClockwise aria-hidden />}
             >
-              Try again
+              {studioT('Try again')}
             </Button>
           </div>
         )
@@ -440,33 +446,41 @@ const SkillToolLine = ({ icon, label, value }: { icon: ReactNode; label: string;
 );
 
 const MessageSetAgentName = () => {
+  useLocale();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const name = watch('name');
 
   if (!name) return null;
 
-  return <SkillToolLine icon={<IconAlignmentLeft />} label="Setting the agent name:" value={name} />;
+  return <SkillToolLine icon={<IconAlignmentLeft />} label={studioT('Setting the agent name:')} value={name} />;
 };
 
 const MessageSetAgentDescription = () => {
+  useLocale();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const description = watch('description');
 
   if (!description) return null;
 
-  return <SkillToolLine icon={<IconAlignmentLeft />} label="Setting the agent description:" value={description} />;
+  return (
+    <SkillToolLine icon={<IconAlignmentLeft />} label={studioT('Setting the agent description:')} value={description} />
+  );
 };
 
 const MessageSetAgentInstructions = () => {
+  useLocale();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const instructions = watch('instructions');
 
   if (!instructions) return null;
 
-  return <SkillToolLine icon={<IconFileText />} label="Setting the agent instructions:" value={instructions} />;
+  return (
+    <SkillToolLine icon={<IconFileText />} label={studioT('Setting the agent instructions:')} value={instructions} />
+  );
 };
 
 const MessageSetAgentTools = () => {
+  useLocale();
   const { agentId, toolsData, agentsData, workflowsData } = useAgentPrimitives();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const selectedTools = watch('tools');
@@ -486,20 +500,22 @@ const MessageSetAgentTools = () => {
   const enabled = availableAgentTools.filter(t => t.isChecked);
   const value = enabled.length === 0 ? 'none' : enabled.map(t => t.name).join(', ');
 
-  return <SkillToolLine icon={<IconMaintenance />} label="Enabling tools:" value={value} />;
+  return <SkillToolLine icon={<IconMaintenance />} label={studioT('Enabling tools:')} value={value} />;
 };
 
 const MessageSetAgentSkills = () => {
+  useLocale();
   const { availableSkills } = useAgentPrimitives();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const skillsField = watch('skills');
   const enabled = skillsField ? availableSkills.filter(s => skillsField[s.id] === true) : [];
   const value = enabled.length === 0 ? 'none' : enabled.map(s => s.name).join(', ');
 
-  return <SkillToolLine icon={<IconZap />} label="Enabling skills:" value={value} />;
+  return <SkillToolLine icon={<IconZap />} label={studioT('Enabling skills:')} value={value} />;
 };
 
 const MessageSetAgentModel = () => {
+  useLocale();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const model = watch('model');
 
@@ -508,38 +524,41 @@ const MessageSetAgentModel = () => {
   return (
     <SkillToolLine
       icon={<ProviderLogo providerId={model.provider} size={16} />}
-      label="Setting agent model to"
+      label={studioT('Setting agent model to')}
       value={`${model.provider}/${model.name}`}
     />
   );
 };
 
 const MessageSetAgentBrowserEnabled = () => {
+  useLocale();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const browserEnabled = watch('browserEnabled');
 
   return (
     <SkillToolLine
       icon={browserEnabled ? <IconGlobe /> : <GlobeLockIcon />}
-      label="Browser access"
+      label={studioT('Browser access')}
       value={browserEnabled ? 'enabled' : 'disabled'}
     />
   );
 };
 
 const MessageSetAgentWorkspaceId = () => {
+  useLocale();
   const { watch } = useFormContext<AgentBuilderEditFormValues>();
   const workspaceId = watch('workspaceId');
 
   if (!workspaceId) return null;
 
-  return <SkillToolLine icon={<IconBuildings />} label="Setting workspace to" value={workspaceId} />;
+  return <SkillToolLine icon={<IconBuildings />} label={studioT('Setting workspace to')} value={workspaceId} />;
 };
 
 interface SkillToolProps {
   name: string;
 }
 
-const SkillTool = ({ name }: SkillToolProps) => (
-  <SkillToolLine icon={<IconZap />} label="Using super-powers:" value={name} />
-);
+const SkillTool = ({ name }: SkillToolProps) => {
+  useLocale();
+  return <SkillToolLine icon={<IconZap />} label={studioT('Using super-powers:')} value={name} />;
+};

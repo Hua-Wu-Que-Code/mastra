@@ -16,6 +16,8 @@ import { ShowMore } from './share-bar-show-more';
 import { ShareBarSkeleton } from './share-bar-skeleton';
 import type { ShareBarColumn, ShareBarProps } from './share-bar-types';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -140,9 +142,10 @@ function ShareBarHeader({
   valueLabel: string;
   valueWidth: string;
 }) {
+  useLocale();
   const cells = [
     ...columns.map(c => ({ label: c.label, width: c.width ?? 'w-16' })),
-    { label: 'Share', width: 'w-12' },
+    { label: studioT('Share'), width: 'w-12' },
     { label: valueLabel, width: valueWidth },
   ];
   return (

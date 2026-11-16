@@ -1,6 +1,8 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconArrowUp } from '@mastra/playground-ui/icons/central/IconArrowUp';
 import { IconLoadingCircle } from '@mastra/playground-ui/icons/central/IconLoadingCircle';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { CSSProperties } from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 import { useAgentColor } from '../../contexts/agent-color-context';
@@ -28,11 +30,12 @@ export const ChatComposer = ({
   disabled,
   canSubmit,
   isRunning = false,
-  placeholder = 'Ask a follow-up',
+  placeholder = studioT('Ask a follow-up'),
   inputTestId,
   submitTestId,
   containerTestId,
 }: ChatComposerProps) => {
+  useLocale();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const agentColor = useAgentColor();
 
@@ -70,7 +73,7 @@ export const ChatComposer = ({
             type="submit"
             variant="default"
             size="icon-sm"
-            tooltip={isRunning ? 'Generating…' : 'Send'}
+            tooltip={isRunning ? studioT('Generating…') : studioT('Send')}
             disabled={!canSubmit}
             data-testid={submitTestId}
           >

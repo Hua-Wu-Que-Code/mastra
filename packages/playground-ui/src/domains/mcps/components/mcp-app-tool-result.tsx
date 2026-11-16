@@ -7,6 +7,7 @@ import type { McpAppModelContextParams, McpAppRef } from '../context/mcp-app-hos
 import { useMcpAppToolCall } from '../hooks/use-mcp-app-tool-call';
 import { McpAppViewer } from './mcp-app-viewer';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface McpAppToolResultProps {
   appInfo: McpAppToolInfo;
@@ -36,6 +37,7 @@ export function McpAppToolResult({
   onUpdateModelContext,
   readOnly,
 }: McpAppToolResultProps) {
+  useLocale();
   const client = useMastraClient();
   const host = useMcpAppHostContext();
   const { toolName, resourceUri } = appInfo;
@@ -66,7 +68,7 @@ export function McpAppToolResult({
   if (isLoading || !html) {
     return (
       <Txt as="p" variant="body" tone="muted" className="rounded-md border border-border bg-background p-4">
-        Loading MCP App UI…
+        {studioT('Loading MCP App UI…')}
       </Txt>
     );
   }

@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@mastra/playground-ui/
 import { CopyButton } from '@mastra/playground-ui/components/CopyButton';
 import { Tab, TabContent, TabList, Tabs } from '@mastra/playground-ui/components/Tabs';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useEffect, useState } from 'react';
 import { McpServerEventsList } from './mcp-server-events-list';
 import { McpServerTasksList } from './mcp-server-tasks-list';
@@ -21,6 +23,7 @@ declare global {
 }
 
 export const MCPDetail = ({ isLoading, server }: MCPDetailProps) => {
+  useLocale();
   const [{ sseUrl, httpStreamUrl }, setUrls] = useState<{ sseUrl: string; httpStreamUrl: string }>({
     sseUrl: '',
     httpStreamUrl: '',
@@ -49,7 +52,7 @@ export const MCPDetail = ({ isLoading, server }: MCPDetailProps) => {
   if (!server)
     return (
       <Txt as="h1" variant="heading" tone="muted" className="py-20 text-center">
-        Server not found
+        {studioT('Server not found')}
       </Txt>
     );
 
@@ -61,28 +64,28 @@ export const MCPDetail = ({ isLoading, server }: MCPDetailProps) => {
   const endpoints = [
     {
       value: 'http',
-      label: 'HTTP',
-      description: 'Use for stateless HTTP transport with streamable responses.',
+      label: studioT('HTTP'),
+      description: studioT('Use for stateless HTTP transport with streamable responses.'),
       content: httpStreamUrl,
-      tooltip: 'Copy HTTP Stream URL',
+      tooltip: studioT('Copy HTTP Stream URL'),
     },
     ...(hasSse
       ? [
           {
             value: 'sse',
-            label: 'SSE',
-            description: 'Use for real-time communication via SSE.',
+            label: studioT('SSE'),
+            description: studioT('Use for real-time communication via SSE.'),
             content: sseUrl,
-            tooltip: 'Copy SSE URL',
+            tooltip: studioT('Copy SSE URL'),
           },
         ]
       : []),
     {
       value: 'cli',
-      label: 'CLI',
-      description: 'Use for local command-line access via npx and mcp-remote.',
+      label: studioT('CLI'),
+      description: studioT('Use for local command-line access via npx and mcp-remote.'),
       content: commandLineConfig,
-      tooltip: 'Copy command line config',
+      tooltip: studioT('Copy command line config'),
     },
   ];
 
@@ -91,7 +94,7 @@ export const MCPDetail = ({ isLoading, server }: MCPDetailProps) => {
       <Card>
         <Tabs defaultTab="http">
           <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 border-b border-border">
-            <CardTitle className="shrink-0">Connect</CardTitle>
+            <CardTitle className="shrink-0">{studioT('Connect')}</CardTitle>
             <div className="min-w-0">
               <TabList variant="pill-ghost" size="sm">
                 {endpoints.map(endpoint => (

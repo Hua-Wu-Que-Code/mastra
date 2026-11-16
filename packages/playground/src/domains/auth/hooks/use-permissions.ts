@@ -1,3 +1,4 @@
+import { isAuthenticated, useAuthCapabilities } from '@mastra/react/hooks/auth';
 /**
  * Hook for checking user permissions in the UI.
  *
@@ -22,8 +23,8 @@
  * ```
  */
 
-import { isAuthenticated, useAuthCapabilities } from '@mastra/react/hooks/auth';
 import { useRoleImpersonation } from './use-role-impersonation';
+import { useAccount } from '@/domains/account/account-context';
 
 /**
  * Permission matching logic.
@@ -143,8 +144,11 @@ export type UsePermissionsResult = {
  * @returns Permission checking utilities
  */
 export function usePermissions(): UsePermissionsResult {
+  const account = useAccount();
   const { data: capabilities, isLoading } = useAuthCapabilities();
-  const { isImpersonating, impersonatedPermissions, impersonatedRole } = useRoleImpersonation();
+  const { isImpersonating: nativeIsImpersonating, impersonatedPermissions, impersonatedRole } = useRoleImpersonation();
+
+  const isImpersonating = !account && nativeIsImpersonating;
 
   // Extract roles and permissions from capabilities
   const authenticated = capabilities && isAuthenticated(capabilities);
@@ -152,12 +156,18 @@ export function usePermissions(): UsePermissionsResult {
 
   // Check if RBAC is enabled
   // If RBAC capability is false or not present, all permission checks should return true
-  const rbacEnabled = authenticated ? capabilities.capabilities.rbac : false;
+  // App permission checks are independent of Mastra Enterprise RBAC.
+  const rbacEnabled = !!account || (authenticated ? capabilities.capabilities.rbac : false);
 
   // When impersonating, use the overridden role and permissions
-  const roles = isImpersonating && impersonatedRole ? [impersonatedRole.id] : (access?.roles ?? []);
+  const roles = account
+    ? [account.user.role]
+    : isImpersonating && impersonatedRole
+      ? [impersonatedRole.id]
+      : (access?.roles ?? []);
   const permissions =
-    isImpersonating && impersonatedPermissions ? impersonatedPermissions : (access?.permissions ?? []);
+    account?.permissions ??
+    (isImpersonating && impersonatedPermissions ? impersonatedPermissions : (access?.permissions ?? []));
 
   // Helper to check permission with RBAC bypass
   const checkPermission = (permission: string): boolean => {
@@ -169,8 +179,8 @@ export function usePermissions(): UsePermissionsResult {
   return {
     roles,
     permissions,
-    isLoading,
-    isAuthenticated: !!authenticated,
+    isLoading: !account && isLoading,
+    isAuthenticated: !!account || !!authenticated,
     rbacEnabled,
 
     hasPermission: (permission: string) => {

@@ -6,6 +6,7 @@ import { DataList } from '@/ds/components/DataList/data-list';
 import { useDataListKeyboard } from '@/ds/components/DataList/use-data-list-keyboard';
 import { SearchInput } from '@/ds/components/SearchInput';
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface TopicTraceSummaryListProps {
   traces: TopicTraceSummary[];
@@ -20,6 +21,7 @@ export function TopicTraceSummaryList({
   onTraceSelect,
   pageSize = 25,
 }: TopicTraceSummaryListProps) {
+  useLocale();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
@@ -31,10 +33,10 @@ export function TopicTraceSummaryList({
   const { containerRef, getRowProps } = useDataListKeyboard({ count: visible.traces.length });
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-4" aria-label="Topic trace summaries">
+    <section className="flex min-h-0 flex-1 flex-col gap-4" aria-label={studioT('Topic trace summaries')}>
       <SearchInput
-        label="Search traces"
-        placeholder="Search traces"
+        label={studioT('Search traces')}
+        placeholder={studioT('Search traces')}
         value={search}
         onValueChange={value => {
           setSearch(value);
@@ -45,12 +47,12 @@ export function TopicTraceSummaryList({
       <DataList columns="minmax(12rem,1fr)" className="min-h-0 flex-1" scrollRef={containerRef}>
         <DataList.Top>
           <DataList.TopCells>
-            <DataList.TopCell>Trace summary</DataList.TopCell>
+            <DataList.TopCell>{studioT('Trace summary')}</DataList.TopCell>
           </DataList.TopCells>
         </DataList.Top>
 
         {visible.traces.length === 0 ? (
-          <DataList.NoMatch message="No traces match this subtopic." />
+          <DataList.NoMatch message={studioT('No traces match this subtopic.')} />
         ) : (
           visible.traces.map((trace, index) => (
             <DataList.RowButton
@@ -68,7 +70,9 @@ export function TopicTraceSummaryList({
 
       {visible.hasMore ? (
         <Button icon={<IconChevronDownMedium />} size="sm" onClick={() => setPage(currentPage => currentPage + 1)}>
-          Load more traces ({visible.traces.length} of {visible.total})
+          {studioT('Load more traces (')}
+          {visible.traces.length} {' ' + studioT('of') + ' '}
+          {visible.total})
         </Button>
       ) : null}
     </section>

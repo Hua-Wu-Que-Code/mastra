@@ -6,6 +6,8 @@ import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/
 import { Txt } from '@/ds/components/Txt';
 import { IconServer1 } from '@/ds/icons/central/IconServer1';
 import { raisedSurfaceStyle, surfaceStateLayerStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface WorkflowEdgeDataButtonProps {
@@ -23,6 +25,7 @@ export const WorkflowEdgeDataButton = ({
   selected,
   onInspect,
 }: WorkflowEdgeDataButtonProps) => {
+  useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const dataLabel = label ?? (previousStepId ? `${previousStepId} output` : 'Previous output');
 
@@ -36,7 +39,7 @@ export const WorkflowEdgeDataButton = ({
         size="sm"
         variant="ghost"
         onClick={onInspect ?? (() => setIsOpen(true))}
-        aria-label={`View ${dataLabel}`}
+        aria-label={studioT('View {value0}', { value0: dataLabel })}
         aria-pressed={selected}
         className={cn(
           raisedSurfaceStyle,
@@ -45,13 +48,13 @@ export const WorkflowEdgeDataButton = ({
         )}
         icon={<IconServer1 className="text-muted-foreground" />}
       >
-        Data
+        {studioT('Data')}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent size="xl">
           <DialogHeader>
-            <DialogTitle>Step output</DialogTitle>
+            <DialogTitle>{studioT('Step output')}</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <div className="min-w-0 rounded-lg border border-border bg-background p-3">

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { EmptyState } from '@/ds/components/EmptyState';
 import { Spinner } from '@/ds/components/Spinner';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type ObservabilityCapabilityGateProps = {
   isLoading: boolean;
@@ -23,6 +24,7 @@ export function ObservabilityCapabilityGate({
   description,
   children,
 }: ObservabilityCapabilityGateProps) {
+  useLocale();
   if (enabled) return children;
 
   return (
@@ -30,9 +32,9 @@ export function ObservabilityCapabilityGate({
       <h1 className="sr-only">{heading}</h1>
       {isLoading ? (
         <div className="flex h-full items-center justify-center gap-2">
-          <Spinner aria-label="Loading storage capabilities" />
+          <Spinner aria-label={studioT('Loading storage capabilities')} />
           <Txt as="span" variant="caption" tone="muted">
-            Loading storage capabilities
+            {studioT('Loading storage capabilities')}
           </Txt>
         </div>
       ) : (

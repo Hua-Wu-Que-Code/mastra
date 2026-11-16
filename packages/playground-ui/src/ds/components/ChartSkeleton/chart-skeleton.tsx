@@ -1,6 +1,8 @@
 import { useId } from 'react';
 import { CHART_MARGIN, X_AXIS_HEIGHT } from '@/ds/primitives/chart-layout';
 import { useShimmerDelay } from '@/ds/primitives/shimmer';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type ChartSkeletonProps = {
@@ -30,6 +32,7 @@ function ghostValues(count: number, seed: number) {
  * across, in the chart's own footprint (plot plus x-axis band).
  */
 export function ChartSkeleton({ kind, height = 210, className }: ChartSkeletonProps) {
+  useLocale();
   const id = `ghost${useId().replace(/:/g, '')}`;
   const delay = useShimmerDelay();
   const values = ghostValues(kind === 'bar' ? 24 : 16, kind === 'bar' ? 7 : 11);
@@ -77,7 +80,7 @@ export function ChartSkeleton({ kind, height = 210, className }: ChartSkeletonPr
     return (
       <div
         role="status"
-        aria-label="Loading chart"
+        aria-label={studioT('Loading chart')}
         data-slot="chart-skeleton"
         className={cn('relative min-h-45 w-full flex-1', className)}
       >
@@ -88,7 +91,7 @@ export function ChartSkeleton({ kind, height = 210, className }: ChartSkeletonPr
   return (
     <div
       role="status"
-      aria-label="Loading chart"
+      aria-label={studioT('Loading chart')}
       data-slot="chart-skeleton"
       className={cn('flex w-full flex-col', className)}
       style={{ height }}

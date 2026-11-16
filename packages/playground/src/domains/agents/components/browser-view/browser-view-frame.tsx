@@ -1,5 +1,7 @@
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBrowserFrame, useBrowserSession } from '../../context/browser-session-context';
@@ -25,6 +27,7 @@ interface BrowserViewFrameProps {
  * Uses useRef pattern for img.src updates to bypass React virtual DOM.
  */
 export function BrowserViewFrame({ className, onStatusChange, onUrlChange, onFirstFrame }: BrowserViewFrameProps) {
+  useLocale();
   const imgRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasFrameRef = useRef(false);
@@ -140,7 +143,7 @@ export function BrowserViewFrame({ className, onStatusChange, onUrlChange, onFir
       {/* Image element - always rendered, hidden via opacity until first frame loads */}
       <img
         ref={imgRef}
-        alt="Browser screencast"
+        alt={studioT('Browser screencast')}
         onClick={handleFrameClick}
         onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -172,7 +175,7 @@ export function BrowserViewFrame({ className, onStatusChange, onUrlChange, onFir
           <div className="flex flex-col items-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
             <Txt as="span" tone="muted">
-              Reconnecting...
+              {studioT('Reconnecting...')}
             </Txt>
           </div>
         </div>
@@ -199,10 +202,10 @@ export function BrowserViewFrame({ className, onStatusChange, onUrlChange, onFir
             </div>
             <div className="flex flex-col gap-1">
               <Txt as="span" variant="heading" className="text-white">
-                Connection Error
+                {studioT('Connection Error')}
               </Txt>
               <Txt as="span" className="text-white/70">
-                Failed to connect to browser
+                {studioT('Failed to connect to browser')}
               </Txt>
             </div>
           </div>

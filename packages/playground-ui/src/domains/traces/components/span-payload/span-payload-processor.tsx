@@ -17,6 +17,7 @@ import type { Scalar } from './span-payload-processor-fields';
 import { hasItems } from './span-payload-registry';
 import { SpanToolNameValue } from './span-payload-tool';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const formatScalar = (value: Scalar): string => (typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value));
 
@@ -34,6 +35,7 @@ export interface SpanPayloadProcessorProps {
  * records. The phase itself is shown once, in the Attributes preview.
  */
 export function SpanPayloadProcessor({ value, hidden = [] }: SpanPayloadProcessorProps) {
+  useLocale();
   const { data, messages, toolCalls, texts, error, scalars, context, extras, formatsAny } = readProcessorPayload(
     value.data,
     hidden,
@@ -53,7 +55,7 @@ export function SpanPayloadProcessor({ value, hidden = [] }: SpanPayloadProcesso
     <div data-slot="span-payload-processor" data-phase={value.phase} className="flex flex-col gap-3">
       {messages.length > 0 && <SpanPayloadMessages value={messages} />}
       {toolCalls.length > 0 && (
-        <SpanPayloadField label={`Tool calls (${toolCalls.length})`}>
+        <SpanPayloadField label={studioT('Tool calls ({value0})', { value0: toolCalls.length })}>
           <SpanPayloadToolCalls toolCalls={toolCalls} />
         </SpanPayloadField>
       )}
@@ -61,7 +63,7 @@ export function SpanPayloadProcessor({ value, hidden = [] }: SpanPayloadProcesso
         <SpanPayloadMarkdown key={index}>{text}</SpanPayloadMarkdown>
       ))}
       {error !== undefined && (
-        <SpanPayloadField label="Error">
+        <SpanPayloadField label={studioT('Error')}>
           <SpanPayloadMarkdown>{error}</SpanPayloadMarkdown>
         </SpanPayloadField>
       )}
@@ -93,7 +95,7 @@ export function SpanPayloadProcessor({ value, hidden = [] }: SpanPayloadProcesso
         </SpanPayloadCollapsible>
       ))}
       {hasExtras && (
-        <SpanPayloadCollapsible label="Other fields">
+        <SpanPayloadCollapsible label={studioT('Other fields')}>
           <SpanPayloadJson value={extras} />
         </SpanPayloadCollapsible>
       )}

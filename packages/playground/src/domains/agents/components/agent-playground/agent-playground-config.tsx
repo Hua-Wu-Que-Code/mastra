@@ -10,10 +10,14 @@ import { IconChip } from '@mastra/playground-ui/icons/central/IconChip';
 import { IconCodeBrackets } from '@mastra/playground-ui/icons/central/IconCodeBrackets';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
-import type { JsonSchemaProperty } from '@mastra/playground-ui/utils/json-schema';
+import type { JsonSchema, JsonSchemaProperty } from '@mastra/playground-ui/utils/json-schema';
 import { useCompareAgentVersions } from '@mastra/react/hooks/agents';
 import { useMemo } from 'react';
 import { useAgentEditFormContext } from '../../context/agent-edit-form-context';
@@ -132,19 +136,21 @@ function getRawBlockContent(block: Record<string, unknown>): string | null {
 }
 
 function RefBlockCopyContent({ promptBlockId }: { promptBlockId: string }) {
+  useLocale();
   const { data: promptBlock } = useStoredPromptBlock({
     blockId: promptBlockId,
     queryOptions: { enabled: Boolean(promptBlockId) },
   });
   const content = promptBlock?.content ?? '';
   if (!content) return null;
-  return <CopyButton content={content} tooltip="Copy prompt block text" />;
+  return <CopyButton content={content} tooltip={studioT('Copy prompt block text')} />;
 }
 
 function BlockCopyButton({ block }: { block: Record<string, unknown> }) {
+  useLocale();
   const rawContent = getRawBlockContent(block);
   if (rawContent) {
-    return <CopyButton content={rawContent} tooltip="Copy prompt text" />;
+    return <CopyButton content={rawContent} tooltip={studioT('Copy prompt text')} />;
   }
   if (block.type === 'prompt_block_ref' && (typeof block.promptBlockId === 'string' || typeof block.id === 'string')) {
     return <RefBlockCopyContent promptBlockId={(block.promptBlockId as string) ?? (block.id as string)} />;
@@ -153,6 +159,7 @@ function BlockCopyButton({ block }: { block: Record<string, unknown> }) {
 }
 
 function InstructionsDiffView({ previousBlocks, currentBlocks }: { previousBlocks: unknown; currentBlocks: unknown }) {
+  useLocale();
   const prevBlocksArr = Array.isArray(previousBlocks) ? previousBlocks : [];
   const currBlocksArr = Array.isArray(currentBlocks) ? currentBlocks : [];
 
@@ -175,7 +182,7 @@ function InstructionsDiffView({ previousBlocks, currentBlocks }: { previousBlock
             </div>
           )}
           <Txt variant="caption" tone="muted" font="mono" className="whitespace-pre-wrap">
-            {oldStr || '(empty)'}
+            {oldStr || studioT('(empty)')}
           </Txt>
         </div>
       );
@@ -225,7 +232,7 @@ function InstructionsDiffView({ previousBlocks, currentBlocks }: { previousBlock
           return (
             <div key={idx} className="rounded-md border border-success-edge bg-success-subtle p-3">
               <Txt variant="meta" className="mb-1 text-success-subtle-foreground">
-                + Added block
+                {studioT('+ Added block')}
               </Txt>
               <Txt variant="caption" className="whitespace-pre-wrap text-success-subtle-foreground">
                 {newStr}
@@ -241,7 +248,7 @@ function InstructionsDiffView({ previousBlocks, currentBlocks }: { previousBlock
                 <BlockCopyButton block={prevBlock} />
               </div>
               <Txt variant="meta" className="mb-1 text-destructive-subtle-foreground">
-                − Removed in latest
+                {studioT('− Removed in latest')}
               </Txt>
               <Txt variant="caption" className="whitespace-pre-wrap text-destructive-subtle-foreground">
                 {oldStr}
@@ -259,7 +266,7 @@ function InstructionsDiffView({ previousBlocks, currentBlocks }: { previousBlock
                 </div>
               )}
               <Txt variant="caption" tone="muted" font="mono" className="whitespace-pre-wrap">
-                {oldStr || '(empty)'}
+                {oldStr || studioT('(empty)')}
               </Txt>
             </div>
           );
@@ -299,6 +306,7 @@ function InstructionsDiffView({ previousBlocks, currentBlocks }: { previousBlock
 }
 
 function RefBlockPreview({ promptBlockId }: { promptBlockId: string }) {
+  useLocale();
   const { data: promptBlock, isLoading } = useStoredPromptBlock({
     blockId: promptBlockId,
     queryOptions: { enabled: Boolean(promptBlockId) },
@@ -317,7 +325,7 @@ function RefBlockPreview({ promptBlockId }: { promptBlockId: string }) {
     <div className="relative rounded-md border border-border bg-background p-3">
       {content && (
         <div className="absolute top-2 right-2">
-          <CopyButton content={content} tooltip="Copy prompt block text" />
+          <CopyButton content={content} tooltip={studioT('Copy prompt block text')} />
         </div>
       )}
       {promptBlock?.name && (
@@ -326,19 +334,20 @@ function RefBlockPreview({ promptBlockId }: { promptBlockId: string }) {
         </Txt>
       )}
       <Txt variant="caption" tone="muted" font="mono" className="whitespace-pre-wrap">
-        {content || '(empty)'}
+        {content || studioT('(empty)')}
       </Txt>
     </div>
   );
 }
 
 function ReadOnlyInstructions({ blocks }: { blocks: unknown }) {
+  useLocale();
   const blocksArr = Array.isArray(blocks) ? blocks : [];
 
   if (blocksArr.length === 0) {
     return (
       <Txt variant="caption" tone="muted" className="py-2">
-        No instruction blocks configured
+        {studioT('No instruction blocks configured')}
       </Txt>
     );
   }
@@ -356,11 +365,11 @@ function ReadOnlyInstructions({ blocks }: { blocks: unknown }) {
           <div key={(block.id as string) ?? idx} className="relative rounded-md border border-border bg-background p-3">
             {content && (
               <div className="absolute top-2 right-2">
-                <CopyButton content={content} tooltip="Copy prompt text" />
+                <CopyButton content={content} tooltip={studioT('Copy prompt text')} />
               </div>
             )}
             <Txt variant="caption" tone="muted" font="mono" className="whitespace-pre-wrap">
-              {content || '(empty)'}
+              {content || studioT('(empty)')}
             </Txt>
           </div>
         );
@@ -376,6 +385,7 @@ function ToolsDiffView({
   previousTools: Record<string, unknown> | undefined;
   currentTools: Record<string, unknown> | undefined;
 }) {
+  useLocale();
   const prevKeys = new Set(previousTools ? Object.keys(previousTools) : []);
   const currKeys = new Set(currentTools ? Object.keys(currentTools) : []);
 
@@ -414,12 +424,12 @@ function ToolsDiffView({
             </Txt>
             {status === 'removed' && (
               <Badge variant="destructive" className="ml-auto">
-                removed in latest
+                {studioT('removed in latest')}
               </Badge>
             )}
             {status === 'added' && (
               <Badge variant="success" className="ml-auto">
-                added in latest
+                {studioT('added in latest')}
               </Badge>
             )}
           </div>
@@ -430,12 +440,13 @@ function ToolsDiffView({
 }
 
 function ReadOnlyTools({ tools }: { tools: Record<string, unknown> | undefined }) {
+  useLocale();
   const entries = tools ? Object.entries(tools) : [];
 
   if (entries.length === 0) {
     return (
       <Txt variant="caption" tone="muted" className="py-2">
-        No tools configured
+        {studioT('No tools configured')}
       </Txt>
     );
   }
@@ -465,6 +476,7 @@ function VariablesDiffView({
   previousVars: Record<string, unknown> | undefined;
   currentVars: Record<string, unknown> | undefined;
 }) {
+  useLocale();
   const prevProps = (previousVars as Record<string, Record<string, unknown>> | undefined)?.properties ?? {};
   const currProps = (currentVars as Record<string, Record<string, unknown>> | undefined)?.properties ?? {};
 
@@ -475,7 +487,7 @@ function VariablesDiffView({
   if (allKeys.length === 0) {
     return (
       <Txt variant="caption" tone="muted" className="py-2">
-        No variables configured
+        {studioT('No variables configured')}
       </Txt>
     );
   }
@@ -513,12 +525,12 @@ function VariablesDiffView({
             </Txt>
             {status === 'removed' && (
               <Badge variant="destructive" className="ml-auto">
-                removed in latest
+                {studioT('removed in latest')}
               </Badge>
             )}
             {status === 'added' && (
               <Badge variant="success" className="ml-auto">
-                added in latest
+                {studioT('added in latest')}
               </Badge>
             )}
           </div>
@@ -528,14 +540,15 @@ function VariablesDiffView({
   );
 }
 
-function ReadOnlyVariables({ variables }: { variables: Record<string, unknown> | undefined }) {
-  const props = (variables as Record<string, Record<string, unknown>> | undefined)?.properties ?? {};
+function ReadOnlyVariables({ variables }: { variables: JsonSchema | undefined }) {
+  useLocale();
+  const props = variables?.properties ?? {};
   const entries = Object.entries(props);
 
   if (entries.length === 0) {
     return (
       <Txt variant="caption" tone="muted" className="py-2">
-        No variables configured
+        {studioT('No variables configured')}
       </Txt>
     );
   }
@@ -547,9 +560,7 @@ function ReadOnlyVariables({ variables }: { variables: Record<string, unknown> |
           <Txt variant="caption" tone="ink" font="mono">
             {`{{${name}}}`}
           </Txt>
-          {(schema as Record<string, unknown>)?.type ? (
-            <Badge>{String((schema as Record<string, unknown>).type)}</Badge>
-          ) : null}
+          {schema.type ? <Badge>{String(schema.type)}</Badge> : null}
         </div>
       ))}
     </div>
@@ -569,6 +580,7 @@ function ReadOnlyConfigWithDiff({
   selectedVersionId: string;
   latestVersionId: string;
 }) {
+  useLocale();
   const { form } = useAgentEditFormContext();
   const tools = form.watch('tools');
   const variables = form.watch('variables');
@@ -598,19 +610,19 @@ function ReadOnlyConfigWithDiff({
 
   const instructionsBadge = instructionsDiff ? (
     <Badge variant="warning" size="sm">
-      modified
+      {studioT('modified')}
     </Badge>
   ) : null;
   const toolsBadge = toolsDiff ? (
     <Badge variant="warning" size="sm">
-      modified
+      {studioT('modified')}
     </Badge>
   ) : toolCount > 0 ? (
     <Badge size="sm">{`${toolCount}`}</Badge>
   ) : null;
   const variablesBadge = variablesDiff ? (
     <Badge variant="warning" size="sm">
-      modified
+      {studioT('modified')}
     </Badge>
   ) : null;
 
@@ -626,13 +638,13 @@ function ReadOnlyConfigWithDiff({
     <Tabs<AgentConfigTab> defaultTab="variables" className="flex min-h-full flex-col overflow-visible">
       <TabList variant="pill-ghost" className="shrink-0">
         <Tab value="variables">
-          <ConfigTabLabel title="Variables" icon={<IconCodeBrackets />} badge={variablesBadge} />
+          <ConfigTabLabel title={studioT('Variables')} icon={<IconCodeBrackets />} badge={variablesBadge} />
         </Tab>
         <Tab value="instructions">
-          <ConfigTabLabel title="System Prompt" icon={<IconChip />} badge={instructionsBadge} />
+          <ConfigTabLabel title={studioT('System Prompt')} icon={<IconChip />} badge={instructionsBadge} />
         </Tab>
         <Tab value="tools">
-          <ConfigTabLabel title="Tools" icon={<IconMaintenance />} badge={toolsBadge} />
+          <ConfigTabLabel title={studioT('Tools')} icon={<IconMaintenance />} badge={toolsBadge} />
         </Tab>
       </TabList>
 
@@ -643,7 +655,7 @@ function ReadOnlyConfigWithDiff({
             currentVars={variablesDiff.currentValue as Record<string, unknown> | undefined}
           />
         ) : (
-          <ReadOnlyVariables variables={variables as Record<string, unknown> | undefined} />
+          <ReadOnlyVariables variables={variables} />
         )}
       </TabContent>
 
@@ -683,6 +695,7 @@ interface AgentPlaygroundConfigProps {
 }
 
 export function AgentPlaygroundConfig({ agentId, selectedVersionId, latestVersionId }: AgentPlaygroundConfigProps) {
+  useLocale();
   const { form, readOnly, isCodeAgentOverride, editorConfig } = useAgentEditFormContext();
   const { isInstructionsLocked } = getEditorOwnership(isCodeAgentOverride, editorConfig);
   const tools = form.watch('tools');
@@ -709,14 +722,14 @@ export function AgentPlaygroundConfig({ agentId, selectedVersionId, latestVersio
           <Tabs<AgentConfigTab> defaultTab="variables" className="flex min-h-full flex-col overflow-visible">
             <TabList variant="pill-ghost" className="shrink-0">
               <Tab value="variables">
-                <ConfigTabLabel title="Variables" icon={<IconCodeBrackets />} />
+                <ConfigTabLabel title={studioT('Variables')} icon={<IconCodeBrackets />} />
               </Tab>
               <Tab value="instructions">
-                <ConfigTabLabel title="System Prompt" icon={<IconChip />} />
+                <ConfigTabLabel title={studioT('System Prompt')} icon={<IconChip />} />
               </Tab>
               <Tab value="tools">
                 <ConfigTabLabel
-                  title="Tools"
+                  title={studioT('Tools')}
                   icon={<IconMaintenance />}
                   badge={toolCount > 0 ? <Badge size="sm">{`${toolCount}`}</Badge> : undefined}
                 />
@@ -734,8 +747,8 @@ export function AgentPlaygroundConfig({ agentId, selectedVersionId, latestVersio
                 ) : null}
                 <Txt variant="meta" tone="muted" className="mt-1">
                   {variableEntries.length > 0
-                    ? 'Defined via requestContextSchema in code.'
-                    : 'No variables defined. Add a requestContextSchema to your agent to define variables.'}
+                    ? studioT('Defined via requestContextSchema in code.')
+                    : studioT('No variables defined. Add a requestContextSchema to your agent to define variables.')}
                 </Txt>
               </div>
             </TabContent>
@@ -743,7 +756,9 @@ export function AgentPlaygroundConfig({ agentId, selectedVersionId, latestVersio
             <TabContent value="instructions" className="px-4 py-0 pb-4">
               <div className="flex flex-col gap-3 pt-4 pb-2">
                 <Txt variant="caption" tone="muted">
-                  Add instruction blocks to your agent. Blocks are combined in order to form the system prompt. You can{' '}
+                  {studioT(
+                    'Add instruction blocks to your agent. Blocks are combined in order to form the system prompt. You can',
+                  )}{' '}
                   <Tooltip>
                     <TooltipTrigger
                       className={cn(
@@ -752,16 +767,22 @@ export function AgentPlaygroundConfig({ agentId, selectedVersionId, latestVersio
                         controlStateColorTransition,
                       )}
                     >
-                      use variables
+                      {studioT('use variables')}
                     </TooltipTrigger>
                     <TooltipContent side="bottom" align="start" className="max-w-72">
                       <span>
-                        Use <InlineCode className="text-column text-foreground">{'{{variableName}}'}</InlineCode> syntax
-                        to insert dynamic values into your instruction blocks.
+                        <Trans
+                          id="Use {part0} syntax to insert dynamic values into your instruction blocks."
+                          values={{
+                            part0: (
+                              <InlineCode className="text-column text-foreground">{'{{variableName}}'}</InlineCode>
+                            ),
+                          }}
+                        />
                       </span>
                     </TooltipContent>
                   </Tooltip>{' '}
-                  as part of your instruction blocks.
+                  {studioT('as part of your instruction blocks.')}
                 </Txt>
               </div>
 

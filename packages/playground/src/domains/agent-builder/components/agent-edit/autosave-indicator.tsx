@@ -1,6 +1,8 @@
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -13,6 +15,7 @@ interface AutosaveIndicatorProps {
 }
 
 export const AutosaveIndicator = ({ status, lastError, onRetry }: AutosaveIndicatorProps) => {
+  useLocale();
   if (status === 'saving') {
     return (
       <Txt
@@ -23,7 +26,7 @@ export const AutosaveIndicator = ({ status, lastError, onRetry }: AutosaveIndica
         data-testid="agent-builder-autosave-saving"
       >
         <Spinner size="sm" />
-        Saving…
+        {studioT('Saving…')}
       </Txt>
     );
   }
@@ -38,7 +41,7 @@ export const AutosaveIndicator = ({ status, lastError, onRetry }: AutosaveIndica
         data-testid="agent-builder-autosave-saved"
       >
         <IconCheckmark2Medium className="size-icon-sm" />
-        Saved
+        {studioT('Saved')}
       </Txt>
     );
   }
@@ -47,7 +50,7 @@ export const AutosaveIndicator = ({ status, lastError, onRetry }: AutosaveIndica
     return (
       <span className="flex items-center gap-1.5 text-muted-foreground" data-testid="agent-builder-autosave-error">
         <Txt as="span" variant="caption" title={lastError?.message}>
-          Failed to save
+          {studioT('Failed to save')}
         </Txt>
         <button
           type="button"
@@ -56,7 +59,7 @@ export const AutosaveIndicator = ({ status, lastError, onRetry }: AutosaveIndica
           className={cn('underline underline-offset-2', quietTextHover, controlStateColorTransition)}
         >
           <Txt as="span" variant="caption">
-            Retry
+            {studioT('Retry')}
           </Txt>
         </button>
       </span>

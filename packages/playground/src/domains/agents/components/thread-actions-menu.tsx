@@ -4,6 +4,7 @@ import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconPin } from '@mastra/playground-ui/icons/central/IconPin';
 import { IconUnpin } from '@mastra/playground-ui/icons/central/IconUnpin';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface ThreadActionsMenuProps {
   onPin?: () => void;
@@ -13,36 +14,37 @@ export interface ThreadActionsMenuProps {
 }
 
 export const ThreadActionsMenu = ({ onPin, onUnpin, onRename, onDelete }: ThreadActionsMenuProps) => {
+  useLocale();
   if (!onPin && !onUnpin && !onRename && !onDelete) return null;
 
   return (
     <DropdownMenu>
-      <DropdownMenu.Trigger variant="ghost" size="icon-sm" aria-label="Thread actions">
+      <DropdownMenu.Trigger variant="ghost" size="icon-sm" aria-label={studioT('Thread actions')}>
         <IconDotGrid1x3Vertical />
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end" finalFocus={false}>
         {onPin && (
           <DropdownMenu.Item onClick={onPin}>
             <IconPin />
-            Pin
+            {studioT('Pin')}
           </DropdownMenu.Item>
         )}
         {onUnpin && (
           <DropdownMenu.Item onClick={onUnpin}>
             <IconUnpin />
-            Unpin
+            {studioT('Unpin')}
           </DropdownMenu.Item>
         )}
         {onRename && (
           <DropdownMenu.Item onClick={onRename}>
             <IconPencil />
-            Rename
+            {studioT('Rename')}
           </DropdownMenu.Item>
         )}
         {onDelete && (
           <DropdownMenu.Item variant="destructive" onClick={onDelete}>
             <TrashIcon />
-            Delete
+            {studioT('Delete')}
           </DropdownMenu.Item>
         )}
       </DropdownMenu.Content>

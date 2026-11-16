@@ -1,6 +1,7 @@
 import type { AnimationEvent } from 'react';
 import { useId, useState } from 'react';
 
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './logo.css';
@@ -25,7 +26,13 @@ function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-function Logo({ className, size = 'md', animateOnHover = false, 'aria-label': ariaLabel = 'Mastra' }: LogoProps) {
+function Logo({
+  className,
+  size = 'md',
+  animateOnHover = false,
+  'aria-label': ariaLabel = studioT('Mastra'),
+}: LogoProps) {
+  useLocale();
   const reactId = useId();
   const clipId = `logo-clip-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const [playing, setPlaying] = useState(false);

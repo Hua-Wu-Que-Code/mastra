@@ -1,6 +1,8 @@
 import { Code } from '@mastra/playground-ui/components/Code';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { focusRingInset } from '@mastra/playground-ui/primitives/transitions';
 
 interface CodeDisplayProps {
@@ -20,6 +22,7 @@ export function CodeDisplay({
   onCopy,
   className = '',
 }: CodeDisplayProps) {
+  useLocale();
   return (
     <div className={`rounded-md border ${className}`} style={{ height }}>
       <ScrollArea className="h-full">
@@ -28,7 +31,7 @@ export function CodeDisplay({
             <button
               type="button"
               onClick={onCopy}
-              aria-label="Copy code"
+              aria-label={studioT('Copy code')}
               className={`absolute inset-0 z-10 rounded-md ${focusRingInset}`}
             />
           )}
@@ -40,7 +43,7 @@ export function CodeDisplay({
                 variant="meta"
                 className="rounded-full bg-warning-subtle px-1.5 py-0.5 text-warning-subtle-foreground"
               >
-                Draft: save changes to apply
+                {studioT('Draft: save changes to apply')}
               </Txt>
             </div>
           )}
@@ -50,7 +53,7 @@ export function CodeDisplay({
               variant="meta"
               className="pointer-events-none absolute top-2 right-2 z-20 rounded-full bg-success-subtle px-1.5 py-0.5 text-success-subtle-foreground"
             >
-              Copied!
+              {studioT('Copied!')}
             </Txt>
           )}
           {onCopy && (
@@ -60,7 +63,7 @@ export function CodeDisplay({
               tone="muted"
               className="pointer-events-none absolute top-2 right-2 z-20 rounded-full bg-muted px-1.5 py-0.5 opacity-0 transition-opacity group-hover:opacity-100"
             >
-              Click to copy
+              {studioT('Click to copy')}
             </Txt>
           )}
         </div>

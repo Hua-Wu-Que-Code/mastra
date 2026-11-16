@@ -11,6 +11,8 @@ import { IconArrowRotateCounterClockwise } from '@mastra/playground-ui/icons/cen
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { controlStateColorTransition, focusRingInset } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -25,6 +27,7 @@ interface AgentWorkingMemoryProps {
 }
 
 export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
+  useLocale();
   const { threadExists, workingMemoryData, workingMemorySource, isLoading, isUpdating, updateWorkingMemory } =
     useWorkingMemory();
 
@@ -41,7 +44,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
   // All hooks must be called before any early returns
   const { isCopied, handleCopy } = useCopyToClipboard({
     text: workingMemoryData ?? '',
-    copyMessage: 'Working memory copied!',
+    copyMessage: studioT('Working memory copied!'),
   });
   const [editState, setEditState] = useState({
     source: workingMemoryData,
@@ -64,7 +67,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
       <div>
         <div className="mb-2 flex items-center gap-2">
           <Txt as="h3" variant="subheading" tone="ink">
-            Working Memory
+            {studioT('Working Memory')}
           </Txt>
           {isWorkingMemoryEnabled && workingMemorySource && (
             <Txt
@@ -78,8 +81,8 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
               )}
               title={
                 workingMemorySource === 'resource'
-                  ? 'Shared across all threads for this agent'
-                  : 'Specific to this conversation thread'
+                  ? studioT('Shared across all threads for this agent')
+                  : studioT('Specific to this conversation thread')
               }
             >
               {workingMemorySource}
@@ -88,7 +91,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
         </div>
         {isWorkingMemoryEnabled && !threadExists && (
           <Txt variant="caption" tone="muted">
-            Send a message to the agent to enable working memory.
+            {studioT('Send a message to the agent to enable working memory.')}
           </Txt>
         )}
       </div>
@@ -114,7 +117,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                             <button
                               type="button"
                               onClick={handleCopy}
-                              aria-label="Copy working memory"
+                              aria-label={studioT('Copy working memory')}
                               className={cn('absolute inset-0 z-10 rounded-lg', focusRingInset)}
                             />
                             <div className="pointer-events-none">
@@ -126,7 +129,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                                 variant="meta"
                                 className="pointer-events-none absolute top-2 right-2 z-20 rounded-full bg-success-subtle px-1.5 py-0.5 text-success-subtle-foreground"
                               >
-                                Copied!
+                                {studioT('Copied!')}
                               </Txt>
                             )}
                             <Txt
@@ -135,7 +138,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                               tone="muted"
                               className="pointer-events-none absolute top-2 right-2 z-20 rounded-full bg-card px-1.5 py-0.5 opacity-0 transition-opacity group-hover:opacity-100"
                             >
-                              Click to copy
+                              {studioT('Click to copy')}
                             </Txt>
                           </div>
                         </ScrollArea>
@@ -145,17 +148,17 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                 </>
               ) : (
                 <Txt as="p" variant="body" tone="muted">
-                  No working memory content yet. Click "Edit working memory" to add content.
+                  {studioT('No working memory content yet. Click "Edit working memory" to add content.')}
                 </Txt>
               )}
             </>
           ) : (
             <CodeEditor
-              aria-label="Working memory content"
+              aria-label={studioT('Working memory content')}
               language={editState.value.trim().startsWith('{') ? 'json' : 'markdown'}
               lineNumbers={false}
               showCopyButton={false}
-              placeholder="Enter working memory content"
+              placeholder={studioT('Enter working memory content')}
               value={editState.value}
               onChange={value => setEditState(state => ({ ...state, value }))}
               editable={!isUpdating}
@@ -175,16 +178,16 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                         onClick={event => event.preventDefault()}
                         className="cursor-not-allowed opacity-50"
                       >
-                        Edit working memory
+                        {studioT('Edit working memory')}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Working memory will be available after the agent calls updateWorkingMemory</p>
+                      <p>{studioT('Working memory will be available after the agent calls updateWorkingMemory')}</p>
                     </TooltipContent>
                   </Tooltip>
                 ) : (
                   <Button icon={<IconPencil />} onClick={() => setIsEditing(true)} disabled={isUpdating}>
-                    Edit working memory
+                    {studioT('Edit working memory')}
                   </Button>
                 )}
               </>
@@ -197,12 +200,16 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                       setIsEditing(false);
                     } catch (error) {
                       console.error('Failed to update working memory:', error);
-                      toast.error('Failed to update working memory');
+                      toast.error(studioT('Failed to update working memory'));
                     }
                   }}
                   disabled={isUpdating}
                 >
-                  {isUpdating ? <IconArrowRotateCounterClockwise className="animate-spin" /> : 'Save changes'}
+                  {isUpdating ? (
+                    <IconArrowRotateCounterClockwise className="h-3 w-3 animate-spin" />
+                  ) : (
+                    studioT('Save changes')
+                  )}
                 </Button>
                 <Button
                   icon={<IconCrossMedium />}
@@ -212,7 +219,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                   }}
                   disabled={isUpdating}
                 >
-                  Cancel
+                  {studioT('Cancel')}
                 </Button>
               </>
             )}
@@ -221,7 +228,9 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
       ) : (
         <div className={cn(raisedSurfaceStyle, 'rounded-lg p-4')}>
           <Txt tone="muted" className="mb-3">
-            Working memory is not enabled for this agent. Enable it to maintain context across conversations.
+            {studioT(
+              'Working memory is not enabled for this agent. Enable it to maintain context across conversations.',
+            )}
           </Txt>
           <a
             href="https://mastra.ai/en/docs/memory/working-memory"
@@ -233,7 +242,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
             )}
           >
             <Txt as="span" variant="body" className="block">
-              Learn about working memory
+              {studioT('Learn about working memory')}
             </Txt>
             <IconSquareArrowTopRight className="size-icon-xs" />
           </a>

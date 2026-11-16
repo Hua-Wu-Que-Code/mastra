@@ -2,6 +2,8 @@
 
 import type { DatasetExperimentResult } from '@mastra/client-js';
 import type { ExperimentStatus } from '@mastra/core/storage';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useScoresByExperimentId } from '@mastra/react/hooks/datasets';
 import { useExperimentsItemUsage } from '@mastra/react/hooks/experiments';
 import { useMemo, useCallback } from 'react';
@@ -44,6 +46,7 @@ export function ExperimentResultsSection({
   onToggleSelectAll,
   supportsMetrics = false,
 }: ExperimentResultsSectionProps) {
+  const studioLocale = useLocale();
   const { currentItemId, openItem, close } = useExperimentItemPanel();
 
   // Row highlight derives from the active `items/:itemId` route.
@@ -102,19 +105,19 @@ export function ExperimentResultsSection({
 
   const resultsListColumns = useMemo(
     () => [
-      { name: 'itemId', label: 'Item ID', size: '7rem' },
-      { name: 'input', label: 'Input', size: '20rem' },
+      { name: 'itemId', label: studioT('Item ID'), size: '7rem' },
+      { name: 'input', label: studioT('Input'), size: '20rem' },
       ...getOptionalResultColumns(results),
       ...(supportsMetrics
         ? [
-            { name: 'cost', label: 'Cost', size: 'auto' },
-            { name: 'tokens', label: 'Tokens', size: 'auto' },
+            { name: 'cost', label: studioT('Cost'), size: 'auto' },
+            { name: 'tokens', label: studioT('Tokens'), size: 'auto' },
           ]
         : []),
-      { name: 'duration', label: 'Duration', size: 'auto' },
+      { name: 'duration', label: studioT('Duration'), size: 'auto' },
       ...scorerIds.map(id => ({ name: id, label: id, size: 'auto' })),
     ],
-    [results, scorerIds, supportsMetrics],
+    [results, scorerIds, supportsMetrics, studioLocale],
   );
 
   return (

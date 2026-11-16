@@ -5,6 +5,8 @@ import { IconChainLink3 } from '@mastra/playground-ui/icons/central/IconChainLin
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgent } from '@mastra/react/hooks/agents';
 import { AgentConfigToggle } from './agent-config-toggle';
 import { useCanCreateAgent } from '@/domains/agent-builder/hooks/use-can-create-agent';
@@ -17,6 +19,7 @@ export interface AgentDetailHeaderActionsProps {
 
 /** Edit / Share / Config actions shown in the route header on every agent sub-page. */
 export function AgentDetailHeaderActions({ agentId, showConfig = true }: AgentDetailHeaderActionsProps) {
+  useLocale();
   const { data: agent } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -28,7 +31,7 @@ export function AgentDetailHeaderActions({ agentId, showConfig = true }: AgentDe
   const sessionUrl = `${window.location.origin}${withStudioBasePath(`/agents/${encodeURIComponent(agentId)}/session`)}`;
   const { handleCopy: handleShareLink, isCopied: isShareCopied } = useCopyToClipboard({
     text: sessionUrl,
-    copyMessage: 'Session URL copied to clipboard!',
+    copyMessage: studioT('Session URL copied to clipboard!'),
   });
 
   const editPath = paths.cmsAgentEditLink(agentId);
@@ -38,16 +41,16 @@ export function AgentDetailHeaderActions({ agentId, showConfig = true }: AgentDe
     <>
       {showEditButton && (
         <Button variant="ghost" size="sm" render={<FrameworkLink href={editPath} />} icon={<IconPencil />}>
-          Edit
+          {studioT('Edit')}
         </Button>
       )}
       <Button
         variant="ghost"
         size="icon-sm"
         type="button"
-        aria-label="Copy session URL"
+        aria-label={studioT('Copy session URL')}
         onClick={handleShareLink}
-        tooltip="Copy session URL to share with your team"
+        tooltip={studioT('Copy session URL to share with your team')}
         data-testid="agent-entity-header-share"
       >
         {isShareCopied ? <IconCheckmark2Medium /> : <IconChainLink3 />}

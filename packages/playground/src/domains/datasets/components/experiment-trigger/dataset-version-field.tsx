@@ -1,4 +1,6 @@
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDataset } from '@mastra/react/hooks/datasets';
 import { DatasetVersions } from '../dataset-versions';
 import type { FieldPopupContainer } from './experiment-trigger-options';
@@ -18,12 +20,13 @@ export interface DatasetVersionFieldProps {
 
 /** Pins the dataset version to run on. Only offered once the dataset has older versions. */
 export function DatasetVersionField({ datasetId, version, onVersionChange, container }: DatasetVersionFieldProps) {
+  useLocale();
   const { data: dataset } = useDataset({ datasetId, queryOptions: { enabled: Boolean(datasetId) } });
   if (!hasVersionsToPick(dataset?.version, version)) return null;
 
   return (
     <Field>
-      <FieldLabel>Dataset version</FieldLabel>
+      <FieldLabel>{studioT('Dataset version')}</FieldLabel>
       {/* DatasetVersions takes `null` for "latest". */}
       <DatasetVersions
         datasetId={datasetId}

@@ -1,5 +1,6 @@
 import { ClearFiltersButton } from '@mastra/playground-ui/components/ClearFiltersButton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export type ScoreEntityOption = { value: string; label: string; type: 'AGENT' | 'WORKFLOW' | 'ALL' };
 
@@ -12,6 +13,7 @@ type ScoresToolsProps = {
 };
 
 export function ScoresTools({ onEntityChange, onReset, selectedEntity, entityOptions, isLoading }: ScoresToolsProps) {
+  useLocale();
   return (
     <div className="flex items-center gap-1.5">
       <Select
@@ -24,8 +26,8 @@ export function ScoresTools({ onEntityChange, onReset, selectedEntity, entityOpt
         }}
         disabled={isLoading}
       >
-        <SelectTrigger aria-label="Filter by entity" size="sm" className="w-auto whitespace-nowrap">
-          <SelectValue placeholder="Select" />
+        <SelectTrigger aria-label={studioT('Filter by entity')} size="sm" className="w-auto whitespace-nowrap">
+          <SelectValue placeholder={studioT('Select')} />
         </SelectTrigger>
         <SelectContent>
           {(entityOptions || []).map(option => (

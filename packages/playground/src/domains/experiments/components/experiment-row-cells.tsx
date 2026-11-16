@@ -1,6 +1,8 @@
 import type { DatasetExperiment } from '@mastra/client-js';
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { DataList } from '@mastra/playground-ui/components/DataList';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatCompactNumber } from '@mastra/playground-ui/utils/cost';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { formatDuration } from '@mastra/playground-ui/utils/duration';
@@ -132,19 +134,20 @@ function ExperimentTargetCell({ experiment }: { experiment: DatasetExperiment })
 }
 
 function ExperimentReviewCell({ review }: { review?: ExperimentReviewSummary }) {
+  useLocale();
   if (!review) return <span className="text-placeholder">—</span>;
   const inPipeline = review.needsReview + review.complete;
   if (inPipeline === 0) return <span className="text-placeholder">—</span>;
   if (review.needsReview > 0) {
     return (
       <Badge size="xs" variant="warning">
-        {review.needsReview} pending
+        {review.needsReview} {' ' + studioT('pending')}
       </Badge>
     );
   }
   return (
     <Badge size="xs" variant="success">
-      {review.complete}/{inPipeline} reviewed
+      {review.complete}/{inPipeline} {' ' + studioT('reviewed')}
     </Badge>
   );
 }

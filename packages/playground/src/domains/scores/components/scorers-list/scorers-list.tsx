@@ -5,6 +5,8 @@ import type { DataListSort } from '@mastra/playground-ui/components/DataList';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { useMemo } from 'react';
@@ -49,6 +51,7 @@ export function ScorersList({
   selectedScorerId,
   keyboardGlobal = true,
 }: ScorersListProps) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
 
   const scorerData = useMemo<ScorersListItem[]>(
@@ -87,14 +90,14 @@ export function ScorersList({
         {onSortChange ? (
           <>
             <DataList.SortableTopCell sortKey="name" sort={sortFor('name')} onSortChange={onSortChange}>
-              Name
+              {studioT('Name')}
             </DataList.SortableTopCell>
-            <DataList.TopCell>Description</DataList.TopCell>
+            <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
             <DataList.SortableTopCell sortKey="source" sort={sortFor('source')} onSortChange={onSortChange}>
-              Source
+              {studioT('Source')}
             </DataList.SortableTopCell>
             <DataList.SortableTopCell sortKey="agents" sort={sortFor('agents')} onSortChange={onSortChange} align="end">
-              Agents
+              {studioT('Agents')}
             </DataList.SortableTopCell>
             <DataList.SortableTopCell
               sortKey="workflows"
@@ -102,24 +105,24 @@ export function ScorersList({
               onSortChange={onSortChange}
               align="end"
             >
-              Workflows
+              {studioT('Workflows')}
             </DataList.SortableTopCell>
           </>
         ) : (
           <>
-            <DataList.TopCell>Name</DataList.TopCell>
-            <DataList.TopCell>Description</DataList.TopCell>
-            <DataList.TopCell>Source</DataList.TopCell>
+            <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Source')}</DataList.TopCell>
             <DataList.TopCellSmart
               long="Agents"
               short={<AgentIcon />}
-              tooltip="Number of attached agents"
+              tooltip={studioT('Number of attached agents')}
               className="text-center"
             />
             <DataList.TopCellSmart
               long="Workflows"
               short={<WorkflowIcon />}
-              tooltip="Number of attached workflows"
+              tooltip={studioT('Number of attached workflows')}
               className="text-center"
             />
           </>
@@ -140,7 +143,7 @@ export function ScorersList({
                 <span className="min-w-0 truncate">{name}</span>
                 {isTrajectory && (
                   <Badge size="xs" variant="purple" className="shrink-0">
-                    trajectory
+                    {studioT('trajectory')}
                   </Badge>
                 )}
               </span>

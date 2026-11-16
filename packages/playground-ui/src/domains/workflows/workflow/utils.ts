@@ -11,6 +11,7 @@ import {
 } from './workflow-step-node-utils';
 import type { WorkflowBoundaryNode, WorkflowStepNode } from './workflow-step-node-utils';
 import type { WorkflowDataEdgeModel } from '@/ds/components/Workflow';
+import { t as studioT } from '@/lib/i18n';
 
 const getWorkflowBoundaryNodeId = (role: 'start' | 'end') => `boundary-${role}`;
 const WORKFLOW_START_NODE_ID = getWorkflowBoundaryNodeId('start');
@@ -580,14 +581,24 @@ export const constructNodesAndEdges = ({
       id: WORKFLOW_START_NODE_ID,
       position: { x: 0, y: 0 },
       type: WORKFLOW_BOUNDARY_NODE_TYPE,
-      data: { label: 'Start', boundaryRole: 'start' },
+      data: {
+        get label() {
+          return studioT('Start');
+        },
+        boundaryRole: 'start',
+      },
     },
     ...nodes,
     {
       id: WORKFLOW_END_NODE_ID,
       position: { x: 0, y: 0 },
       type: WORKFLOW_BOUNDARY_NODE_TYPE,
-      data: { label: 'End', boundaryRole: 'end' },
+      data: {
+        get label() {
+          return studioT('End');
+        },
+        boundaryRole: 'end',
+      },
     },
   ];
 

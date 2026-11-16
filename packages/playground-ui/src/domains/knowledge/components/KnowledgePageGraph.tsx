@@ -67,6 +67,8 @@ import { IconLayersTwo } from '@/ds/icons/central/IconLayersTwo';
 import { IconMinusMedium } from '@/ds/icons/central/IconMinusMedium';
 import { IconPin } from '@/ds/icons/central/IconPin';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const NO_PANE_INSETS: PaneInsets = { left: 0, right: 0 };
 type PaneStyle = CSSProperties & { '--knowledge-pane-left': string };
@@ -383,6 +385,7 @@ const CIRCLE_TEXT_SHARE = 0.74;
 
 /** A scope or page: its kind on top, its name below, both inside the circle; far pages draw as dots. */
 function PageNodeComponent({ data }: NodeProps<PageFlowNode & { data: PageNodeData }>) {
+  useLocale();
   if (data.form === 'dot') return <DotNode data={data} />;
   const { page, size, selected, pinned, badge } = data;
   const group = isScopeGroup(page);
@@ -428,7 +431,7 @@ function PageNodeComponent({ data }: NodeProps<PageFlowNode & { data: PageNodeDa
               data-testid={page.isScope ? 'knowledge-scope-caption' : 'knowledge-page-caption'}
             >
               {data.level ? <LevelIcon level={data.level} /> : null}
-              <span className="truncate">{rest ? 'More' : data.isParent ? 'Parent' : kind}</span>
+              <span className="truncate">{rest ? studioT('More') : data.isParent ? studioT('Parent') : kind}</span>
             </Txt>
           )}
           <Txt
@@ -465,10 +468,10 @@ function PageNodeComponent({ data }: NodeProps<PageFlowNode & { data: PageNodeDa
         </KnowledgeTooltip>
       ) : null}
       {badge ? (
-        <KnowledgeTooltip label={`${badge} children, not all drawn`}>
+        <KnowledgeTooltip label={studioT('{value0} children, not all drawn', { value0: badge })}>
           <span
             data-testid="knowledge-child-count-badge"
-            aria-label={`${badge} children, not all drawn`}
+            aria-label={studioT('{value0} children, not all drawn', { value0: badge })}
             className="absolute top-full left-1/2 -mt-1 -translate-x-1/2 rounded-full border border-border bg-card px-1.5 shadow-raised"
           >
             <Txt as="span" variant="meta" tone="ink">
@@ -522,13 +525,14 @@ function BreakAtColons({ text }: { text: string }) {
 }
 
 function PinBadge({ size }: { size: number }) {
+  useLocale();
   const { badge, style } = pinBadgeStyle(size);
   return (
     <span
       data-testid="knowledge-pin-badge"
       className="absolute flex items-center justify-center rounded-full bg-badge-amber-strong text-badge-amber-foreground shadow-raised"
       style={style}
-      aria-label="Pinned"
+      aria-label={studioT('Pinned')}
     >
       <IconPin size={Math.round(badge * 0.6)} aria-hidden />
     </span>
@@ -566,6 +570,7 @@ function rimToRim(from: Circle, to: Circle, gap = 3) {
 }
 
 function RimEdgeComponent({ id, data, style, markerEnd }: EdgeProps<Edge<RimEdgeData>>) {
+  useLocale();
   if (!data) return null;
   const { x1, y1, x2, y2 } = rimToRim(data.from, data.to);
   const mention = data.kind === 'mention';
@@ -582,9 +587,9 @@ function RimEdgeComponent({ id, data, style, markerEnd }: EdgeProps<Edge<RimEdge
           strokeWidth={14}
           data-testid="knowledge-grant-edge"
           data-role={data.role}
-          aria-label={`Grants ${data.role}`}
+          aria-label={studioT('Grants {value0}', { value0: data.role })}
         >
-          <title>{`Grants ${data.role}`}</title>
+          <title>{studioT('Grants {value0}', { value0: data.role })}</title>
         </path>
       ) : null}
     </>
@@ -642,6 +647,7 @@ function GraphLegend({
   /** The branches dots are coloured by, each named for the circle it hangs under. */
   branches: LegendBranch[];
 }) {
+  useLocale();
   const [pinned, setPinned] = useState(!collapsible);
   const [peeking, setPeeking] = useState(false);
   const open = pinned || peeking;
@@ -664,25 +670,25 @@ function GraphLegend({
             setPeeking(false);
           }}
         >
-          Legend
+          {studioT('Legend')}
         </Button>
       ) : null}
       <ul
-        aria-label="Legend"
+        aria-label={studioT('Legend')}
         hidden={collapsible && !open}
         className={`pointer-events-none flex flex-col gap-1 rounded-lg px-2.5 py-2 ${collapsible ? 'bg-card shadow-overlay' : 'rounded-md border border-border bg-card/90 shadow-raised'}`}
       >
         <li className="flex items-center gap-2">
           <span className={LEGEND_SWATCH} style={{ ...SCOPE_STYLE }} aria-hidden />
           <Txt as="span" variant="meta" tone="muted">
-            Scope
+            {studioT('Scope')}
           </Txt>
         </li>
         {levels.includes('scope') ? (
           <li className="flex items-center gap-2" data-testid="knowledge-legend-level-scope">
             <IconLayersTwo aria-hidden className="size-icon-xs shrink-0 text-muted-foreground" />
             <Txt as="span" variant="meta" tone="muted">
-              Scope, above its pages
+              {studioT('Scope, above its pages')}
             </Txt>
           </li>
         ) : null}
@@ -690,21 +696,21 @@ function GraphLegend({
           <li className="flex items-center gap-2" data-testid="knowledge-legend-level-ancestor">
             <IconArrowWallUp aria-hidden className="size-icon-xs shrink-0 text-muted-foreground" />
             <Txt as="span" variant="meta" tone="muted">
-              Page above the focus
+              {studioT('Page above the focus')}
             </Txt>
           </li>
         ) : null}
         <li className="flex items-center gap-2">
           <span className={LEGEND_SWATCH} style={{ ...PAGE_STYLE }} aria-hidden />
           <Txt as="span" variant="meta" tone="muted">
-            Page
+            {studioT('Page')}
           </Txt>
         </li>
         {focused ? (
           <li className="flex items-center gap-2" data-testid="knowledge-legend-focused">
             <span className={LEGEND_SWATCH} style={{ ...PAGE_STYLE, borderWidth: 3 }} aria-hidden />
             <Txt as="span" variant="meta" tone="muted">
-              Focused page
+              {studioT('Focused page')}
             </Txt>
           </li>
         ) : null}
@@ -712,7 +718,7 @@ function GraphLegend({
           <li className="flex items-center gap-2" data-testid="knowledge-legend-dot">
             <span className="inline-block size-2 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
             <Txt as="span" variant="meta" tone="muted">
-              Page in another branch
+              {studioT('Page in another branch')}
             </Txt>
           </li>
         ) : null}
@@ -727,10 +733,10 @@ function GraphLegend({
             <KnowledgeTooltip label={branch.name}>
               <Txt as="span" variant="meta" tone="muted" className="pointer-events-auto max-w-40 truncate">
                 {branches.length > 1
-                  ? `Under ${branch.name}`
+                  ? studioT('Under {value0}', { value0: branch.name })
                   : branch.scope
-                    ? 'Under parent scope'
-                    : 'Under parent page'}
+                    ? studioT('Under parent scope')
+                    : studioT('Under parent page')}
               </Txt>
             </KnowledgeTooltip>
           </li>
@@ -738,7 +744,7 @@ function GraphLegend({
         {branches.length > LEGEND_BRANCH_CAP ? (
           <li className="pl-0.5">
             <Txt as="span" variant="meta" tone="muted">
-              +{branches.length - LEGEND_BRANCH_CAP} more branches
+              <Trans id="+{part0} more branches" values={{ part0: branches.length - LEGEND_BRANCH_CAP }} />
             </Txt>
           </li>
         ) : null}
@@ -751,7 +757,7 @@ function GraphLegend({
                   <polygon points="11,1 16,4 11,7" fill={LINK_EDGE_COLOR} />
                 </svg>
                 <Txt as="span" variant="meta" tone="muted">
-                  Links out of the selected page
+                  {studioT('Links out of the selected page')}
                 </Txt>
               </li>
             ) : null}
@@ -770,7 +776,7 @@ function GraphLegend({
                   <polygon points="11,1 16,4 11,7" fill="var(--chart-orange)" />
                 </svg>
                 <Txt as="span" variant="meta" tone="muted">
-                  Links into it
+                  {studioT('Links into it')}
                 </Txt>
               </li>
             ) : null}
@@ -782,7 +788,7 @@ function GraphLegend({
               <line x1="0" y1="2" x2="12" y2="2" stroke={MENTION_EDGE_COLOR} strokeWidth="2" />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              Mentioned in notes
+              {studioT('Mentioned in notes')}
             </Txt>
           </li>
         ) : null}
@@ -793,7 +799,7 @@ function GraphLegend({
               <polygon points="11,1 16,4 11,7" fill={LINK_EDGE_COLOR} />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              Linked in page body
+              {studioT('Linked in page body')}
             </Txt>
           </li>
         ) : null}
@@ -803,7 +809,7 @@ function GraphLegend({
               <line x1="0" y1="2" x2="16" y2="2" {...DOT_PARENT_EDGE_STYLE} strokeOpacity={0.5} />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              Child page (dot)
+              {studioT('Child page (dot)')}
             </Txt>
           </li>
         ) : null}
@@ -814,7 +820,7 @@ function GraphLegend({
               <polygon points="9,1 15,4 9,7" fill={UP_EDGE_COLOR} />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              Parent of the focused page
+              {studioT('Parent of the focused page')}
             </Txt>
           </li>
         ) : null}
@@ -832,7 +838,7 @@ function GraphLegend({
               />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              Parent → child
+              {studioT('Parent → child')}
             </Txt>
           </li>
         ) : null}
@@ -845,7 +851,7 @@ function GraphLegend({
               14→
             </Txt>
             <Txt as="span" variant="meta" tone="muted">
-              Links in, links out (not drawn)
+              {studioT('Links in, links out (not drawn)')}
             </Txt>
           </li>
         ) : null}
@@ -856,7 +862,7 @@ function GraphLegend({
               <polygon points="11,1 16,4 11,7" fill={GRANT_EDGE_COLOR} />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              Grants access (hover for role)
+              {studioT('Grants access (hover for role)')}
             </Txt>
           </li>
         ) : null}
@@ -868,7 +874,7 @@ function GraphLegend({
             <IconPin />
           </span>
           <Txt as="span" variant="meta" tone="muted">
-            Pinned
+            {studioT('Pinned')}
           </Txt>
         </li>
       </ul>
@@ -961,6 +967,7 @@ export interface KnowledgePageGraphProps {
  * parent links as faint edges and mentions as solid ones. The first layout is deterministic for the same pages; later updates start from where pages already sit.
  */
 export function KnowledgePageGraph(props: KnowledgePageGraphProps) {
+  useLocale();
   const { settled = true } = props;
   // While the pages a new focus needs are still loading, the graph keeps showing what it had: laying out
   // the new focus on old data would animate to the wrong place and then jump when the data landed. The
@@ -1007,7 +1014,7 @@ export function KnowledgePageGraph(props: KnowledgePageGraphProps) {
           data-testid="knowledge-graph-loading"
           className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded border border-border bg-card px-3 py-1 text-body-sm text-muted-foreground shadow-overlay"
         >
-          Loading pages…
+          {studioT('Loading pages…')}
         </p>
       ) : null}
     </ReactFlowProvider>
@@ -1036,6 +1043,7 @@ function KnowledgePageGraphInner({
   insets = NO_PANE_INSETS,
   collapsibleLegend,
 }: KnowledgePageGraphProps) {
+  useLocale();
   // Grants add placeholder circles for declared principals with no scope page yet, and their own lines.
   const { graphPages, allEdges } = useMemo(() => {
     const granted = grantGraph(pages, grants);
@@ -1563,7 +1571,7 @@ function KnowledgePageGraphInner({
     return (
       <div className="flex h-full items-center justify-center p-6">
         <Txt variant="body" tone="muted">
-          No pages yet.
+          {studioT('No pages yet.')}
         </Txt>
       </div>
     );
@@ -1622,27 +1630,32 @@ function KnowledgePageGraphInner({
         <Background variant={BackgroundVariant.Dots} gap={26} size={1.4} color="var(--border-strong)" />
       </ReactFlow>
       <div className="absolute bottom-3 left-3 z-10 translate-x-(--knowledge-tree-drawer-inset,0px) transition-transform duration-slow ease-out-custom motion-reduce:transition-none">
-        <ButtonsGroup size="sm" aria-label="Zoom" data-knowledge-graph-zoom className="rounded-full shadow-overlay">
+        <ButtonsGroup
+          size="sm"
+          aria-label={studioT('Zoom')}
+          data-knowledge-graph-zoom
+          className="rounded-full shadow-overlay"
+        >
           <Button
             size="icon-sm"
-            tooltip="Zoom out"
-            aria-label="Zoom out"
+            tooltip={studioT('Zoom out')}
+            aria-label={studioT('Zoom out')}
             onClick={() => void reactFlow.zoomOut({ duration: fitDuration(prefersMotion()) })}
           >
             <IconMinusMedium />
           </Button>
           <Button
             size="icon-sm"
-            tooltip="Zoom in"
-            aria-label="Zoom in"
+            tooltip={studioT('Zoom in')}
+            aria-label={studioT('Zoom in')}
             onClick={() => void reactFlow.zoomIn({ duration: fitDuration(prefersMotion()) })}
           >
             <IconPlusMedium />
           </Button>
           <Button
             size="icon-sm"
-            tooltip="Fit view"
-            aria-label="Fit view"
+            tooltip={studioT('Fit view')}
+            aria-label={studioT('Fit view')}
             onClick={() => fit(fitDuration(prefersMotion()))}
           >
             <IconFullscreen1 />

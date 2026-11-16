@@ -3,6 +3,8 @@ import { Field, FieldError, FieldLabel } from '@mastra/playground-ui/components/
 import { Input } from '@mastra/playground-ui/components/Input';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { ProviderItem, ToolkitItem } from '../types';
 
 interface ProviderToolkitSelectorProps {
@@ -42,13 +44,14 @@ export function ProviderToolkitSelector({
   onLabelChange,
   onConnect,
 }: ProviderToolkitSelectorProps) {
+  useLocale();
   return (
     <div className="space-y-4 rounded border p-4">
       <Field invalid={Boolean(providersError)} disabled={providersLoading}>
-        <FieldLabel>Provider</FieldLabel>
+        <FieldLabel>{studioT('Provider')}</FieldLabel>
         <Select value={providerId} onValueChange={onProviderChange}>
           <SelectTrigger>
-            <SelectValue placeholder={providersLoading ? 'Loading providers…' : 'Select provider'} />
+            <SelectValue placeholder={providersLoading ? studioT('Loading providers…') : studioT('Select provider')} />
           </SelectTrigger>
           <SelectContent>
             {providers.map(provider => (
@@ -62,10 +65,10 @@ export function ProviderToolkitSelector({
       </Field>
 
       <Field invalid={Boolean(toolkitsError)} disabled={!providerId || toolkitsLoading}>
-        <FieldLabel>Toolkit</FieldLabel>
+        <FieldLabel>{studioT('Toolkit')}</FieldLabel>
         <Select value={toolkit} onValueChange={onToolkitChange}>
           <SelectTrigger>
-            <SelectValue placeholder={toolkitsLoading ? 'Loading toolkits…' : 'Select toolkit'} />
+            <SelectValue placeholder={toolkitsLoading ? studioT('Loading toolkits…') : studioT('Select toolkit')} />
           </SelectTrigger>
           <SelectContent>
             {toolkits.map(item => (
@@ -79,8 +82,12 @@ export function ProviderToolkitSelector({
       </Field>
 
       <Field disabled={!providerId || !toolkit}>
-        <FieldLabel>Label (optional)</FieldLabel>
-        <Input placeholder="My personal Gmail" value={label} onChange={event => onLabelChange(event.target.value)} />
+        <FieldLabel>{studioT('Label (optional)')}</FieldLabel>
+        <Input
+          placeholder={studioT('My personal Gmail')}
+          value={label}
+          onChange={event => onLabelChange(event.target.value)}
+        />
       </Field>
 
       <Button
@@ -89,7 +96,7 @@ export function ProviderToolkitSelector({
         onClick={onConnect}
         disabled={!providerId || !toolkit || authorizePending}
       >
-        {authorizePending ? 'Authorizing…' : 'Connect'}
+        {authorizePending ? studioT('Authorizing…') : studioT('Connect')}
       </Button>
 
       {authorizeError ? (
@@ -99,7 +106,9 @@ export function ProviderToolkitSelector({
       ) : null}
       {authorizedConnection ? (
         <Notice variant="success">
-          Authorized: {authorizedConnection.connectionId} (status: {authorizedConnection.status})
+          {studioT('Authorized:') + ' '}
+          {authorizedConnection.connectionId} {' ' + studioT('(status:') + ' '}
+          {authorizedConnection.status})
         </Notice>
       ) : null}
     </div>

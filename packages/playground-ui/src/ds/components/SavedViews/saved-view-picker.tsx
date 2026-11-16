@@ -25,6 +25,8 @@ import { IconLayersThree } from '@/ds/icons/central/IconLayersThree';
 import { IconLayersTwo } from '@/ds/icons/central/IconLayersTwo';
 import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSquare1';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SavedViewPickerProps<TSettings> = {
@@ -58,9 +60,10 @@ export function SavedViewPicker<TSettings>({
   describeView,
   canEdit = () => true,
   canCreate = true,
-  'aria-label': ariaLabel = 'Views',
+  'aria-label': ariaLabel = studioT('Views'),
   className,
 }: SavedViewPickerProps<TSettings>) {
+  useLocale();
   const anchorRef = useRef<HTMLDivElement>(null);
   const [renaming, setRenaming] = useState(false);
   const { draft, activeView } = views;
@@ -89,11 +92,11 @@ export function SavedViewPicker<TSettings>({
       {activeUnsaved && (
         <div className="flex shrink-0 items-center gap-1.5">
           <Button type="button" variant="ghost" size="sm" disabled={views.pending} onClick={views.discard}>
-            Reset
+            {studioT('Reset')}
           </Button>
           {editable && (
             <Button type="button" variant="default" size="sm" disabled={views.pending} onClick={views.save}>
-              Save changes
+              {studioT('Save changes')}
             </Button>
           )}
         </div>
@@ -111,7 +114,10 @@ export function SavedViewPicker<TSettings>({
           <ComboboxTrigger
             size="sm"
             icon={<IconLayersTwo />}
-            aria-label={`View: ${selected?.label}${activeUnsaved ? ', unsaved changes' : ''}`}
+            aria-label={studioT('View: {value0}{value1}', {
+              value0: selected?.label,
+              value1: activeUnsaved ? ', unsaved changes' : '',
+            })}
             className="max-w-60"
           >
             {selected?.label}
@@ -120,8 +126,8 @@ export function SavedViewPicker<TSettings>({
             )}
           </ComboboxTrigger>
           <ComboboxContent align="end">
-            <ComboboxSearch placeholder="Search views" />
-            <ComboboxEmpty>No views found.</ComboboxEmpty>
+            <ComboboxSearch placeholder={studioT('Search views')} />
+            <ComboboxEmpty>{studioT('No views found.')}</ComboboxEmpty>
             <ComboboxList>
               {(item: PickerItem) => {
                 const view = item.viewId ? viewsById.get(item.viewId) : undefined;
@@ -137,20 +143,20 @@ export function SavedViewPicker<TSettings>({
         </ComboboxRoot>
         {activeView && !creating && (editable || canCreate) && (
           <DropdownMenu>
-            <DropdownMenu.Trigger variant="ghost" size="icon-sm" tooltip="View actions" className="shrink-0">
+            <DropdownMenu.Trigger variant="ghost" size="icon-sm" tooltip={studioT('View actions')} className="shrink-0">
               <IconDotGrid1x3Horizontal />
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end">
               {editable && (
                 <DropdownMenu.Item onClick={() => setRenaming(true)}>
                   <IconInputForm aria-hidden />
-                  Rename
+                  {studioT('Rename')}
                 </DropdownMenu.Item>
               )}
               {canCreate && (
                 <DropdownMenu.Item onClick={() => views.duplicate(activeView.id)}>
                   <IconSquareBehindSquare1 aria-hidden />
-                  Duplicate
+                  {studioT('Duplicate')}
                 </DropdownMenu.Item>
               )}
               {editable && (
@@ -158,7 +164,7 @@ export function SavedViewPicker<TSettings>({
                   <DropdownMenu.Separator />
                   <DropdownMenu.Item variant="destructive" onClick={() => views.remove(activeView.id)}>
                     <TrashIcon aria-hidden />
-                    Delete view
+                    {studioT('Delete view')}
                   </DropdownMenu.Item>
                 </>
               )}
@@ -174,15 +180,15 @@ export function SavedViewPicker<TSettings>({
             else views.discard();
           }}
         >
-          <PopoverTrigger variant="ghost" size="icon-sm" tooltip="Save as new view" className="shrink-0">
+          <PopoverTrigger variant="ghost" size="icon-sm" tooltip={studioT('Save as new view')} className="shrink-0">
             <IconLayersThree />
           </PopoverTrigger>
           <PopoverContent align="end" className="w-72">
             {creating && (
               <ViewNameForm
-                title="Save as new view"
+                title={studioT('Save as new view')}
                 initialName={draft.name}
-                submitLabel="Save view"
+                submitLabel={studioT('Save view')}
                 error={views.error}
                 pending={views.pending}
                 onNameChange={name => views.change({ name })}
@@ -225,6 +231,7 @@ function RenamePopover({
   onClose: () => void;
   onRename: (name: string) => boolean | Promise<boolean>;
 }) {
+  useLocale();
   // The name that last failed to save: its error shows until the user types something else.
   const [failedName, setFailedName] = useState<string>();
   const [typedName, setTypedName] = useState(name);
@@ -238,9 +245,9 @@ function RenamePopover({
       <PopoverContent anchor={anchorRef} align="end" className="w-72">
         {open && (
           <ViewNameForm
-            title="Rename view"
+            title={studioT('Rename view')}
             initialName={name}
-            submitLabel="Rename"
+            submitLabel={studioT('Rename')}
             error={failedName !== undefined && failedName === typedName ? error : undefined}
             pending={pending}
             onNameChange={setTypedName}
@@ -275,6 +282,7 @@ function ViewNameForm({
   onSubmit: (name: string) => void | Promise<void>;
   onCancel: () => void;
 }) {
+  useLocale();
   const [name, setName] = useState(initialName);
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -287,7 +295,7 @@ function ViewNameForm({
       </Txt>
       <Field invalid={error !== undefined}>
         <Input
-          aria-label="View name"
+          aria-label={studioT('View name')}
           size="sm"
           autoFocus
           onFocus={event => event.currentTarget.select()}
@@ -302,7 +310,7 @@ function ViewNameForm({
       </Field>
       <div className="flex justify-end gap-1.5">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          Cancel
+          {studioT('Cancel')}
         </Button>
         <Button type="submit" variant="default" size="sm" disabled={pending || !name.trim()}>
           {submitLabel}

@@ -21,6 +21,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconLoadingCircle } from '@/ds/icons/central/IconLoadingCircle';
 import { Icon } from '@/ds/icons/Icon';
 import { useLocalStorageState } from '@/hooks/use-local-storage-state';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/utils/toast';
 
 export type WorkflowTriggerProps = Pick<
@@ -64,6 +66,7 @@ export function WorkflowTrigger({
   runActionsSlot,
   canExecute: canExecuteWorkflow,
 }: WorkflowTriggerProps) {
+  useLocale();
   const {
     result,
     setResult,
@@ -126,7 +129,8 @@ export function WorkflowTrigger({
         resourceId: trimmedResourceId,
       });
     } catch (error) {
-      if (!request.signal.aborted) toast.error(error instanceof Error ? error.message : 'Error executing workflow');
+      if (!request.signal.aborted)
+        toast.error(error instanceof Error ? error.message : studioT('Error executing workflow'));
     } finally {
       if (!request.signal.aborted) setIsStarting(false);
     }
@@ -140,7 +144,7 @@ export function WorkflowTrigger({
       setCancelResponse({ ...response, runId: activeRunId });
       if (resultWithoutStream) setResult({ ...resultWithoutStream, status: 'canceled' });
     } catch {
-      toast.error('Error cancelling workflow run');
+      toast.error(studioT('Error cancelling workflow run'));
     }
   };
 
@@ -200,7 +204,7 @@ export function WorkflowTrigger({
             <Icon>
               <IconLoadingCircle className="animate-spin text-foreground" />
             </Icon>
-            <Txt>Resuming workflow</Txt>
+            <Txt>{studioT('Resuming workflow')}</Txt>
           </div>
         )}
 
@@ -219,14 +223,14 @@ export function WorkflowTrigger({
             collapsible={false}
             headingSlot={headingSlot}
             leftActions={!paramsRunId ? <WorkflowDebugModeSwitch /> : undefined}
-            submitButtonLabel={isStarting ? 'Starting…' : 'Run'}
+            submitButtonLabel={isStarting ? studioT('Starting…') : studioT('Run')}
             submitActions={runActionsSlot?.({ resourceId, setResourceId })}
           />
         )}
 
         {!canExecuteWorkflow && (
           <Txt variant="caption" tone="muted" className="px-5 py-2">
-            You don't have permission to execute workflows.
+            {studioT("You don't have permission to execute workflows.")}
           </Txt>
         )}
 

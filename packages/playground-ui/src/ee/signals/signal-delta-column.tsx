@@ -7,6 +7,7 @@ import type { ThemeFlowResponse, TraceSignalName } from './types';
 import { useTraceIntelligence } from './use-trace-intelligence';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 function percent(share: number) {
   return `${Math.round(share * 100)}%`;
@@ -36,13 +37,14 @@ export function SignalDeltaColumn({
   toIndex: number;
   onThemeSelect: (selection: ThemeSelection, snapshotIndex: number) => void;
 }) {
+  useLocale();
   const { signalCatalog } = useTraceIntelligence();
   const label = signalLabel(signalCatalog, signalName);
   const deltas = computeThemeShareDeltas(fromFlow, toFlow, signalName);
   const detailIndexFor = (delta: { toShare: number }) => (delta.toShare > 0 ? toIndex : fromIndex);
 
   return (
-    <section aria-label={`${label} changes`} className="min-w-0">
+    <section aria-label={studioT('{value0} changes', { value0: label })} className="min-w-0">
       <Txt
         as="h3"
         variant="eyebrow"
@@ -60,7 +62,7 @@ export function SignalDeltaColumn({
         {deltas.length === 0 ? (
           <li className="text-muted-foreground">
             <Txt as="span" variant="caption" className="block">
-              No themes in either snapshot.
+              {studioT('No themes in either snapshot.')}
             </Txt>
           </li>
         ) : null}
@@ -97,7 +99,7 @@ export function SignalDeltaColumn({
                 <div className="px-2.5 py-2">{card}</div>
               ) : (
                 <button
-                  aria-label={`View theme details for ${delta.label}`}
+                  aria-label={studioT('View theme details for {value0}', { value0: delta.label })}
                   className="block w-full cursor-pointer rounded-lg px-2.5 py-2 text-left hover:border-border-strong hover:bg-white/[0.03]"
                   onClick={() =>
                     onThemeSelect({ kind: 'theme', signalName, themeId, label: delta.label }, detailIndexFor(delta))

@@ -8,6 +8,8 @@ import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
 import { DataPanel } from '@/ds/components/DataPanel';
 import { Txt } from '@/ds/components/Txt';
 import { IconArrowRight } from '@/ds/icons/central/IconArrowRight';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatTimestampPrecise } from '@/utils/date-format';
 
 export interface LogDataPanelProps {
@@ -33,15 +35,21 @@ export function LogDataPanel({
   depth,
   actions,
 }: LogDataPanelProps) {
+  useLocale();
   const formattedDate = log ? (formatTimestampPrecise(log.timestamp) ?? '') : '';
 
   return (
-    <DataPanel open={!!log} onClose={onClose} title={log ? `Log ${formattedDate}` : 'Log'} depth={depth}>
+    <DataPanel
+      open={!!log}
+      onClose={onClose}
+      title={log ? studioT('Log {value0}', { value0: formattedDate }) : studioT('Log')}
+      depth={depth}
+    >
       {log && (
         <>
           <DataPanel.Header>
             <DataPanel.CloseButton onClick={onClose} />
-            <DataPanel.Heading>Log</DataPanel.Heading>
+            <DataPanel.Heading>{studioT('Log')}</DataPanel.Heading>
             <DataPanel.Metadata>
               <DataPanel.Meta tooltip={formattedDate}>{formattedDate}</DataPanel.Meta>
             </DataPanel.Metadata>
@@ -50,8 +58,8 @@ export function LogDataPanel({
               <DataPanel.NextPrevNav
                 onPrevious={onPrevious}
                 onNext={onNext}
-                previousLabel="Go to previous log"
-                nextLabel="Go to next log"
+                previousLabel={studioT('Go to previous log')}
+                nextLabel={studioT('Go to next log')}
               />
             </DataPanel.HeaderActions>
           </DataPanel.Header>
@@ -61,31 +69,31 @@ export function LogDataPanel({
               <DataKeysAndValues>
                 {log.entityType && (
                   <>
-                    <DataKeysAndValues.Key>Entity Type</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Entity Type')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{log.entityType}</DataKeysAndValues.Value>
                   </>
                 )}
                 {log.entityName && (
                   <>
-                    <DataKeysAndValues.Key>Entity Name</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Entity Name')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{log.entityName}</DataKeysAndValues.Value>
                   </>
                 )}
                 {log.serviceName && (
                   <>
-                    <DataKeysAndValues.Key>Service</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Service')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{log.serviceName}</DataKeysAndValues.Value>
                   </>
                 )}
                 {log.environment && (
                   <>
-                    <DataKeysAndValues.Key>Environment</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Environment')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{log.environment}</DataKeysAndValues.Value>
                   </>
                 )}
                 {log.source && (
                   <>
-                    <DataKeysAndValues.Key>Source</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Source')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{log.source}</DataKeysAndValues.Value>
                   </>
                 )}
@@ -98,7 +106,7 @@ export function LogDataPanel({
                   ))}
               </DataKeysAndValues>
 
-              <DataPanel.CodeSection title="Message" codeStr={log.message} simplified />
+              <DataPanel.CodeSection title={studioT('Message')} codeStr={log.message} simplified />
 
               {(log.traceId || log.spanId) && (
                 <div className="grid gap-2">
@@ -109,12 +117,12 @@ export function LogDataPanel({
                         icon={<IconArrowRight />}
                         onClick={() => log.traceId && onTraceClick?.(log.traceId)}
                       >
-                        <span>Trace</span>
+                        <span>{studioT('Trace')}</span>
                         <Txt as="span" variant="caption" tone="faint" className="ml-auto min-w-0 truncate">
                           # {log.traceId}
                         </Txt>
                       </Button>
-                      <CopyButton content={log.traceId} tooltip="Copy trace ID to clipboard" />
+                      <CopyButton content={log.traceId} tooltip={studioT('Copy trace ID to clipboard')} />
                     </ButtonsGroup>
                   )}
                   {log.spanId && (
@@ -125,19 +133,19 @@ export function LogDataPanel({
                         onClick={() => log.traceId && log.spanId && onSpanClick?.(log.traceId, log.spanId)}
                         icon={<IconArrowRight />}
                       >
-                        <span>Span</span>
+                        <span>{studioT('Span')}</span>
                         <Txt as="span" variant="caption" tone="faint" className="ml-auto min-w-0 truncate">
                           # {log.spanId}
                         </Txt>
                       </Button>
-                      <CopyButton content={log.spanId} tooltip="Copy span ID to clipboard" />
+                      <CopyButton content={log.spanId} tooltip={studioT('Copy span ID to clipboard')} />
                     </ButtonsGroup>
                   )}
                 </div>
               )}
 
               {log.data && Object.keys(log.data).length > 0 && (
-                <DataPanel.CodeSection title="Data" codeStr={JSON.stringify(log.data, null, 2)} />
+                <DataPanel.CodeSection title={studioT('Data')} codeStr={JSON.stringify(log.data, null, 2)} />
               )}
             </div>
           </DataPanel.Content>

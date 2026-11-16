@@ -5,6 +5,8 @@ import { IconBrain } from '@mastra/playground-ui/icons/central/IconBrain';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import {
   useTemplateRepo,
   useTemplateRepoEnvVars,
@@ -26,9 +28,10 @@ import { TemplateSuccess } from '@/domains/templates/template-success';
 import { cn } from '@/lib/utils';
 
 export default function Template() {
+  useLocale();
   const { templateSlug } = useParams() as { templateSlug: string };
   const crumbs = [
-    { id: 'templates', label: 'Templates', to: '/templates' },
+    { id: 'templates', label: studioT('Templates'), to: '/templates' },
     { id: 'template', label: decodeRouteParam(templateSlug) },
   ];
   const [searchParams, setSearchParams] = useSearchParams();
@@ -179,38 +182,38 @@ export default function Template() {
   const providerOptions = [
     { value: 'openai', label: 'OpenAI' },
     { value: 'anthropic', label: 'Anthropic' },
-    { value: 'groq', label: 'Groq' },
+    { value: 'groq', label: studioT('Groq') },
     { value: 'google', label: 'Google' },
   ];
 
   const templateInfoData = [
     {
       key: 'tools',
-      label: 'Tools',
+      label: studioT('Tools'),
       value: template?.tools?.length ? template.tools.map(tool => tool).join(', ') : 'n/a',
       icon: <ToolsIcon />,
     },
     {
       key: 'agents',
-      label: 'Agents',
+      label: studioT('Agents'),
       value: template?.agents?.length ? template.agents.map(agent => agent).join(', ') : 'n/a',
       icon: <AgentIcon />,
     },
     {
       key: 'workflows',
-      label: 'Workflows',
+      label: studioT('Workflows'),
       value: template?.workflows?.length ? template.workflows.map(workflow => workflow).join(', ') : 'n/a',
       icon: <WorkflowIcon />,
     },
     {
       key: 'providers',
-      label: 'Providers',
+      label: studioT('Providers'),
       value: template?.supportedProviders?.length ? template.supportedProviders.join(', ') : 'n/a',
       icon: <IconBrain />,
     },
     {
       key: 'tags',
-      label: 'Tags',
+      label: studioT('Tags'),
       value: template?.tags?.length ? template.tags.join(', ') : 'n/a',
       icon: <IconTag />,
     },
@@ -254,7 +257,7 @@ export default function Template() {
   const handleModelUpdate = async (params: { provider: string; modelId: string }) => {
     setSelectedModelProvider(params.provider);
     setSelectedModelId(params.modelId);
-    return { message: 'Model updated successfully' };
+    return { message: studioT('Model updated successfully') };
   };
 
   const handleInstallTemplate = async () => {

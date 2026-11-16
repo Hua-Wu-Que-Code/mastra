@@ -14,6 +14,10 @@ import { IconChatBubbles } from '@/ds/icons/central/IconChatBubbles';
 import { IconScript } from '@/ds/icons/central/IconScript';
 import { focusRing } from '@/ds/primitives/transitions';
 import { formatCompactNumber } from '@/lib/cost';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { pluralize } from '@/lib/string';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +53,9 @@ function describeMessage(message: unknown): { title: string; meta: ReactNode } {
   const catalog = parseAvailableSkills(text);
   if (catalog && !catalog.before.trim() && !catalog.after.trim()) {
     return {
-      title: 'Skills catalog',
+      get title() {
+        return studioT('Skills catalog');
+      },
       meta: (
         <Metadata>
           <Metadata.Item>{pluralize(catalog.skills.length, 'skill')}</Metadata.Item>
@@ -62,7 +68,7 @@ function describeMessage(message: unknown): { title: string; meta: ReactNode } {
     .split('\n')
     .map(line => line.trim().replace(/^#+\s*/, ''))
     .find(Boolean);
-  return { title: firstLine ?? 'Empty message', meta: size };
+  return { title: firstLine ?? studioT('Empty message'), meta: size };
 }
 
 /** What a change without content was about, e.g. "2 messages from memory". */
@@ -196,9 +202,10 @@ function DiffRow({
 }
 
 function Clipped({ children }: { children: ReactNode }) {
+  useLocale();
   const box = useCollapsibleBox({ collapsedHeight: COLLAPSED_HEIGHT });
   return (
-    <CollapsibleBox state={box} expandLabel="Show all">
+    <CollapsibleBox state={box} expandLabel={studioT('Show all')}>
       {children}
     </CollapsibleBox>
   );
@@ -261,6 +268,7 @@ function DiffCard({
   changes: Change[];
   kept?: SpanInputMessage[];
 }) {
+  useLocale();
   const additions = changes.filter(change => !isRemoval(change)).reduce((sum, change) => sum + countOf(change), 0);
   const deletions = changes.filter(isRemoval).reduce((sum, change) => sum + countOf(change), 0);
   const summary = [
@@ -283,13 +291,13 @@ function DiffCard({
           <Txt as="span" variant="meta" font="mono" className="ml-auto flex shrink-0 items-center gap-1.5">
             <DiffStat additions={additions} deletions={deletions} />
             <Txt as="span" variant="meta" tone="faint">
-              {additions + deletions === 1 ? 'message' : 'messages'}
+              {additions + deletions === 1 ? studioT('message') : studioT('messages')}
             </Txt>
           </Txt>
         </div>
         {/* Says in words what the +/− rows below mean, for anyone reading a prompt diff for the first time. */}
         <Txt as="p" variant="body-sm" tone="muted" className="pl-6">
-          Changed by this processor: {summary}
+          <Trans id="Changed by this processor: {part0}" values={{ part0: summary }} />
         </Txt>
       </header>
       <ol className="flex min-w-0 list-none flex-col divide-y divide-border">
@@ -311,6 +319,7 @@ function DiffCard({
  * so the change shows where it landed in the prompt without the rest of the prompt drowning it.
  */
 export function SpanPromptChanges({ span }: { span: SpanRecord }) {
+  useLocale();
   const changes = mergeCountOnly(getPromptChanges(span).filter((change): change is Change => isRecord(change)));
   if (changes.length === 0) return null;
 
@@ -322,12 +331,14 @@ export function SpanPromptChanges({ span }: { span: SpanRecord }) {
       {system.length > 0 && (
         <DiffCard
           icon={<IconScript />}
-          title="System prompt"
+          title={studioT('System prompt')}
           changes={system}
           kept={keptSystemMessages(span, system)}
         />
       )}
-      {conversation.length > 0 && <DiffCard icon={<IconChatBubbles />} title="Conversation" changes={conversation} />}
+      {conversation.length > 0 && (
+        <DiffCard icon={<IconChatBubbles />} title={studioT('Conversation')} changes={conversation} />
+      )}
     </div>
   );
 }

@@ -11,6 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/ds/components/Popover
 import { Txt } from '@/ds/components/Txt';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type FilterBarAdvancedChipProps = {
@@ -23,6 +25,7 @@ export type FilterBarAdvancedChipProps = {
  * recursive rule builder; the chip's remove button drops the whole subtree.
  */
 export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChipProps) {
+  useLocale();
   const ctx = useFilterBarContext();
   const [initial] = useState(() => !ctx.mounted);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -74,7 +77,10 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
       <div
         ref={rootRef}
         role="group"
-        aria-label={`Advanced filter, ${count} ${count === 1 ? 'condition' : 'conditions'}`}
+        aria-label={studioT('Advanced filter, {value0} {value1}', {
+          value0: count,
+          value1: count === 1 ? 'condition' : 'conditions',
+        })}
         aria-hidden={leaving || undefined}
         data-slot="filter-bar-advanced"
         data-initial={initial || undefined}
@@ -90,10 +96,10 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
           render={<button type="button" />}
           data-filter-bar-segment="field"
           className={editableSegmentClass}
-          title="Edit advanced filter"
+          title={studioT('Edit advanced filter')}
         >
           <IconCodeBrackets aria-hidden />
-          <span className="truncate">Advanced filter</span>
+          <span className="truncate">{studioT('Advanced filter')}</span>
           {count > 0 && (
             <Txt as="span" variant="column" tone="muted" aria-hidden>
               {count}
@@ -109,8 +115,8 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
             type="button"
             ref={el => ctx.registerSegment(group.id, 'remove', el)}
             data-filter-bar-segment="remove"
-            aria-label="Remove advanced filter"
-            title="Remove advanced filter"
+            aria-label={studioT('Remove advanced filter')}
+            title={studioT('Remove advanced filter')}
             className={removeSegmentClass}
             onClick={remove}
           >
@@ -127,7 +133,7 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
         <div className="flex items-center gap-2 border-b border-border px-3 py-2">
           <IconCodeBrackets className="size-icon-sm text-muted-foreground" />
           <Txt as="span" variant="label" tone="ink">
-            Advanced filter
+            {studioT('Advanced filter')}
           </Txt>
           <Txt as="span" variant="column" tone="muted" className="rounded-md bg-fill-subtle px-1.5">
             {count}
@@ -136,7 +142,7 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
             variant="ghost"
             size="icon-sm"
             className="ml-auto"
-            tooltip="Close"
+            tooltip={studioT('Close')}
             onClick={() => ctx.setOpenGroup(null)}
           >
             <IconCrossMedium />
@@ -145,7 +151,7 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
         <FilterBarGroupEditor
           group={group}
           depth={1}
-          removeLabel="Remove advanced filter"
+          removeLabel={studioT('Remove advanced filter')}
           onRemove={() => {
             ctx.setOpenGroup(null);
             remove();

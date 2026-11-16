@@ -1,8 +1,9 @@
 import { useRef } from 'react';
-
 import { AnnotationCommentCard } from './annotation-comment-card';
 import type { ChatAnnotation } from './chat-annotations';
+
 import { Popover, PopoverContent } from '@/ds/components/Popover';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface CommentCard {
   id: string;
@@ -27,6 +28,7 @@ export function AnnotationCommentPopover({
   onRemove,
   onClose,
 }: AnnotationCommentPopoverProps) {
+  useLocale();
   const commentRef = useRef<HTMLTextAreaElement>(null);
 
   return (
@@ -48,7 +50,7 @@ export function AnnotationCommentPopover({
         align="start"
         sideOffset={8}
         initialFocus={commentRef}
-        aria-label={`Annotation ${number}`}
+        aria-label={studioT('Annotation {value0}', { value0: number })}
         className="w-80 max-w-[calc(100vw-2rem)] p-3"
       >
         <AnnotationCommentCard

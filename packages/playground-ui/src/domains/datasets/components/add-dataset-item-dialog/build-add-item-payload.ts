@@ -1,6 +1,7 @@
 import type { AddDatasetItemParams, DatasetItemToolMock } from '@mastra/client-js';
 import { isToolStepType } from './trajectory-types';
 import type { ExpectedStep, TrajectoryOrdering, TrajectoryStepRow } from './trajectory-types';
+import { t as studioT } from '@/lib/i18n';
 
 export type AddItemField = 'input' | 'groundTruth' | 'toolMocks' | 'requestContext' | 'expectedTrajectory';
 
@@ -60,21 +61,36 @@ const isToolMock = (value: unknown): value is DatasetItemToolMock =>
 function parseToolMocks(raw: string): { toolMocks?: DatasetItemToolMock[] } | { message: string } {
   if (!raw.trim()) return {};
   const parsed = parseJson(raw);
-  if (!parsed.ok) return { message: 'Tool mocks must be valid JSON' };
-  if (!Array.isArray(parsed.value)) return { message: 'Tool mocks must be a JSON array' };
+  if (!parsed.ok)
+    return {
+      get message() {
+        return studioT('Tool mocks must be valid JSON');
+      },
+    };
+  if (!Array.isArray(parsed.value))
+    return {
+      get message() {
+        return studioT('Tool mocks must be a JSON array');
+      },
+    };
   if (!parsed.value.every(isToolMock))
-    return { message: 'Each tool mock needs a "toolName" string and an "args" object' };
+    return {
+      get message() {
+        return studioT('Each tool mock needs a "toolName" string and an "args" object');
+      },
+    };
   return parsed.value.length > 0 ? { toolMocks: parsed.value } : {};
 }
 
 function toExpectedStep(row: TrajectoryStepRow, index: number): { step: ExpectedStep } | { message: string } {
   const label = `Step ${index + 1}`;
   const name = row.name.trim();
-  if (!name) return { message: `${label} needs a name` };
+  if (!name) return { message: studioT('{value0} needs a name', { value0: label }) };
 
   // Only tool steps have expected args; any other type parses blank and sends none.
   const toolArgs = parseOptionalObject(isToolStepType(row.stepType) ? row.toolArgs : '');
-  if (!toolArgs.ok) return { message: `The expected args of ${label.toLowerCase()} must be a JSON object` };
+  if (!toolArgs.ok)
+    return { message: studioT('The expected args of {value0} must be a JSON object', { value0: label.toLowerCase() }) };
   const args = toolArgs.value ? { toolArgs: toolArgs.value } : {};
 
   // A prefilled row keeps its recorded details; the editor's name and args replace the recorded ones.
@@ -92,7 +108,15 @@ function toExpectedStep(row: TrajectoryStepRow, index: number): { step: Expected
 
 /** The request body for the dialog, or the first error with the field that owns it. Options that are off are left out. */
 export function buildAddItemPayload(draft: AddItemDraft): { params: AddItemParams } | { error: AddItemError } {
-  if (!draft.input.trim()) return { error: { field: 'input', message: 'Input is required' } };
+  if (!draft.input.trim())
+    return {
+      error: {
+        field: 'input',
+        get message() {
+          return studioT('Input is required');
+        },
+      },
+    };
   const params: AddItemParams = { input: parseJsonOrText(draft.input) };
 
   if (draft.groundTruth.trim()) params.groundTruth = parseJsonOrText(draft.groundTruth);
@@ -104,7 +128,14 @@ export function buildAddItemPayload(draft: AddItemDraft): { params: AddItemParam
   if (draft.requestContextEnabled) {
     const requestContext = parseOptionalObject(draft.requestContext);
     if (!requestContext.ok)
-      return { error: { field: 'requestContext', message: 'Request context must be a JSON object' } };
+      return {
+        error: {
+          field: 'requestContext',
+          get message() {
+            return studioT('Request context must be a JSON object');
+          },
+        },
+      };
     if (requestContext.value) params.requestContext = requestContext.value;
   }
 

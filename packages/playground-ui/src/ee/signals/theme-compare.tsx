@@ -1,7 +1,7 @@
 import { useState } from 'react';
-
 import { useThemeFlows } from './hooks/use-theme-flows';
 import { SignalDeltaColumn } from './signal-delta-column';
+
 import { SignalsFrameLoadingSkeleton } from './signals-loading-skeleton';
 import { SnapshotSummary } from './snapshot-summary';
 import { TimelineTrack } from './snapshot-timeline';
@@ -10,6 +10,7 @@ import { timelineTickPositions } from './snapshot-timeline-data';
 import type { ThemeSelection } from './theme-drilldown-data';
 import type { ThemeSnapshot, TraceSignalName } from './types';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /**
  * Compare mode: two interchangeable points on the shared time axis show how
@@ -33,6 +34,7 @@ export function ThemeCompare({
   totalSnapshots: number;
   onThemeSelect: (selection: ThemeSelection, snapshotIndex: number) => void;
 }) {
+  useLocale();
   const [pointIndexes, setPointIndexes] = useState<[number, number]>();
   const [grabbedPoint, setGrabbedPoint] = useState<0 | 1>();
   const lastIndex = snapshots.length - 1;
@@ -89,7 +91,7 @@ export function ThemeCompare({
   const grabbedIndex = grabbedPoint === undefined ? undefined : points[grabbedPoint];
 
   return (
-    <section aria-label="Snapshot comparison" className="space-y-4">
+    <section aria-label={studioT('Snapshot comparison')} className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 px-3 py-2.5 sm:px-4">
         <TimelineTrack
           snapshots={snapshots}
@@ -106,7 +108,7 @@ export function ThemeCompare({
 
           className="rounded-md border border-border px-2 py-1 tabular-nums"
         >
-          <SnapshotSummary snapshot={fromSnapshot} flow={flows[fromIndex]} label="Earlier snapshot" />
+          <SnapshotSummary snapshot={fromSnapshot} flow={flows[fromIndex]} label={studioT('Earlier snapshot')} />
         </Txt>
         <Txt as="span" variant="caption" tone="muted" aria-hidden="true">
           →
@@ -117,17 +119,17 @@ export function ThemeCompare({
 
           className="rounded-md border border-border px-2 py-1 tabular-nums"
         >
-          <SnapshotSummary snapshot={toSnapshot} flow={flows[toIndex]} label="Later snapshot" />
+          <SnapshotSummary snapshot={toSnapshot} flow={flows[toIndex]} label={studioT('Later snapshot')} />
         </Txt>
         <Txt variant="caption" tone="muted">
           {grabbedPoint === undefined
-            ? 'Click a landmark to move the nearest point. Click a point to grab it.'
-            : 'Point grabbed. Click a landmark to place it.'}
+            ? studioT('Click a landmark to move the nearest point. Click a point to grab it.')
+            : studioT('Point grabbed. Click a landmark to place it.')}
         </Txt>
       </div>
       {fromIndex === toIndex ? (
         <Txt tone="muted" className="rounded-lg border border-border bg-background p-6">
-          Pick two different landmarks on the timeline to compare them.
+          {studioT('Pick two different landmarks on the timeline to compare them.')}
         </Txt>
       ) : !fromFlow || !toFlow ? (
         <SignalsFrameLoadingSkeleton />

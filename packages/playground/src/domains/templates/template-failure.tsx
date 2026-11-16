@@ -2,6 +2,10 @@ import { Code } from '@mastra/playground-ui/components/Code';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconEmojiSad } from '@mastra/playground-ui/icons/central/IconEmojiSad';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { Container } from './shared';
@@ -12,6 +16,7 @@ type TemplateFailureProps = {
 };
 
 export function TemplateFailure({ errorMsg, validationErrors }: TemplateFailureProps) {
+  useLocale();
   const errorString = typeof errorMsg === 'string' ? errorMsg : errorMsg != null ? String(errorMsg) : undefined;
   const isSchemaError = errorString?.includes('Invalid schema for function');
   const isValidationError =
@@ -31,12 +36,12 @@ export function TemplateFailure({ errorMsg, validationErrors }: TemplateFailureP
     if (isValidationError) {
       return {
         icon: <IconExclamationTriangle className="text-warning-foreground" />,
-        title: 'Template Installed with Warnings',
+        title: studioT('Template Installed with Warnings'),
       };
     }
     return {
       icon: <IconEmojiSad />,
-      title: 'Template Installation Failed',
+      title: studioT('Template Installation Failed'),
     };
   };
 
@@ -60,14 +65,14 @@ export function TemplateFailure({ errorMsg, validationErrors }: TemplateFailureP
         <details>
           <summary className={cn(quietTextHover, 'cursor-pointer text-center select-none')}>
             <Txt as="span" variant="caption" className="block">
-              Show Validation Issues ({validationErrors.length})
+              <Trans id="Show Validation Issues ( {part0})" values={{ part0: validationErrors.length }} />
             </Txt>
           </summary>
           <div className="mt-4 max-h-60 space-y-2 overflow-auto rounded bg-muted p-3 text-left">
             {validationErrors.map((error, index) => (
               <div key={index} className="border-l-2 border-destructive-indicator pl-2">
                 <Txt as="p" variant="column" className="text-destructive-foreground">
-                  {error.type === 'typescript' ? '🔴 TypeScript Error' : '⚠️ Lint Error'}
+                  {error.type === 'typescript' ? studioT('🔴 TypeScript Error') : studioT('⚠️ Lint Error')}
                 </Txt>
                 <Code
                   className="mt-1 text-caption wrap-break-word whitespace-pre-wrap text-muted-foreground"
@@ -84,7 +89,7 @@ export function TemplateFailure({ errorMsg, validationErrors }: TemplateFailureP
         <details>
           <summary className={cn(quietTextHover, 'cursor-pointer text-center select-none')}>
             <Txt as="span" variant="caption" className="block">
-              Show Details
+              {studioT('Show Details')}
             </Txt>
           </summary>
           <div className="mt-4 max-h-60 overflow-auto rounded bg-muted p-3 text-left">

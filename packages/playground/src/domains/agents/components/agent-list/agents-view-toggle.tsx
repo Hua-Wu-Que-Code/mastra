@@ -2,6 +2,7 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { ButtonsGroup } from '@mastra/playground-ui/components/ButtonsGroup';
 import { IconLayoutColumn } from '@mastra/playground-ui/icons/central/IconLayoutColumn';
 import { IconListBullets } from '@mastra/playground-ui/icons/central/IconListBullets';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export type AgentsView = 'compact' | 'list';
 
@@ -11,13 +12,14 @@ export interface AgentsViewToggleProps {
 }
 
 export function AgentsViewToggle({ view, onViewChange }: AgentsViewToggleProps) {
+  useLocale();
   return (
-    <ButtonsGroup aria-label="Agents view">
+    <ButtonsGroup aria-label={studioT('Agents view')}>
       <Button
         type="button"
         variant={view === 'list' ? 'default' : 'ghost'}
         size="icon-md"
-        tooltip="List view"
+        tooltip={studioT('List view')}
         aria-pressed={view === 'list'}
         onClick={() => onViewChange('list')}
       >
@@ -27,7 +29,7 @@ export function AgentsViewToggle({ view, onViewChange }: AgentsViewToggleProps) 
         type="button"
         variant={view === 'compact' ? 'default' : 'ghost'}
         size="icon-md"
-        tooltip="Compact view"
+        tooltip={studioT('Compact view')}
         aria-pressed={view === 'compact'}
         onClick={() => onViewChange('compact')}
       >

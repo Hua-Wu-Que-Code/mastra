@@ -5,6 +5,8 @@ import { SpanPayloadCollapsible } from './span-payload-primitives';
 import { asCoreSpan } from './span-payload-registry';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
 import { Notice } from '@/ds/components/Notice';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface SpanErrorRendererProps {
@@ -15,6 +17,7 @@ export interface SpanErrorRendererProps {
 type SpanError = NonNullable<ReturnType<typeof describeSpanError>>;
 
 function SpanErrorFacts({ error }: { error: SpanError }) {
+  useLocale();
   const hasMeta = error.id !== undefined || error.domain !== undefined || error.category !== undefined;
 
   return (
@@ -23,26 +26,26 @@ function SpanErrorFacts({ error }: { error: SpanError }) {
         <DataKeysAndValues>
           {error.id !== undefined && (
             <>
-              <DataKeysAndValues.Key>Id</DataKeysAndValues.Key>
+              <DataKeysAndValues.Key>{studioT('Id')}</DataKeysAndValues.Key>
               <DataKeysAndValues.Value>{error.id}</DataKeysAndValues.Value>
             </>
           )}
           {error.domain !== undefined && (
             <>
-              <DataKeysAndValues.Key>Domain</DataKeysAndValues.Key>
+              <DataKeysAndValues.Key>{studioT('Domain')}</DataKeysAndValues.Key>
               <DataKeysAndValues.Value>{error.domain}</DataKeysAndValues.Value>
             </>
           )}
           {error.category !== undefined && (
             <>
-              <DataKeysAndValues.Key>Category</DataKeysAndValues.Key>
+              <DataKeysAndValues.Key>{studioT('Category')}</DataKeysAndValues.Key>
               <DataKeysAndValues.Value>{error.category}</DataKeysAndValues.Value>
             </>
           )}
         </DataKeysAndValues>
       )}
       {error.details !== undefined && (
-        <SpanPayloadCollapsible label="Details">
+        <SpanPayloadCollapsible label={studioT('Details')}>
           <SpanPayloadJson value={error.details} />
         </SpanPayloadCollapsible>
       )}
@@ -52,12 +55,13 @@ function SpanErrorFacts({ error }: { error: SpanError }) {
 
 /** The error a span recorded, as a banner; `null` when the span succeeded. */
 export function SpanErrorRenderer({ span, className }: SpanErrorRendererProps) {
+  useLocale();
   const error = describeSpanError(asCoreSpan(span));
   if (!error) return null;
 
   return (
     <div data-slot="span-error" className={className}>
-      <Notice variant="destructive" title={error.name ?? 'Error'}>
+      <Notice variant="destructive" title={error.name ?? studioT('Error')}>
         <Notice.Message>{error.message}</Notice.Message>
         <SpanErrorFacts error={error} />
       </Notice>

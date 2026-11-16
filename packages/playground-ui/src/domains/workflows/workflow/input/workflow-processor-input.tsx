@@ -6,13 +6,39 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/ds/components
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select';
 import { Textarea } from '@/ds/components/Textarea';
 import { FormSubmitRow } from '@/lib/form/components/form-submit-row';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const PROCESSOR_PHASES = [
-  { value: 'input', description: 'Process input messages before LLM' },
-  { value: 'inputStep', description: 'Process at each agentic loop step' },
-  { value: 'outputStream', description: 'Process streaming chunks' },
-  { value: 'outputResult', description: 'Process complete output' },
-  { value: 'outputStep', description: 'Process after each LLM response' },
+  {
+    value: 'input',
+    get description() {
+      return studioT('Process input messages before LLM');
+    },
+  },
+  {
+    value: 'inputStep',
+    get description() {
+      return studioT('Process at each agentic loop step');
+    },
+  },
+  {
+    value: 'outputStream',
+    get description() {
+      return studioT('Process streaming chunks');
+    },
+  },
+  {
+    value: 'outputResult',
+    get description() {
+      return studioT('Process complete output');
+    },
+  },
+  {
+    value: 'outputStep',
+    get description() {
+      return studioT('Process after each LLM response');
+    },
+  },
 ];
 
 type WorkflowProcessorInputProps = Omit<WorkflowInputDataProps, 'defaultValues'> & {
@@ -50,6 +76,7 @@ export const WorkflowProcessorInput = ({
   submitButtonVariant,
   submitButtonFullWidth,
 }: WorkflowProcessorInputProps) => {
+  useLocale();
   const [errors, setErrors] = useState<ProcessorErrors>(NO_ERRORS);
 
   const handleSubmit = () => {
@@ -71,7 +98,7 @@ export const WorkflowProcessorInput = ({
   return (
     <div className="flex flex-col gap-4">
       <Field invalid={errors.phase.length > 0}>
-        <FieldLabel>Phase</FieldLabel>
+        <FieldLabel>{studioT('Phase')}</FieldLabel>
         <Select
           value={value.phase}
           onValueChange={phase => {
@@ -81,7 +108,7 @@ export const WorkflowProcessorInput = ({
           disabled={isSubmitLoading}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select phase" />
+            <SelectValue placeholder={studioT('Select phase')} />
           </SelectTrigger>
           <SelectContent>
             {PROCESSOR_PHASES.map(phaseOption => (
@@ -98,14 +125,14 @@ export const WorkflowProcessorInput = ({
       </Field>
 
       <Field invalid={errors.message.length > 0}>
-        <FieldLabel>Test Message</FieldLabel>
+        <FieldLabel>{studioT('Test Message')}</FieldLabel>
         <Textarea
           value={getProcessorMessage(value)}
           onChange={event => {
             setErrors(NO_ERRORS);
             onChange(withPhaseRole(updateProcessorMessage(value, event.target.value)));
           }}
-          placeholder="Enter a test message"
+          placeholder={studioT('Enter a test message')}
           rows={4}
           disabled={isSubmitLoading}
         />

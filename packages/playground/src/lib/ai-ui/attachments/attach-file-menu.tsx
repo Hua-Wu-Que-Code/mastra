@@ -13,6 +13,8 @@ import { Field, FieldError, FieldLabel } from '@mastra/playground-ui/components/
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
 import { IconChainLink3 } from '@mastra/playground-ui/icons/central/IconChainLink3';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useComposerAttachments } from './composer-attachments';
@@ -21,6 +23,7 @@ import { useComposerAttachments } from './composer-attachments';
  * "+" composer action: attach from the camera, photo library or files, or add a public URL.
  */
 export const AttachFileMenu = () => {
+  useLocale();
   const [urlOpen, setUrlOpen] = useState(false);
   const { addFiles, addUrl } = useComposerAttachments();
 
@@ -43,7 +46,7 @@ export const AttachFileMenu = () => {
       <ComposerAttachMenu
         onFiles={files => void addFiles(files)}
         size="icon-md"
-        actions={[{ label: 'From a URL…', icon: <IconChainLink3 />, onSelect: () => setUrlOpen(true) }]}
+        actions={[{ label: studioT('From a URL…'), icon: <IconChainLink3 />, onSelect: () => setUrlOpen(true) }]}
       />
       <Dialog open={urlOpen} onOpenChange={setUrlOpen}>
         <DialogContent
@@ -57,18 +60,18 @@ export const AttachFileMenu = () => {
         >
           <Form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Attach from a URL</DialogTitle>
+              <DialogTitle>{studioT('Attach from a URL')}</DialogTitle>
             </DialogHeader>
             <DialogBody>
               <Field>
-                <FieldLabel>Public URL</FieldLabel>
+                <FieldLabel>{studioT('Public URL')}</FieldLabel>
                 <Input name="url-attachment" type="url" placeholder="https://placehold.co/600x400/png" />
                 <FieldError />
               </Field>
             </DialogBody>
             <DialogFooter>
-              <DialogCancel>Cancel</DialogCancel>
-              <DialogAction type="submit">Add</DialogAction>
+              <DialogCancel>{studioT('Cancel')}</DialogCancel>
+              <DialogAction type="submit">{studioT('Add')}</DialogAction>
             </DialogFooter>
           </Form>
         </DialogContent>

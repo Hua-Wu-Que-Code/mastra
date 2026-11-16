@@ -2,6 +2,8 @@ import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Entity, EntityContent, EntityName, EntityDescription } from '@mastra/playground-ui/components/Entity';
 import { Section, SubSectionRoot } from '@mastra/playground-ui/components/Section';
 import { IconPlugin1 } from '@mastra/playground-ui/icons/central/IconPlugin1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { hueFillClass, hueForName } from '@mastra/playground-ui/utils/colors';
 import { useToolProviders } from '@mastra/react/hooks/tool-providers';
@@ -22,6 +24,7 @@ interface IntegrationToolsSectionProps {
 }
 
 export function IntegrationToolsSection({ selectedToolIds, onSubmitTools }: IntegrationToolsSectionProps) {
+  useLocale();
   const { data, isLoading } = useToolProviders();
   const providers = data?.providers ?? [];
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
@@ -46,7 +49,7 @@ export function IntegrationToolsSection({ selectedToolIds, onSubmitTools }: Inte
     <>
       <SubSectionRoot>
         <Section.Header>
-          <SubSectionHeader title="Integration Tools" icon={<IconPlugin1 />} />
+          <SubSectionHeader title={studioT('Integration Tools')} icon={<IconPlugin1 />} />
         </Section.Header>
 
         <div className="flex flex-col gap-1">
@@ -72,10 +75,10 @@ export function IntegrationToolsSection({ selectedToolIds, onSubmitTools }: Inte
                 <div className="flex items-center gap-2">
                   {count > 0 && (
                     <Badge>
-                      {count} {count === 1 ? 'tool' : 'tools'}
+                      {count} {count === 1 ? studioT('tool') : studioT('tools')}
                     </Badge>
                   )}
-                  <Badge variant="success">Available</Badge>
+                  <Badge variant="success">{studioT('Available')}</Badge>
                 </div>
               </Entity>
             );

@@ -4,6 +4,8 @@ import { CardDescription, CardTitle } from '@mastra/playground-ui/components/Car
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@mastra/playground-ui/components/HoverCard';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useId } from 'react';
 
 export interface AgentWorkflowDetailsProps {
@@ -16,6 +18,7 @@ function formatWorkflowCount(count: number) {
 }
 
 export function AgentWorkflowDetails({ agentName, workflows }: AgentWorkflowDetailsProps) {
+  useLocale();
   const titleId = useId();
   const workflowEntries = Object.entries(workflows ?? {});
 
@@ -34,7 +37,7 @@ export function AgentWorkflowDetails({ agentName, workflows }: AgentWorkflowDeta
             variant="ghost"
             size="sm"
             className="pointer-events-auto"
-            aria-label={`Show ${workflowCount} for ${agentName}`}
+            aria-label={studioT('Show {value0} for {value1}', { value0: workflowCount, value1: agentName })}
             icon={<WorkflowIcon aria-hidden="true" />}
           >
             <span>{workflowEntries.length}</span>
@@ -49,9 +52,9 @@ export function AgentWorkflowDetails({ agentName, workflows }: AgentWorkflowDeta
         className="w-80 max-w-[calc(100vw-2rem)]"
       >
         <div className="grid gap-3">
-          <CardTitle id={titleId}>Workflows</CardTitle>
+          <CardTitle id={titleId}>{studioT('Workflows')}</CardTitle>
           <ul
-            aria-label={`Configured workflows for ${agentName}`}
+            aria-label={studioT('Configured workflows for {value0}', { value0: agentName })}
             className="grid max-h-64 gap-3 overflow-y-auto"
             tabIndex={0}
           >

@@ -1,6 +1,8 @@
 import type { KeyboardEventHandler, PointerEventHandler } from 'react';
 import { Txt } from '@/ds/components/Txt/Txt';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface DateRangeSelectionProps {
@@ -26,6 +28,7 @@ export function DateRangeSelection({
   onPointerDown,
   onKeyDown,
 }: DateRangeSelectionProps) {
+  useLocale();
   const visibleWidth = Math.max(width, 0.6);
   const visibleLeft = Math.min(left, 100 - visibleWidth);
   const showDuration = width >= 12;
@@ -33,7 +36,7 @@ export function DateRangeSelection({
     <div
       role="slider"
       tabIndex={0}
-      aria-label="Move selected date range"
+      aria-label={studioT('Move selected date range')}
       aria-orientation="horizontal"
       aria-valuemin={0}
       aria-valuemax={max}

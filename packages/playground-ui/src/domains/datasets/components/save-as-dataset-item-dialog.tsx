@@ -15,6 +15,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/utils/toast';
 
 const CREATE_DATASET_VALUE = '__create-dataset__';
@@ -63,6 +65,7 @@ export function SaveAsDatasetItemDialog({
   source,
   renderCreateDatasetDialog,
 }: SaveAsDatasetItemDialogProps) {
+  useLocale();
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('');
   const [isCreateDatasetOpen, setIsCreateDatasetOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -158,7 +161,7 @@ export function SaveAsDatasetItemDialog({
     e.preventDefault();
 
     if (!selectedDatasetId) {
-      toast.error('Please select a dataset');
+      toast.error(studioT('Please select a dataset'));
       return;
     }
 
@@ -166,7 +169,7 @@ export function SaveAsDatasetItemDialog({
     try {
       parsedInput = JSON.parse(input);
     } catch {
-      toast.error('Input must be valid JSON');
+      toast.error(studioT('Input must be valid JSON'));
       return;
     }
 
@@ -175,7 +178,7 @@ export function SaveAsDatasetItemDialog({
       try {
         parsedGroundTruth = JSON.parse(groundTruth);
       } catch {
-        toast.error('Ground Truth must be valid JSON');
+        toast.error(studioT('Ground Truth must be valid JSON'));
         return;
       }
     }
@@ -185,7 +188,7 @@ export function SaveAsDatasetItemDialog({
       try {
         parsedTrajectory = JSON.parse(expectedTrajectory);
       } catch {
-        toast.error('Expected Trajectory must be valid JSON');
+        toast.error(studioT('Expected Trajectory must be valid JSON'));
         return;
       }
     }
@@ -195,12 +198,12 @@ export function SaveAsDatasetItemDialog({
       try {
         const parsed = JSON.parse(toolMocks);
         if (!Array.isArray(parsed)) {
-          toast.error('Tool Mocks must be a JSON array');
+          toast.error(studioT('Tool Mocks must be a JSON array'));
           return;
         }
         parsedToolMocks = parsed as DatasetItemToolMock[];
       } catch {
-        toast.error('Tool Mocks must be valid JSON');
+        toast.error(studioT('Tool Mocks must be valid JSON'));
         return;
       }
     }
@@ -218,8 +221,8 @@ export function SaveAsDatasetItemDialog({
       const targetDataset = datasets.find(d => d.id === selectedDatasetId);
       // Opens the dataset with the new item's drawer; apps without that route return ''.
       const itemHref = paths.datasetItemLink(selectedDatasetId, item.id);
-      toast.success(`Added to "${targetDataset?.name}"`, {
-        action: itemHref ? { label: 'Go to dataset', onClick: () => navigate(itemHref) } : undefined,
+      toast.success(studioT('Added to "{value0}"', { value0: targetDataset?.name }), {
+        action: itemHref ? { label: studioT('Go to dataset'), onClick: () => navigate(itemHref) } : undefined,
       });
 
       setSelectedDatasetId('');
@@ -229,7 +232,9 @@ export function SaveAsDatasetItemDialog({
       setToolMocks('');
       onClose();
     } catch (error) {
-      toast.error(`Failed to save item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to save item: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
     }
   };
 
@@ -242,24 +247,29 @@ export function SaveAsDatasetItemDialog({
     <DataPanel
       open={isOpen}
       onClose={handleCancel}
-      title="Save as Dataset Item"
-      description="Save data as a dataset item"
+      title={studioT('Save as Dataset Item')}
+      description={studioT('Save data as a dataset item')}
       depth={depth}
     >
       <DataPanel.Header>
         <DataPanel.Heading>
-          Save as Dataset Item
+          {studioT('Save as Dataset Item')}
           <b className="whitespace-nowrap">{breadcrumb}</b>
         </DataPanel.Heading>
         <DataPanel.HeaderActions>
-          <DataPanel.CloseButton icon="x" onClick={handleCancel} label="Close save as dataset item" tooltip="Close" />
+          <DataPanel.CloseButton
+            icon="x"
+            onClick={handleCancel}
+            label={studioT('Close save as dataset item')}
+            tooltip={studioT('Close')}
+          />
         </DataPanel.HeaderActions>
       </DataPanel.Header>
 
       <DataPanel.Content>
         <Form onSubmit={handleSubmit}>
           <Field>
-            <FieldLabel required>Dataset</FieldLabel>
+            <FieldLabel required>{studioT('Dataset')}</FieldLabel>
             <Select
               // Base UI resets an unmatched non-null value to null when items change, which would wipe a
               // just-created dataset before the refetch lists it; null means "no selection" and is left alone.
@@ -268,14 +278,18 @@ export function SaveAsDatasetItemDialog({
               disabled={addItem.isPending || isSelectionLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder={isSelectionLoading ? 'Loading datasets...' : 'Select a dataset'} />
+                <SelectValue
+                  placeholder={isSelectionLoading ? studioT('Loading datasets...') : studioT('Select a dataset')}
+                />
               </SelectTrigger>
               <SelectContent>
-                {renderCreateDatasetDialog && <SelectItem value={CREATE_DATASET_VALUE}>Create dataset</SelectItem>}
+                {renderCreateDatasetDialog && (
+                  <SelectItem value={CREATE_DATASET_VALUE}>{studioT('Create dataset')}</SelectItem>
+                )}
                 {datasets.length === 0
                   ? !renderCreateDatasetDialog && (
                       <Txt as="p" variant="body" tone="muted" className="px-2 py-4 text-center">
-                        No datasets available
+                        {studioT('No datasets available')}
                       </Txt>
                     )
                   : datasets.map(dataset => (
@@ -288,12 +302,12 @@ export function SaveAsDatasetItemDialog({
           </Field>
 
           <Field>
-            <FieldLabel required>Input (JSON)</FieldLabel>
+            <FieldLabel required>{studioT('Input (JSON)')}</FieldLabel>
             <CodeEditor value={input} onChange={handleInputChange} showCopyButton={false} className="min-h-30" />
           </Field>
 
           <Field>
-            <FieldLabel>Ground Truth (JSON, optional)</FieldLabel>
+            <FieldLabel>{studioT('Ground Truth (JSON, optional)')}</FieldLabel>
             <CodeEditor
               value={groundTruth}
               onChange={handleGroundTruthChange}
@@ -303,7 +317,7 @@ export function SaveAsDatasetItemDialog({
           </Field>
 
           <Field>
-            <FieldLabel>Expected Trajectory (JSON, optional)</FieldLabel>
+            <FieldLabel>{studioT('Expected Trajectory (JSON, optional)')}</FieldLabel>
             <CodeEditor
               value={expectedTrajectory}
               onChange={handleExpectedTrajectoryChange}
@@ -313,7 +327,7 @@ export function SaveAsDatasetItemDialog({
           </Field>
 
           <Field>
-            <FieldLabel>Tool Mocks (JSON, optional)</FieldLabel>
+            <FieldLabel>{studioT('Tool Mocks (JSON, optional)')}</FieldLabel>
             <CodeEditor
               value={toolMocks}
               onChange={handleToolMocksChange}
@@ -324,7 +338,7 @@ export function SaveAsDatasetItemDialog({
 
           <div className="flex justify-end gap-2 pt-4">
             <Button icon={<IconCrossMedium />} type="button" onClick={handleCancel}>
-              Cancel
+              {studioT('Cancel')}
             </Button>
             <Button
               icon={<IconCheckmark2Medium />}
@@ -332,7 +346,11 @@ export function SaveAsDatasetItemDialog({
               variant="default"
               disabled={addItem.isPending || trajectoryLoading || !isSelectedDatasetListed}
             >
-              {addItem.isPending ? 'Saving...' : trajectoryLoading ? 'Loading...' : 'Save item'}
+              {addItem.isPending
+                ? studioT('Saving...')
+                : trajectoryLoading
+                  ? studioT('Loading...')
+                  : studioT('Save item')}
             </Button>
           </div>
         </Form>

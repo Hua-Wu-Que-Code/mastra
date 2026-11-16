@@ -8,11 +8,14 @@ import { Icon } from '@/ds/icons/Icon';
 import { controlSizeClasses } from '@/ds/primitives/control-size';
 import { raisedControlSurfaceStyle } from '@/ds/primitives/form-element';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type PaginationProps = ComponentProps<'nav'>;
 
-export function Pagination({ className, 'aria-label': ariaLabel = 'Pagination', ...props }: PaginationProps) {
+export function Pagination({ className, 'aria-label': ariaLabel = studioT('Pagination'), ...props }: PaginationProps) {
+  useLocale();
   return (
     <nav
       data-slot="pagination"
@@ -123,6 +126,7 @@ export function PaginationNext({ text = 'Next', ...props }: PaginationNextProps)
 export type PaginationEllipsisProps = ComponentProps<'span'>;
 
 export function PaginationEllipsis({ className, ...props }: PaginationEllipsisProps) {
+  useLocale();
   return (
     <span
       data-slot="pagination-ellipsis"
@@ -132,7 +136,7 @@ export function PaginationEllipsis({ className, ...props }: PaginationEllipsisPr
       <Icon size="sm" aria-hidden>
         <IconDotGrid1x3Horizontal />
       </Icon>
-      <span className="sr-only">More pages</span>
+      <span className="sr-only">{studioT('More pages')}</span>
     </span>
   );
 }

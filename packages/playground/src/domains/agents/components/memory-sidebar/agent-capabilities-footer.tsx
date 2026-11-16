@@ -10,6 +10,8 @@ import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconS
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { MemoryIcon } from '@mastra/playground-ui/icons/MemoryIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition, focusRing, focusRingInset } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 
@@ -149,6 +151,7 @@ function CapabilityItem({ view, label, status, description, docsHref, enabled, t
 // Each capability component owns its data and loading state; React Query
 // dedupes the underlying requests across instances — see client-request-dedupe.
 function MemoryCapability({ agentId, view }: AgentCapabilityProps) {
+  useLocale();
   const { data: memory, isLoading } = useMemory({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -162,12 +165,12 @@ function MemoryCapability({ agentId, view }: AgentCapabilityProps) {
   return (
     <CapabilityItem
       view={view}
-      label="Memory"
+      label={studioT('Memory')}
       status={status}
       description={
         enabled
-          ? 'Conversation history and configured memory features are available for this agent.'
-          : 'This agent has no memory configured, so conversations are not saved as memory-backed threads.'
+          ? studioT('Conversation history and configured memory features are available for this agent.')
+          : studioT('This agent has no memory configured, so conversations are not saved as memory-backed threads.')
       }
       docsHref="https://mastra.ai/docs/memory/overview"
       enabled={enabled}
@@ -178,6 +181,7 @@ function MemoryCapability({ agentId, view }: AgentCapabilityProps) {
 }
 
 function EditorCapability({ agentId, view }: AgentCapabilityProps) {
+  useLocale();
   const { data: agent, isLoading: isAgentLoading } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -206,7 +210,7 @@ function EditorCapability({ agentId, view }: AgentCapabilityProps) {
   return (
     <CapabilityItem
       view={view}
-      label="Editor"
+      label={studioT('Editor')}
       status={status}
       description={description}
       docsHref="https://mastra.ai/docs/editor/overview"
@@ -218,6 +222,7 @@ function EditorCapability({ agentId, view }: AgentCapabilityProps) {
 }
 
 function ToolsCapability({ agentId, view }: AgentCapabilityProps) {
+  useLocale();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -228,9 +233,13 @@ function ToolsCapability({ agentId, view }: AgentCapabilityProps) {
   return (
     <CapabilityItem
       view={view}
-      label="Tools"
+      label={studioT('Tools')}
       status={isLoading ? 'Checking' : countStatus(count)}
-      description={count > 0 ? `${count} tool${count === 1 ? '' : 's'} available.` : 'No tools are configured.'}
+      description={
+        count > 0
+          ? studioT('{value0} tool{value1} available.', { value0: count, value1: count === 1 ? '' : 's' })
+          : studioT('No tools are configured.')
+      }
       docsHref="https://mastra.ai/docs/agents/using-tools-and-mcp"
       enabled={count > 0}
       tone="emerald"
@@ -240,6 +249,7 @@ function ToolsCapability({ agentId, view }: AgentCapabilityProps) {
 }
 
 function WorkflowsCapability({ agentId, view }: AgentCapabilityProps) {
+  useLocale();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -250,10 +260,12 @@ function WorkflowsCapability({ agentId, view }: AgentCapabilityProps) {
   return (
     <CapabilityItem
       view={view}
-      label="Workflows"
+      label={studioT('Workflows')}
       status={isLoading ? 'Checking' : countStatus(count)}
       description={
-        count > 0 ? `${count} workflow${count === 1 ? '' : 's'} available.` : 'No workflows are attached to this agent.'
+        count > 0
+          ? studioT('{value0} workflow{value1} available.', { value0: count, value1: count === 1 ? '' : 's' })
+          : studioT('No workflows are attached to this agent.')
       }
       docsHref="https://mastra.ai/docs/workflows/overview"
       enabled={count > 0}
@@ -264,6 +276,7 @@ function WorkflowsCapability({ agentId, view }: AgentCapabilityProps) {
 }
 
 function SubAgentsCapability({ agentId, view }: AgentCapabilityProps) {
+  useLocale();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -274,12 +287,12 @@ function SubAgentsCapability({ agentId, view }: AgentCapabilityProps) {
   return (
     <CapabilityItem
       view={view}
-      label="Sub-agents"
+      label={studioT('Sub-agents')}
       status={isLoading ? 'Checking' : countStatus(count)}
       description={
         count > 0
-          ? `${count} sub-agent${count === 1 ? '' : 's'} available.`
-          : 'No sub-agents are attached to this agent.'
+          ? studioT('{value0} sub-agent{value1} available.', { value0: count, value1: count === 1 ? '' : 's' })
+          : studioT('No sub-agents are attached to this agent.')
       }
       docsHref="https://mastra.ai/docs/agents/supervisor-agents"
       enabled={count > 0}
@@ -290,6 +303,7 @@ function SubAgentsCapability({ agentId, view }: AgentCapabilityProps) {
 }
 
 function ProcessorsCapability({ agentId, view }: AgentCapabilityProps) {
+  useLocale();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -300,12 +314,15 @@ function ProcessorsCapability({ agentId, view }: AgentCapabilityProps) {
   return (
     <CapabilityItem
       view={view}
-      label="Processors"
+      label={studioT('Processors')}
       status={isLoading ? 'Checking' : countStatus(count)}
       description={
         count > 0
-          ? `${count} input/output processor${count === 1 ? '' : 's'} configured.`
-          : 'No input or output processors are configured.'
+          ? studioT('{value0} input/output processor{value1} configured.', {
+              value0: count,
+              value1: count === 1 ? '' : 's',
+            })
+          : studioT('No input or output processors are configured.')
       }
       docsHref="https://mastra.ai/docs/agents/processors"
       enabled={count > 0}
@@ -346,12 +363,16 @@ function CapabilitiesSummary({ agentId }: { agentId: string }) {
 }
 
 export function AgentCapabilitiesFooter({ agentId }: { agentId: string }) {
+  useLocale();
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
       <div className="shrink-0 border-t border-border">
-        <CollapsibleTrigger asChild aria-label={isExpanded ? 'Hide capability details' : 'Show capability details'}>
+        <CollapsibleTrigger
+          asChild
+          aria-label={isExpanded ? studioT('Hide capability details') : studioT('Show capability details')}
+        >
           <button
             type="button"
             data-testid="agent-capabilities-footer"

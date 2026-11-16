@@ -8,6 +8,8 @@ import { IconDotGrid1x3Horizontal } from '@/ds/icons/central/IconDotGrid1x3Horiz
 import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
 import { IconPencil } from '@/ds/icons/central/IconPencil';
 import { raisedSurfaceStyle, surfaceStateLayerStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 // Dark attachments need a fill above the muted composer. Light attachments keep
@@ -36,6 +38,7 @@ export function ComposerAttachment({
   onPreview,
   variant = 'thumbnail',
 }: ComposerAttachmentProps) {
+  useLocale();
   const triggerRef = useRef<HTMLDivElement>(null);
   const focusTargetRef = useRef<HTMLElement | undefined>(undefined);
   const menuContentRef = useRef<HTMLDivElement>(null);
@@ -152,8 +155,8 @@ export function ComposerAttachment({
             size="icon-sm"
             className="h-auto w-full flex-1 rounded-(--attachment-action-radius)"
             onClick={onRemove}
-            aria-label={`Remove ${name}`}
-            title={`Remove ${name}`}
+            aria-label={studioT('Remove {value0}', { value0: name })}
+            title={studioT('Remove {value0}', { value0: name })}
           >
             <IconCrossMedium />
           </Button>
@@ -164,8 +167,8 @@ export function ComposerAttachment({
               size="icon-sm"
               className="h-auto w-full flex-1 rounded-(--attachment-action-radius)"
               onClick={onEdit}
-              aria-label={`Edit ${name}`}
-              title={`Edit ${name}`}
+              aria-label={studioT('Edit {value0}', { value0: name })}
+              title={studioT('Edit {value0}', { value0: name })}
             >
               <IconPencil />
             </Button>
@@ -176,7 +179,7 @@ export function ComposerAttachment({
           variant="ghost"
           size="icon-sm"
           className="absolute inset-y-(--attachment-action-inset) right-(--attachment-action-inset) z-20 hidden h-auto w-11 rounded-(--attachment-action-radius) max-sm:flex pointer-coarse:flex"
-          aria-label={`Actions for ${name}`}
+          aria-label={studioT('Actions for {value0}', { value0: name })}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
           onClick={event => openMenu(event.currentTarget)}
@@ -188,19 +191,19 @@ export function ComposerAttachment({
         {onPreview && (
           <ContextMenu.Item className="min-h-11" onSelect={() => runMenuAction(onPreview)}>
             <IconEyeOpen />
-            <span>Preview</span>
+            <span>{studioT('Preview')}</span>
           </ContextMenu.Item>
         )}
         {onEdit && (
           <ContextMenu.Item className="min-h-11" onSelect={() => runMenuAction(onEdit)}>
             <IconPencil />
-            <span>Edit</span>
+            <span>{studioT('Edit')}</span>
           </ContextMenu.Item>
         )}
         {(onPreview || onEdit) && <ContextMenu.Separator />}
         <ContextMenu.Item className="min-h-11" variant="destructive" onSelect={() => runMenuAction(onRemove)}>
           <IconCrossMedium />
-          <span>Remove</span>
+          <span>{studioT('Remove')}</span>
         </ContextMenu.Item>
       </ContextMenu.Content>
     </ContextMenu>

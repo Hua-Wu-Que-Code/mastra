@@ -1,5 +1,7 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDatasetItem } from '@mastra/react/hooks/datasets';
 import { useMemo } from 'react';
 
@@ -13,6 +15,7 @@ import { RouteSidePanel, useSelectedItemSidePanel } from '@/lib/route-side-panel
  * can't be opened programmatically.
  */
 export function DatasetItemSidePanel() {
+  useLocale();
   const { datasetId, items, isLoadingItems, currentItemId: itemId, openItem, close } = useDatasetItemPanel();
   const isMobile = useIsMobile();
   useSelectedItemSidePanel(itemId, close);
@@ -37,7 +40,10 @@ export function DatasetItemSidePanel() {
         isLoadingItems || isFetchingItem ? (
           <DataPanel.LoadingData />
         ) : (
-          <DataPanel.NoData>No loaded item "{itemId}".</DataPanel.NoData>
+          <DataPanel.NoData>
+            {studioT('No loaded item "')}
+            {itemId}".
+          </DataPanel.NoData>
         )
       }
       items={items}

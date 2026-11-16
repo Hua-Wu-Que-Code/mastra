@@ -3,6 +3,8 @@ import { DataList, DataListSkeleton, useDataListKeyboard } from '@mastra/playgro
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { eventSearch } from '../hooks/use-event-drawer-param';
 import { useMcpServerEvents } from '../hooks/use-mcp-server-events';
 import { McpEventDeliveryBadges } from './mcp-event-drawer/mcp-event-delivery-badges';
@@ -11,6 +13,7 @@ const COLUMNS = 'auto 1fr auto';
 
 /** The event types a server declares. Render it only for servers that report `events_capability`. */
 export function McpServerEventsList({ server }: { server: McpServerInfo }) {
+  useLocale();
   const { data, isLoading, isError } = useMcpServerEvents(server.id);
   const events = data?.events ?? [];
   const { Link } = useLinkComponent();
@@ -19,20 +22,20 @@ export function McpServerEventsList({ server }: { server: McpServerInfo }) {
   return (
     <section className="flex flex-col gap-3">
       <Txt as="h2" variant="heading">
-        Events
+        {studioT('Events')}
       </Txt>
 
       {isLoading && <DataListSkeleton columns={COLUMNS} />}
-      {isError && <Notice variant="destructive">Could not load this server's events.</Notice>}
+      {isError && <Notice variant="destructive">{studioT("Could not load this server's events.")}</Notice>}
       {data && (
         <DataList columns={COLUMNS} scrollRef={containerRef}>
           <DataList.Top>
-            <DataList.TopCell>Name</DataList.TopCell>
-            <DataList.TopCell>Description</DataList.TopCell>
-            <DataList.TopCell>Delivery</DataList.TopCell>
+            <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Delivery')}</DataList.TopCell>
           </DataList.Top>
 
-          {events.length === 0 && <DataList.NoMatch message="This server declares no events" />}
+          {events.length === 0 && <DataList.NoMatch message={studioT('This server declares no events')} />}
 
           {events.map((event, index) => (
             <DataList.RowLink

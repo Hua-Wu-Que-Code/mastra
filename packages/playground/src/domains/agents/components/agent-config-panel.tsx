@@ -8,6 +8,8 @@ import {
 } from '@mastra/playground-ui/components/Drawer';
 import { ActivatedSkillsProvider } from '@mastra/playground-ui/domains/agents/context/activated-skills-context';
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 
 import { AgentOverviewPanel } from './agent-overview-panel/agent-overview-panel';
@@ -27,6 +29,7 @@ export function AgentConfigPanel({
   children: ReactNode;
   disabled?: boolean;
 }) {
+  useLocale();
   const isMobile = useIsMobile();
   const panel = (
     <ActivatedSkillsProvider key={agentId}>
@@ -44,7 +47,7 @@ export function AgentConfigPanel({
           <DrawerBackdrop />
           <DrawerViewport>
             <DrawerPopup className="w-[calc(100vw-2.5rem)] max-w-md">
-              <DrawerTitle className="sr-only">Config</DrawerTitle>
+              <DrawerTitle className="sr-only">{studioT('Config')}</DrawerTitle>
               <div className="flex min-h-0 flex-1 flex-col">{panel}</div>
             </DrawerPopup>
           </DrawerViewport>

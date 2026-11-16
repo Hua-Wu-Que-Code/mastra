@@ -4,6 +4,7 @@ import { ActivityItem, SignalActivity } from '@/ds/components/ai/activity';
 import type { ActivityAppearance } from '@/ds/components/ai/activity';
 import { MarkdownRenderer } from '@/ds/components/MarkdownRenderer';
 import { ScrollArea } from '@/ds/components/ScrollArea';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const SkillGlyph = agentGlyph('skill');
 
@@ -16,15 +17,16 @@ export function SkillMessage({
   defaultOpen?: boolean;
   appearance?: ActivityAppearance;
 }) {
+  useLocale();
   const { name, arguments: args, instructions, description } = activation;
   const item = (
     <ActivityItem
       appearance={appearance}
-      label="Skill"
+      label={studioT('Skill')}
       detail={args ? `${name} ${args}` : name}
       icon={<SkillGlyph className={appearance === 'inline' ? undefined : 'text-span-skill'} aria-hidden />}
       data-skill-name={name}
-      aria-label={`Skill: ${name}`}
+      aria-label={studioT('Skill: {value0}', { value0: name })}
       defaultOpen={defaultOpen}
     >
       <ScrollArea maxHeight="24rem" revealScrollbarOnHover={false}>
@@ -38,7 +40,12 @@ export function SkillMessage({
   return (
     <div className="flex flex-col">
       {item}
-      <SignalActivity kind="reactive" label="Work item description" message={description} appearance={appearance} />
+      <SignalActivity
+        kind="reactive"
+        label={studioT('Work item description')}
+        message={description}
+        appearance={appearance}
+      />
     </div>
   );
 }

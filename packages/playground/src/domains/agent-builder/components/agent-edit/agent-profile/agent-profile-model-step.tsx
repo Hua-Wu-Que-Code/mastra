@@ -3,6 +3,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { ProviderLogo, cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import { IconArrowRight } from '@mastra/playground-ui/icons/central/IconArrowRight';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useWatch } from 'react-hook-form';
 import { AgentStepContainer } from './agent-step-container';
 import { Models } from './models';
@@ -24,6 +26,7 @@ const ActiveModelBadge = ({ provider, name }: ActiveModelBadgeProps) => {
 };
 
 export const AgentProfileModelStep = () => {
+  useLocale();
   const { next } = useWizard();
   const isStreaming = useStreamRunning();
   const model = useWatch({ name: 'model' });
@@ -36,18 +39,19 @@ export const AgentProfileModelStep = () => {
 
   return (
     <AgentStepContainer
-      title="Available models"
+      title={studioT('Available models')}
       description={
         model ? (
           <div className="flex items-center gap-2">
-            Selected model: <ActiveModelBadge provider={model.provider} name={model.name} />
+            {studioT('Selected model:') + ' '}
+            <ActiveModelBadge provider={model.provider} name={model.name} />
           </div>
         ) : undefined
       }
       contentClassName="overflow-hidden"
       cta={
         <Button onClick={handleContinue} disabled={isStreaming}>
-          Continue{' '}
+          {studioT('Continue')}{' '}
           <Icon>
             <IconArrowRight />
           </Icon>

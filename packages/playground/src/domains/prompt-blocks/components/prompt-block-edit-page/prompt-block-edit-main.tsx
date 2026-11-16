@@ -1,4 +1,6 @@
 import { CodeEditor } from '@mastra/playground-ui/components/CodeEditor';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { RuleGroup } from '@mastra/playground-ui/utils/rule-engine';
 import type { UseFormReturn } from 'react-hook-form';
 import { Controller, useWatch } from 'react-hook-form';
@@ -13,6 +15,7 @@ interface PromptBlockEditMainProps {
 }
 
 export function PromptBlockEditMain({ form, formResetKey = 0 }: PromptBlockEditMainProps) {
+  useLocale();
   const { control, setValue } = form;
 
   const schema = useWatch({ control, name: 'variables' });
@@ -26,8 +29,8 @@ export function PromptBlockEditMain({ form, formResetKey = 0 }: PromptBlockEditM
     <div className="flex h-full flex-col gap-3 px-4">
       <div className="flex items-center justify-between">
         <SectionHeader
-          title="Content"
-          subtitle="Write the prompt block content. Use {{variableName}} for template variables."
+          title={studioT('Content')}
+          subtitle={studioT('Write the prompt block content. Use {{variableName}} for template variables.')}
         />
         <DisplayConditionsDialog
           entityName="Prompt Block"
@@ -47,7 +50,7 @@ export function PromptBlockEditMain({ form, formResetKey = 0 }: PromptBlockEditM
               onChange={field.onChange}
               language="markdown"
               showCopyButton
-              placeholder="Enter prompt block content"
+              placeholder={studioT('Enter prompt block content')}
               highlightVariables
               schema={schema}
               className="min-h-[200px] flex-1"

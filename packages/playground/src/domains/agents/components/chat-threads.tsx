@@ -17,6 +17,10 @@ import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { PanelEdgeIcon } from '@mastra/playground-ui/resize/panel-edge-icon';
 import { panelIconButtonClass } from '@mastra/playground-ui/resize/panel-icon-button';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -50,6 +54,7 @@ export const ChatThreads = ({
   embedded = false,
   isLoading = false,
 }: ChatThreadsProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const [dialog, setDialog] = useState<{ type: 'rename' | 'delete'; thread: StorageThreadType } | null>(null);
   const { canDelete, canEdit } = usePermissions();
@@ -106,14 +111,14 @@ export const ChatThreads = ({
             <Icon>
               <IconPlusMedium />
             </Icon>
-            New Thread
+            {studioT('New Thread')}
           </ThreadListNewItem>
           {canHidePanel && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  aria-label="Hide threads panel"
+                  aria-label={studioT('Hide threads panel')}
                   className={cn(panelIconButtonClass, 'shrink-0')}
                   onClick={() => threadsPanel?.collapse()}
                 >
@@ -124,8 +129,7 @@ export const ChatThreads = ({
               </TooltipTrigger>
               <TooltipContent side="right">
                 <span className="inline-flex items-center gap-1.5">
-                  Hide threads panel
-                  <Kbd size="xs">{'{'}</Kbd>
+                  <Trans id="Hide threads panel {part0}" values={{ part0: <Kbd size="xs">{'{'}</Kbd> }} />
                 </span>
               </TooltipContent>
             </Tooltip>
@@ -139,7 +143,7 @@ export const ChatThreads = ({
             {pinnedThreads.length > 0 && (
               <CollapsibleSection
                 labelId={pinnedLabelId}
-                label="Pinned"
+                label={studioT('Pinned')}
                 collapsed={isCollapsed('pinned')}
                 onToggle={() => toggle('pinned')}
               >
@@ -172,14 +176,16 @@ export const ChatThreads = ({
                   if (node) threadsPanel?.collapseOnce();
                 }}
               >
-                <ThreadListEmpty>Your conversations will appear here once you start chatting!</ThreadListEmpty>
+                <ThreadListEmpty>
+                  {studioT('Your conversations will appear here once you start chatting!')}
+                </ThreadListEmpty>
               </div>
             ) : (
               otherThreads.length > 0 &&
               (pinnedThreads.length > 0 ? (
                 <CollapsibleSection
                   labelId={recentLabelId}
-                  label="Recent"
+                  label={studioT('Recent')}
                   collapsed={isCollapsed('recent')}
                   onToggle={() => toggle('recent')}
                 >
@@ -222,18 +228,21 @@ interface DeleteThreadDialogProps {
   onDelete: () => void;
 }
 const DeleteThreadDialog = ({ open, onOpenChange, onDelete }: DeleteThreadDialogProps) => {
+  useLocale();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content>
         <AlertDialog.Header>
-          <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+          <AlertDialog.Title>{studioT('Are you absolutely sure?')}</AlertDialog.Title>
           <AlertDialog.Description>
-            This action cannot be undone. This will permanently delete your chat and remove it from our servers.
+            {studioT(
+              'This action cannot be undone. This will permanently delete your chat and remove it from our servers.',
+            )}
           </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Footer>
-          <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-          <AlertDialog.Action onClick={onDelete}>Continue</AlertDialog.Action>
+          <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
+          <AlertDialog.Action onClick={onDelete}>{studioT('Continue')}</AlertDialog.Action>
         </AlertDialog.Footer>
       </AlertDialog.Content>
     </AlertDialog>

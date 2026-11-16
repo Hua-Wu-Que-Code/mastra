@@ -8,13 +8,42 @@ import { Badge } from '@/ds/components/Badge';
 import type { BadgeIndicator, BadgeVariant } from '@/ds/components/Badge';
 import { CopyButton } from '@/ds/components/CopyButton';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const STATUS: Record<McpTaskStatus, { label: string; variant: BadgeVariant; indicator?: BadgeIndicator }> = {
-  working: { label: 'working', variant: 'info', indicator: 'pulse' },
-  input_required: { label: 'input required', variant: 'warning', indicator: 'dot' },
-  completed: { label: 'completed', variant: 'success' },
-  failed: { label: 'failed', variant: 'destructive' },
-  cancelled: { label: 'cancelled', variant: 'neutral' },
+  working: {
+    get label() {
+      return studioT('working');
+    },
+    variant: 'info',
+    indicator: 'pulse',
+  },
+  input_required: {
+    get label() {
+      return studioT('input required');
+    },
+    variant: 'warning',
+    indicator: 'dot',
+  },
+  completed: {
+    get label() {
+      return studioT('completed');
+    },
+    variant: 'success',
+  },
+  failed: {
+    get label() {
+      return studioT('failed');
+    },
+    variant: 'destructive',
+  },
+  cancelled: {
+    get label() {
+      return studioT('cancelled');
+    },
+    variant: 'neutral',
+  },
 };
 
 /** Now, every second, until `endedAt` is known. */
@@ -37,6 +66,7 @@ const formatElapsed = (ms: number) => {
 
 /** A `task working` badge and `0:42` elapsed for a tool call that continued as an MCP task, with its task id to copy. */
 export function McpTaskChip({ task }: { task: McpTaskView }) {
+  useLocale();
   const { label, variant, indicator } = STATUS[task.status];
   const terminal = isTerminalMcpTaskStatus(task.status);
   const elapsed = useClock(terminal ? task.endedAt : undefined) - Date.parse(task.createdAt);
@@ -48,14 +78,20 @@ export function McpTaskChip({ task }: { task: McpTaskView }) {
         variant={variant}
         emphasis="subtle"
         indicator={indicator}
-        title={`MCP task ${task.taskId} on ${task.serverName}`}
+        title={studioT('MCP task {value0} on {value1}', { value0: task.taskId, value1: task.serverName })}
       >
-        <span>task {label}</span>
+        <span>
+          <Trans id="task {part0}" values={{ part0: label }} />
+        </span>
       </Badge>
       <Txt as="span" variant="meta" font="mono" tone="muted" className="tabular-nums">
         {formatElapsed(elapsed)}
       </Txt>
-      <CopyButton content={task.taskId} tooltip="Copy MCP task id" copyMessage="Copied MCP task id" />
+      <CopyButton
+        content={task.taskId}
+        tooltip={studioT('Copy MCP task id')}
+        copyMessage={studioT('Copied MCP task id')}
+      />
     </span>
   );
 }

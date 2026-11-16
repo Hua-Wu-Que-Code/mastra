@@ -7,6 +7,7 @@ import { DatePicker } from '@/ds/components/DateTimePicker';
 import { Popover, PopoverTrigger, PopoverContent } from '@/ds/components/Popover/popover';
 import { Txt } from '@/ds/components/Txt/Txt';
 import { IconCalendarDays } from '@/ds/icons/central/IconCalendarDays';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface DateRangeBoundaryPickerProps {
   boundary: DateBoundary;
@@ -17,6 +18,7 @@ interface DateRangeBoundaryPickerProps {
 }
 
 export function DateRangeBoundaryPicker({ boundary, value, min, max, onSelect }: DateRangeBoundaryPickerProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const isFrom = boundary === 'from';
   const boundaryLabel = isFrom ? 'start date' : 'end date';
@@ -36,7 +38,7 @@ export function DateRangeBoundaryPicker({ boundary, value, min, max, onSelect }:
       <PopoverTrigger
         render={
           <Button
-            aria-label={`Choose ${boundaryLabel}, ${formattedDate}`}
+            aria-label={studioT('Choose {value0}, {value1}', { value0: boundaryLabel, value1: formattedDate })}
             aria-expanded={open}
             size="sm"
             className="h-11 w-full min-w-0 justify-start overflow-hidden px-3 sm:h-8"

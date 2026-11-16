@@ -1,4 +1,5 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface ExperimentsComparableLegendProps {
   /** Dataset of the first selected experiment. Omitted before any selection. */
@@ -7,24 +8,25 @@ export interface ExperimentsComparableLegendProps {
 
 /** Names the dataset the current selection locks the experiments list to. */
 export function ExperimentsComparableLegend({ dataset }: ExperimentsComparableLegendProps) {
+  useLocale();
   return (
     <Txt
       as="p"
       variant="body-sm"
       tone="muted"
       role="note"
-      aria-label="Comparable experiments"
+      aria-label={studioT('Comparable experiments')}
       className="min-w-0 truncate"
     >
       {dataset ? (
         <>
-          Comparable experiments share dataset{' '}
+          {studioT('Comparable experiments share dataset')}{' '}
           <Txt as="span" variant="body-sm" tone="ink" title={dataset.id}>
             {dataset.name}
           </Txt>
         </>
       ) : (
-        'Select an experiment to pick the dataset to compare'
+        studioT('Select an experiment to pick the dataset to compare')
       )}
     </Txt>
   );

@@ -3,6 +3,8 @@ import { EmptyState } from '@mastra/playground-ui/components/EmptyState';
 import { Metadata } from '@mastra/playground-ui/components/Metadata';
 import { RotatingText } from '@mastra/playground-ui/components/RotatingText';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDuration } from '@mastra/playground-ui/utils/duration';
 import { useNow } from '../hooks/use-now';
 import { QUEUED_MESSAGE, RUNNING_MESSAGES } from './experiment-run-messages';
@@ -13,6 +15,7 @@ export interface ExperimentRunProgressProps {
 
 /** Stands in for the KPIs and results while a run is queued or in progress, which would only show partial data. */
 export function ExperimentRunProgress({ experiment }: ExperimentRunProgressProps) {
+  useLocale();
   const { status, totalItems, succeededCount, failedCount, startedAt } = experiment;
   const now = useNow();
   const finishedCount = succeededCount + failedCount;
@@ -28,15 +31,19 @@ export function ExperimentRunProgress({ experiment }: ExperimentRunProgressProps
       variant="fill"
       as="h2"
       iconSlot={<Spinner />}
-      titleSlot={isQueued ? 'Experiment queued' : 'Experiment in progress'}
+      titleSlot={isQueued ? studioT('Experiment queued') : studioT('Experiment in progress')}
       descriptionSlot={
         <span className="flex flex-col items-center gap-1">
           <span>{isQueued ? QUEUED_MESSAGE : <RotatingText messages={RUNNING_MESSAGES} />}</span>
           <Metadata className="justify-center tabular-nums">
             <Metadata.Item>
-              {finishedCount} / {totalItems} {noun} finished
+              {finishedCount} / {totalItems} {noun} {' ' + studioT('finished')}
             </Metadata.Item>
-            {elapsed && <Metadata.Item>{elapsed} elapsed</Metadata.Item>}
+            {elapsed && (
+              <Metadata.Item>
+                {elapsed} {' ' + studioT('elapsed')}
+              </Metadata.Item>
+            )}
           </Metadata>
         </span>
       }

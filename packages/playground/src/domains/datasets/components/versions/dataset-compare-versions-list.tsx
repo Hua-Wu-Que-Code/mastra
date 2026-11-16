@@ -7,6 +7,10 @@ import { IconMathEquals } from '@mastra/playground-ui/icons/central/IconMathEqua
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { focusRing, transitions } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
 
@@ -24,19 +28,25 @@ const versionInfoConfig = {
     badgeVariant: 'info' as const,
     borderColor: 'border-info-edge',
     icon: <IconPlusMedium />,
-    tooltip: 'Added in this version',
+    get tooltip() {
+      return studioT('Added in this version');
+    },
   },
   changed: {
     badgeVariant: 'warning' as const,
     borderColor: 'border-warning-edge',
     icon: <IconPencil />,
-    tooltip: 'Changed in this version',
+    get tooltip() {
+      return studioT('Changed in this version');
+    },
   },
   same: {
     badgeVariant: 'success' as const,
     borderColor: 'border-success-edge',
     icon: <IconMathEquals />,
-    tooltip: 'Same in both versions',
+    get tooltip() {
+      return studioT('Same in both versions');
+    },
   },
 };
 
@@ -101,10 +111,11 @@ function LinkCell({
 }
 
 function VersionInfo({ variant, version }: { variant?: VersionInfoVariant; version?: number }) {
+  useLocale();
   if (!variant) {
     return (
       <Txt as="span" tone="muted">
-        v. {version}
+        <Trans id="v. {part0}" values={{ part0: version }} />
       </Txt>
     );
   }
@@ -113,7 +124,7 @@ function VersionInfo({ variant, version }: { variant?: VersionInfoVariant; versi
     <div className="grid grid-cols-[1fr_auto]">
       {version !== undefined && (
         <Txt as="span" tone="muted" className="flex min-w-16 justify-end pr-3">
-          v. {version}
+          <Trans id="v. {part0}" values={{ part0: version }} />
         </Txt>
       )}
       <span className="inline-flex" role="img" aria-label={tooltip}>
@@ -152,6 +163,7 @@ export function DatasetCompareVersionsList({
   itemsAMap,
   itemsBMap,
 }: DatasetCompareVersionsListProps) {
+  useLocale();
   const isANewer = versionA > versionB;
   return (
     <div className="overflow-y-auto">
@@ -197,7 +209,7 @@ export function DatasetCompareVersionsList({
                     <div className="flex items-center justify-center">
                       <EmptyCell
                         red={isANewer}
-                        tooltip={isANewer ? 'Deleted in this version' : 'Not present in this version'}
+                        tooltip={isANewer ? studioT('Deleted in this version') : studioT('Not present in this version')}
                       />
                     </div>
                   )}
@@ -213,7 +225,9 @@ export function DatasetCompareVersionsList({
                     <div className="flex items-center justify-center">
                       <EmptyCell
                         red={!isANewer}
-                        tooltip={!isANewer ? 'Deleted in this version' : 'Not present in this version'}
+                        tooltip={
+                          !isANewer ? studioT('Deleted in this version') : studioT('Not present in this version')
+                        }
                       />
                     </div>
                   )}
@@ -232,11 +246,11 @@ export function DatasetCompareVersionsList({
                 <LinkCell
                   href={`/datasets/${datasetId}/items/${id}/versions?version=${itemA?.datasetVersion}&compare=${itemB?.datasetVersion}`}
                 >
-                  Compare
+                  {studioT('Compare')}
                 </LinkCell>
               ) : (
                 <div>
-                  <EmptyCell tooltip="Comparing is available only for changed items" />
+                  <EmptyCell tooltip={studioT('Comparing is available only for changed items')} />
                 </div>
               )}
             </li>

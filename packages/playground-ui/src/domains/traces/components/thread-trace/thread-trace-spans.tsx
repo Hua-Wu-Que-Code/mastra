@@ -1,9 +1,9 @@
 import { useTraceSpans } from '@mastra/react/hooks/traces';
 import { useMemo } from 'react';
 import type { ComponentProps } from 'react';
-
 import { useExpandedSpanIds } from '../../hooks/use-expanded-span-ids';
 import { formatHierarchicalSpans } from '../format-hierarchical-spans';
+
 import { TraceSpanTree } from '../trace-span-tree';
 import { useThreadTrace } from './thread-trace-context';
 import { useThreadTraceRow } from './thread-trace-row-context';
@@ -11,6 +11,8 @@ import { Button } from '@/ds/components/Button';
 import { CollapsibleBox } from '@/ds/components/CollapsibleBox';
 import type { CollapsibleBoxState } from '@/ds/components/CollapsibleBox';
 import { IconMinimize45 } from '@/ds/icons/central/IconMinimize45';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /**
@@ -35,6 +37,7 @@ export interface ThreadTraceSpansProps extends Omit<ComponentProps<'div'>, 'chil
  * (hidden while a span of the row is open). Clamping needs the measured height of `ThreadTrace.Messages`.
  */
 export function ThreadTraceSpans({ className, timelineClassName, ...props }: ThreadTraceSpansProps) {
+  useLocale();
   const { selectSpan } = useThreadTrace();
   const { traceId, selectedSpanId, featuredSpanIds, revealSpanId, timelineRef, isActive } = useThreadTraceRow();
   const { budget, overflows, isExpanded, setExpanded } = useSpansClamp();
@@ -59,7 +62,7 @@ export function ThreadTraceSpans({ className, timelineClassName, ...props }: Thr
   return (
     <CollapsibleBox
       state={box}
-      expandLabel="Expand"
+      expandLabel={studioT('Expand')}
       data-slot="thread-trace-spans"
       data-testid="trace-row-timeline"
       className={className}
@@ -80,7 +83,7 @@ export function ThreadTraceSpans({ className, timelineClassName, ...props }: Thr
       {isExpanded && overflows && !isActive && (
         <div className="flex justify-center pb-2">
           <Button size="sm" variant="ghost" icon={<IconMinimize45 />} onClick={() => setExpanded(false)}>
-            Collapse
+            {studioT('Collapse')}
           </Button>
         </div>
       )}

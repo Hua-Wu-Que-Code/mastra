@@ -5,6 +5,7 @@ import { useEffect, useMemo, useCallback } from 'react';
 import type { DefaultValues } from 'react-hook-form';
 import { useForm, FormProvider } from 'react-hook-form';
 import { CustomAutoFormField } from './components/custom-auto-form-field';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function CustomAutoForm<T extends Record<string, any>>({
   schema,
@@ -18,6 +19,7 @@ export function CustomAutoForm<T extends Record<string, any>>({
   onFormInit,
   formProps = {},
 }: AutoFormProps<T>) {
+  useLocale();
   const parsedSchema = useMemo(() => parseSchema(schema), [schema]);
   const methods = useForm<T>({
     defaultValues: {
@@ -85,7 +87,7 @@ export function CustomAutoForm<T extends Record<string, any>>({
             <CustomAutoFormField key={field.key} field={field} path={[field.key]} />
           ))}
           {children}
-          {withSubmit && <uiComponents.SubmitButton>Submit</uiComponents.SubmitButton>}
+          {withSubmit && <uiComponents.SubmitButton>{studioT('Submit')}</uiComponents.SubmitButton>}
         </uiComponents.Form>
       </AutoFormProvider>
     </FormProvider>

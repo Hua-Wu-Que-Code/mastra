@@ -4,6 +4,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { SpanPayloadToolCalls } from '@mastra/playground-ui/domains/traces/components/span-payload/span-payload-primitives';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import {
   getMissingTextNotice,
   getResultErrorMessage,
@@ -68,6 +70,7 @@ export function ComparisonSideCell({
   onOutputExpandedChange,
   onShowTrace,
 }: ComparisonSideCellProps) {
+  useLocale();
   const { isMetricVisible } = useCompareMetricPreferences();
 
   if (isLoading) {
@@ -81,7 +84,7 @@ export function ComparisonSideCell({
   if (!data.present) {
     return (
       <Txt tone="muted" className="py-5 text-center">
-        Not present in this experiment
+        {studioT('Not present in this experiment')}
       </Txt>
     );
   }
@@ -98,8 +101,8 @@ export function ComparisonSideCell({
       <Button
         size="icon-sm"
         variant="ghost"
-        tooltip="View trace"
-        aria-label="View trace"
+        tooltip={studioT('View trace')}
+        aria-label={studioT('View trace')}
         onClick={() => onShowTrace(traceId)}
       >
         <TraceIcon />
@@ -117,20 +120,20 @@ export function ComparisonSideCell({
   return (
     <div className={sectionStackClass}>
       {hasMetrics && (
-        <ComparisonSection title="Metrics" collapsible={false} actions={traceAction}>
+        <ComparisonSection title={studioT('Metrics')} collapsible={false} actions={traceAction}>
           <ComparisonMetricList metrics={metrics} />
         </ComparisonSection>
       )}
 
       {errorMessage ? (
-        <ComparisonSection title="Error" tone="negative" framed actions={resultActions(errorMessage)}>
+        <ComparisonSection title={studioT('Error')} tone="negative" framed actions={resultActions(errorMessage)}>
           <Txt tone="muted" className="p-3 break-words">
             {errorMessage}
           </Txt>
         </ComparisonSection>
       ) : (
         <ComparisonSection
-          title="Output"
+          title={studioT('Output')}
           framed
           actions={resultActions(outputStr)}
           expanded={outputExpanded}
@@ -147,20 +150,20 @@ export function ComparisonSideCell({
       )}
 
       {toolCalls.length > 0 && (
-        <ComparisonSection title={`Tool calls (${toolCalls.length})`}>
+        <ComparisonSection title={studioT('Tool calls ({value0})', { value0: toolCalls.length })}>
           <SpanPayloadToolCalls toolCalls={toolCalls} />
         </ComparisonSection>
       )}
 
       {data.comment && (
-        <ComparisonSection title="Comment" framed>
+        <ComparisonSection title={studioT('Comment')} framed>
           <ComparisonPayload value={data.comment} />
         </ComparisonSection>
       )}
 
       {data.metadata && Object.keys(data.metadata).length > 0 && (
         <ComparisonSection
-          title="Metadata"
+          title={studioT('Metadata')}
           framed
           actions={<CopyButton content={formatValue(data.metadata)} variant="ghost" />}
         >

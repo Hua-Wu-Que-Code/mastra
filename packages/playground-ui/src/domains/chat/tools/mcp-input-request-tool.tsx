@@ -15,6 +15,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRight';
 import { DynamicForm } from '@/lib/form/dynamic-form';
 import { jsonSchemaToZodRuntime } from '@/lib/form/json-schema-to-zod-runtime';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 export interface McpInputRequestToolProps {
   payload: McpInputRequestPayload;
@@ -119,6 +121,7 @@ export function McpInputRequestTool({
   readOnly,
   notice,
 }: McpInputRequestToolProps) {
+  useLocale();
   // A Map, not an object: request keys come from the server, and one named `constructor` or
   // `__proto__` must not read `Object.prototype` and look answered.
   const [answers, setAnswers] = useState<ReadonlyMap<string, McpInputResponse>>(() => new Map());
@@ -147,17 +150,20 @@ export function McpInputRequestTool({
   return (
     <AskUserContainer className="mb-4" data-testid="mcp-input-request">
       <AskUserLabel>
-        {payload.serverName} needs input to continue {payload.toolName}
+        {payload.serverName} {' ' + studioT('needs input to continue') + ' '}
+        {payload.toolName}
       </AskUserLabel>
       <AskUserBody className="flex flex-col gap-4">
         {notice && <Notice variant="info">{notice}</Notice>}
         {tooLarge ? (
           <>
-            <Txt tone="muted">{payload.serverName} sent more than Studio can show here.</Txt>
+            <Txt tone="muted">
+              <Trans id="{part0} sent more than Studio can show here." values={{ part0: payload.serverName }} />
+            </Txt>
             {!readOnly && (
               <div className="flex gap-2">
                 <Button type="button" variant="ghost" disabled={isSubmitting || answers.size > 0} onClick={cancelAll}>
-                  Cancel
+                  {studioT('Cancel')}
                 </Button>
               </div>
             )}
@@ -200,22 +206,23 @@ function InputRequest({
   readOnly?: boolean;
   onAnswer: (response: McpInputResponse) => void;
 }) {
+  useLocale();
   const view = useMemo(() => viewRequest(request), [request]);
   const schema = useMemo(() => (view.kind === 'form' ? jsonSchemaToZodRuntime(view.schema) : undefined), [view]);
 
   const decline = (
     <Button type="button" disabled={disabled} onClick={() => onAnswer({ action: 'decline' })}>
-      Decline
+      {studioT('Decline')}
     </Button>
   );
   const cancel = (
     <Button type="button" variant="ghost" disabled={disabled} onClick={() => onAnswer({ action: 'cancel' })}>
-      Cancel
+      {studioT('Cancel')}
     </Button>
   );
 
   return (
-    <section aria-label={`Input request ${requestKey}`} className="flex flex-col gap-3">
+    <section aria-label={studioT('Input request {value0}', { value0: requestKey })} className="flex flex-col gap-3">
       {view.message && (
         <Txt variant="subheading" tone="ink">
           {view.message}
@@ -228,7 +235,7 @@ function InputRequest({
           schema={schema}
           onSubmit={values => onAnswer({ action: 'accept', content: isRecord(values) ? values : {} })}
           isSubmitLoading={disabled}
-          submitButtonLabel="Accept"
+          submitButtonLabel={studioT('Accept')}
           submitButtonVariant="primary"
           submitActions={
             <>
@@ -244,16 +251,18 @@ function InputRequest({
             render={<a href={view.url} target="_blank" rel="noopener noreferrer" />}
             iconEnd={<IconSquareArrowTopRight />}
           >
-            Open link
+            {studioT('Open link')}
           </Button>
           <Button type="button" variant="primary" disabled={disabled} onClick={() => onAnswer({ action: 'accept' })}>
-            Done
+            {studioT('Done')}
           </Button>
           {cancel}
         </div>
       ) : (
         <>
-          <Txt tone="muted">Studio can't answer a {request.method} request.</Txt>
+          <Txt tone="muted">
+            <Trans id="Studio can't answer a {part0} request." values={{ part0: request.method }} />
+          </Txt>
           <CodeEditor data={{ ...request }} />
           <div className="flex gap-2">{cancel}</div>
         </>

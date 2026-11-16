@@ -5,6 +5,7 @@ import { Button } from '@/ds/components/Button';
 import { Input } from '@/ds/components/Input';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 interface KeyValuePair {
   id: string;
@@ -13,6 +14,7 @@ interface KeyValuePair {
 }
 
 export const RecordField: React.FC<AutoFormFieldProps> = ({ inputProps, field }) => {
+  useLocale();
   const { onChange } = inputProps;
   const [pairs, setPairs] = React.useState<KeyValuePair[]>(() =>
     Object.entries(field.default || {}).map(([key, val]) => ({
@@ -73,17 +75,17 @@ export const RecordField: React.FC<AutoFormFieldProps> = ({ inputProps, field })
         // One row per pair: the field already sits in the form's surface, so no card of its own.
         <div key={pair.id} className="flex items-center gap-2">
           <Input
-            placeholder="Key"
+            placeholder={studioT('Key')}
             className="flex-1"
-            aria-label="Key"
+            aria-label={studioT('Key')}
             value={pair.key}
             onChange={e => handleChange(pair.id, 'key', e.target.value)}
             onBlur={handleBlur}
           />
           <Input
-            placeholder="Value"
+            placeholder={studioT('Value')}
             className="flex-1"
-            aria-label="Value"
+            aria-label={studioT('Value')}
             value={pair.value}
             onChange={e => handleChange(pair.id, 'value', e.target.value)}
             onBlur={handleBlur}
@@ -92,8 +94,8 @@ export const RecordField: React.FC<AutoFormFieldProps> = ({ inputProps, field })
             type="button"
             variant="ghost"
             size="icon-md"
-            tooltip="Remove pair"
-            aria-label="Remove pair"
+            tooltip={studioT('Remove pair')}
+            aria-label={studioT('Remove pair')}
             onClick={() => removePair(pair.id)}
           >
             <TrashIcon />
@@ -108,7 +110,7 @@ export const RecordField: React.FC<AutoFormFieldProps> = ({ inputProps, field })
         onClick={addPair}
         icon={<IconPlusMedium />}
       >
-        Add pair
+        {studioT('Add pair')}
       </Button>
     </div>
   );

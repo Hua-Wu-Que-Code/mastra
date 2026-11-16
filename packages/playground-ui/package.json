@@ -166,14 +166,15 @@
     "dev": "node scripts/prune-dist.mjs && vite build --watch --mode development",
     "test": "vitest",
     "test:mutate": "stryker run --mutate",
-    "typecheck": "tsc",
+    "typecheck": "pnpm check:i18n && tsc",
     "icons:central": "node scripts/central-icons.mjs",
     "lint": "oxlint --type-aware .",
     "lint:fix": "oxlint --type-aware --fix .",
     "build:publish": "pnpm build && yalc push",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "pnpm turbo build --filter @mastra/core --filter @mastra/react --filter @mastra/ai-sdk && storybook build"
+    "build-storybook": "pnpm turbo build --filter @mastra/core --filter @mastra/react --filter @mastra/ai-sdk && storybook build",
+    "check:i18n": "node ../../scripts/check-studio-i18n.mjs"
   },
   "keywords": [
     "mastra",

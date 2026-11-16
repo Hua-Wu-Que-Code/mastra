@@ -1,5 +1,6 @@
 import { CodeEditor } from '@mastra/playground-ui/components/CodeEditor';
 import { MarkdownRenderer } from '@mastra/playground-ui/components/MarkdownRenderer';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 export interface ComparisonPayloadProps {
   value: unknown;
@@ -7,6 +8,7 @@ export interface ComparisonPayloadProps {
 
 /** A payload (input, ground truth, output): strings as markdown, anything else as JSON. Frame it with a `framed` `ComparisonSection`. */
 export function ComparisonPayload({ value }: ComparisonPayloadProps) {
+  useLocale();
   return (
     <div className="min-w-0 p-3 text-foreground">
       {typeof value === 'string' ? (
@@ -19,7 +21,7 @@ export function ComparisonPayload({ value }: ComparisonPayloadProps) {
           lineNumbers={false}
           showCopyButton={false}
           variant="embedded"
-          aria-label="JSON payload"
+          aria-label={studioT('JSON payload')}
         />
       )}
     </div>

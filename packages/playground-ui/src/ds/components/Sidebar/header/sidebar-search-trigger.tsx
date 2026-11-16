@@ -4,6 +4,7 @@ import { SidebarButtonHint } from './sidebar-button-hint';
 import { Button } from '@/ds/components/Button';
 import type { ButtonProps } from '@/ds/components/Button';
 import { IconMagnifyingGlass } from '@/ds/icons/central/IconMagnifyingGlass';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SidebarSearchTriggerProps = Omit<ButtonProps, 'variant' | 'size' | 'tooltip' | 'children'> & {
   /** Tooltip label, and the accessible name unless `aria-label` is set. Defaults to `Search`. */
@@ -16,9 +17,10 @@ export type SidebarSearchTriggerProps = Omit<ButtonProps, 'variant' | 'size' | '
 
 export const SidebarSearchTrigger = forwardRef<HTMLButtonElement, SidebarSearchTriggerProps>(
   function SidebarSearchTrigger(
-    { label = 'Search', shortcut, children, 'aria-label': ariaLabel, type = 'button', ...props },
+    { label = studioT('Search'), shortcut, children, 'aria-label': ariaLabel, type = 'button', ...props },
     ref,
   ) {
+    useLocale();
     return (
       <Button
         ref={ref}

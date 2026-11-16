@@ -1,12 +1,13 @@
 import type { TimeTravelParams } from '@mastra/client-js';
-
 import { useContext, useMemo, useState } from 'react';
 import type { TripwireData } from '../context/use-current-run';
+
 import { WorkflowRunContext } from '../context/workflow-run-context';
 import { useWorkflowStepDetail } from '../context/workflow-step-detail-context';
 import { WorkflowTimeTravelForm } from './workflow-time-travel-form';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogBody } from '@/ds/components/Dialog';
 import { WorkflowCodeContent, WorkflowStepActions, WorkflowStepAction } from '@/ds/components/Workflow';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface WorkflowStepActionBarProps {
   resumeData?: any;
@@ -35,6 +36,7 @@ export const WorkflowStepActionBar = ({
   stepsFlow,
   requestContext,
 }: WorkflowStepActionBarProps) => {
+  useLocale();
   const [openDialog, setOpenDialog] = useState<StepDialog | null>(null);
   const dialogProps = (dialog: StepDialog) => ({
     open: openDialog === dialog,
@@ -183,7 +185,10 @@ export const WorkflowStepActionBar = ({
         <Dialog {...dialogProps('timeTravel')}>
           <DialogContent size="xl">
             <DialogHeader>
-              <DialogTitle>Time travel to {stepKey}</DialogTitle>
+              <DialogTitle>
+                {studioT('Time travel to') + ' '}
+                {stepKey}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
               <WorkflowTimeTravelForm stepKey={stepKey} closeModal={closeDialog} requestContext={requestContext} />
@@ -197,7 +202,10 @@ export const WorkflowStepActionBar = ({
           <Dialog {...dialogProps('runStep')}>
             <DialogContent size="xl">
               <DialogHeader>
-                <DialogTitle>Run step {stepKey}</DialogTitle>
+                <DialogTitle>
+                  {studioT('Run step') + ' '}
+                  {stepKey}
+                </DialogTitle>
               </DialogHeader>
               <DialogBody>
                 <WorkflowTimeTravelForm
@@ -205,7 +213,7 @@ export const WorkflowStepActionBar = ({
                   stepKey={stepKey}
                   closeModal={closeDialog}
                   isPerStepRun
-                  buttonText="Run step"
+                  buttonText={studioT('Run step')}
                   inputData={stepPayload?.input}
                 />
               </DialogBody>
@@ -215,7 +223,10 @@ export const WorkflowStepActionBar = ({
           <Dialog {...dialogProps('continueRun')}>
             <DialogContent size="xl">
               <DialogHeader>
-                <DialogTitle>Continue run {stepKey}</DialogTitle>
+                <DialogTitle>
+                  {studioT('Continue run') + ' '}
+                  {stepKey}
+                </DialogTitle>
               </DialogHeader>
               <DialogBody>
                 <WorkflowTimeTravelForm
@@ -223,7 +234,7 @@ export const WorkflowStepActionBar = ({
                   stepKey={stepKey}
                   closeModal={closeDialog}
                   isContinueRun
-                  buttonText="Continue run"
+                  buttonText={studioT('Continue run')}
                   inputData={stepPayload?.input}
                 />
               </DialogBody>
@@ -236,7 +247,9 @@ export const WorkflowStepActionBar = ({
         <Dialog {...dialogProps('resumeData')}>
           <DialogContent size="xl">
             <DialogHeader>
-              <DialogTitle>{stepName} resume data</DialogTitle>
+              <DialogTitle>
+                {stepName} {' ' + studioT('resume data')}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
               <WorkflowCodeContent data={resumeData} />
@@ -249,7 +262,9 @@ export const WorkflowStepActionBar = ({
         <Dialog {...dialogProps('error')}>
           <DialogContent size="xl">
             <DialogHeader>
-              <DialogTitle>{stepName} error</DialogTitle>
+              <DialogTitle>
+                {stepName} {' ' + studioT('error')}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
               <WorkflowCodeContent data={error} />
@@ -262,7 +277,9 @@ export const WorkflowStepActionBar = ({
         <Dialog {...dialogProps('tripwire')}>
           <DialogContent size="xl">
             <DialogHeader>
-              <DialogTitle>{stepName} tripwire</DialogTitle>
+              <DialogTitle>
+                {stepName} {' ' + studioT('tripwire')}
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
               <WorkflowCodeContent

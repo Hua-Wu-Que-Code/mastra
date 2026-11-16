@@ -1,9 +1,10 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
 import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
-
 import { IconGlobe } from '@mastra/playground-ui/icons/central/IconGlobe';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useVisibilityChange } from '../../hooks/use-visibility-change-skill';
 import { DeleteSkillMenuItem } from './delete-skill-action';
@@ -28,13 +29,19 @@ export function SkillBuilderMobileMenu({
   skillName = '',
   disabled = false,
 }: SkillBuilderMobileMenuProps) {
+  useLocale();
   if (!showSetVisibility && !showDelete) return null;
 
   return (
     <div className="lg:hidden" data-testid="skill-builder-mobile-menu">
       <DropdownMenu>
         <DropdownMenu.Trigger asChild>
-          <Button size="icon-sm" variant="ghost" tooltip="More actions" data-testid="skill-builder-mobile-menu-trigger">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            tooltip={studioT('More actions')}
+            data-testid="skill-builder-mobile-menu-trigger"
+          >
             <IconDotGrid1x3Vertical />
           </Button>
         </DropdownMenu.Trigger>
@@ -54,6 +61,7 @@ interface VisibilityMenuItemProps {
 }
 
 function VisibilityMenuItem({ skillId, disabled }: VisibilityMenuItemProps) {
+  useLocale();
   const formMethods = useFormContext<SkillEditFormValues>();
   const value = useWatch({ control: formMethods.control, name: 'visibility' }) ?? 'private';
   const { requestChange, dialog } = useVisibilityChange(skillId);
@@ -70,7 +78,7 @@ function VisibilityMenuItem({ skillId, disabled }: VisibilityMenuItemProps) {
           }}
         >
           <IconGlobe />
-          <span>Add to library</span>
+          <span>{studioT('Add to library')}</span>
         </DropdownMenu.Item>
       ) : (
         <DropdownMenu.Item
@@ -82,7 +90,7 @@ function VisibilityMenuItem({ skillId, disabled }: VisibilityMenuItemProps) {
           }}
         >
           <IconLock />
-          <span>Remove from library</span>
+          <span>{studioT('Remove from library')}</span>
         </DropdownMenu.Item>
       )}
       {dialog}

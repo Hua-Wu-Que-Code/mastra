@@ -1,6 +1,8 @@
 import { ClearFiltersButton } from '@mastra/playground-ui/components/ClearFiltersButton';
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 
 type TemplatesToolsProps = {
@@ -30,6 +32,7 @@ export function TemplatesTools({
   className,
   isLoading,
 }: TemplatesToolsProps) {
+  useLocale();
   if (isLoading) {
     return (
       <div
@@ -47,15 +50,15 @@ export function TemplatesTools({
   return (
     <div className={cn('sticky top-0 mx-auto flex flex-wrap gap-1.5 bg-background py-5', className)}>
       <SearchInput
-        label="Search templates"
-        placeholder="Search templates"
+        label={studioT('Search templates')}
+        placeholder={studioT('Search templates')}
         size="sm"
         value={searchTerm}
         onValueChange={onSearchChange}
       />
       <Select value={selectedTag} onValueChange={onTagChange}>
-        <SelectTrigger aria-label="Search by tag" size="sm" className="w-auto">
-          <SelectValue placeholder="Select an option" />
+        <SelectTrigger aria-label={studioT('Search by tag')} size="sm" className="w-auto">
+          <SelectValue placeholder={studioT('Select an option')} />
         </SelectTrigger>
         <SelectContent>
           {tagOptions.map(option => (
@@ -66,8 +69,8 @@ export function TemplatesTools({
         </SelectContent>
       </Select>
       <Select value={selectedProvider} onValueChange={onProviderChange}>
-        <SelectTrigger aria-label="Search by provider" size="sm" className="w-auto">
-          <SelectValue placeholder="Select an option" />
+        <SelectTrigger aria-label={studioT('Search by provider')} size="sm" className="w-auto">
+          <SelectValue placeholder={studioT('Select an option')} />
         </SelectTrigger>
         <SelectContent>
           {providerOptions.map(option => (

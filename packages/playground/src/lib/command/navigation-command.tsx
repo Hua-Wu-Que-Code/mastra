@@ -22,9 +22,10 @@ import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconS
 import { IconSidebarSimpleLeftWide } from '@mastra/playground-ui/icons/central/IconSidebarSimpleLeftWide';
 import { McpServerIcon } from '@mastra/playground-ui/icons/McpServerIcon';
 import { ToolsIcon } from '@mastra/playground-ui/icons/ToolsIcon';
-
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgents } from '@mastra/react/hooks/agents';
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useProcessors } from '@mastra/react/hooks/processors';
@@ -103,20 +104,23 @@ const CommandRail = ({
   scopeOptions: ScopeOption[];
   activeScope: CommandScope;
   onScopeChange: (scope: CommandScope) => void;
-}) => (
-  <CommandPaletteRail aria-label="Search categories">
-    {scopeOptions.map(option => (
-      <CommandPaletteScope
-        key={option.id}
-        icon={option.icon}
-        label={option.label}
-        count={option.count}
-        active={activeScope === option.id}
-        onSelect={() => onScopeChange(option.id)}
-      />
-    ))}
-  </CommandPaletteRail>
-);
+}) => {
+  useLocale();
+  return (
+    <CommandPaletteRail aria-label={studioT('Search categories')}>
+      {scopeOptions.map(option => (
+        <CommandPaletteScope
+          key={option.id}
+          icon={option.icon}
+          label={option.label}
+          count={option.count}
+          active={activeScope === option.id}
+          onSelect={() => onScopeChange(option.id)}
+        />
+      ))}
+    </CommandPaletteRail>
+  );
+};
 
 const CommandResults = ({
   sidebar,
@@ -127,6 +131,7 @@ const CommandResults = ({
   activeScope: CommandScope;
   closeCommand: () => void;
 }) => {
+  useLocale();
   if (!sidebar || (activeScope !== 'all' && activeScope !== 'settings')) return null;
 
   return (
@@ -138,8 +143,8 @@ const CommandResults = ({
           closeCommand();
         }}
         icon={<IconSidebarSimpleLeftWide />}
-        title="Toggle sidebar"
-        subtitle="Studio layout"
+        title={studioT('Toggle sidebar')}
+        subtitle={studioT('Studio layout')}
       />
     </CommandGroup>
   );
@@ -151,29 +156,32 @@ const PathSectionResults = ({
 }: {
   sections: NavigationSection[];
   handleSelect: HandleSelect;
-}) => (
-  <>
-    {sections.map(section => (
-      <CommandGroup key={section.key} heading={section.title}>
-        {section.items.map(item => {
-          const Icon = item.Icon;
-          return (
-            <CommandPaletteItem
-              key={item.url}
-              value={getRouteValue(item, section.title)}
-              onSelect={() => handleSelect(item.url)}
-              icon={<Icon />}
-              title={item.name}
-              subtitle="Studio path"
-              path={item.url}
-              badge={getRouteBadge(section.title)}
-            />
-          );
-        })}
-      </CommandGroup>
-    ))}
-  </>
-);
+}) => {
+  useLocale();
+  return (
+    <>
+      {sections.map(section => (
+        <CommandGroup key={section.key} heading={section.title}>
+          {section.items.map(item => {
+            const Icon = item.Icon;
+            return (
+              <CommandPaletteItem
+                key={item.url}
+                value={getRouteValue(item, section.title)}
+                onSelect={() => handleSelect(item.url)}
+                icon={<Icon />}
+                title={item.name}
+                subtitle={studioT('Studio path')}
+                path={item.url}
+                badge={getRouteBadge(section.title)}
+              />
+            );
+          })}
+        </CommandGroup>
+      ))}
+    </>
+  );
+};
 
 const AgentResults = ({
   visible,
@@ -186,6 +194,7 @@ const AgentResults = ({
   paths: NavigationPaths;
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible || entries.length === 0) return null;
 
   return (
@@ -197,7 +206,7 @@ const AgentResults = ({
           onSelect={() => handleSelect(paths.agentLink(id))}
           icon={<AgentIcon />}
           title={agent.name}
-          subtitle="Agent chat"
+          subtitle={studioT('Agent chat')}
           path={paths.agentLink(id)}
           badge="Agent"
         />
@@ -217,6 +226,7 @@ const WorkflowResults = ({
   paths: NavigationPaths;
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible || entries.length === 0) return null;
 
   return (
@@ -228,7 +238,7 @@ const WorkflowResults = ({
           onSelect={() => handleSelect(paths.workflowLink(id))}
           icon={<WorkflowIcon />}
           title={workflow.name}
-          subtitle="Workflow graph"
+          subtitle={studioT('Workflow graph')}
           path={paths.workflowLink(id)}
           badge="Workflow"
         />
@@ -248,6 +258,7 @@ const ToolResults = ({
   paths: NavigationPaths;
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible || entries.length === 0) return null;
 
   return (
@@ -259,7 +270,7 @@ const ToolResults = ({
           onSelect={() => handleSelect(paths.toolLink(id))}
           icon={<ToolsIcon />}
           title={tool.id}
-          subtitle="Tool definition"
+          subtitle={studioT('Tool definition')}
           path={paths.toolLink(id)}
           badge="Tool"
         />
@@ -279,6 +290,7 @@ const ProcessorResults = ({
   paths: NavigationPaths;
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible || entries.length === 0) return null;
 
   return (
@@ -295,7 +307,7 @@ const ProcessorResults = ({
             onSelect={() => handleSelect(targetPath)}
             icon={<IconChip />}
             title={displayName}
-            subtitle={processor.isWorkflow ? 'Workflow processor' : 'Processor'}
+            subtitle={processor.isWorkflow ? studioT('Workflow processor') : studioT('Processor')}
             path={targetPath}
             badge="Processor"
           />
@@ -316,6 +328,7 @@ const McpServerResults = ({
   paths: NavigationPaths;
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible || entries.length === 0) return null;
 
   return (
@@ -327,7 +340,7 @@ const McpServerResults = ({
           onSelect={() => handleSelect(paths.mcpServerLink(server.id))}
           icon={<McpServerIcon />}
           title={server.name}
-          subtitle="MCP server"
+          subtitle={studioT('MCP server')}
           path={paths.mcpServerLink(server.id)}
           badge="MCP"
         />
@@ -347,6 +360,7 @@ const ObservabilityResults = ({
   workflowEntries: WorkflowEntry[];
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible) return null;
 
   return (
@@ -356,8 +370,8 @@ const ObservabilityResults = ({
           value="observability traces telemetry signals /traces"
           onSelect={() => handleSelect('/traces')}
           icon={<IconEyeOpen />}
-          title="Traces"
-          subtitle="Runtime traces"
+          title={studioT('Traces')}
+          subtitle={studioT('Runtime traces')}
           path="/traces"
           badge="Signal"
         />
@@ -365,8 +379,8 @@ const ObservabilityResults = ({
           value="metrics usage latency performance tokens /metrics"
           onSelect={() => handleSelect('/metrics')}
           icon={<IconGauge />}
-          title="Metrics"
-          subtitle="Runtime metrics"
+          title={studioT('Metrics')}
+          subtitle={studioT('Runtime metrics')}
           path="/metrics"
           badge="Signal"
         />
@@ -374,8 +388,8 @@ const ObservabilityResults = ({
           value="logs events runtime /logs"
           onSelect={() => handleSelect('/logs')}
           icon={<IconEyeOpen />}
-          title="Logs"
-          subtitle="Runtime logs"
+          title={studioT('Logs')}
+          subtitle={studioT('Runtime logs')}
           path="/logs"
           badge="Signal"
         />
@@ -393,7 +407,7 @@ const ObservabilityResults = ({
                 onSelect={() => handleSelect(path)}
                 icon={<IconEyeOpen />}
                 title={agent.name}
-                subtitle="Agent traces"
+                subtitle={studioT('Agent traces')}
                 path={path}
                 badge="Trace"
               />
@@ -414,7 +428,7 @@ const ObservabilityResults = ({
                 onSelect={() => handleSelect(path)}
                 icon={<IconEyeOpen />}
                 title={workflow.name}
-                subtitle="Workflow traces"
+                subtitle={studioT('Workflow traces')}
                 path={path}
                 badge="Trace"
               />
@@ -437,6 +451,7 @@ const EvaluationResults = ({
   paths: NavigationPaths;
   handleSelect: HandleSelect;
 }) => {
+  useLocale();
   if (!visible || entries.length === 0) return null;
 
   return (
@@ -450,7 +465,7 @@ const EvaluationResults = ({
             onSelect={() => handleSelect(paths.scorerLink(id))}
             icon={<IconGauge />}
             title={name}
-            subtitle="Evaluation scorer"
+            subtitle={studioT('Evaluation scorer')}
             path={paths.scorerLink(id)}
             badge="Scorer"
           />
@@ -461,6 +476,7 @@ const EvaluationResults = ({
 };
 
 export const NavigationCommand = () => {
+  const studioLocale = useLocale();
   const { open, setOpen } = useNavigationCommand();
   const { navigate, paths } = useLinkComponent();
   const { isMastraPlatform } = useMastraPlatform();
@@ -530,8 +546,8 @@ export const NavigationCommand = () => {
     ];
 
     if (studioItems.length === 0) return sections;
-    return [...sections, { key: 'studio', title: 'Studio', items: studioItems }];
-  }, [filterNavItem, isMastraPlatform]);
+    return [...sections, { key: 'studio', title: studioT('Studio'), items: studioItems }];
+  }, [filterNavItem, isMastraPlatform, studioLocale]);
 
   const pathCount = navigationSections.reduce((count, section) => count + section.items.length, 0);
   const toolingCount = toolEntries.length + processorEntries.length + mcpServers.length;
@@ -542,14 +558,14 @@ export const NavigationCommand = () => {
     pathCount + agentEntries.length + workflowEntries.length + toolingCount + evaluationCount + observabilityCount;
 
   const scopeOptions: ScopeOption[] = [
-    { id: 'all', label: 'All', icon: <IconMagnifyingGlass />, count: allCount },
-    { id: 'paths', label: 'Paths', icon: <IconDirection1 />, count: pathCount },
-    { id: 'agents', label: 'Agents', icon: <AgentIcon />, count: agentEntries.length },
-    { id: 'workflows', label: 'Workflows', icon: <WorkflowIcon />, count: workflowEntries.length },
-    { id: 'tooling', label: 'Tooling', icon: <IconLayersThree />, count: toolingCount },
-    { id: 'evaluation', label: 'Evaluation', icon: <IconGauge />, count: evaluationCount },
-    { id: 'observability', label: 'Intelligence', icon: <IconEyeOpen />, count: observabilityCount },
-    { id: 'settings', label: 'Studio', icon: <IconSettingsSliderHor />, count: settingsCount },
+    { id: 'all', label: studioT('All'), icon: <IconMagnifyingGlass />, count: allCount },
+    { id: 'paths', label: studioT('Paths'), icon: <IconDirection1 />, count: pathCount },
+    { id: 'agents', label: studioT('Agents'), icon: <AgentIcon />, count: agentEntries.length },
+    { id: 'workflows', label: studioT('Workflows'), icon: <WorkflowIcon />, count: workflowEntries.length },
+    { id: 'tooling', label: studioT('Tooling'), icon: <IconLayersThree />, count: toolingCount },
+    { id: 'evaluation', label: studioT('Evaluation'), icon: <IconGauge />, count: evaluationCount },
+    { id: 'observability', label: studioT('Intelligence'), icon: <IconEyeOpen />, count: observabilityCount },
+    { id: 'settings', label: studioT('Studio'), icon: <IconSettingsSliderHor />, count: settingsCount },
   ];
 
   const showPaths = activeScope === 'all' || activeScope === 'paths';
@@ -582,14 +598,17 @@ export const NavigationCommand = () => {
     <CommandPaletteDialog
       open={open}
       onOpenChange={updateOpen}
-      title="Mastra Studio Search"
-      description="Search Studio routes and runtime entities"
+      title={studioT('Mastra Studio Search')}
+      description={studioT('Search Studio routes and runtime entities')}
     >
-      <CommandPaletteInput placeholder="Search Studio, agents, workflows, tools, paths" />
+      <CommandPaletteInput placeholder={studioT('Search Studio, agents, workflows, tools, paths')} />
       <CommandPaletteBody>
         <CommandRail scopeOptions={scopeOptions} activeScope={activeScope} onScopeChange={setActiveScope} />
-        <CommandPaletteResults aria-label="Search results" footer={<CommandPaletteFooter label="Studio search" />}>
-          <CommandEmpty>No matching results.</CommandEmpty>
+        <CommandPaletteResults
+          aria-label={studioT('Search results')}
+          footer={<CommandPaletteFooter label={studioT('Studio search')} />}
+        >
+          <CommandEmpty>{studioT('No matching results.')}</CommandEmpty>
           <CommandResults sidebar={sidebar} activeScope={activeScope} closeCommand={closeCommand} />
           <PathSectionResults sections={visiblePathSections} handleSelect={handleSelect} />
           <AgentResults visible={showAgents} entries={agentEntries} paths={paths} handleSelect={handleSelect} />

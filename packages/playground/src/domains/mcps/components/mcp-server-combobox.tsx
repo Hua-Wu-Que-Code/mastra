@@ -1,6 +1,8 @@
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useEffect } from 'react';
@@ -24,9 +26,9 @@ export interface MCPServerComboboxProps {
 export function MCPServerCombobox({
   value,
   onValueChange,
-  placeholder = 'Select an MCP server',
-  searchPlaceholder = 'Search MCP servers',
-  emptyText = 'No MCP servers found.',
+  placeholder = studioT('Select an MCP server'),
+  searchPlaceholder = studioT('Search MCP servers'),
+  emptyText = studioT('No MCP servers found.'),
   className,
   disabled = false,
   variant,
@@ -36,15 +38,16 @@ export function MCPServerCombobox({
   align,
   container,
 }: MCPServerComboboxProps) {
+  const studioLocale = useLocale();
   const { data: mcpServers = [], isLoading, isError, error } = useMCPServers();
   const { navigate, paths } = useLinkComponent();
 
   useEffect(() => {
     if (isError) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load MCP servers';
-      toast.error(`Error loading MCP servers: ${errorMessage}`);
+      toast.error(studioT('Error loading MCP servers: {value0}', { value0: errorMessage }));
     }
-  }, [isError, error]);
+  }, [isError, error, studioLocale]);
 
   const mcpServerOptions = mcpServers.map(server => ({
     label: server.name,
@@ -64,7 +67,7 @@ export function MCPServerCombobox({
       options={mcpServerOptions}
       value={value}
       onValueChange={handleValueChange}
-      placeholder={isLoading ? 'Loading MCP servers...' : placeholder}
+      placeholder={isLoading ? studioT('Loading MCP servers...') : placeholder}
       searchPlaceholder={searchPlaceholder}
       emptyText={emptyText}
       className={className}

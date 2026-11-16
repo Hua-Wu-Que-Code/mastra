@@ -30,6 +30,7 @@ import { Form } from '@/ds/components/Form';
 import { Txt } from '@/ds/components/Txt';
 import { IconColumns3 } from '@/ds/icons/central/IconColumns3';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const EMPTY_KEYS: readonly string[] = [];
 
@@ -84,6 +85,7 @@ export function TraceColumnsMenu({
   onReset,
   disabled,
 }: TraceColumnsMenuProps) {
+  useLocale();
   const withMetadata = catalog.metadata && withQueryTrace;
   const [isMetadataDialogOpen, setIsMetadataDialogOpen] = useState(false);
   const [metadataKey, setMetadataKey] = useState('');
@@ -122,11 +124,11 @@ export function TraceColumnsMenu({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenu.Trigger disabled={disabled} size="icon-sm" tooltip="Columns">
+        <DropdownMenu.Trigger disabled={disabled} size="icon-sm" tooltip={studioT('Columns')}>
           <IconColumns3 aria-hidden />
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="start" className="min-w-56">
-          <DropdownMenu.Label>Standard columns</DropdownMenu.Label>
+          <DropdownMenu.Label>{studioT('Standard columns')}</DropdownMenu.Label>
           {catalog.standardColumns.map(column => (
             <DropdownMenu.CheckboxItem
               key={column}
@@ -140,7 +142,7 @@ export function TraceColumnsMenu({
           {catalog.usage && (
             <>
               <DropdownMenu.Separator />
-              <DropdownMenu.Label>Usage columns</DropdownMenu.Label>
+              <DropdownMenu.Label>{studioT('Usage columns')}</DropdownMenu.Label>
               {TRACE_USAGE_COLUMNS.map(column => (
                 <DropdownMenu.CheckboxItem
                   key={column}
@@ -160,7 +162,7 @@ export function TraceColumnsMenu({
           )}
 
           <DropdownMenu.Separator />
-          <DropdownMenu.Label>Custom columns</DropdownMenu.Label>
+          <DropdownMenu.Label>{studioT('Custom columns')}</DropdownMenu.Label>
           {TRACE_CUSTOM_COLUMN_FIELDS.map(field => {
             const isVisible = preferences.customColumns.includes(field);
             return (
@@ -177,7 +179,7 @@ export function TraceColumnsMenu({
           {catalog.metadata && (withQueryTrace || preferences.metadataKeys.length > 0) && (
             <>
               <DropdownMenu.Separator />
-              <DropdownMenu.Label>Metadata columns</DropdownMenu.Label>
+              <DropdownMenu.Label>{studioT('Metadata columns')}</DropdownMenu.Label>
               {preferences.metadataKeys.map(key => (
                 <DropdownMenu.CheckboxItem
                   key={key}
@@ -191,14 +193,14 @@ export function TraceColumnsMenu({
               {withMetadata && (
                 <DropdownMenu.Item onSelect={() => setIsMetadataDialogOpen(true)}>
                   <IconPlusMedium aria-hidden />
-                  Add metadata column
+                  {studioT('Add metadata column')}
                 </DropdownMenu.Item>
               )}
             </>
           )}
 
           <DropdownMenu.Separator />
-          <DropdownMenu.Item onSelect={onReset}>Reset to defaults</DropdownMenu.Item>
+          <DropdownMenu.Item onSelect={onReset}>{studioT('Reset to defaults')}</DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu>
 
@@ -207,15 +209,16 @@ export function TraceColumnsMenu({
           <DialogContent>
             <Form onSubmit={handleAddMetadata} className="gap-0">
               <DialogHeader>
-                <DialogTitle>Add metadata column</DialogTitle>
+                <DialogTitle>{studioT('Add metadata column')}</DialogTitle>
                 <DialogDescription>
-                  Pick a top-level trace metadata key observed in the current time range, or type one. Only the key is
-                  saved, never its values.
+                  {studioT(
+                    'Pick a top-level trace metadata key observed in the current time range, or type one. Only the key is saved, never its values.',
+                  )}
                 </DialogDescription>
               </DialogHeader>
               <DialogBody>
                 <Field invalid={Boolean(metadataError)}>
-                  <FieldLabel>Metadata key</FieldLabel>
+                  <FieldLabel>{studioT('Metadata key')}</FieldLabel>
                   <Combobox
                     options={metadataKeyOptions}
                     value={metadataKey}
@@ -224,16 +227,16 @@ export function TraceColumnsMenu({
                       setMetadataError(undefined);
                     }}
                     allowCustomValue
-                    placeholder="Select a metadata key"
-                    searchPlaceholder="Search metadata keys"
-                    emptyText="No metadata keys observed. Type one to add it."
+                    placeholder={studioT('Select a metadata key')}
+                    searchPlaceholder={studioT('Search metadata keys')}
+                    emptyText={studioT('No metadata keys observed. Type one to add it.')}
                   />
                   <FieldError>{metadataError}</FieldError>
                 </Field>
               </DialogBody>
               <DialogFooter>
-                <DialogCancel>Cancel</DialogCancel>
-                <DialogAction type="submit">Add column</DialogAction>
+                <DialogCancel>{studioT('Cancel')}</DialogCancel>
+                <DialogAction type="submit">{studioT('Add column')}</DialogAction>
               </DialogFooter>
             </Form>
           </DialogContent>

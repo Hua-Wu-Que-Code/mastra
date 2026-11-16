@@ -17,6 +17,8 @@ import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
 import { focusRing } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { truncateString } from '@/utils/truncate-string';
 
@@ -71,6 +73,7 @@ function TreeToggleCell({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  useLocale();
   const hasToggle = row.kind === 'workflow' && row.nestedIds.length > 0;
   const workflowName = row.kind === 'workflow' ? row.workflow.name : row.stepId;
 
@@ -80,7 +83,10 @@ function TreeToggleCell({
         <button
           type="button"
           aria-expanded={isExpanded}
-          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} nested workflows of ${workflowName}`}
+          aria-label={studioT('{value0} nested workflows of {value1}', {
+            value0: isExpanded ? 'Collapse' : 'Expand',
+            value1: workflowName,
+          })}
           className={cn(
             quietTextHover,
             "relative grid size-5 shrink-0 place-items-center before:absolute before:-inset-1.5 before:content-['']",
@@ -138,6 +144,7 @@ function WorkflowRow({
   runCount: { running?: number; suspended?: number } | undefined;
   rowProps: ReturnType<ReturnType<typeof useDataListKeyboard>['getRowProps']>;
 }) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
   const linkRef = useRef<HTMLAnchorElement>(null);
   const { workflow: wf, nestedIds } = row;
@@ -164,8 +171,8 @@ function WorkflowRow({
             {row.depth > 0 ? <TreeConnector guides={row.guides} isLastChild={row.isLastChild} /> : null}
             <span className="truncate">{name}</span>
             {wf.origin === 'dynamic' ? (
-              <Badge size="xs" variant="blue" title="Registered via the dynamic-workflows API">
-                Dynamic
+              <Badge size="xs" variant="blue" title={studioT('Registered via the dynamic-workflows API')}>
+                {studioT('Dynamic')}
               </Badge>
             ) : null}
             {hasNested ? (
@@ -173,7 +180,7 @@ function WorkflowRow({
                 as="span"
                 variant="body-sm"
                 tone="muted"
-                title={`Nested workflows: ${nestedIds.join(', ')}`}
+                title={studioT('Nested workflows: {value0}', { value0: nestedIds.join(', ') })}
                 className="inline-flex shrink-0 items-center gap-1"
               >
                 <WorkflowIcon aria-hidden className="size-icon-sm" />
@@ -187,7 +194,10 @@ function WorkflowRow({
           {runningCount > 0 ? (
             <span
               className="inline-flex items-center gap-1.5 text-info-indicator"
-              aria-label={`${runningCount} run${runningCount === 1 ? '' : 's'} in progress`}
+              aria-label={studioT('{value0} run{value1} in progress', {
+                value0: runningCount,
+                value1: runningCount === 1 ? '' : 's',
+              })}
             >
               <span aria-hidden className="size-2 rounded-full bg-info-indicator motion-safe:animate-pulse" />
               {runningCount}
@@ -200,7 +210,10 @@ function WorkflowRow({
           {suspendedCount > 0 ? (
             <span
               className="inline-flex items-center gap-1.5 text-warning-foreground"
-              aria-label={`${suspendedCount} run${suspendedCount === 1 ? '' : 's'} awaiting input`}
+              aria-label={studioT('{value0} run{value1} awaiting input', {
+                value0: suspendedCount,
+                value1: suspendedCount === 1 ? '' : 's',
+              })}
             >
               <IconPause aria-hidden className="size-icon-sm" />
               {suspendedCount}
@@ -223,6 +236,7 @@ export function WorkflowsList({
   onSortChange,
   requestContext,
 }: WorkflowsListProps) {
+  useLocale();
   const [expandedPaths, setExpandedPaths] = useState<ReadonlySet<string>>(new Set());
   const runCounts = useWorkflowsRunCounts({ requestContext });
 
@@ -281,24 +295,24 @@ export function WorkflowsList({
     <DataList columns={GRID_COLUMNS} fit="container" scrollRef={containerRef}>
       <DataList.Top>
         <DataList.TopCell>
-          <span className="sr-only">Expand</span>
+          <span className="sr-only">{studioT('Expand')}</span>
         </DataList.TopCell>
         <SortHeader sortKey="name" sort={sort} onSortChange={onSortChange}>
-          Name
+          {studioT('Name')}
         </SortHeader>
-        <DataList.TopCell>Description</DataList.TopCell>
+        <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
         <SortHeader sortKey="running" sort={sort} onSortChange={onSortChange}>
-          Running
+          {studioT('Running')}
         </SortHeader>
         <SortHeader sortKey="suspended" sort={sort} onSortChange={onSortChange}>
-          Pending input
+          {studioT('Pending input')}
         </SortHeader>
         <SortHeader sortKey="steps" sort={sort} onSortChange={onSortChange}>
-          Number of steps
+          {studioT('Number of steps')}
         </SortHeader>
       </DataList.Top>
 
-      {rows.length === 0 && search ? <DataList.NoMatch message="No Workflows match your search" /> : null}
+      {rows.length === 0 && search ? <DataList.NoMatch message={studioT('No Workflows match your search')} /> : null}
 
       {rows.map(row => {
         const isExpanded = expandedPaths.has(row.pathKey);
@@ -321,11 +335,12 @@ export function WorkflowsList({
                         tabIndex={0}
                         className={cn('shrink-0 rounded-sm', focusRing)}
                       >
-                        not registered
+                        {studioT('not registered')}
                       </TooltipTrigger>
                       <TooltipContent className="max-w-72">
-                        Runs as a step of its parent workflow. Add it to the workflows of your Mastra instance to open,
-                        run, and inspect it on its own page.
+                        {studioT(
+                          'Runs as a step of its parent workflow. Add it to the workflows of your Mastra instance to open, run, and inspect it on its own page.',
+                        )}
                       </TooltipContent>
                     </Tooltip>
                   </span>

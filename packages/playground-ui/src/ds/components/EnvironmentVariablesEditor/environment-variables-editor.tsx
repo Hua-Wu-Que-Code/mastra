@@ -16,16 +16,18 @@ import { EnvironmentVariablesEditorUploadError } from './environment-variables-e
 import type { EnvironmentVariablesEditorProps } from './environment-variables-editor.types';
 import type { EnvironmentVariableEntry } from '@/lib/env-file';
 import { DUPLICATE_ENVIRONMENT_VARIABLE_MESSAGE } from '@/lib/env-file';
+
+import { t as studioT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const renderEnvironmentVariablesEditor = <TRow extends EnvironmentVariableEntry = EnvironmentVariableEntry>({
   className,
   children,
-  addLabel = 'Add variable',
-  keyLabel = 'Key',
-  valueLabel = 'Value',
-  keyPlaceholder = 'e.g: OPEN_AI_KEY',
-  valuePlaceholder = 'e.g: sk-xxxxxxxx',
+  addLabel = studioT('Add variable'),
+  keyLabel = studioT('Key'),
+  valueLabel = studioT('Value'),
+  keyPlaceholder = studioT('e.g: OPEN_AI_KEY'),
+  valuePlaceholder = studioT('e.g: sk-xxxxxxxx'),
   duplicateKeyMessage = DUPLICATE_ENVIRONMENT_VARIABLE_MESSAGE,
   rowErrors,
   error,

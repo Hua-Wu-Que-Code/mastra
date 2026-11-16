@@ -32,6 +32,10 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/ds/components
 import { Txt } from '@/ds/components/Txt';
 import { SettingsContainer } from '@/ds/new/settings';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 import { toast } from '@/utils/toast';
 
@@ -96,18 +100,32 @@ type WizardStep = 1 | 2 | 3;
 
 /** Only steps whose fields don't describe themselves carry a description. */
 const STEPS: Record<WizardStep, { title: string; description?: ReactNode; optional?: boolean }> = {
-  1: { title: 'Input and ground truth' },
+  1: {
+    get title() {
+      return studioT('Input and ground truth');
+    },
+  },
   2: {
-    title: 'Tool mocks',
+    get title() {
+      return studioT('Tool mocks');
+    },
     optional: true,
-    description:
-      'Return fixed results instead of running the real tools. When the target calls a tool listed here with the same args, it gets your output back. Leave empty to run tools for real.',
+    get description() {
+      return studioT(
+        'Return fixed results instead of running the real tools. When the target calls a tool listed here with the same args, it gets your output back. Leave empty to run tools for real.',
+      );
+    },
   },
   3: {
-    title: 'Context and trajectory',
+    get title() {
+      return studioT('Context and trajectory');
+    },
     optional: true,
-    description:
-      'Pass values to the run, or check the steps the target takes. Leave both off to add the item without them.',
+    get description() {
+      return studioT(
+        'Pass values to the run, or check the steps the target takes. Leave both off to add the item without them.',
+      );
+    },
   },
 };
 
@@ -158,13 +176,14 @@ export function AddDatasetItemDialog({ open, onOpenChange, ...props }: AddDatase
 }
 
 function WizardHeader({ step }: { step: WizardStep }) {
+  useLocale();
   const { title, description, optional } = STEPS[step];
 
   return (
     <DialogHeader key={step} className={stepTransition}>
       <div className="flex min-w-0 items-center gap-2">
         <DialogTitle>{title}</DialogTitle>
-        {optional && <Badge size="sm">Optional</Badge>}
+        {optional && <Badge size="sm">{studioT('Optional')}</Badge>}
       </div>
       {description && <DialogDescription>{description}</DialogDescription>}
     </DialogHeader>
@@ -172,9 +191,13 @@ function WizardHeader({ step }: { step: WizardStep }) {
 }
 
 function StepProgress({ step }: { step: WizardStep }) {
+  useLocale();
   return (
     <div className="mr-auto flex items-center gap-2">
-      <ol className="flex gap-1" aria-label={`Step ${step} of ${STEP_COUNT}`}>
+      <ol
+        className="flex gap-1"
+        aria-label={studioT('Step {value0} of {value1}', { value0: step, value1: STEP_COUNT })}
+      >
         {Object.keys(STEPS).map((key, index) => (
           <li
             key={key}
@@ -184,7 +207,7 @@ function StepProgress({ step }: { step: WizardStep }) {
         ))}
       </ol>
       <Txt as="span" variant="caption" tone="muted" aria-hidden="true">
-        Step {step} of {STEP_COUNT}
+        <Trans id="Step {part0} of {part1}" values={{ part0: step, part1: STEP_COUNT }} />
       </Txt>
     </div>
   );
@@ -203,6 +226,7 @@ function AddDatasetItemForm({
   addItem,
   ...initialValues
 }: AddDatasetItemFormProps) {
+  useLocale();
   const [step, setStep] = useState<WizardStep>(1);
   const [draft, setDraft] = useState(() => initialDraft(initialValues));
   const [formError, setFormError] = useState<AddItemError>();
@@ -254,11 +278,11 @@ function AddDatasetItemForm({
       if (pickedDataset) {
         // Opens the dataset with the new item's drawer; apps without that route return ''.
         const itemHref = paths.datasetItemLink(pickedDataset.id, item.id);
-        toast.success(`Added to ${pickedDataset.name}`, {
-          action: itemHref ? { label: 'Go to dataset', onClick: () => navigate(itemHref) } : undefined,
+        toast.success(studioT('Added to {value0}', { value0: pickedDataset.name }), {
+          action: itemHref ? { label: studioT('Go to dataset'), onClick: () => navigate(itemHref) } : undefined,
         });
       } else {
-        toast.success('Item added successfully');
+        toast.success(studioT('Item added successfully'));
       }
       onOpenChange(false);
       onSuccess?.();
@@ -269,7 +293,9 @@ function AddDatasetItemForm({
         if (isAddItemField(fieldErrors.field)) setStep(STEP_OF_FIELD[fieldErrors.field]);
         return;
       }
-      toast.error(`Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to add item: {value0}', { value0: error instanceof Error ? error.message : 'Unknown error' }),
+      );
     }
   };
 
@@ -302,12 +328,14 @@ function AddDatasetItemForm({
 
           <div className="grid items-start gap-5 sm:grid-cols-2">
             <Field invalid={isInvalid('input')}>
-              <FieldLabel required>Input</FieldLabel>
-              <FieldDescription>What the target receives when this item runs. JSON or plain text.</FieldDescription>
+              <FieldLabel required>{studioT('Input')}</FieldLabel>
+              <FieldDescription>
+                {studioT('What the target receives when this item runs. JSON or plain text.')}
+              </FieldDescription>
               <CodeEditor
                 value={draft.input}
                 onChange={editField('input')}
-                aria-label="Input"
+                aria-label={studioT('Input')}
                 showCopyButton={hasContent(draft.input)}
                 showFormatButton={hasContent(draft.input) && isJson(draft.input)}
                 className="h-[220px]"
@@ -316,12 +344,14 @@ function AddDatasetItemForm({
               <DatasetFieldErrors field="input" errors={apiErrorsOf('input')} />
             </Field>
             <Field invalid={isInvalid('groundTruth')}>
-              <FieldLabel>Ground truth</FieldLabel>
-              <FieldDescription>The expected answer scorers compare against. JSON or plain text.</FieldDescription>
+              <FieldLabel>{studioT('Ground truth')}</FieldLabel>
+              <FieldDescription>
+                {studioT('The expected answer scorers compare against. JSON or plain text.')}
+              </FieldDescription>
               <CodeEditor
                 value={draft.groundTruth}
                 onChange={editField('groundTruth')}
-                aria-label="Ground truth"
+                aria-label={studioT('Ground truth')}
                 placeholder={GROUND_TRUTH_PLACEHOLDER}
                 showCopyButton={hasContent(draft.groundTruth)}
                 showFormatButton={hasContent(draft.groundTruth) && isJson(draft.groundTruth)}
@@ -338,7 +368,7 @@ function AddDatasetItemForm({
             <CodeEditor
               value={draft.toolMocks}
               onChange={editField('toolMocks')}
-              aria-label="Tool mocks JSON"
+              aria-label={studioT('Tool mocks JSON')}
               placeholder={TOOL_MOCKS_PLACEHOLDER}
               showCopyButton={hasContent(draft.toolMocks)}
               showFormatButton={hasContent(draft.toolMocks)}
@@ -352,8 +382,8 @@ function AddDatasetItemForm({
         <div hidden={step !== 3} className={stepTransition}>
           <SettingsContainer>
             <CollapsibleSettingsRow
-              label="Request context"
-              description="Values passed to the target when this item runs."
+              label={studioT('Request context')}
+              description={studioT('Values passed to the target when this item runs.')}
               enabled={draft.requestContextEnabled}
               onEnabledChange={requestContextEnabled => update(() => ({ requestContextEnabled }))}
               errorMsg={errorOf('requestContext')}
@@ -361,7 +391,7 @@ function AddDatasetItemForm({
               <CodeEditor
                 value={draft.requestContext}
                 onChange={editField('requestContext')}
-                aria-label="Request context JSON"
+                aria-label={studioT('Request context JSON')}
                 placeholder={requestContextPlaceholder(targetDataset?.requestContextSchema)}
                 showCopyButton={hasContent(draft.requestContext)}
                 showFormatButton={hasContent(draft.requestContext)}
@@ -369,8 +399,8 @@ function AddDatasetItemForm({
               />
             </CollapsibleSettingsRow>
             <CollapsibleSettingsRow
-              label="Expected trajectory"
-              description="The steps the target should take to produce its answer."
+              label={studioT('Expected trajectory')}
+              description={studioT('The steps the target should take to produce its answer.')}
               enabled={draft.trajectoryEnabled}
               onEnabledChange={trajectoryEnabled => update(() => ({ trajectoryEnabled }))}
               errorMsg={errorOf('expectedTrajectory')}
@@ -390,22 +420,22 @@ function AddDatasetItemForm({
       <DialogFooter>
         <StepProgress step={step} />
         {step === 1 ? (
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
         ) : (
           <Button
             variant="ghost"
             disabled={addItem.isPending}
             onClick={() => setStep(current => (current - 1) as WizardStep)}
           >
-            Back
+            {studioT('Back')}
           </Button>
         )}
         {step < 3 ? (
           <DialogAction disabled={!hasDataset} onConfirm={advance}>
-            Next
+            {studioT('Next')}
           </DialogAction>
         ) : (
-          <DialogAction onConfirm={() => void handleSubmit()}>Add item</DialogAction>
+          <DialogAction onConfirm={() => void handleSubmit()}>{studioT('Add item')}</DialogAction>
         )}
       </DialogFooter>
 

@@ -10,6 +10,8 @@ import { getShortId } from '@/ds/components/Text';
 import { Txt } from '@/ds/components/Txt';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { formatDate } from '@/utils/date-format';
 
@@ -26,6 +28,7 @@ export type TraceScoresTabProps = {
  * mount it with a `key` on the trace/anchor pair so a page index never leaks across traces.
  */
 export function TraceScoresTab({ traceId, spanId, onScoreSelect }: TraceScoresTabProps) {
+  useLocale();
   const [page, setPage] = useState(0);
   const { data: scoresData, isLoading } = useTraceSpanScores({
     traceId,
@@ -45,7 +48,12 @@ export function TraceScoresTab({ traceId, spanId, onScoreSelect }: TraceScoresTa
   const scores = scoresData?.scores ?? [];
 
   if (scores.length === 0) {
-    return <EmptyState titleSlot="No scores yet" descriptionSlot="Score this trace to see results here." />;
+    return (
+      <EmptyState
+        titleSlot={studioT('No scores yet')}
+        descriptionSlot={studioT('Score this trace to see results here.')}
+      />
+    );
   }
 
   return (
@@ -59,6 +67,7 @@ export function TraceScoresTab({ traceId, spanId, onScoreSelect }: TraceScoresTa
 }
 
 function TraceScoreCard({ score, onSelect }: { score: ClientScoreRowData; onSelect: () => void }) {
+  useLocale();
   const createdAt = new Date(score.createdAt);
   const scorerName = String(score.scorer?.name || score.scorer?.id || 'Scorer');
 
@@ -67,7 +76,7 @@ function TraceScoreCard({ score, onSelect }: { score: ClientScoreRowData; onSele
       <button
         type="button"
         onClick={onSelect}
-        aria-label={`Score ${getShortId(score.id)}`}
+        aria-label={studioT('Score {value0}', { value0: getShortId(score.id) })}
         className="grid cursor-pointer gap-1 text-left after:absolute after:inset-0 after:content-['']"
       >
         <MetricsKpiCard.Label>{scorerName}</MetricsKpiCard.Label>
@@ -89,6 +98,7 @@ function TraceScoreCard({ score, onSelect }: { score: ClientScoreRowData; onSele
 }
 
 function TraceScoreReason({ reason }: { reason: string }) {
+  useLocale();
   const [expanded, setExpanded] = useState(false);
   const isLong = reason.length > REASON_PREVIEW_LENGTH;
   const text = isLong && !expanded ? `${reason.slice(0, REASON_PREVIEW_LENGTH).trimEnd()}…` : reason;
@@ -105,7 +115,7 @@ function TraceScoreReason({ reason }: { reason: string }) {
             className={cn(quietTextHover, controlStateColorTransition, 'relative z-10 underline underline-offset-2')}
           >
             <Txt as="span" variant="caption">
-              {expanded ? 'Read less' : 'Read more'}
+              {expanded ? studioT('Read less') : studioT('Read more')}
             </Txt>
           </button>
         </>

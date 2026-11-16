@@ -5,6 +5,8 @@ import { useActivatedSkills } from '@mastra/playground-ui/domains/agents/context
 import { LoadingBadge } from '@mastra/playground-ui/domains/chat/components/loading-badge';
 import { WORKSPACE_TOOLS_PREFIX } from '@mastra/playground-ui/domains/chat/tools/workspace-tool-constants';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useParams } from 'react-router';
 import { AgentMetadataExpandableList } from './agent-metadata-expandable-list';
 import { AgentMetadataList, AgentMetadataListEmpty, AgentMetadataListItem } from './agent-metadata-list';
@@ -18,10 +20,11 @@ export interface AgentMetadataNetworkListProps {
 }
 
 export const AgentMetadataNetworkList = ({ agents }: AgentMetadataNetworkListProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   if (agents.length === 0) {
-    return <AgentMetadataListEmpty>No agents</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No agents')}</AgentMetadataListEmpty>;
   }
 
   return (
@@ -43,12 +46,13 @@ export interface AgentMetadataToolListProps {
 }
 
 export const AgentMetadataToolList = ({ agentId, tools }: AgentMetadataToolListProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   // A tool opens in a drawer over the conversation you're in, so reading it doesn't leave the thread.
   const { threadId } = useParams();
 
   if (tools.length === 0) {
-    return <AgentMetadataListEmpty>No tools</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No tools')}</AgentMetadataListEmpty>;
   }
 
   return (
@@ -73,10 +77,11 @@ export interface AgentMetadataWorkflowListProps {
 }
 
 export const AgentMetadataWorkflowList = ({ workflows }: AgentMetadataWorkflowListProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   if (workflows.length === 0) {
-    return <AgentMetadataListEmpty>No workflows</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No workflows')}</AgentMetadataListEmpty>;
   }
 
   return (
@@ -98,6 +103,7 @@ interface AgentMetadataScorerListProps {
 }
 
 export const AgentMetadataScorerList = ({ entityId, entityType }: AgentMetadataScorerListProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const { data: scorers = {}, isLoading } = useScorers();
 
@@ -117,7 +123,7 @@ export const AgentMetadataScorerList = ({ entityId, entityType }: AgentMetadataS
   }
 
   if (scorerList.length === 0) {
-    return <AgentMetadataListEmpty>No Scorers</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No Scorers')}</AgentMetadataListEmpty>;
   }
 
   return (
@@ -145,11 +151,12 @@ export interface AgentMetadataSkillListProps {
 }
 
 export const AgentMetadataSkillList = ({ skills, agentId, workspaceId }: AgentMetadataSkillListProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
   const { isSkillActivated } = useActivatedSkills();
 
   if (skills.length === 0) {
-    return <AgentMetadataListEmpty>No skills</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No skills')}</AgentMetadataListEmpty>;
   }
 
   return (
@@ -161,7 +168,7 @@ export const AgentMetadataSkillList = ({ skills, agentId, workspaceId }: AgentMe
         const badge = (
           <Badge variant={isActivated ? 'success' : 'neutral'}>
             {skill.name}
-            {isActivated && <span className="sr-only">Active</span>}
+            {isActivated && <span className="sr-only">{studioT('Active')}</span>}
           </Badge>
         );
 
@@ -177,7 +184,7 @@ export const AgentMetadataSkillList = ({ skills, agentId, workspaceId }: AgentMe
                   {badge}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Active</TooltipContent>
+              <TooltipContent>{studioT('Active')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : (
@@ -207,8 +214,9 @@ function formatWorkspaceToolName(toolName: string): string {
 }
 
 export const AgentMetadataWorkspaceToolsList = ({ tools }: AgentMetadataWorkspaceToolsListProps) => {
+  useLocale();
   if (tools.length === 0) {
-    return <AgentMetadataListEmpty>No workspace tools</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No workspace tools')}</AgentMetadataListEmpty>;
   }
 
   return (
@@ -225,8 +233,9 @@ export interface AgentMetadataBrowserToolsListProps {
 }
 
 export const AgentMetadataBrowserToolsList = ({ tools }: AgentMetadataBrowserToolsListProps) => {
+  useLocale();
   if (tools.length === 0) {
-    return <AgentMetadataListEmpty>No browser tools</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No browser tools')}</AgentMetadataListEmpty>;
   }
 
   return <AgentMetadataExpandableList items={tools} getKey={tool => tool} renderItem={tool => <Badge>{tool}</Badge>} />;
@@ -241,10 +250,11 @@ export const AgentMetadataCombinedProcessorList = ({
   inputProcessors,
   outputProcessors,
 }: AgentMetadataCombinedProcessorListProps) => {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   if (inputProcessors.length === 0 && outputProcessors.length === 0) {
-    return <AgentMetadataListEmpty>No processors</AgentMetadataListEmpty>;
+    return <AgentMetadataListEmpty>{studioT('No processors')}</AgentMetadataListEmpty>;
   }
 
   // Use the first processor's ID for the link (they're grouped into a single workflow per type)
@@ -260,7 +270,7 @@ export const AgentMetadataCombinedProcessorList = ({
             data-testid="processor-badge"
             className={metadataLinkClassName}
           >
-            <Badge>input</Badge>
+            <Badge>{studioT('input')}</Badge>
           </Link>
         </AgentMetadataListItem>
       )}
@@ -271,7 +281,7 @@ export const AgentMetadataCombinedProcessorList = ({
             data-testid="processor-badge"
             className={metadataLinkClassName}
           >
-            <Badge>output</Badge>
+            <Badge>{studioT('output')}</Badge>
           </Link>
         </AgentMetadataListItem>
       )}

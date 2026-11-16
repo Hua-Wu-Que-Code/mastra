@@ -3,6 +3,8 @@ import { Button } from './Button';
 import type { ButtonProps } from './Button';
 import { Kbd } from '@/ds/components/Kbd';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { useKeydown } from '@/lib/keyboard';
 import { mergeRefs } from '@/lib/merge-refs';
 
@@ -22,6 +24,7 @@ export interface CreateButtonProps extends Omit<ButtonProps, 'icon' | 'tooltip'>
  */
 export const CreateButton = React.forwardRef<HTMLElement, CreateButtonProps>(
   ({ tooltip, shortcutEnabled = true, disabled, children, ...props }, forwardedRef) => {
+    useLocale();
     const buttonRef = useRef<HTMLElement>(null);
 
     useKeydown(
@@ -37,7 +40,7 @@ export const CreateButton = React.forwardRef<HTMLElement, CreateButtonProps>(
         tooltip={
           <span className="inline-flex items-center gap-1.5">
             {tooltip}
-            <Kbd size="xs">C</Kbd>
+            <Kbd size="xs">{studioT('C')}</Kbd>
           </span>
         }
         {...props}

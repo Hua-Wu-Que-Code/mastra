@@ -2,6 +2,7 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Input } from '@mastra/playground-ui/components/Input';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import {
   SettingsContainer,
   SettingsEmptyRow,
@@ -44,6 +45,7 @@ function matchesConfig(draft: ConnectionDraft, config: StudioConfig) {
  * to the next. Saving changes the stored config, which remounts the form (it's keyed by it) on the saved values.
  */
 export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioConfig }) {
+  useLocale();
   const { setConfig } = useStudioConfig();
   // Rows keep an id so removing one doesn't hand its inputs to the next. A counter, not `crypto.randomUUID`,
   // which is missing when Studio is served over plain http.
@@ -68,7 +70,7 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
         }))
       }
     >
-      Add header
+      {studioT('Add header')}
     </Button>
   );
 
@@ -81,7 +83,7 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
   function save(event: FormEvent) {
     event.preventDefault();
     if (!draft.baseUrl.trim()) {
-      setUrlError('Enter the server URL');
+      setUrlError(studioT('Enter the server URL'));
       return;
     }
     setConfig({
@@ -89,7 +91,7 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
       apiPrefix: draft.apiPrefix.trim() || undefined,
       headers: headersRecord(draft.headers),
     });
-    toast.success('Connection saved');
+    toast.success(studioT('Connection saved'));
   }
 
   function discard() {
@@ -100,7 +102,11 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
   return (
     <form onSubmit={save} onReset={discard} noValidate>
       <SettingsContainer>
-        <SettingsRow label="Mastra instance URL" description="The server this studio talks to." errorMsg={urlError}>
+        <SettingsRow
+          label={studioT('Mastra instance URL')}
+          description={studioT('The server this studio talks to.')}
+          errorMsg={urlError}
+        >
           <Input
             name="url"
             value={draft.baseUrl}
@@ -112,35 +118,37 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
             }}
           />
         </SettingsRow>
-        <SettingsRow label="API prefix" description="Path in front of every API route.">
+        <SettingsRow label={studioT('API prefix')} description={studioT('Path in front of every API route.')}>
           <Input
             name="apiPrefix"
             value={draft.apiPrefix}
-            placeholder="/api (default)"
+            placeholder={studioT('/api (default)')}
             spellCheck={false}
             onChange={event => setDraft(current => ({ ...current, apiPrefix: event.target.value }))}
           />
         </SettingsRow>
         {draft.headers.length === 0 ? (
-          <SettingsEmptyRow action={addHeader}>No request headers</SettingsEmptyRow>
+          <SettingsEmptyRow action={addHeader}>{studioT('No request headers')}</SettingsEmptyRow>
         ) : (
           <SettingsListHeader action={addHeader}>
-            {draft.headers.length === 1 ? '1 request header' : `${draft.headers.length} request headers`}
+            {draft.headers.length === 1
+              ? studioT('1 request header')
+              : studioT('{count} request headers', { count: draft.headers.length })}
           </SettingsListHeader>
         )}
         {draft.headers.map(row => (
           <div key={row.id} className="flex min-w-0 items-center gap-2">
             <Input
-              aria-label="Header name"
+              aria-label={studioT('Header name')}
               value={row.name}
-              placeholder="Authorization"
+              placeholder={studioT('Authorization')}
               spellCheck={false}
               onChange={event => updateHeader(row.id, { name: event.target.value })}
             />
             <Input
-              aria-label={row.name ? `Value of ${row.name}` : 'Header value'}
+              aria-label={row.name ? studioT('Value of {value0}', { value0: row.name }) : studioT('Header value')}
               value={row.value}
-              placeholder="Bearer <token>"
+              placeholder={studioT('Bearer <token>')}
               spellCheck={false}
               onChange={event => updateHeader(row.id, { value: event.target.value })}
             />
@@ -148,8 +156,8 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
               type="button"
               size="icon-md"
               variant="ghost"
-              aria-label={row.name ? `Remove ${row.name}` : 'Remove header'}
-              tooltip="Remove header"
+              aria-label={row.name ? studioT('Remove {value0}', { value0: row.name }) : studioT('Remove header')}
+              tooltip={studioT('Remove header')}
               onClick={() =>
                 setDraft(current => ({ ...current, headers: current.headers.filter(other => other.id !== row.id) }))
               }
@@ -160,13 +168,13 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
         ))}
         {changed ? (
           <div className="flex items-center justify-between gap-3">
-            <span className="text-body-sm text-muted-foreground">Unsaved changes</span>
+            <span className="text-body-sm text-muted-foreground">{studioT('Unsaved changes')}</span>
             <div className="flex items-center gap-2">
               <Button type="reset" size="sm" variant="ghost">
-                Discard
+                {studioT('Discard')}
               </Button>
               <Button type="submit" size="sm" variant="primary">
-                Save changes
+                {studioT('Save changes')}
               </Button>
             </div>
           </div>

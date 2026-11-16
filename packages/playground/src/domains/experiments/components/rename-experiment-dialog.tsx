@@ -12,6 +12,8 @@ import {
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { useState } from 'react';
@@ -27,6 +29,7 @@ export interface RenameExperimentDialogProps {
  * so the form state is seeded from the experiment each time it opens.
  */
 export function RenameExperimentDialog({ experiment, open, onOpenChange }: RenameExperimentDialogProps) {
+  useLocale();
   const [name, setName] = useState(experiment.name ?? '');
   const [description, setDescription] = useState(experiment.description ?? '');
   const { updateExperiment } = useDatasetMutations();
@@ -44,10 +47,14 @@ export function RenameExperimentDialog({ experiment, open, onOpenChange }: Renam
         name: name.trim(),
         description: description.trim(),
       });
-      toast.success('Experiment renamed');
+      toast.success(studioT('Experiment renamed'));
       onOpenChange(false);
     } catch (error) {
-      toast.error(`Failed to rename experiment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to rename experiment: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
@@ -55,34 +62,34 @@ export function RenameExperimentDialog({ experiment, open, onOpenChange }: Renam
     <Dialog open={open} onOpenChange={onOpenChange} pending={updateExperiment.isPending}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename Experiment</DialogTitle>
+          <DialogTitle>{studioT('Rename Experiment')}</DialogTitle>
         </DialogHeader>
         <Form onSubmit={handleSubmit}>
           <DialogBody>
             <Field>
-              <FieldLabel required>Name</FieldLabel>
+              <FieldLabel required>{studioT('Name')}</FieldLabel>
               <Input
                 required
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Enter experiment name"
+                placeholder={studioT('Enter experiment name')}
                 autoFocus
               />
             </Field>
 
             <Field>
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>{studioT('Description')}</FieldLabel>
               <Input
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Enter experiment description (optional)"
+                placeholder={studioT('Enter experiment description (optional)')}
               />
             </Field>
           </DialogBody>
           <DialogFooter>
-            <DialogCancel>Cancel</DialogCancel>
+            <DialogCancel>{studioT('Cancel')}</DialogCancel>
             <DialogAction type="submit" disabled={!canSave}>
-              {updateExperiment.isPending ? 'Saving...' : 'Save'}
+              {updateExperiment.isPending ? studioT('Saving...') : studioT('Save')}
             </DialogAction>
           </DialogFooter>
         </Form>

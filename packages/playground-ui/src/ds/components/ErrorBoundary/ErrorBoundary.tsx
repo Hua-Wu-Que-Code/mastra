@@ -5,6 +5,8 @@ import { IconArrowRotateCounterClockwise } from '@/ds/icons/central/IconArrowRot
 import { IconBug } from '@/ds/icons/central/IconBug';
 import { IconExclamationTriangle } from '@/ds/icons/central/IconExclamationTriangle';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type ErrorBoundaryVariant = 'section' | 'inline';
@@ -132,6 +134,7 @@ function DefaultErrorFallback({
   variant,
   className,
 }: DefaultErrorFallbackProps) {
+  useLocale();
   const stack = errorInfo?.componentStack ?? error.stack ?? '';
   const isInline = variant === 'inline';
 
@@ -166,10 +169,10 @@ function DefaultErrorFallback({
             isInline ? 'text-subheading' : 'text-subheading @md:text-heading @lg:text-title',
           )}
         >
-          {title ?? 'Something went wrong'}
+          {title ?? studioT('Something went wrong')}
         </h3>
         <p className={cn('text-muted-foreground', isInline ? 'text-caption' : 'text-body')}>
-          {description ?? 'An unexpected error occurred while rendering this part of the page.'}
+          {description ?? studioT('An unexpected error occurred while rendering this part of the page.')}
         </p>
         <p
           className={cn(
@@ -186,7 +189,7 @@ function DefaultErrorFallback({
             size={isInline ? 'sm' : 'lg'}
             onClick={reset}
           >
-            Try again
+            {studioT('Try again')}
           </Button>
           <Button
             icon={<IconArrowRotateClockwise />}
@@ -194,7 +197,7 @@ function DefaultErrorFallback({
             size={isInline ? 'sm' : 'lg'}
             onClick={() => window.location.reload()}
           >
-            Reload page
+            {studioT('Reload page')}
           </Button>
           <Button
             icon={<IconBug />}
@@ -202,12 +205,14 @@ function DefaultErrorFallback({
             variant="default"
             size={isInline ? 'sm' : 'lg'}
           >
-            Report issue
+            {studioT('Report issue')}
           </Button>
         </div>
         {stack ? (
           <details className={cn('w-full text-left', isInline ? 'mt-1' : 'mt-2')}>
-            <summary className={cn('cursor-pointer text-caption', quietTextHover)}>Show error details</summary>
+            <summary className={cn('cursor-pointer text-caption', quietTextHover)}>
+              {studioT('Show error details')}
+            </summary>
             <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-card p-3 text-meta break-words whitespace-pre-wrap text-muted-foreground">
               {stack}
             </pre>

@@ -17,6 +17,8 @@ import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconS
 import { IconSquareBehindSquare1 } from '@mastra/playground-ui/icons/central/IconSquareBehindSquare1';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { SkillIcon } from '@mastra/playground-ui/icons/SkillIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -70,6 +72,7 @@ export function SkillEditDialog({
   isAdmin,
   onCopy,
 }: SkillEditDialogProps) {
+  const studioLocale = useLocale();
   const [mode, setMode] = useState<DialogMode>('simple');
   const [isEditing, setIsEditing] = useState(false);
   const [chatSessionKey, setChatSessionKey] = useState(() => nanoid());
@@ -218,7 +221,11 @@ export function SkillEditDialog({
           instructions,
         });
       } catch (error) {
-        toast.error(`Failed to update skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to update skill: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
         return;
       }
       onSkillUpdated?.(result);
@@ -234,7 +241,11 @@ export function SkillEditDialog({
           files: filesToSave,
         });
       } catch (error) {
-        toast.error(`Failed to create skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to create skill: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
         return;
       }
       onSkillCreated?.(result, workspaceId);
@@ -254,6 +265,8 @@ export function SkillEditDialog({
     onSkillCreated,
     onSkillUpdated,
     onClose,
+    ,
+    studioLocale,
   ]);
 
   const isPending = createSkill.isPending || updateSkill.isPending;
@@ -263,7 +276,9 @@ export function SkillEditDialog({
   return (
     <SideDialog
       dialogTitle={dialogTitle}
-      dialogDescription={isExistingSkill ? 'View or edit skill details' : 'Describe what your skill should do'}
+      dialogDescription={
+        isExistingSkill ? studioT('View or edit skill details') : studioT('Describe what your skill should do')
+      }
       isOpen={isOpen}
       onClose={onClose}
       className="h-full"
@@ -274,50 +289,50 @@ export function SkillEditDialog({
           {isViewMode && skill?.visibility === 'private' && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="shrink-0 text-muted-foreground" aria-label="Private skill">
+                <span className="shrink-0 text-muted-foreground" aria-label={studioT('Private skill')}>
                   <Icon size="xs">
                     <IconLock />
                   </Icon>
                 </span>
               </TooltipTrigger>
-              <TooltipContent>Only visible to you</TooltipContent>
+              <TooltipContent>{studioT('Only visible to you')}</TooltipContent>
             </Tooltip>
           )}
         </SideDialog.Heading>
         <div className="mr-6 flex items-center gap-2">
           {isViewMode && isOwner && (
             <Button size="sm" onClick={() => setIsEditing(true)} icon={<IconPencil />}>
-              Edit
+              {studioT('Edit')}
             </Button>
           )}
           {isViewMode && !isOwner && onCopy && skill && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" onClick={() => onCopy(skill)} icon={<IconSquareBehindSquare1 />}>
-                  Copy
+                  {studioT('Copy')}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Make your own private copy you can edit</TooltipContent>
+              <TooltipContent>{studioT('Make your own private copy you can edit')}</TooltipContent>
             </Tooltip>
           )}
           {!isReadOnly && (
             <>
               {authEnabled && (
                 <Select value={visibility} onValueChange={next => setVisibility(next)}>
-                  <SelectTrigger size="sm" aria-label="Visibility" className="w-fit gap-1.5">
-                    <SelectValue placeholder="Visibility" />
+                  <SelectTrigger size="sm" aria-label={studioT('Visibility')} className="w-fit gap-1.5">
+                    <SelectValue placeholder={studioT('Visibility')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="private">
                       <span className="flex items-center gap-2">
                         <IconLock className="size-icon-sm" />
-                        Private
+                        {studioT('Private')}
                       </span>
                     </SelectItem>
                     <SelectItem value="public">
                       <span className="flex items-center gap-2">
                         <IconGlobe className="size-icon-sm" />
-                        Public
+                        {studioT('Public')}
                       </span>
                     </SelectItem>
                   </SelectContent>
@@ -330,7 +345,7 @@ export function SkillEditDialog({
                 onClick={handleSave}
                 disabled={!name.trim() || isPending}
               >
-                {isPending ? 'Saving...' : isExistingSkill ? 'Save' : 'Create'}
+                {isPending ? studioT('Saving...') : isExistingSkill ? studioT('Save') : studioT('Create')}
               </Button>
             </>
           )}
@@ -374,7 +389,7 @@ export function SkillEditDialog({
                 >
                   <IconChevronDownMedium className="size-icon-xs" />
                   <Txt as="span" variant="caption" className="block">
-                    Hide skill details
+                    {studioT('Hide skill details')}
                   </Txt>
                 </button>
 
@@ -383,10 +398,14 @@ export function SkillEditDialog({
                     <IconExclamationTriangle className="mt-0.5 size-icon-md shrink-0" />
                     <Txt as="span" variant="caption">
                       {!workspaceId
-                        ? 'No workspace available. The skill will be saved to the database only.'
+                        ? studioT('No workspace available. The skill will be saved to the database only.')
                         : hasDynamicFilesystem
-                          ? "This workspace resolves its filesystem per request, so skill files can't be written to it. The skill will be saved to the database only."
-                          : 'No workspace filesystem configured. The skill will be saved to the database only.'}
+                          ? studioT(
+                              "This workspace resolves its filesystem per request, so skill files can't be written to it. The skill will be saved to the database only.",
+                            )
+                          : studioT(
+                              'No workspace filesystem configured. The skill will be saved to the database only.',
+                            )}
                     </Txt>
                   </div>
                 )}
@@ -422,7 +441,7 @@ export function SkillEditDialog({
                       >
                         <IconSettingsSliderHor className="size-icon-sm" />
                         <Txt as="span" variant="caption" className="block">
-                          Advanced mode
+                          {studioT('Advanced mode')}
                         </Txt>
                         <IconChevronRightMedium className="size-icon-xs" />
                       </button>
@@ -444,7 +463,7 @@ export function SkillEditDialog({
                       >
                         <IconPencil className="size-icon-sm" />
                         <Txt as="span" variant="caption" className="block">
-                          Simple mode
+                          {studioT('Simple mode')}
                         </Txt>
                         <IconChevronRightMedium className="size-icon-xs" />
                       </button>
@@ -468,7 +487,7 @@ export function SkillEditDialog({
                 >
                   <IconChevronRightMedium className="size-icon-xs" />
                   <Txt as="span" variant="caption" className="block">
-                    {hasFields ? 'Show skill details' : 'or fill in manually'}
+                    {hasFields ? studioT('Show skill details') : studioT('or fill in manually')}
                   </Txt>
                 </button>
               </div>

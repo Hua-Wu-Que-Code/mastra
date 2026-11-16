@@ -1,3 +1,6 @@
+import { t } from '@/lib/i18n/runtime';
+import type { MessageKey } from '@/lib/i18n/runtime';
+
 /** How a line words one kind of tool: while it runs, done alone, and once or many times in a summary. */
 export interface ToolPhrases {
   live: string;
@@ -6,11 +9,19 @@ export interface ToolPhrases {
   many: string;
 }
 
-const phrases = (live: string, done: string, one: string, many = one): ToolPhrases => ({
-  live,
-  done,
-  one,
-  many,
+const phrases = (live: MessageKey, done: MessageKey, one: MessageKey, many = one): ToolPhrases => ({
+  get live() {
+    return t(live);
+  },
+  get done() {
+    return t(done);
+  },
+  get one() {
+    return t(one);
+  },
+  get many() {
+    return t(many);
+  },
 });
 
 const KIND_PHRASES = {
@@ -254,5 +265,15 @@ function isToolKind(label: string): label is ToolKind {
 
 export function toolPhrases(label: string): ToolPhrases {
   if (isToolKind(label)) return KIND_PHRASES[label];
-  return phrases(`Using ${label}`, `Used ${label}`, `used ${label}`);
+  return {
+    live: t('Using {label}', { label }),
+    done: t('Used {label}', { label }),
+    one: t('used {label}', { label }),
+    many: t('used {label}', { label }),
+  };
+}
+
+/** Keep tool-kind dispatch stable and translate only its visible label. */
+export function toolLabel(label: string): string {
+  return isToolKind(label) ? t(label) : label;
 }

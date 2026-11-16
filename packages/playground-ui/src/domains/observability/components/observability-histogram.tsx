@@ -6,6 +6,10 @@ import { formatCount } from '@/domains/metrics/lib/chart-format';
 import { MetricsStackedBarChart } from '@/ds/components/MetricsStackedBarChart';
 import { Txt } from '@/ds/components/Txt';
 import type { DragSelectionRange } from '@/ds/primitives/charts/drag-selection';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 /** A thin strip: about 34px of bars above the time axis, so the list keeps its vertical space. */
@@ -14,7 +18,13 @@ const CHART_HEIGHT = 64;
 const VOLUME_COLOR = 'var(--fill-strong)';
 /** Up to 90 bars share the width; the cap only matters for short custom windows with few bars. */
 const MAX_BAR_SIZE = 40;
-const ERRORS_SERIES = { dataKey: 'errors', label: 'Errors', color: CHART_COLORS.error };
+const ERRORS_SERIES = {
+  dataKey: 'errors',
+  get label() {
+    return studioT('Errors');
+  },
+  color: CHART_COLORS.error,
+};
 
 export type ObservabilityHistogramProps = {
   /** Accessible name of the chart region, e.g. "Traces over time". */
@@ -43,6 +53,7 @@ export function ObservabilityHistogram({
   isUpdating = false,
   onZoom,
 }: ObservabilityHistogramProps) {
+  useLocale();
   const series = useMemo(
     () => [{ dataKey: 'ok', label: resourceLabel, color: VOLUME_COLOR }, ERRORS_SERIES],
     [resourceLabel],
@@ -58,13 +69,16 @@ export function ObservabilityHistogram({
     <section aria-label={label} aria-busy={isLoading || isUpdating} className="shrink-0">
       {!isError && !isLoading && (
         <span className="sr-only">
-          {formatCount(ok + errors)} {resourceLabel.toLowerCase()}, {formatCount(errors)} errors
+          <Trans
+            id="{part0} {part1}, {part2} errors"
+            values={{ part0: formatCount(ok + errors), part1: resourceLabel.toLowerCase(), part2: formatCount(errors) }}
+          />
         </span>
       )}
       {isError ? (
         <div className="flex items-center justify-center" style={{ height: CHART_HEIGHT }}>
           <Txt variant="caption" tone="muted">
-            Couldn't load the chart.
+            {studioT("Couldn't load the chart.")}
           </Txt>
         </div>
       ) : (

@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/ds/components/Card';
 import { Sankey, SankeyChart } from '@/ds/components/SankeyChart';
 import type { SankeyChartColumn, SankeyChartNodeSelection, SankeyChartRecord } from '@/ds/components/SankeyChart';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function FlowCard({
   columns,
@@ -30,6 +31,7 @@ export function FlowCard({
   signalOrder: TraceSignalName[];
   reorderDisabled: boolean;
 }) {
+  useLocale();
   const linkedColumnIds = new Set(columns.map(column => column.id));
   const stageSignalNames = stages.map(stage => stage.signalName).filter(signalName => linkedColumnIds.has(signalName));
   const optimisticSignalNames = signalOrder.filter(signalName => linkedColumnIds.has(signalName));
@@ -45,7 +47,7 @@ export function FlowCard({
 
   return (
     <Card
-      aria-label="Trace signal theme flow"
+      aria-label={studioT('Trace signal theme flow')}
       as="section"
       className="relative min-w-0"
       elevation="raised"
@@ -59,7 +61,7 @@ export function FlowCard({
         aria-hidden="true"
         className="absolute top-0 left-5 -translate-y-1/2 bg-background px-2"
       >
-        SIGNALS
+        {studioT('SIGNALS')}
       </Txt>
       <CardContent className="px-0 pt-4 pb-2 sm:pt-5 sm:pb-3">
         <SortableSignalHeaders
@@ -67,10 +69,10 @@ export function FlowCard({
           reorderDisabled={reorderDisabled}
           onOrderChange={handleHeaderOrderChange}
         />
-        <div aria-label="Themes" role="separator" className="flex items-center gap-2 py-1">
+        <div aria-label={studioT('Themes')} role="separator" className="flex items-center gap-2 py-1">
           <span aria-hidden="true" className="h-px w-5 bg-border" />
           <Txt tone="muted" as="span" variant="meta" className="block">
-            THEMES
+            {studioT('THEMES')}
           </Txt>
           <span aria-hidden="true" className="h-px flex-1 bg-border" />
         </div>

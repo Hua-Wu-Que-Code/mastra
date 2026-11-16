@@ -1,4 +1,6 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMCPServerTool } from '@mastra/react/hooks/mcps';
 import { McpToolPlayground } from './mcp-tool-playground';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
@@ -11,12 +13,19 @@ export interface McpToolDrawerBodyProps {
 }
 
 export function McpToolDrawerBody({ serverId }: McpToolDrawerBodyProps) {
+  useLocale();
   const toolId = useOpenToolId();
   const { canExecute } = usePermissions();
   const { data: tool, isLoading } = useMCPServerTool({ serverId, toolId });
 
   if (isLoading) return <DataPanel.LoadingData />;
-  if (!tool) return <DataPanel.NoData>This server has no tool "{toolId}".</DataPanel.NoData>;
+  if (!tool)
+    return (
+      <DataPanel.NoData>
+        {studioT('This server has no tool "')}
+        {toolId}".
+      </DataPanel.NoData>
+    );
 
   return (
     <ToolDrawerContent

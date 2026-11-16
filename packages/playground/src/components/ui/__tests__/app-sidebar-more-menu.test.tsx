@@ -1,6 +1,8 @@
 import type { ListWorkspacesResponse, McpServerListResponse } from '@mastra/client-js';
+
+import { locale } from '@mastra/playground-ui/lib/i18n';
 import type { AuthCapabilities } from '@mastra/react/hooks/auth';
-import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { noMcpServers, noWorkspaces, oneMcpServer, oneWorkspace } from './fixtures/nav-more';
@@ -50,6 +52,7 @@ beforeEach(() => {
 afterEach(() => {
   server.resetHandlers();
   cleanup();
+  act(() => locale.setLocale('en'));
 });
 
 describe('AppSidebar More menu', () => {
@@ -113,5 +116,28 @@ describe('AppSidebar More menu', () => {
       expect(localStorage.getItem('mastra:nav-recent:/processors')).toBeNull();
       expect(localStorage.getItem('mastra:studio:sidebar-visibility')).toBe('{}');
     });
+  });
+});
+
+describe('when the sidebar is localized for the creator product', () => {
+  it('omits the resources and package version entries', async () => {
+    renderSidebar();
+    await screen.findByRole('link', { name: 'Agents' });
+    expect(screen.queryByRole('link', { name: 'Resources' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Version / })).toBeNull();
+  });
+  it('keeps a pinned link when switching to Chinese', async () => {
+    renderSidebar();
+    await choosePlacement('Tools', 'Always show');
+    act(() => locale.setLocale('zh'));
+    expect(screen.getByRole('link', { name: '工具' }).getAttribute('href')).toBe('/tools');
+    fireEvent.click(screen.getByRole('button', { name: '更多' }));
+    fireEvent.click(await screen.findByRole('menuitem', { name: '自定义侧边栏' }));
+    const dialog = await screen.findByRole('dialog', { name: '自定义侧边栏' });
+    const select = within(dialog).getByRole('combobox', { name: /工具/ });
+    expect(select.textContent).toContain('始终显示');
+    fireEvent.click(select);
+    expect(await screen.findByRole('option', { name: '收进更多菜单' })).toBeTruthy();
+    expect(screen.getByRole('option', { name: '不显示' })).toBeTruthy();
   });
 });

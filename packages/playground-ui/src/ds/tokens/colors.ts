@@ -1,3 +1,5 @@
+import { t as studioT } from '@/lib/i18n';
+
 export const Colors = {
   'chart-blue': 'var(--chart-blue)',
   'chart-blue-deep': 'var(--chart-blue-deep)',
@@ -284,7 +286,9 @@ export const Colors = {
   muted: 'var(--muted)',
   foreground: 'var(--foreground)',
   'muted-foreground': 'var(--muted-foreground)',
-  placeholder: 'var(--placeholder)',
+  get placeholder() {
+    return studioT('var(--placeholder)');
+  },
 
   scrim: 'var(--scrim)',
 

@@ -1,5 +1,7 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconLoadingCircle } from '@mastra/playground-ui/icons/central/IconLoadingCircle';
+import { useLocale } from '@mastra/playground-ui/lib/i18n';
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
   // AgentBrowser tools
@@ -33,6 +35,7 @@ export interface AgentBusyOverlayProps {
  * Mouse moves still show cursor on top of the overlay.
  */
 export function AgentBusyOverlay({ toolName }: AgentBusyOverlayProps) {
+  useLocale();
   const displayName = toolName
     ? (TOOL_DISPLAY_NAMES[toolName] ?? toolName.replace(/^(browser_|stagehand_)/, ''))
     : 'Working';
@@ -42,7 +45,7 @@ export function AgentBusyOverlay({ toolName }: AgentBusyOverlayProps) {
       <div className="flex items-center gap-2 rounded-md bg-surface-panel px-3 py-1.5 shadow-overlay">
         <IconLoadingCircle className="size-icon-sm animate-spin text-muted-foreground" />
         <Txt as="span" variant="column" tone="muted">
-          Agent: {displayName}
+          <Trans id="Agent: {part0}" values={{ part0: displayName }} />
         </Txt>
       </div>
     </div>

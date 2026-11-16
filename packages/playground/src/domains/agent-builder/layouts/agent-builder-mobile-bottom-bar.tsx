@@ -5,6 +5,8 @@ import { IconLibrary } from '@mastra/playground-ui/icons/central/IconLibrary';
 import { IconServer } from '@mastra/playground-ui/icons/central/IconServer';
 import { IconStar } from '@mastra/playground-ui/icons/central/IconStar';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useMemo } from 'react';
@@ -42,6 +44,7 @@ const infrastructureLink: MobileLink = {
 };
 
 export function AgentBuilderMobileBottomBar() {
+  useLocale();
   const { Link } = useLinkComponent();
   const { pathname } = useLocation();
   const features = useBuilderAgentFeatures();
@@ -66,7 +69,7 @@ export function AgentBuilderMobileBottomBar() {
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={studioT('Primary')}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden"
     >
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${links.length}, minmax(0, 1fr))` }}>

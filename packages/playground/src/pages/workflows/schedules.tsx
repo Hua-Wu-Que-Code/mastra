@@ -1,6 +1,8 @@
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useSchedules } from '@mastra/react/hooks/schedules';
 import { useSearchParams } from 'react-router';
@@ -12,6 +14,7 @@ import { schedulesCrumb } from '@/domains/workflows/schedules-crumb';
 const crumbs = [navCrumb('/workflows'), schedulesCrumb];
 
 export default function SchedulesPage() {
+  useLocale();
   const [searchParams] = useSearchParams();
   const workflowId = searchParams.get('workflowId') ?? undefined;
   const { error } = useSchedules(workflowId ? { workflowId } : {});
@@ -19,7 +22,7 @@ export default function SchedulesPage() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Schedules</h1>
+        <h1 className="sr-only">{studioT('Schedules')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -28,7 +31,7 @@ export default function SchedulesPage() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Schedules</h1>
+        <h1 className="sr-only">{studioT('Schedules')}</h1>
         <PermissionDenied variant="fill" resource="schedules" />
       </PageLayout>
     );
@@ -36,7 +39,7 @@ export default function SchedulesPage() {
 
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Schedules</h1>
+      <h1 className="sr-only">{studioT('Schedules')}</h1>
       <div className="h-full">
         <SchedulesPageContent workflowId={workflowId} />
       </div>

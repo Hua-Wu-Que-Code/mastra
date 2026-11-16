@@ -24,12 +24,14 @@ import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/Ico
 import { GithubIcon } from '@mastra/playground-ui/icons/GithubIcon';
 import { SkillIcon } from '@mastra/playground-ui/icons/SkillIcon';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useCallback, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import {
   useBuilderRegistryPreview,
   useInstallBuilderRegistrySkill,
   usePopularBuilderRegistrySkills,
@@ -84,6 +86,7 @@ export function BuilderAddSkillDialog({
   onInstalled,
   onCollision,
 }: BuilderAddSkillDialogProps) {
+  useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<BuilderRegistrySkillSummary | null>(null);
   const [installError, setInstallError] = useState<string | null>(null);
@@ -179,16 +182,22 @@ export function BuilderAddSkillDialog({
     <Dialog open={open} onOpenChange={handleOpenChange} pending={installMutation.isPending}>
       <DialogContent size="xl" className="h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Browse {registryLabel}</DialogTitle>
+          <DialogTitle>
+            {studioT('Browse') + ' '}
+            {registryLabel}
+          </DialogTitle>
           <DialogDescription>
-            Find a public skill from {registryLabel} and import it into your Builder skill library.
+            <Trans
+              id="Find a public skill from {part0} and import it into your Builder skill library."
+              values={{ part0: registryLabel }}
+            />
           </DialogDescription>
         </DialogHeader>
 
         <DialogBody layout="fill">
           <SearchInput
-            label={`Search ${registryLabel}`}
-            placeholder={`Search ${registryLabel}`}
+            label={studioT('Search {value0}', { value0: registryLabel })}
+            placeholder={studioT('Search {value0}', { value0: registryLabel })}
             value={searchQuery}
             onValueChange={handleSearch}
             data-testid="builder-add-skill-search"
@@ -197,7 +206,7 @@ export function BuilderAddSkillDialog({
           <div className="flex min-h-0 flex-1 gap-4">
             <div className="flex min-h-0 w-1/2 flex-col">
               <Txt as="p" variant="eyebrow" tone="muted" className="mb-2">
-                {hasSearchResults ? 'Search results' : 'Popular skills'}
+                {hasSearchResults ? studioT('Search results') : studioT('Popular skills')}
               </Txt>
               <ScrollArea className="flex-1 rounded-lg border border-border">
                 {isLoadingPopular || isSearching ? (
@@ -207,7 +216,7 @@ export function BuilderAddSkillDialog({
                 ) : displaySkills.length === 0 ? (
                   <EmptyState
                     iconSlot={<IconPackage />}
-                    titleSlot={hasSearchResults ? 'No skills found' : 'No skills available'}
+                    titleSlot={hasSearchResults ? studioT('No skills found') : studioT('No skills available')}
                   />
                 ) : (
                   <div className="space-y-1 p-2">
@@ -238,7 +247,7 @@ export function BuilderAddSkillDialog({
                                     className="inline-flex items-center gap-1 rounded bg-info-subtle px-1.5 py-0.5 text-info-subtle-foreground"
                                   >
                                     <IconCheckmark2Medium className="size-icon-xs" />
-                                    Installed
+                                    {studioT('Installed')}
                                   </Txt>
                                 )}
                               </div>
@@ -263,7 +272,7 @@ export function BuilderAddSkillDialog({
 
             <div className="flex min-h-0 w-1/2 flex-col overflow-hidden rounded-lg border border-border">
               {!selectedSkill ? (
-                <EmptyState className="flex-1" iconSlot={<IconPackage />} titleSlot="Select a skill to preview" />
+                <EmptyState className="flex-1" iconSlot={<IconPackage />} titleSlot={studioT('Select a skill to preview')} />
               ) : (
                 <>
                   <div className="border-b border-border bg-card p-4">
@@ -285,7 +294,10 @@ export function BuilderAddSkillDialog({
                           <span className="flex items-center gap-1">
                             <IconArrowInbox className="size-icon-xs" />
                             <Txt as="span" variant="caption" className="block">
-                              {selectedSkill.installs.toLocaleString()} installs
+                              <Trans
+                                id="{part0} installs"
+                                values={{ part0: selectedSkill.installs.toLocaleString() }}
+                              />
                             </Txt>
                           </span>
                         </div>
@@ -296,7 +308,7 @@ export function BuilderAddSkillDialog({
                           target="_blank"
                           rel="noopener noreferrer"
                           className={cn(quietTextHover, controlStateColorTransition)}
-                          title="View on GitHub"
+                          title={studioT('View on GitHub')}
                         >
                           <IconSquareArrowTopRight className="size-icon-md" />
                         </a>
@@ -315,7 +327,7 @@ export function BuilderAddSkillDialog({
                       </div>
                     </ScrollArea>
                   ) : (
-                    <EmptyState className="flex-1" iconSlot={<IconPackage />} titleSlot="Preview unavailable" />
+                    <EmptyState className="flex-1" iconSlot={<IconPackage />} titleSlot={studioT('Preview unavailable')} />
                   )}
                 </>
               )}
@@ -326,13 +338,17 @@ export function BuilderAddSkillDialog({
         </DialogBody>
 
         <DialogFooter>
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
           <DialogAction
             onConfirm={handleInstall}
             disabled={!parsedSource || isSelectedInstalled}
             data-testid="builder-install-skill-button"
           >
-            {installMutation.isPending ? 'Installing...' : isSelectedInstalled ? 'Already installed' : 'Install'}
+            {installMutation.isPending
+              ? studioT('Installing...')
+              : isSelectedInstalled
+                ? studioT('Already installed')
+                : studioT('Install')}
           </DialogAction>
         </DialogFooter>
       </DialogContent>

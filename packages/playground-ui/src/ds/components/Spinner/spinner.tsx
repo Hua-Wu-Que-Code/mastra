@@ -2,6 +2,7 @@ import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
 import type { ComponentPropsWithoutRef } from 'react';
 
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './spinner.css';
@@ -39,10 +40,11 @@ function Spinner({
   size = 'md',
   variant = 'default',
   fill = false,
-  'aria-label': ariaLabel = 'Loading',
+  'aria-label': ariaLabel = studioT('Loading'),
   role = 'status',
   ...props
 }: SpinnerProps) {
+  useLocale();
   const resolvedSize = size ?? 'md';
   const resolvedVariant = variant ?? 'default';
 

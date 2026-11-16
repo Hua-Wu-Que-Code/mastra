@@ -1,5 +1,7 @@
 import { v4 as uuid } from '@lukeed/uuid';
 import type { RuleGroup, RuleGroupDepth1, RuleGroupDepth2 } from '@mastra/core/storage';
+
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { JsonSchema } from '@mastra/playground-ui/utils/json-schema';
 import { z } from 'zod';
 
@@ -181,7 +183,9 @@ const memoryConfigSchema = z
       return true;
     },
     {
-      message: 'Semantic recall requires both vector and embedder to be configured',
+      get message() {
+        return studioT('Semantic recall requires both vector and embedder to be configured');
+      },
       path: ['semanticRecall'],
     },
   );

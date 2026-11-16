@@ -15,17 +15,40 @@ import { FailureRateCard } from './failure-rate-card';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import { MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
 import { MetricsStackedBarChart } from '@/ds/components/MetricsStackedBarChart';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const SERIES = [
-  { dataKey: 'completed', label: 'Completed', color: CHART_COLORS.green },
-  { dataKey: 'failed', label: 'Failed', color: CHART_COLORS.error },
+  {
+    dataKey: 'completed',
+    get label() {
+      return studioT('Completed');
+    },
+    color: CHART_COLORS.green,
+  },
+  {
+    dataKey: 'failed',
+    get label() {
+      return studioT('Failed');
+    },
+    color: CHART_COLORS.error,
+  },
 ];
 
 type View = 'runs' | 'failure';
 
 const VIEWS = [
-  { value: 'runs', label: 'Agent runs' },
-  { value: 'failure', label: 'Failure rate' },
+  {
+    value: 'runs',
+    get label() {
+      return studioT('Agent runs');
+    },
+  },
+  {
+    value: 'failure',
+    get label() {
+      return studioT('Failure rate');
+    },
+  },
 ] as const satisfies readonly { value: View; label: string }[];
 
 /**
@@ -56,13 +79,14 @@ function AgentRunsChart({
   onTimeRangeClick,
   titleMenu,
 }: Pick<AgentRunsCardProps, 'onTimeRangeClick'> & { titleMenu: ChartCardProps<View>['titleMenu'] }) {
+  useLocale();
   const { data = [], isLoading, isError, isPlaceholderData } = useMetricsActivity();
   const { timestamp } = useMetricsFilters();
   const { stepHours } = bucketPlan(timestamp.start, timestamp.end);
   const total = data.reduce((sum, b) => sum + b.completed + b.failed, 0);
 
   const layout = {
-    title: 'Agent runs',
+    title: studioT('Agent runs'),
     titleMenu,
     toolbar: (
       <MetricsCard.Toolbar>

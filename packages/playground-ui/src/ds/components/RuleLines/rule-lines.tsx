@@ -1,12 +1,14 @@
 import type { ComponentProps, ReactNode } from 'react';
-
 import { Button } from '@/ds/components/Button';
 import type { ButtonProps } from '@/ds/components/Button';
+
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/ds/components/Select';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
 import { textStyle } from '@/ds/primitives/text';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // Conditions read as a sentence, one line each: a keyword column ("Where", "and", "or") then the line's pickers.
@@ -48,16 +50,23 @@ export type RuleLineLogicProps = {
 };
 
 /** The keyword that also picks how a group's lines combine: "and" or "or". */
-export function RuleLineLogic({ value, onValueChange, 'aria-label': label = 'Match all or any' }: RuleLineLogicProps) {
+export function RuleLineLogic({
+  value,
+  onValueChange,
+  'aria-label': label = studioT('Match all or any'),
+}: RuleLineLogicProps) {
+  useLocale();
   return (
     <div data-slot="rule-line-logic" className={keywordColumn}>
       <Select value={value} onValueChange={next => next && onValueChange(next)}>
         <SelectTrigger size="sm" variant="ghost" aria-label={label} className="-ml-2 w-fit px-2">
-          <span className={textStyle({ variant: 'caption', tone: 'ink' })}>{value === 'AND' ? 'and' : 'or'}</span>
+          <span className={textStyle({ variant: 'caption', tone: 'ink' })}>
+            {value === 'AND' ? studioT('and') : studioT('or')}
+          </span>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="AND">and</SelectItem>
-          <SelectItem value="OR">or</SelectItem>
+          <SelectItem value="AND">{studioT('and')}</SelectItem>
+          <SelectItem value="OR">{studioT('or')}</SelectItem>
         </SelectContent>
       </Select>
     </div>

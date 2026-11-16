@@ -3,6 +3,8 @@
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasets } from '@mastra/react/hooks/datasets';
 import { useEffect } from 'react';
@@ -26,9 +28,9 @@ export interface DatasetComboboxProps {
 export function DatasetCombobox({
   value,
   onValueChange,
-  placeholder = 'Select a dataset',
-  searchPlaceholder = 'Search datasets',
-  emptyText = 'No datasets found.',
+  placeholder = studioT('Select a dataset'),
+  searchPlaceholder = studioT('Search datasets'),
+  emptyText = studioT('No datasets found.'),
   className,
   disabled = false,
   variant,
@@ -38,15 +40,16 @@ export function DatasetCombobox({
   align,
   container,
 }: DatasetComboboxProps) {
+  const studioLocale = useLocale();
   const { data, isLoading, isError, error } = useDatasets();
   const { navigate, paths } = useLinkComponent();
 
   useEffect(() => {
     if (isError) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load datasets';
-      toast.error(`Error loading datasets: ${errorMessage}`);
+      toast.error(studioT('Error loading datasets: {value0}', { value0: errorMessage }));
     }
-  }, [isError, error]);
+  }, [isError, error, studioLocale]);
 
   const datasets = data?.datasets ?? [];
   const datasetOptions = datasets.map(d => ({
@@ -67,7 +70,7 @@ export function DatasetCombobox({
       options={datasetOptions}
       value={value}
       onValueChange={handleValueChange}
-      placeholder={isLoading ? 'Loading datasets...' : placeholder}
+      placeholder={isLoading ? studioT('Loading datasets...') : placeholder}
       searchPlaceholder={searchPlaceholder}
       emptyText={emptyText}
       className={className}

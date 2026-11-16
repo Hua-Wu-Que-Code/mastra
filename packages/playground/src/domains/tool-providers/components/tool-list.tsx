@@ -4,6 +4,8 @@ import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useProviderTools } from '@mastra/react/hooks/tool-providers';
 import { useEffect, useState } from 'react';
@@ -17,6 +19,7 @@ interface ToolListProps {
 }
 
 export function ToolList({ providerId, toolkit, selectedIds, onToggle }: ToolListProps) {
+  useLocale();
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedCallback((value: string) => {
@@ -39,9 +42,9 @@ export function ToolList({ providerId, toolkit, selectedIds, onToggle }: ToolLis
     <div className="grid h-full grid-rows-[auto_1fr] overflow-hidden">
       <div className="border-b border-border px-3 py-2.5">
         <SearchInput
-          label="Search tools"
+          label={studioT('Search tools')}
           size="sm"
-          placeholder="Search tools"
+          placeholder={studioT('Search tools')}
           value={query}
           onValueChange={value => {
             setQuery(value);
@@ -62,7 +65,7 @@ export function ToolList({ providerId, toolkit, selectedIds, onToggle }: ToolLis
           ) : tools.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <Txt variant="caption" tone="muted">
-                No tools found
+                {studioT('No tools found')}
               </Txt>
             </div>
           ) : (

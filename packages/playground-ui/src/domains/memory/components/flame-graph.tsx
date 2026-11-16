@@ -11,16 +11,15 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
 import { Button } from '../../../ds/components/Button';
 import { Txt } from '../../../ds/components/Txt';
+
 import { overlaySurfaceStyle } from '../../../ds/primitives/raised-surface';
 import type { ExtractedOmMarker } from '../lib/extract-markers';
 import { tToTimestampMs } from '../lib/replay-selection';
 import type { TDomain } from '../lib/timeline';
 import { tToTimestamp } from '../lib/timeline';
 import type { MemoryMessage, OMHistoryRecord } from '../types';
-import {
   getAreaRowYMax,
   isEventPoint,
   toActiveObservationData,
@@ -32,6 +31,8 @@ import {
   toSelectedT,
 } from './flame-graph-data';
 import { IconArrowRotateCounterClockwise } from '@/ds/icons/central/IconArrowRotateCounterClockwise';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate } from '@/utils/date-format';
 
 export interface ZoomRange {
@@ -63,11 +64,12 @@ const OBS_COLOR = 'var(--chart-amber)';
 const REFLECT_COLOR = 'var(--chart-pink)';
 
 function TimeAxis({ domain }: { domain: TDomain }) {
+  useLocale();
   const ticks = [0, 0.25, 0.5, 0.75, 1];
   return (
     <div className="grid grid-cols-[6rem_1fr] items-center">
       <Txt variant="meta" tone="muted" className="flex items-center self-stretch border-r border-border pl-3">
-        Time
+        {studioT('Time')}
       </Txt>
       <div className="flex justify-between px-1 py-1.5">
         {ticks.map(t => (
@@ -91,6 +93,7 @@ export function FlameTooltip({
   domain?: TDomain;
   showValue?: boolean;
 }) {
+  useLocale();
   if (!active || !payload?.length) return null;
   const t = payload[0]?.payload?.t;
   const time =
@@ -103,7 +106,7 @@ export function FlameTooltip({
         {time && (
           <div className="flex items-center justify-between gap-3">
             <Txt as="span" variant="meta" tone="muted">
-              time
+              {studioT('time')}
             </Txt>
             <Txt as="span" variant="meta" font="mono" tone="ink">
               {time}
@@ -320,6 +323,7 @@ function ZoomTrack({
   onZoomRightChange: (ts: number) => void;
   onReset: () => void;
 }) {
+  useLocale();
   const trackRef = useRef<HTMLDivElement>(null);
   const dragging = useRef<'left' | 'right' | null>(null);
 
@@ -364,10 +368,10 @@ function ZoomTrack({
     <div className="grid grid-cols-[6rem_1fr] items-center border-b border-border">
       <div className="flex items-center gap-1 self-stretch border-r border-border pl-3">
         <Txt variant="meta" tone="muted">
-          Zoom
+          {studioT('Zoom')}
         </Txt>
-        <Button variant="ghost" size="icon-sm" aria-label="Reset zoom" onClick={onReset}>
-          <IconArrowRotateCounterClockwise />
+        <Button variant="ghost" size="icon-sm" aria-label={studioT('Reset zoom')} onClick={onReset}>
+          <IconArrowRotateCounterClockwise className="size-3" />
         </Button>
       </div>
       <div
@@ -442,6 +446,7 @@ export function FlameGraph({
   zoomRange,
   onZoomRangeChange,
 }: FlameGraphProps) {
+  useLocale();
   const domain = tDomainProp ?? FALLBACK_DOMAIN;
 
   const handleSelectT = useCallback(
@@ -511,7 +516,7 @@ export function FlameGraph({
   return (
     <div className="flex flex-col pr-2 pb-2 [&_.recharts-surface]:outline-none">
       <CombinedRow
-        label="Messages"
+        label={studioT('Messages')}
         areaData={contextData}
         areaDataKey="pendingMessageTokens"
         eventData={messageData}
@@ -524,7 +529,7 @@ export function FlameGraph({
       />
 
       <CombinedRow
-        label="Observations"
+        label={studioT('Observations')}
         areaData={activeObservationData}
         areaDataKey="observationTokenCount"
         eventData={eventData}
@@ -538,7 +543,7 @@ export function FlameGraph({
 
       {bufferedObservationData.length > 0 && (
         <AreaRow
-          label="Buffered obs"
+          label={studioT('Buffered obs')}
           data={bufferedObservationData}
           dataKey="bufferedObservationTokenCount"
           color={REFLECT_COLOR}
@@ -550,7 +555,13 @@ export function FlameGraph({
       )}
 
       {eventData.length > 0 && (
-        <EventRow label="Events" data={eventData} color={REFLECT_COLOR} domain={domain} zoomDomain={zoomDomain} />
+        <EventRow
+          label={studioT('Events')}
+          data={eventData}
+          color={REFLECT_COLOR}
+          domain={domain}
+          zoomDomain={zoomDomain}
+        />
       )}
 
       <TimeAxis domain={domain} />

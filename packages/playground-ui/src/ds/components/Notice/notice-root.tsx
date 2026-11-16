@@ -8,6 +8,8 @@ import { IconExclamationCircle } from '@/ds/icons/central/IconExclamationCircle'
 import { IconExclamationTriangle } from '@/ds/icons/central/IconExclamationTriangle';
 import { IconFileText } from '@/ds/icons/central/IconFileText';
 import { IconLightBulbSimple } from '@/ds/icons/central/IconLightBulbSimple';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type NoticeVariant = 'warning' | 'destructive' | 'success' | 'info' | 'note';
@@ -44,6 +46,7 @@ export function NoticeRoot({
   className,
   ...props
 }: NoticeRootProps) {
+  useLocale();
   const { icon: defaultIcon, iconClass } = variantConfig[variant];
   const hasTitle = hasContent(title);
   const hasMessage = hasContent(children);
@@ -83,7 +86,7 @@ export function NoticeRoot({
           variant="ghost"
           size="icon-sm"
           className="absolute end-2 top-2 before:absolute before:-inset-2"
-          tooltip="Dismiss notice"
+          tooltip={studioT('Dismiss notice')}
           onClick={onDismiss}
         >
           <IconCrossMedium />

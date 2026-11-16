@@ -14,9 +14,11 @@ import {
 } from '@/ds/components/Dialog';
 import { Input } from '@/ds/components/Input';
 import { IconFolderAddRight } from '@/ds/icons/central/IconFolderAddRight';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /** "New folder" icon button; renders nothing unless `onCreateDirectory` is provided. */
 export function WorkspaceCreateDirectory({ labeled = false }: { labeled?: boolean } = {}) {
+  useLocale();
   const { workspaceId, onCreateDirectory, isReadOnly } = useWorkspaceContext();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -46,10 +48,10 @@ export function WorkspaceCreateDirectory({ labeled = false }: { labeled?: boolea
     <>
       {labeled ? (
         <Button variant="ghost" icon={<IconFolderAddRight />} onClick={() => setOpen(true)}>
-          New folder
+          {studioT('New folder')}
         </Button>
       ) : (
-        <Button variant="ghost" size="icon-sm" tooltip="New folder" onClick={() => setOpen(true)}>
+        <Button variant="ghost" size="icon-sm" tooltip={studioT('New folder')} onClick={() => setOpen(true)}>
           <IconFolderAddRight />
         </Button>
       )}
@@ -62,21 +64,21 @@ export function WorkspaceCreateDirectory({ labeled = false }: { labeled?: boolea
             }}
           >
             <DialogHeader>
-              <DialogTitle>New folder</DialogTitle>
+              <DialogTitle>{studioT('New folder')}</DialogTitle>
             </DialogHeader>
             <DialogBody>
               <Input
                 autoFocus
-                aria-label="Folder path"
-                placeholder="docs/guides"
+                aria-label={studioT('Folder path')}
+                placeholder={studioT('docs/guides')}
                 value={path}
                 onChange={event => setPath(event.target.value)}
               />
             </DialogBody>
             <DialogFooter>
-              <DialogCancel>Cancel</DialogCancel>
+              <DialogCancel>{studioT('Cancel')}</DialogCancel>
               <Button type="submit" variant="primary" disabled={!trimmed || pending}>
-                Create
+                {studioT('Create')}
               </Button>
             </DialogFooter>
           </form>

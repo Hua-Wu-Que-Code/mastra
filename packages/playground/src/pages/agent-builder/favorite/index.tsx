@@ -8,6 +8,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { IconStar } from '@mastra/playground-ui/icons/central/IconStar';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -29,6 +31,7 @@ import { useBuilderAgentFeatures } from '@/domains/agent-builder/hooks/use-build
 type Tab = 'agents' | 'skills';
 
 export default function AgentBuilderFavoritePage() {
+  useLocale();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<Tab>('agents');
@@ -76,7 +79,11 @@ export default function AgentBuilderFavoritePage() {
     }
     return (
       <div className="flex items-center justify-center pt-10">
-        <EmptyState tone="error" titleSlot={`Failed to load favorite ${resource}`} descriptionSlot={error.message} />
+        <EmptyState
+          tone="error"
+          titleSlot={studioT('Failed to load favorite {value0}', { value0: resource })}
+          descriptionSlot={error.message}
+        />
       </div>
     );
   };
@@ -89,8 +96,8 @@ export default function AgentBuilderFavoritePage() {
         return (
           <div className="flex items-center-safe justify-center-safe">
             <EmptyState
-              titleSlot="No favorite agents yet"
-              descriptionSlot="Star agents to keep them here for quick access."
+              titleSlot={studioT('No favorite agents yet')}
+              descriptionSlot={studioT('Star agents to keep them here for quick access.')}
             />
           </div>
         );
@@ -105,8 +112,8 @@ export default function AgentBuilderFavoritePage() {
       return (
         <div className="flex items-center-safe justify-center-safe">
           <EmptyState
-            titleSlot="No favorite skills yet"
-            descriptionSlot="Star skills to keep them here for quick access."
+            titleSlot={studioT('No favorite skills yet')}
+            descriptionSlot={studioT('Star skills to keep them here for quick access.')}
           />
         </div>
       );
@@ -123,12 +130,12 @@ export default function AgentBuilderFavoritePage() {
               <ActionRow.Start>
                 <PageHeader>
                   <PageHeader.Title>
-                    <IconStar /> Favorites
+                    <IconStar /> {' ' + studioT('Favorites')}
                   </PageHeader.Title>
                   <PageHeader.Description>
                     {tab === 'agents'
-                      ? "Agents you've starred in Agent Builder."
-                      : "Skills you've starred in Agent Builder."}
+                      ? studioT("Agents you've starred in Agent Builder.")
+                      : studioT("Skills you've starred in Agent Builder.")}
                   </PageHeader.Description>
                 </PageHeader>
               </ActionRow.Start>
@@ -147,7 +154,7 @@ export default function AgentBuilderFavoritePage() {
                       )}
                     >
                       <Txt as="span" variant="column" className="block">
-                        Agents
+                        {studioT('Agents')}
                       </Txt>
                     </button>
                     <button
@@ -160,7 +167,7 @@ export default function AgentBuilderFavoritePage() {
                       )}
                     >
                       <Txt as="span" variant="column" className="block">
-                        Skills
+                        {studioT('Skills')}
                       </Txt>
                     </button>
                   </div>
@@ -169,8 +176,8 @@ export default function AgentBuilderFavoritePage() {
                   <SearchInput
                     {...listSearchProps}
                     onValueChange={setSearch}
-                    label="Search favorites"
-                    placeholder="Search by name or description"
+                    label={studioT('Search favorites')}
+                    placeholder={studioT('Search by name or description')}
                   />
                 </div>
               </ActionRow.Start>

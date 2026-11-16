@@ -2,6 +2,8 @@ import type { ToolEdit } from './tool-presentation';
 import { useHighlight } from '@/ds/components/Code';
 import { CodeBlock } from '@/ds/components/CodeBlock';
 import { languageForPath } from '@/ds/components/CodeEditor/highlight';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { truncateString } from '@/lib/truncate-string';
 import { cn } from '@/lib/utils';
 
@@ -44,6 +46,7 @@ function DiffSide({ lines, side, lang }: { lines: string[]; side: keyof typeof D
 }
 
 export function ToolCallEdit({ edit, showFullContent = false }: { edit: ToolEdit; showFullContent?: boolean }) {
+  useLocale();
   const lang = languageForPath(edit.path);
 
   if ('content' in edit) {
@@ -68,11 +71,15 @@ export function ToolCallEdit({ edit, showFullContent = false }: { edit: ToolEdit
         showFullContent && 'max-h-60 overflow-y-auto',
       )}
       role="group"
-      aria-label="File change"
+      aria-label={studioT('File change')}
     >
       <DiffSide lines={removed.lines} side="removed" lang={lang} />
       <DiffSide lines={added.lines} side="added" lang={lang} />
-      {hidden > 0 && <div className="px-2.5 py-1 text-muted-foreground select-none">… {hidden} more lines</div>}
+      {hidden > 0 && (
+        <div className="px-2.5 py-1 text-muted-foreground select-none">
+          … {hidden} {' ' + studioT('more lines')}
+        </div>
+      )}
     </div>
   );
 }

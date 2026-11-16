@@ -17,6 +17,8 @@ import { ProcessorIcon } from '@/ds/icons/ProcessorIcon';
 import { ScorersIcon } from '@/ds/icons/ScorersIcon';
 import { ToolsIcon } from '@/ds/icons/ToolsIcon';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -97,22 +99,102 @@ type EntityTypeDisplay = { label: string; Icon: ComponentType<SVGProps<SVGSVGEle
 
 // Keys are lowercase `EntityType` enum values (plus legacy `workflow`).
 const ENTITY_TYPE_DISPLAY: Record<string, EntityTypeDisplay> = {
-  agent: { label: 'Agent', Icon: AgentIcon },
-  workflow: { label: 'Workflow', Icon: WorkflowIcon },
-  workflow_run: { label: 'Workflow', Icon: WorkflowIcon },
-  workflow_step: { label: 'Step', Icon: WorkflowIcon },
-  tool: { label: 'Tool', Icon: ToolsIcon },
-  scorer: { label: 'Scorer', Icon: ScorersIcon },
-  classifier: { label: 'Classifier', Icon: IconArrowSplitUp },
-  memory: { label: 'Memory', Icon: MemoryIcon },
-  mcp_server: { label: 'MCP Server', Icon: McpServerIcon },
-  input_processor: { label: 'Processor', Icon: ProcessorIcon },
-  input_step_processor: { label: 'Processor', Icon: ProcessorIcon },
-  output_processor: { label: 'Processor', Icon: ProcessorIcon },
-  output_step_processor: { label: 'Processor', Icon: ProcessorIcon },
-  tool_result_processor: { label: 'Processor', Icon: ProcessorIcon },
-  rag_ingestion: { label: 'RAG', Icon: IconServer1 },
-  trajectory: { label: 'Trajectory', Icon: IconDirection1 },
+  agent: {
+    get label() {
+      return studioT('Agent');
+    },
+    Icon: AgentIcon,
+  },
+  workflow: {
+    get label() {
+      return studioT('Workflow');
+    },
+    Icon: WorkflowIcon,
+  },
+  workflow_run: {
+    get label() {
+      return studioT('Workflow');
+    },
+    Icon: WorkflowIcon,
+  },
+  workflow_step: {
+    get label() {
+      return studioT('Step');
+    },
+    Icon: WorkflowIcon,
+  },
+  tool: {
+    get label() {
+      return studioT('Tool');
+    },
+    Icon: ToolsIcon,
+  },
+  scorer: {
+    get label() {
+      return studioT('Scorer');
+    },
+    Icon: ScorersIcon,
+  },
+  classifier: {
+    get label() {
+      return studioT('Classifier');
+    },
+    Icon: IconArrowSplitUp,
+  },
+  memory: {
+    get label() {
+      return studioT('Memory');
+    },
+    Icon: MemoryIcon,
+  },
+  mcp_server: {
+    get label() {
+      return studioT('MCP Server');
+    },
+    Icon: McpServerIcon,
+  },
+  input_processor: {
+    get label() {
+      return studioT('Processor');
+    },
+    Icon: ProcessorIcon,
+  },
+  input_step_processor: {
+    get label() {
+      return studioT('Processor');
+    },
+    Icon: ProcessorIcon,
+  },
+  output_processor: {
+    get label() {
+      return studioT('Processor');
+    },
+    Icon: ProcessorIcon,
+  },
+  output_step_processor: {
+    get label() {
+      return studioT('Processor');
+    },
+    Icon: ProcessorIcon,
+  },
+  tool_result_processor: {
+    get label() {
+      return studioT('Processor');
+    },
+    Icon: ProcessorIcon,
+  },
+  rag_ingestion: {
+    get label() {
+      return studioT('RAG');
+    },
+    Icon: IconServer1,
+  },
+  trajectory: {
+    get label() {
+      return studioT('Trajectory');
+    },
+    Icon: IconDirection1,
+  },
 };
 
 export interface TracesDataListTypeCellProps {
@@ -145,11 +227,36 @@ export function TracesDataListTypeCell({ entityType }: TracesDataListTypeCellPro
 const UNSET_STATUS_CONFIG: { label: string; variant: BadgeVariant } = { label: '-', variant: 'neutral' };
 
 const STATUS_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {
-  completed: { label: 'OK', variant: 'success' },
-  ok: { label: 'OK', variant: 'success' },
-  success: { label: 'OK', variant: 'success' },
-  error: { label: 'ERR', variant: 'destructive' },
-  running: { label: 'RUN', variant: 'neutral' },
+  completed: {
+    get label() {
+      return studioT('OK');
+    },
+    variant: 'success',
+  },
+  ok: {
+    get label() {
+      return studioT('OK');
+    },
+    variant: 'success',
+  },
+  success: {
+    get label() {
+      return studioT('OK');
+    },
+    variant: 'success',
+  },
+  error: {
+    get label() {
+      return studioT('ERR');
+    },
+    variant: 'destructive',
+  },
+  running: {
+    get label() {
+      return studioT('RUN');
+    },
+    variant: 'neutral',
+  },
   unset: UNSET_STATUS_CONFIG,
 };
 
@@ -175,14 +282,54 @@ export function TracesDataListStatusCell({ status }: TracesDataListStatusCellPro
 // ---------------------------------------------------------------------------
 
 const OUTCOME_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {
-  success: { label: 'OK', variant: 'success' },
-  error: { label: 'ERR', variant: 'destructive' },
-  abort: { label: 'Abort', variant: 'warning' },
-  interrupted: { label: 'Interrupted', variant: 'warning' },
-  limit: { label: 'Limit', variant: 'orange' },
-  blocked: { label: 'Blocked', variant: 'orange' },
-  suspend: { label: 'Suspend', variant: 'info' },
-  unknown: { label: 'Unknown', variant: 'neutral' },
+  success: {
+    get label() {
+      return studioT('OK');
+    },
+    variant: 'success',
+  },
+  error: {
+    get label() {
+      return studioT('ERR');
+    },
+    variant: 'destructive',
+  },
+  abort: {
+    get label() {
+      return studioT('Abort');
+    },
+    variant: 'warning',
+  },
+  interrupted: {
+    get label() {
+      return studioT('Interrupted');
+    },
+    variant: 'warning',
+  },
+  limit: {
+    get label() {
+      return studioT('Limit');
+    },
+    variant: 'orange',
+  },
+  blocked: {
+    get label() {
+      return studioT('Blocked');
+    },
+    variant: 'orange',
+  },
+  suspend: {
+    get label() {
+      return studioT('Suspend');
+    },
+    variant: 'info',
+  },
+  unknown: {
+    get label() {
+      return studioT('Unknown');
+    },
+    variant: 'neutral',
+  },
 };
 
 const formatContextValue = (value: unknown) => (typeof value === 'string' ? value : JSON.stringify(value));
@@ -194,6 +341,7 @@ export interface TracesDataListOutcomeCellProps {
 }
 
 export function TracesDataListOutcomeCell({ outcome, status }: TracesDataListOutcomeCellProps) {
+  useLocale();
   if (!outcome) {
     const config = STATUS_CONFIG[(status ?? 'unset').toLowerCase()] ?? UNSET_STATUS_CONFIG;
     const badge = (
@@ -208,7 +356,7 @@ export function TracesDataListOutcomeCell({ outcome, status }: TracesDataListOut
         ) : (
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>{badge}</TooltipTrigger>
-            <TooltipContent>Outcome not recorded; status from error</TooltipContent>
+            <TooltipContent>{studioT('Outcome not recorded; status from error')}</TooltipContent>
           </Tooltip>
         )}
       </DataListCell>

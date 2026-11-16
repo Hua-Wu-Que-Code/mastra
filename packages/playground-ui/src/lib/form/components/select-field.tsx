@@ -1,8 +1,10 @@
 import type { AutoFormFieldProps } from '@autoform/react';
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export const SelectField: React.FC<AutoFormFieldProps> = ({ field, inputProps, value }) => {
+  useLocale();
   const { key: _key, ...props } = inputProps;
 
   return (
@@ -20,7 +22,7 @@ export const SelectField: React.FC<AutoFormFieldProps> = ({ field, inputProps, v
       }}
     >
       <SelectTrigger>
-        <SelectValue placeholder="Select an option" />
+        <SelectValue placeholder={studioT('Select an option')} />
       </SelectTrigger>
       <SelectContent>
         {(field.options || []).map(([key, label]) => (

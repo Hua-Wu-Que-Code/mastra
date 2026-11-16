@@ -2,6 +2,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { IconPlugin1 } from '@mastra/playground-ui/icons/central/IconPlugin1';
 import { IconSettingsGear5 } from '@mastra/playground-ui/icons/central/IconSettingsGear5';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthorize, useExistingConnections, useToolkits } from '@mastra/react/hooks/tool-providers';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -137,6 +139,7 @@ export const ToolkitConnectionControl = ({
   disabled = false,
   multipleAllowed = false,
 }: ToolkitConnectionControlProps) => {
+  useLocale();
   const { setValue } = useFormContext<AgentBuilderEditFormValues>();
   const queryClient = useQueryClient();
   const authorize = useAuthorize();
@@ -163,8 +166,7 @@ export const ToolkitConnectionControl = ({
 
   // Any selected tool in this toolkit means the toolkit's connections are used.
   const providerConfig = useWatch({ name: `toolProviders.${providerId}` }) as
-    | ToolProvidersFormValue[string]
-    | undefined;
+    ToolProvidersFormValue[string] | undefined;
   const hasSelectedTool = useMemo(
     () => Object.values(providerConfig?.tools ?? {}).some(tool => tool?.toolkit === toolkit),
     [providerConfig?.tools, toolkit],
@@ -232,7 +234,7 @@ export const ToolkitConnectionControl = ({
         disabled={disabled || authorize.isPending}
         data-testid={`toolkit-connect-${testIdSuffix}`}
       >
-        {authorize.isPending ? 'Connecting…' : 'Connect'}
+        {authorize.isPending ? studioT('Connecting…') : studioT('Connect')}
       </Button>
     );
   }
@@ -243,8 +245,8 @@ export const ToolkitConnectionControl = ({
         type="button"
         variant="ghost"
         size="icon-sm"
-        tooltip="Manage connection"
-        aria-label={`Manage ${toolkit} connection`}
+        tooltip={studioT('Manage connection')}
+        aria-label={studioT('Manage {value0} connection', { value0: toolkit })}
         onClick={() => setManageOpen(true)}
         disabled={disabled}
         data-testid={`toolkit-manage-${testIdSuffix}`}

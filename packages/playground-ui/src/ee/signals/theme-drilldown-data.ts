@@ -1,4 +1,5 @@
 import type { ThemeFlowResponse, ThemeNode, ThemePathsResponse, TraceSignalName } from './types';
+import { t as studioT } from '@/lib/i18n';
 
 export type ThemeSelection =
   | {
@@ -142,7 +143,9 @@ export function buildDrilledThemeFlow(
       : {
           nodeId: noiseNodeIds.get(signalName) ?? `drilled-noise-${signalName}`,
           kind: 'noise',
-          label: 'Noise',
+          get label() {
+            return studioT('Noise');
+          },
           traceCount: 0,
           stageShare: 0,
         };

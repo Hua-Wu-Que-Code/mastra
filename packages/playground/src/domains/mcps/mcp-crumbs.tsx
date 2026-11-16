@@ -1,4 +1,6 @@
 import { CrumbSkeleton, crumbSwitcherTriggerProps } from '@mastra/playground-ui/components/Breadcrumb';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useParams } from 'react-router';
 import { MCPServerCombobox } from './components/mcp-server-combobox';
@@ -13,8 +15,11 @@ export function McpServerCrumb() {
 }
 
 export function McpServerSwitcher() {
+  useLocale();
   const { serverId } = useParams<{ serverId: string }>();
   if (!serverId) return null;
 
-  return <MCPServerCombobox value={serverId} {...crumbSwitcherTriggerProps} aria-label="Switch MCP server" />;
+  return (
+    <MCPServerCombobox value={serverId} {...crumbSwitcherTriggerProps} aria-label={studioT('Switch MCP server')} />
+  );
 }

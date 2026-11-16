@@ -15,21 +15,68 @@ import { IconQuestionmarkCircle } from '@/ds/icons/central/IconQuestionmarkCircl
 import { IconSkip } from '@/ds/icons/central/IconSkip';
 import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { formatDuration } from '@/utils/duration';
 
 const statusPresentation = {
-  success: { label: 'Completed', icon: IconCheckmark2Medium },
-  failed: { label: 'Failed', icon: IconCircleX },
-  suspended: { label: 'Needs input', icon: IconPause },
-  waiting: { label: 'Waiting', icon: IconStopwatch },
-  paused: { label: 'Paused', icon: IconPause },
-  skipped: { label: 'Skipped', icon: IconSkip },
-  running: { label: 'Running', icon: IconLoadingCircle },
-  canceled: { label: 'Canceled', icon: IconCircleBanSign },
+  success: {
+    get label() {
+      return studioT('Completed');
+    },
+    icon: IconCheckmark2Medium,
+  },
+  failed: {
+    get label() {
+      return studioT('Failed');
+    },
+    icon: IconCircleX,
+  },
+  suspended: {
+    get label() {
+      return studioT('Needs input');
+    },
+    icon: IconPause,
+  },
+  waiting: {
+    get label() {
+      return studioT('Waiting');
+    },
+    icon: IconStopwatch,
+  },
+  paused: {
+    get label() {
+      return studioT('Paused');
+    },
+    icon: IconPause,
+  },
+  skipped: {
+    get label() {
+      return studioT('Skipped');
+    },
+    icon: IconSkip,
+  },
+  running: {
+    get label() {
+      return studioT('Running');
+    },
+    icon: IconLoadingCircle,
+  },
+  canceled: {
+    get label() {
+      return studioT('Canceled');
+    },
+    icon: IconCircleBanSign,
+  },
 } satisfies Record<Step['status'], { label: string; icon: typeof IconCheckmark2Medium }>;
 
-const unknownStatus = { label: 'Status unavailable', icon: IconQuestionmarkCircle };
+const unknownStatus = {
+  get label() {
+    return studioT('Status unavailable');
+  },
+  icon: IconQuestionmarkCircle,
+};
 
 export interface WorkflowTimelineRowProps {
   row: TimelineRow;
@@ -50,6 +97,7 @@ export function WorkflowTimelineRow({
   onOpenInput,
   onOpenOutput,
 }: WorkflowTimelineRowProps) {
+  useLocale();
   const status = Object.hasOwn(statusPresentation, row.status) ? statusPresentation[row.status] : unknownStatus;
   const StatusIcon = status.icon;
   const tone = workflowStatusTone(row.status);
@@ -123,14 +171,16 @@ export function WorkflowTimelineRow({
         variant="meta"
         tone="muted"
         className="text-right whitespace-nowrap"
-        title={row.timing && row.spansSuspension ? 'Includes time spent suspended waiting for input' : undefined}
+        title={
+          row.timing && row.spansSuspension ? studioT('Includes time spent suspended waiting for input') : undefined
+        }
       >
         {row.timing ? (
           <Txt as="span" variant="meta" font="mono">
             {formatDuration(row.timing.durationMs)}
           </Txt>
         ) : (
-          <span aria-label="Timing unavailable">—</span>
+          <span aria-label={studioT('Timing unavailable')}>—</span>
         )}
       </Txt>
       <div className="flex items-center">
@@ -138,7 +188,7 @@ export function WorkflowTimelineRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          tooltip="View step input"
+          tooltip={studioT('View step input')}
           disabled={row.step.input === undefined}
           onClick={event => onOpenInput(row, event.currentTarget)}
         >
@@ -148,7 +198,7 @@ export function WorkflowTimelineRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          tooltip="View step output"
+          tooltip={studioT('View step output')}
           disabled={row.step.output === undefined}
           onClick={event => onOpenOutput(row, event.currentTarget)}
         >

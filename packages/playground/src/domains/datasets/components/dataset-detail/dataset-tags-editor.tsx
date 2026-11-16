@@ -3,6 +3,7 @@ import type { ComboboxOption } from '@mastra/playground-ui/components/Combobox';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@mastra/playground-ui/icons/central/IconCrossMedium';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations, useDataset, useDatasets } from '@mastra/react/hooks/datasets';
 import { useMemo, useState } from 'react';
@@ -22,6 +23,7 @@ export interface DatasetTagsEditorProps {
  * change persists immediately; removal is via the badge only.
  */
 export function DatasetTagsEditor({ datasetId }: DatasetTagsEditorProps) {
+  const studioLocale = useLocale();
   const { data: dataset } = useDataset({ datasetId: datasetId, queryOptions: { enabled: Boolean(datasetId) } });
   const { data: datasetsData } = useDatasets();
   const { updateDataset } = useDatasetMutations();
@@ -40,11 +42,13 @@ export function DatasetTagsEditor({ datasetId }: DatasetTagsEditorProps) {
     }));
     const trimmed = search.trim();
     const canCreate = trimmed.length > 0 && !allTags.includes(trimmed) && !currentTags.includes(trimmed);
-    return canCreate ? [{ label: `Create "${trimmed}"`, value: CREATE_TAG_VALUE }, ...existing] : existing;
-  }, [allTags, currentTags, search]);
+    return canCreate
+      ? [{ label: studioT('Create "{value0}"', { value0: trimmed }), value: CREATE_TAG_VALUE }, ...existing]
+      : existing;
+  }, [allTags, currentTags, search, studioLocale]);
 
   const persistTags = (tags: string[]) => {
-    updateDataset.mutate({ datasetId, tags }, { onError: () => toast.error('Failed to update tags') });
+    updateDataset.mutate({ datasetId, tags }, { onError: () => toast.error(studioT('Failed to update tags')) });
   };
 
   const handleAdd = (value: string) => {
@@ -64,7 +68,7 @@ export function DatasetTagsEditor({ datasetId }: DatasetTagsEditorProps) {
           {tag}
           <button
             type="button"
-            aria-label={`Remove tag ${tag}`}
+            aria-label={studioT('Remove tag {value0}', { value0: tag })}
             disabled={updateDataset.isPending}
             onClick={() => handleRemove(tag)}
             className="cursor-pointer rounded-sm hover:opacity-70 disabled:opacity-50"
@@ -78,9 +82,9 @@ export function DatasetTagsEditor({ datasetId }: DatasetTagsEditorProps) {
         value={undefined}
         onValueChange={handleAdd}
         onInputValueChange={setSearch}
-        placeholder="Add tag"
-        searchPlaceholder="Search or create tag"
-        emptyText="Type to create a tag"
+        placeholder={studioT('Add tag')}
+        searchPlaceholder={studioT('Search or create tag')}
+        emptyText={studioT('Type to create a tag')}
         variant="ghost"
         size="sm"
         className="w-auto min-w-0"

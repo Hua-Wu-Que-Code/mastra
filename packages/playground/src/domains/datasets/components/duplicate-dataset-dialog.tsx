@@ -13,6 +13,10 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useMastraClient } from '@mastra/react';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
@@ -37,6 +41,7 @@ export function DuplicateDatasetDialog({
   sourceDatasetTargetType,
   onSuccess,
 }: DuplicateDatasetDialogProps) {
+  useLocale();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isDuplicating, setIsDuplicating] = useState(false);
@@ -60,7 +65,7 @@ export function DuplicateDatasetDialog({
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error('Dataset name is required');
+      toast.error(studioT('Dataset name is required'));
       return;
     }
 
@@ -114,7 +119,7 @@ export function DuplicateDatasetDialog({
         setProgress({ phase: 'copying', current: i + 1, total: allItems.length });
       }
 
-      toast.success(`Dataset duplicated with ${allItems.length} items`);
+      toast.success(studioT('Dataset duplicated with {value0} items', { value0: allItems.length }));
 
       setName('');
       setDescription('');
@@ -124,7 +129,11 @@ export function DuplicateDatasetDialog({
 
       onSuccess?.(dataset.id);
     } catch (error) {
-      toast.error(`Failed to duplicate dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to duplicate dataset: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
       setIsDuplicating(false);
       setProgress({ phase: 'idle', current: 0, total: 0 });
     }
@@ -149,33 +158,38 @@ export function DuplicateDatasetDialog({
     <Dialog open={open} onOpenChange={onOpenChange} pending={isDuplicating}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Duplicate Dataset</DialogTitle>
+          <DialogTitle>{studioT('Duplicate Dataset')}</DialogTitle>
         </DialogHeader>
         <Form onSubmit={handleSubmit}>
           <DialogBody>
             <Field>
-              <FieldLabel required>Name</FieldLabel>
+              <FieldLabel required>{studioT('Name')}</FieldLabel>
               <Input
                 required
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Enter dataset name"
+                placeholder={studioT('Enter dataset name')}
                 autoFocus
                 disabled={isDuplicating}
               />
             </Field>
 
             <Field>
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>{studioT('Description')}</FieldLabel>
               <Input
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Enter dataset description (optional)"
+                placeholder={studioT('Enter dataset description (optional)')}
                 disabled={isDuplicating}
               />
             </Field>
 
-            <Txt tone="muted">All items from &quot;{sourceDatasetName}&quot; will be copied to the new dataset</Txt>
+            <Txt tone="muted">
+              <Trans
+                id='All items from " {part0} " will be copied to the new dataset'
+                values={{ part0: sourceDatasetName }}
+              />
+            </Txt>
 
             {isDuplicating && (
               <div className="space-y-2">
@@ -190,9 +204,9 @@ export function DuplicateDatasetDialog({
             )}
           </DialogBody>
           <DialogFooter>
-            <DialogCancel>Cancel</DialogCancel>
+            <DialogCancel>{studioT('Cancel')}</DialogCancel>
             <DialogAction type="submit" disabled={!name.trim()}>
-              {isDuplicating ? 'Duplicating...' : 'Duplicate dataset'}
+              {isDuplicating ? studioT('Duplicating...') : studioT('Duplicate dataset')}
             </DialogAction>
           </DialogFooter>
         </Form>

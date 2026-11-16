@@ -1,7 +1,8 @@
+import { locale, t } from '@mastra/playground-ui/lib/i18n';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { useLocation } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import Metrics from '..';
 import {
@@ -328,5 +329,20 @@ describe('Metrics storage support', () => {
       expect(await screen.findByRole('menuitemradio', { name: 'Tool calls' })).toBeTruthy();
       expect(screen.queryByRole('button', { name: /^Breakdown/ })).toBeNull();
     });
+  });
+});
+
+afterEach(() => act(() => locale.setLocale('en')));
+describe('when storage cannot collect metrics in Chinese', () => {
+  it('translates the storage availability notice', async () => {
+    act(() => locale.setLocale('zh'));
+    server.use(
+      http.get(`${TEST_BASE_URL}/api/observability/capabilities`, () => HttpResponse.json(unsupportedStorage)),
+    );
+    renderPage();
+    expect(
+      await screen.findByRole('heading', { name: t('Metrics are not available with your current storage') }),
+    ).toBeTruthy();
+    expect(screen.queryByText(unavailableTitle)).toBeNull();
   });
 });

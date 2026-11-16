@@ -3,6 +3,8 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { ScrollArea, ScrollAreaViewport } from '@mastra/playground-ui/components/ScrollArea';
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -43,6 +45,7 @@ export const FilterableList = ({
   disabled = false,
   testIdPrefix,
 }: FilterableListProps) => {
+  useLocale();
   const agentColor = useAgentColor();
   const [search, setSearch] = useState('');
 
@@ -58,11 +61,11 @@ export const FilterableList = ({
       data-testid={`${testIdPrefix}-filter`}
     >
       <SearchInput
-        label={`Search ${title.toLowerCase()}`}
+        label={studioT('Search {value0}', { value0: title.toLowerCase() })}
         size="md"
         className="flex-none"
         data-testid={`${testIdPrefix}-filter-search`}
-        placeholder={`Search ${title.toLowerCase()}`}
+        placeholder={studioT('Search {value0}', { value0: title.toLowerCase() })}
         value={search}
         onValueChange={setSearch}
       />
@@ -76,7 +79,7 @@ export const FilterableList = ({
           className={cn(quietTextHover, controlStateColorTransition, 'disabled:cursor-not-allowed disabled:opacity-60')}
         >
           <Txt as="span" variant="meta" className="block">
-            Select all
+            {studioT('Select all')}
           </Txt>
         </button>
         <button
@@ -87,7 +90,7 @@ export const FilterableList = ({
           className={cn(quietTextHover, controlStateColorTransition, 'disabled:cursor-not-allowed disabled:opacity-60')}
         >
           <Txt as="span" variant="meta" className="block">
-            Clear all
+            {studioT('Clear all')}
           </Txt>
         </button>
       </div>
@@ -96,7 +99,7 @@ export const FilterableList = ({
         <ScrollAreaViewport className="pr-2">
           {filteredItems.length === 0 ? (
             <Txt variant="meta" tone="muted" className="px-1 py-2">
-              No matches
+              {studioT('No matches')}
             </Txt>
           ) : (
             <ul className="flex flex-col gap-0.5">

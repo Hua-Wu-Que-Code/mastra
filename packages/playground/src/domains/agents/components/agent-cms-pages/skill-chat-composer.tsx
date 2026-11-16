@@ -1,5 +1,7 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconSparklesTwo } from '@mastra/playground-ui/icons/central/IconSparklesTwo';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useChat } from '@mastra/react/chat';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -39,6 +41,7 @@ export function SkillChatComposer({
   onRunningChange,
   ...callbacks
 }: SkillChatComposerProps) {
+  useLocale();
   const populatedRef = useRef(false);
 
   // Keep form state in a ref so the reader tool always gets the latest values
@@ -137,12 +140,12 @@ export function SkillChatComposer({
       </div>
       <div className="flex flex-col gap-1">
         <Txt variant="subheading" tone="ink" as="p">
-          {hasFields ? 'Refine your skill' : 'Describe your skill'}
+          {hasFields ? studioT('Refine your skill') : studioT('Describe your skill')}
         </Txt>
         <Txt variant="caption" tone="muted" as="p">
           {hasFields
-            ? 'Ask the agent to adjust the name, description, or instructions.'
-            : 'Tell the agent what this skill should do and it will fill in the details for you.'}
+            ? studioT('Ask the agent to adjust the name, description, or instructions.')
+            : studioT('Tell the agent what this skill should do and it will fill in the details for you.')}
         </Txt>
       </div>
     </div>
@@ -164,7 +167,7 @@ export function SkillChatComposer({
         disabled={isRunning}
         canSubmit={!!trimmed && !isRunning}
         isRunning={isRunning}
-        placeholder={hasFields ? 'Ask the agent to refine' : 'Describe your skill'}
+        placeholder={hasFields ? studioT('Ask the agent to refine') : studioT('Describe your skill')}
         inputTestId="skill-builder-conversation-input"
         submitTestId="skill-builder-conversation-submit"
         containerTestId="skill-builder-conversation-composer"

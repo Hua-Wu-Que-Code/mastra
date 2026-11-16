@@ -4,14 +4,16 @@ import { TooltipProvider } from '@mastra/playground-ui/components/Tooltip';
 import { Tree } from '@mastra/playground-ui/components/Tree';
 import { IconFileBend } from '@mastra/playground-ui/icons/central/IconFileBend';
 import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
-
 import { IconFolder1 } from '@mastra/playground-ui/icons/central/IconFolder1';
 import { IconFolderAddRight } from '@mastra/playground-ui/icons/central/IconFolderAddRight';
+
 import { IconFolderOpen } from '@mastra/playground-ui/icons/central/IconFolderOpen';
 import { IconImages1 } from '@mastra/playground-ui/icons/central/IconImages1';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { IconScript } from '@mastra/playground-ui/icons/central/IconScript';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { MouseEvent, ReactNode } from 'react';
 import { useCallback, useRef, useState } from 'react';
 import type { InMemoryFileNode } from '../agent-edit-page/utils/form-validation';
@@ -111,12 +113,13 @@ function FolderAddAction({ tooltip, onClick }: { tooltip: string; onClick: () =>
 }
 
 function FolderActions({ onAddFile, onAddFolder }: { onAddFile: () => void; onAddFolder: () => void }) {
+  useLocale();
   return (
     <span className="flex opacity-0 group-hover:opacity-100">
-      <Button size="icon-sm" variant="ghost" tooltip="New file" onClick={onAddFile}>
+      <Button size="icon-sm" variant="ghost" tooltip={studioT('New file')} onClick={onAddFile}>
         <IconPlusMedium />
       </Button>
-      <Button size="icon-sm" variant="ghost" tooltip="New folder" onClick={onAddFolder}>
+      <Button size="icon-sm" variant="ghost" tooltip={studioT('New folder')} onClick={onAddFolder}>
         <IconFolderAddRight />
       </Button>
     </span>
@@ -124,12 +127,13 @@ function FolderActions({ onAddFile, onAddFolder }: { onAddFile: () => void; onAd
 }
 
 function FileDeleteAction({ nodeId, onRemove }: { nodeId: string; onRemove: (id: string) => void }) {
+  useLocale();
   return (
     <span className="ml-auto shrink-0 opacity-0 group-hover:opacity-100">
       <Button
         size="icon-sm"
         variant="ghost"
-        tooltip="Delete file"
+        tooltip={studioT('Delete file')}
         onClick={(e: MouseEvent<HTMLButtonElement>) => {
           e.stopPropagation();
           onRemove(nodeId);
@@ -164,6 +168,7 @@ function UserNodeList({
   onInputSubmit: (name: string) => void;
   onInputCancel: () => void;
 }) {
+  useLocale();
   return nodes
     .filter(n => !STRUCTURAL_IDS.has(n.id))
     .map(node => {
@@ -175,16 +180,26 @@ function UserNodeList({
               actions={
                 !readOnly && (
                   <span className="flex opacity-0 group-hover:opacity-100">
-                    <Button size="icon-sm" variant="ghost" tooltip="New file" onClick={() => onAddFile(node.id)}>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      tooltip={studioT('New file')}
+                      onClick={() => onAddFile(node.id)}
+                    >
                       <IconPlusMedium />
                     </Button>
-                    <Button size="icon-sm" variant="ghost" tooltip="New folder" onClick={() => onAddFolder(node.id)}>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      tooltip={studioT('New folder')}
+                      onClick={() => onAddFolder(node.id)}
+                    >
                       <IconFolderAddRight />
                     </Button>
                     <Button
                       size="icon-sm"
                       variant="ghost"
-                      tooltip="Delete folder"
+                      tooltip={studioT('Delete folder')}
                       onClick={(e: MouseEvent<HTMLButtonElement>) => {
                         e.stopPropagation();
                         onRemove(node.id);
@@ -215,7 +230,7 @@ function UserNodeList({
               {pendingInput?.parentId === node.id && (
                 <Tree.Input
                   type={pendingInput.type === 'folder' ? 'folder' : 'file'}
-                  placeholder={pendingInput.type === 'folder' ? 'folder name' : 'filename.ext'}
+                  placeholder={pendingInput.type === 'folder' ? studioT('folder name') : studioT('filename.ext')}
                   onSubmit={onInputSubmit}
                   onCancel={onInputCancel}
                 />
@@ -238,6 +253,7 @@ function UserNodeList({
 type PendingInput = { parentId: string; type: 'file' | 'folder' };
 
 export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, readOnly }: SkillFileTreeProps) {
+  useLocale();
   const [pendingInput, setPendingInput] = useState<PendingInput | null>(null);
   const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({
     references: true,
@@ -355,12 +371,12 @@ export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, r
           <Tree.FolderContent>
             <Tree.File id="skill-md">
               <Tree.Icon>{getFileIcon('SKILL.md')}</Tree.Icon>
-              <Tree.Label>SKILL.md</Tree.Label>
+              <Tree.Label>{studioT('SKILL.md')}</Tree.Label>
             </Tree.File>
 
             <Tree.File id="license-md">
               <Tree.Icon>{getFileIcon('LICENSE.md')}</Tree.Icon>
-              <Tree.Label>LICENSE.md</Tree.Label>
+              <Tree.Label>{studioT('LICENSE.md')}</Tree.Label>
             </Tree.File>
 
             {referencesFolder && (
@@ -379,7 +395,7 @@ export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, r
                   }
                 >
                   <Tree.Icon>{getFolderIcon(openFolders.references)}</Tree.Icon>
-                  <Tree.Label>references</Tree.Label>
+                  <Tree.Label>{studioT('references')}</Tree.Label>
                 </Tree.FolderTrigger>
                 <Tree.FolderContent>
                   <UserNodeList
@@ -397,7 +413,7 @@ export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, r
                   {pendingInput?.parentId === 'references' && (
                     <Tree.Input
                       type={pendingInput.type === 'folder' ? 'folder' : 'file'}
-                      placeholder={pendingInput.type === 'folder' ? 'folder name' : 'filename.ext'}
+                      placeholder={pendingInput.type === 'folder' ? studioT('folder name') : studioT('filename.ext')}
                       onSubmit={handleInputSubmit}
                       onCancel={handleInputCancel}
                     />
@@ -419,7 +435,7 @@ export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, r
                   }
                 >
                   <Tree.Icon>{getFolderIcon(openFolders.scripts)}</Tree.Icon>
-                  <Tree.Label>scripts</Tree.Label>
+                  <Tree.Label>{studioT('scripts')}</Tree.Label>
                 </Tree.FolderTrigger>
                 <Tree.FolderContent>
                   <UserNodeList
@@ -437,7 +453,7 @@ export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, r
                   {pendingInput?.parentId === 'scripts' && (
                     <Tree.Input
                       type={pendingInput.type === 'folder' ? 'folder' : 'file'}
-                      placeholder={pendingInput.type === 'folder' ? 'folder name' : 'filename.ext'}
+                      placeholder={pendingInput.type === 'folder' ? studioT('folder name') : studioT('filename.ext')}
                       onSubmit={handleInputSubmit}
                       onCancel={handleInputCancel}
                     />
@@ -449,10 +465,10 @@ export function SkillFileTree({ files, onChange, selectedFileId, onSelectFile, r
             {assetsFolder && (
               <Tree.Folder open={openFolders.assets} onOpenChange={(open: boolean) => setFolderOpen('assets', open)}>
                 <Tree.FolderTrigger
-                  actions={!readOnly && <FolderAddAction tooltip="Add image" onClick={handleAddImage} />}
+                  actions={!readOnly && <FolderAddAction tooltip={studioT('Add image')} onClick={handleAddImage} />}
                 >
                   <Tree.Icon>{getFolderIcon(openFolders.assets)}</Tree.Icon>
-                  <Tree.Label>assets</Tree.Label>
+                  <Tree.Label>{studioT('assets')}</Tree.Label>
                 </Tree.FolderTrigger>
                 <Tree.FolderContent>
                   {(assetsFolder.children ?? [])

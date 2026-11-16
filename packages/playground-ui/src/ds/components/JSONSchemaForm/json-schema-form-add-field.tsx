@@ -4,10 +4,12 @@ import { useJSONSchemaFormNestedContext } from './json-schema-form-nested-contex
 import { Button } from '@/ds/components/Button';
 import type { ButtonProps } from '@/ds/components/Button';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type JSONSchemaFormAddFieldProps = Omit<ButtonProps, 'onClick'>;
 
 export function AddField({ children, ...props }: JSONSchemaFormAddFieldProps) {
+  useLocale();
   const { addField } = useJSONSchemaForm();
   const nestedContext = useJSONSchemaFormNestedContext();
 
@@ -20,7 +22,7 @@ export function AddField({ children, ...props }: JSONSchemaFormAddFieldProps) {
 
   return (
     <Button icon={<IconPlusMedium />} type="button" {...props} onClick={handleClick}>
-      {children || 'Add field'}
+      {children || studioT('Add field')}
     </Button>
   );
 }

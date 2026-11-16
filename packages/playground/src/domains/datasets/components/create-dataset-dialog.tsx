@@ -14,6 +14,8 @@ import {
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Form } from '@mastra/playground-ui/components/Form';
 import { Input } from '@mastra/playground-ui/components/Input';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { useForm } from 'react-hook-form';
@@ -41,6 +43,7 @@ export function CreateDatasetDialog({
   targetIds,
   onSuccess,
 }: CreateDatasetDialogProps) {
+  useLocale();
   const { createDataset } = useDatasetMutations();
   const navigate = useNavigate();
 
@@ -57,8 +60,10 @@ export function CreateDatasetDialog({
     <Dialog open={open} onOpenChange={onOpenChange} pending={createDataset.isPending}>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>Create new dataset</DialogTitle>
-          <DialogDescription>Datasets group test cases used to evaluate your agents and workflows.</DialogDescription>
+          <DialogTitle>{studioT('Create new dataset')}</DialogTitle>
+          <DialogDescription>
+            {studioT('Datasets group test cases used to evaluate your agents and workflows.')}
+          </DialogDescription>
         </DialogHeader>
         {/* Mounted only while open, so every opening starts from a fresh form and a new default name. */}
         <CreateDatasetDialogForm
@@ -80,6 +85,7 @@ interface CreateDatasetDialogFormProps {
 }
 
 function CreateDatasetDialogForm({ createDataset, targetType, targetIds, onCreated }: CreateDatasetDialogFormProps) {
+  useLocale();
   const { register, handleSubmit, watch } = useForm<CreateDatasetFormValues>({
     defaultValues: { name: `Dataset ${createNameSuffix()}` },
   });
@@ -87,7 +93,7 @@ function CreateDatasetDialogForm({ createDataset, targetType, targetIds, onCreat
 
   const onSubmit = handleSubmit(async values => {
     if (!values.name.trim()) {
-      toast.error('Dataset name is required');
+      toast.error(studioT('Dataset name is required'));
       return;
     }
 
@@ -98,10 +104,14 @@ function CreateDatasetDialogForm({ createDataset, targetType, targetIds, onCreat
         targetIds,
       });
 
-      toast.success('Dataset created successfully');
+      toast.success(studioT('Dataset created successfully'));
       onCreated(result.id);
     } catch (error) {
-      toast.error(`Failed to create dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to create dataset: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   });
 
@@ -109,14 +119,14 @@ function CreateDatasetDialogForm({ createDataset, targetType, targetIds, onCreat
     <Form onSubmit={onSubmit} className="min-h-0 flex-1">
       <DialogBody>
         <Field>
-          <FieldLabel required>Name</FieldLabel>
-          <Input required {...register('name')} placeholder="Enter dataset name" autoFocus />
+          <FieldLabel required>{studioT('Name')}</FieldLabel>
+          <Input required {...register('name')} placeholder={studioT('Enter dataset name')} autoFocus />
         </Field>
       </DialogBody>
       <DialogFooter>
-        <DialogCancel>Cancel</DialogCancel>
+        <DialogCancel>{studioT('Cancel')}</DialogCancel>
         <DialogAction type="submit" disabled={!name.trim()}>
-          {createDataset.isPending ? 'Creating...' : 'Create dataset'}
+          {createDataset.isPending ? studioT('Creating...') : studioT('Create dataset')}
         </DialogAction>
       </DialogFooter>
     </Form>

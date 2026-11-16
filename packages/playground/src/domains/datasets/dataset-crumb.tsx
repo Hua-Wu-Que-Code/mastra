@@ -1,4 +1,6 @@
 import { CrumbSkeleton, crumbSwitcherTriggerProps } from '@mastra/playground-ui/components/Breadcrumb';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDataset } from '@mastra/react/hooks/datasets';
 import { useParams, useSearchParams } from 'react-router';
 import { DatasetCombobox } from './components/dataset-combobox';
@@ -20,10 +22,11 @@ export function DatasetCrumb() {
 }
 
 export function DatasetSwitcher() {
+  useLocale();
   const { datasetId } = useParams<{ datasetId: string }>();
   if (!datasetId) return null;
 
-  return <DatasetCombobox value={datasetId} {...crumbSwitcherTriggerProps} aria-label="Switch dataset" />;
+  return <DatasetCombobox value={datasetId} {...crumbSwitcherTriggerProps} aria-label={studioT('Switch dataset')} />;
 }
 
 export function DatasetVersionCrumb() {
@@ -43,6 +46,7 @@ export function DatasetVersionCrumb() {
 }
 
 export function DatasetVersionSwitcher() {
+  useLocale();
   const { datasetId } = useParams<{ datasetId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const { activeVersion, handleVersionChange } = useDatasetItemsUrlState(searchParams, setSearchParams);
@@ -61,7 +65,7 @@ export function DatasetVersionSwitcher() {
       currentVersion={dataset?.version}
       datasetCreatedAt={dataset?.createdAt}
       {...crumbSwitcherTriggerProps}
-      aria-label="Switch dataset version"
+      aria-label={studioT('Switch dataset version')}
     />
   );
 }

@@ -13,6 +13,7 @@ import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyD
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { JsonSchema } from '@mastra/playground-ui/utils/json-schema';
 import { useStoredAgents } from '@mastra/react/hooks/agents';
 import { useCallback, useMemo } from 'react';
@@ -30,14 +31,20 @@ function RecursiveFieldRenderer({
   parentPath: string[];
   depth: number;
 }) {
+  useLocale();
   return (
     <div className="py-2" style={{ paddingLeft: depth * 8 }}>
       <JSONSchemaForm.Field key={field.id} field={field} parentPath={parentPath} depth={depth}>
         <div className="space-y-2 px-2">
           <div className="flex flex-row items-center gap-4">
-            <JSONSchemaForm.FieldName labelIsHidden placeholder="Variable name" size="md" className="w-full" />
+            <JSONSchemaForm.FieldName
+              labelIsHidden
+              placeholder={studioT('Variable name')}
+              size="md"
+              className="w-full"
+            />
 
-            <JSONSchemaForm.FieldType placeholder="Type" />
+            <JSONSchemaForm.FieldType placeholder={studioT('Type')} />
             <JSONSchemaForm.FieldOptional />
             <JSONSchemaForm.FieldNullable />
             <JSONSchemaForm.FieldRemove />
@@ -57,7 +64,7 @@ function RecursiveFieldRenderer({
           </JSONSchemaForm.FieldList>
           <JSONSchemaForm.AddField className="mt-2" size="sm">
             <IconPlusMedium />
-            Add nested variable
+            {studioT('Add nested variable')}
           </JSONSchemaForm.AddField>
         </JSONSchemaForm.NestedFields>
       </JSONSchemaForm.Field>
@@ -92,6 +99,7 @@ export function PromptBlockEditSidebar({
   formResetKey = 0,
   blockId,
 }: PromptBlockEditSidebarProps) {
+  useLocale();
   const {
     register,
     control,
@@ -124,29 +132,32 @@ export function PromptBlockEditSidebar({
     <div className="flex h-full flex-col">
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-4 p-4">
-          <SectionHeader title="Configuration" subtitle="Define your prompt block's name and description." />
+          <SectionHeader
+            title={studioT('Configuration')}
+            subtitle={studioT("Define your prompt block's name and description.")}
+          />
 
           <Field invalid={Boolean(errors.name)}>
-            <FieldLabel required>Name</FieldLabel>
-            <Input placeholder="My Prompt Block" required {...register('name')} />
+            <FieldLabel required>{studioT('Name')}</FieldLabel>
+            <Input placeholder={studioT('My Prompt Block')} required {...register('name')} />
             <FieldError>{errors.name?.message}</FieldError>
           </Field>
 
           <Field invalid={Boolean(errors.description)}>
-            <FieldLabel>Description</FieldLabel>
-            <Textarea placeholder="Describe what this prompt block does" {...register('description')} />
+            <FieldLabel>{studioT('Description')}</FieldLabel>
+            <Textarea placeholder={studioT('Describe what this prompt block does')} {...register('description')} />
             <FieldError>{errors.description?.message}</FieldError>
           </Field>
         </div>
 
         <div className="flex flex-col gap-4 border-t border-border p-4">
           <SectionHeader
-            title="Variables"
+            title={studioT('Variables')}
             subtitle={
               <>
-                Define variables for this prompt block. Use{' '}
-                <InlineCode className="text-label text-foreground">{'{{variableName}}'}</InlineCode> syntax in your
-                content.
+                {studioT('Define variables for this prompt block. Use')}{' '}
+                <InlineCode className="text-label text-foreground">{'{{variableName}}'}</InlineCode>{' '}
+                {' ' + studioT('syntax in your content.')}
               </>
             }
           />
@@ -166,7 +177,7 @@ export function PromptBlockEditSidebar({
             <div className="p-2">
               <JSONSchemaForm.AddField>
                 <IconPlusMedium />
-                Add variable
+                {studioT('Add variable')}
               </JSONSchemaForm.AddField>
             </div>
           </JSONSchemaForm.Root>
@@ -174,7 +185,7 @@ export function PromptBlockEditSidebar({
 
         {mode === 'edit' && blockId && (
           <div className="flex flex-col gap-3 border-t border-border p-4">
-            <SectionHeader title="Used by" subtitle="Agents that reference this prompt block." />
+            <SectionHeader title={studioT('Used by')} subtitle={studioT('Agents that reference this prompt block.')} />
             {usedByAgents.length > 0 ? (
               <div className="flex flex-col gap-1.5">
                 {usedByAgents.map(agent => (
@@ -192,7 +203,7 @@ export function PromptBlockEditSidebar({
               </div>
             ) : (
               <Txt variant="caption" tone="muted">
-                Not referenced by any agents yet.
+                {studioT('Not referenced by any agents yet.')}
               </Txt>
             )}
           </div>
@@ -206,12 +217,12 @@ export function PromptBlockEditSidebar({
               {isSavingDraft ? (
                 <>
                   <Spinner className="h-4 w-4" />
-                  Saving...
+                  {studioT('Saving...')}
                 </>
               ) : (
                 <>
                   <IconFloppyDisk1 />
-                  Save
+                  {studioT('Save')}
                 </>
               )}
             </Button>
@@ -224,12 +235,12 @@ export function PromptBlockEditSidebar({
               {isSubmitting ? (
                 <>
                   <Spinner className="h-4 w-4" />
-                  Publishing...
+                  {studioT('Publishing...')}
                 </>
               ) : (
                 <>
                   <IconCheckmark2Medium />
-                  Publish
+                  {studioT('Publish')}
                 </>
               )}
             </Button>
@@ -239,12 +250,12 @@ export function PromptBlockEditSidebar({
             {isSubmitting ? (
               <>
                 <Spinner className="h-4 w-4" />
-                Creating...
+                {studioT('Creating...')}
               </>
             ) : (
               <>
                 <IconCheckmark2Medium />
-                Create prompt block
+                {studioT('Create prompt block')}
               </>
             )}
           </Button>

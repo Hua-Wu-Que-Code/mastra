@@ -1,6 +1,8 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxProps } from '@mastra/playground-ui/components/Combobox';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { useScorerVersions } from '@mastra/react/hooks/scores';
 
@@ -23,6 +25,7 @@ export function ScorerVersionCombobox({
   variant,
   activeVersionId,
 }: ScorerVersionComboboxProps) {
+  useLocale();
   const { data, isLoading } = useScorerVersions({
     scorerId,
     params: { orderBy: { direction: 'DESC' } },
@@ -35,19 +38,19 @@ export function ScorerVersionCombobox({
   const activeVersionNumber = activeVersion?.versionNumber;
 
   const options = [
-    { label: 'Latest', value: '' },
+    { label: studioT('Latest'), value: '' },
     ...versions.map(version => {
       const isPublished = version.id === activeVersionId;
       const isDraft = activeVersionNumber !== undefined && version.versionNumber > activeVersionNumber;
 
       return {
-        label: `v${version.versionNumber}`,
+        label: studioT('v{value0}', { value0: version.versionNumber }),
         value: version.id,
         description: formatDate(version.createdAt, 'date-time') ?? '',
         end: isPublished ? (
-          <Badge variant="success">Published</Badge>
+          <Badge variant="success">{studioT('Published')}</Badge>
         ) : isDraft ? (
-          <Badge variant="info">Draft</Badge>
+          <Badge variant="info">{studioT('Draft')}</Badge>
         ) : undefined,
       };
     }),
@@ -58,9 +61,9 @@ export function ScorerVersionCombobox({
       options={options}
       value={value}
       onValueChange={onValueChange}
-      placeholder={isLoading ? 'Loading versions...' : 'Versions'}
-      searchPlaceholder="Search versions"
-      emptyText="No versions found."
+      placeholder={isLoading ? studioT('Loading versions...') : studioT('Versions')}
+      searchPlaceholder={studioT('Search versions')}
+      emptyText={studioT('No versions found.')}
       className={className}
       disabled={disabled || isLoading}
       variant={variant}

@@ -12,6 +12,8 @@ import type { LinkComponent } from '@/ds/types/link-component';
 import { cn } from '@/lib/utils';
 
 export type SidebarLink = {
+  /** Stable identity for preferences and React keys when the display name is localized. */
+  id?: string;
   name: string;
   url: string;
   icon?: React.ReactNode;

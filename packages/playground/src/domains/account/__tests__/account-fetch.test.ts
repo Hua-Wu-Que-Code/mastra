@@ -1,0 +1,70 @@
+import { http, HttpResponse } from 'msw';
+import { describe, expect, it } from 'vitest';
+import { createAccountFetch } from '../account-fetch';
+import { creatorSession, adminSession } from './fixtures/session';
+import { server } from '@/test/msw-server';
+const url = 'http://localhost:4111/api/agents/creator-agent/stream';
+describe('Account fetch', () => {
+  describe('when the API is mounted at a custom prefix', () => {
+    it('removes editable settings and binds the resource on that route', async () => {
+      const mountedUrl = url.replace('/api/', '/api/mastra/');
+      server.use(
+        http.post(mountedUrl, async ({ request }) => {
+          expect(await request.json()).toEqual({
+            messages: [],
+            memory: { thread: 'thread-1', resource: creatorSession.resourceId },
+          });
+          return HttpResponse.json({ ok: true });
+        }),
+      );
+      expect(
+        (
+          await createAccountFetch(creatorSession, '/api/mastra')(mountedUrl, {
+            method: 'POST',
+            body: JSON.stringify({ messages: [], model: 'override', memory: { thread: 'thread-1' } }),
+          })
+        ).status,
+      ).toBe(200);
+    });
+  });
+  describe('when a creator sends a Studio chat request', () => {
+    it('sends conversation data with the assigned resource and server configuration', async () => {
+      server.use(
+        http.post(url, async ({ request }) => {
+          expect(request.credentials).toBe('include');
+          expect(await request.json()).toEqual({
+            messages: [{ role: 'user', content: 'hello' }],
+            memory: { thread: 'thread-1', resource: creatorSession.resourceId },
+          });
+          return HttpResponse.json({ ok: true });
+        }),
+      );
+      const response = await createAccountFetch(creatorSession)(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'hello' }],
+          memory: { thread: 'thread-1', resource: 'creator-agent' },
+          modelSettings: { temperature: 0.5 },
+          model: 'other/model',
+          requestContext: { injected: true },
+          clientTools: {},
+        }),
+      });
+      expect(response.status).toBe(200);
+    });
+  });
+  describe('when an administrator sends a request', () => {
+    it('preserves administrator configuration', async () => {
+      const body = { messages: [], model: 'provider/model' };
+      server.use(
+        http.post(url, async ({ request }) => {
+          expect(await request.json()).toEqual(body);
+          return HttpResponse.json({ ok: true });
+        }),
+      );
+      expect((await createAccountFetch(adminSession)(url, { method: 'POST', body: JSON.stringify(body) })).status).toBe(
+        200,
+      );
+    });
+  });
+});

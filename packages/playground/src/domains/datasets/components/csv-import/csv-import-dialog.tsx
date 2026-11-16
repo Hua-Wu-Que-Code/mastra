@@ -14,6 +14,10 @@ import {
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations, useDataset } from '@mastra/react/hooks/datasets';
 import { useCallback, useState } from 'react';
@@ -49,6 +53,7 @@ interface ImportResult {
  * Flow: upload -> preview -> mapping -> import -> complete
  */
 export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CSVImportDialogProps) {
+  const studioLocale = useLocale();
   const [step, setStep] = useState<ImportStep>('upload');
 
   const [parsedCSV, setParsedCSV] = useState<ParsedCSV | null>(null);
@@ -92,7 +97,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
       errors.push({
         row: 0,
         column: 'Input',
-        message: 'At least one column must be mapped to Input',
+        message: studioT('At least one column must be mapped to Input'),
       });
       return errors;
     }
@@ -106,14 +111,14 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
           errors.push({
             row: rowNum,
             column: col,
-            message: 'Input value is required',
+            message: studioT('Input value is required'),
           });
         }
       });
     });
 
     return errors;
-  }, [parsedCSV, columnMapping]);
+  }, [parsedCSV, columnMapping, studioLocale]);
 
   const buildItemFromRow = useCallback((row: Record<string, unknown>, mapping: ColumnMapping, headers: string[]) => {
     const inputColumns = headers.filter(h => mapping[h] === 'input');
@@ -174,7 +179,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
           {
             row: 0,
             column: '',
-            message: 'All rows failed schema validation. Please check your data.',
+            message: studioT('All rows failed schema validation. Please check your data.'),
           },
         ]);
         return;
@@ -196,7 +201,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
       });
       setStep('validation');
     }
-  }, [validateMappedData, parsedCSV, columnMapping, buildItemFromRow, dataset]);
+  }, [validateMappedData, parsedCSV, columnMapping, buildItemFromRow, dataset, studioLocale]);
 
   const handleImport = useCallback(async () => {
     if (!schemaValidation || schemaValidation.validCount === 0) return;
@@ -248,10 +253,19 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
       const skipped = schemaValidation?.invalidCount ?? 0;
       if (skipped > 0) {
         toast.success(
-          `Imported ${importResult.success} row${importResult.success !== 1 ? 's' : ''} (${skipped} skipped)`,
+          studioT('Imported {value0} row{value1} ({value2} skipped)', {
+            value0: importResult.success,
+            value1: importResult.success !== 1 ? studioT('English plural suffix') : '',
+            value2: skipped,
+          }),
         );
       } else {
-        toast.success(`Imported ${importResult.success} row${importResult.success !== 1 ? 's' : ''}`);
+        toast.success(
+          studioT('Imported {value0} row{value1}', {
+            value0: importResult.success,
+            value1: importResult.success !== 1 ? studioT('English plural suffix') : '',
+          }),
+        );
       }
     }
 
@@ -266,7 +280,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
       setImportProgress({ current: 0, total: 0 });
       setImportResult(null);
     }, 150);
-  }, [onOpenChange, onSuccess, importResult, schemaValidation]);
+  }, [onOpenChange, onSuccess, importResult, schemaValidation, studioLocale]);
 
   const handleClose = useCallback(() => {
     onOpenChange(false);
@@ -298,7 +312,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
         return parsedCSV ? (
           <>
             <Txt as="p" variant="body" tone="muted">
-              Preview of your CSV data. Click Next to map columns.
+              {studioT('Preview of your CSV data. Click Next to map columns.')}
             </Txt>
             <CSVPreviewTable headers={parsedCSV.headers} data={parsedCSV.data} maxRows={5} />
           </>
@@ -317,7 +331,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
 
             <div className="border-t border-border pt-4">
               <Txt as="p" variant="caption" tone="muted" className="mb-2">
-                Data Preview
+                {studioT('Data Preview')}
               </Txt>
               <CSVPreviewTable headers={parsedCSV.headers} data={parsedCSV.data} maxRows={3} />
             </div>
@@ -329,8 +343,8 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
           <>
             <Txt as="p" variant="body" tone="muted">
               {dataset?.inputSchema || dataset?.groundTruthSchema
-                ? 'Rows have been validated against the dataset schema.'
-                : 'Ready to import. No schema validation required.'}
+                ? studioT('Rows have been validated against the dataset schema.')
+                : studioT('Ready to import. No schema validation required.')}
             </Txt>
 
             {schemaValidation.invalidCount > 0 ? (
@@ -340,11 +354,20 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
                     ⚠
                   </Txt>
                   <Txt as="span" variant="label" className="block">
-                    {schemaValidation.invalidCount} row{schemaValidation.invalidCount !== 1 ? 's' : ''} will be skipped
+                    <Trans
+                      id="{part0} row {part1} will be skipped"
+                      values={{
+                        part0: schemaValidation.invalidCount,
+                        part1: schemaValidation.invalidCount !== 1 ? studioT('English plural suffix') : '',
+                      }}
+                    />
                   </Txt>
                 </div>
                 <Txt tone="muted" className="mt-1">
-                  {schemaValidation.validCount} of {schemaValidation.totalRows} rows will be imported
+                  <Trans
+                    id="{part0} of {part1} rows will be imported"
+                    values={{ part0: schemaValidation.validCount, part1: schemaValidation.totalRows }}
+                  />
                 </Txt>
               </div>
             ) : (
@@ -354,7 +377,13 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
                     ✓
                   </Txt>
                   <Txt as="span" variant="label" className="block">
-                    All {schemaValidation.totalRows} row{schemaValidation.totalRows !== 1 ? 's are' : ' is'} valid
+                    <Trans
+                      id="All {part0} row {part1} valid"
+                      values={{
+                        part0: schemaValidation.totalRows,
+                        part1: schemaValidation.totalRows !== 1 ? studioT('s are') : ' ' + studioT('is'),
+                      }}
+                    />
                   </Txt>
                 </div>
               </div>
@@ -363,7 +392,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
             {schemaValidation.validCount === 0 && (
               <div role="alert">
                 <Notice variant="destructive">
-                  No valid rows to import. Please fix the data or adjust the schema.
+                  {studioT('No valid rows to import. Please fix the data or adjust the schema.')}
                 </Notice>
               </div>
             )}
@@ -378,10 +407,13 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
             <Spinner />
             <div className="text-center">
               <Txt as="p" variant="heading" tone="faint">
-                Importing items...
+                {studioT('Importing items...')}
               </Txt>
               <Txt as="p" variant="body" tone="muted" className="mt-1">
-                {importProgress.current} of {importProgress.total}
+                <Trans
+                  id="{part0} of {part1}"
+                  values={{ part0: importProgress.current, part1: importProgress.total }}
+                />
               </Txt>
             </div>
           </div>
@@ -395,16 +427,27 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
             </Txt>
             <div className="text-center">
               <Txt as="p" variant="heading" tone="faint">
-                Import Complete
+                {studioT('Import Complete')}
               </Txt>
               <Txt as="p" variant="body" tone="muted" className="mt-1">
-                {importResult?.success ?? 0} item{importResult?.success !== 1 ? 's' : ''} imported
-                {importResult && importResult.errors > 0 && (
-                  <span className="text-destructive-foreground">
-                    {' '}
-                    ({importResult.errors} error{importResult.errors !== 1 ? 's' : ''})
-                  </span>
-                )}
+                <Trans
+                  id="{part0} item {part1} imported {part2}"
+                  values={{
+                    part0: importResult?.success ?? 0,
+                    part1: importResult?.success !== 1 ? studioT('English plural suffix') : '',
+                    part2: importResult && importResult.errors > 0 && (
+                      <span className="text-destructive-foreground">
+                        <Trans
+                          id="({part0} error {part1})"
+                          values={{
+                            part0: importResult.errors,
+                            part1: importResult.errors !== 1 ? studioT('English plural suffix') : '',
+                          }}
+                        />
+                      </span>
+                    ),
+                  }}
+                />
               </Txt>
             </div>
           </div>
@@ -415,22 +458,22 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
   const renderFooter = () => {
     switch (step) {
       case 'upload':
-        return <DialogCancel>Cancel</DialogCancel>;
+        return <DialogCancel>{studioT('Cancel')}</DialogCancel>;
 
       case 'preview':
         return (
           <>
-            <Button onClick={() => setStep('upload')}>Back</Button>
-            <DialogAction onConfirm={() => setStep('mapping')}>Next</DialogAction>
+            <Button onClick={() => setStep('upload')}>{studioT('Back')}</Button>
+            <DialogAction onConfirm={() => setStep('mapping')}>{studioT('Next')}</DialogAction>
           </>
         );
 
       case 'mapping':
         return (
           <>
-            <Button onClick={() => setStep('preview')}>Back</Button>
+            <Button onClick={() => setStep('preview')}>{studioT('Back')}</Button>
             <DialogAction onConfirm={handleValidateMapping} disabled={!columnMapping.isInputMapped}>
-              {dataset?.inputSchema || dataset?.groundTruthSchema ? 'Validate' : 'Next'}
+              {dataset?.inputSchema || dataset?.groundTruthSchema ? studioT('Validate') : studioT('Next')}
             </DialogAction>
           </>
         );
@@ -438,11 +481,17 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
       case 'validation':
         return (
           <>
-            <Button onClick={() => setStep('mapping')}>Back</Button>
+            <Button onClick={() => setStep('mapping')}>{studioT('Back')}</Button>
             <DialogAction onConfirm={handleImport} disabled={!schemaValidation || schemaValidation.validCount === 0}>
               {schemaValidation?.invalidCount
-                ? `Import ${schemaValidation.validCount} Valid Row${schemaValidation.validCount !== 1 ? 's' : ''}`
-                : `Import ${schemaValidation?.totalRows ?? 0} Row${schemaValidation?.totalRows !== 1 ? 's' : ''}`}
+                ? studioT('Import {value0} Valid Row{value1}', {
+                    value0: schemaValidation.validCount,
+                    value1: schemaValidation.validCount !== 1 ? studioT('English plural suffix') : '',
+                  })
+                : studioT('Import {value0} Row{value1}', {
+                    value0: schemaValidation?.totalRows ?? 0,
+                    value1: schemaValidation?.totalRows !== 1 ? studioT('English plural suffix') : '',
+                  })}
             </DialogAction>
           </>
         );
@@ -451,7 +500,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
         return null;
 
       case 'complete':
-        return <DialogAction onConfirm={handleDone}>Done</DialogAction>;
+        return <DialogAction onConfirm={handleDone}>{studioT('Done')}</DialogAction>;
     }
   };
 
@@ -471,7 +520,7 @@ export function CSVImportDialog({ datasetId, open, onOpenChange, onSuccess }: CS
       <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle>{stepTitles[step]}</DialogTitle>
-          <DialogDescription>Import dataset items from a CSV file.</DialogDescription>
+          <DialogDescription>{studioT('Import dataset items from a CSV file.')}</DialogDescription>
         </DialogHeader>
 
         <DialogBody>{renderStepContent()}</DialogBody>

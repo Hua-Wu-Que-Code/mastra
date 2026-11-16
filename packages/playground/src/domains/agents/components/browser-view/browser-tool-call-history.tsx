@@ -1,6 +1,10 @@
 import { DisclosureChevron } from '@mastra/playground-ui/components/DisclosureChevron';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useBrowserToolCalls } from '@mastra/playground-ui/domains/agents/context/browser-tool-calls-context';
+
+import { useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useRef, useEffect, useState } from 'react';
 import { BrowserToolCallItem } from './browser-tool-call-item';
@@ -14,6 +18,7 @@ interface BrowserToolCallHistoryProps {
  * Renders below the browser frame in BrowserViewPanel.
  */
 export function BrowserToolCallHistory({ className }: BrowserToolCallHistoryProps) {
+  useLocale();
   const { toolCalls } = useBrowserToolCalls();
   const [isExpanded, setIsExpanded] = useState(true);
   const listRef = useRef<HTMLDivElement>(null);
@@ -37,7 +42,7 @@ export function BrowserToolCallHistory({ className }: BrowserToolCallHistoryProp
       >
         <DisclosureChevron className="size-3.5 text-muted-foreground" />
         <Txt as="span" variant="column" tone="muted">
-          Browser actions ({toolCalls.length})
+          <Trans id="Browser actions ( {part0})" values={{ part0: toolCalls.length }} />
         </Txt>
       </button>
 

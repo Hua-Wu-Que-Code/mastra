@@ -1,5 +1,7 @@
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
 import { IconChevronTopMedium } from '@/ds/icons/central/IconChevronTopMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 /** The list's last row: pages more rows in, or collapses back to the top rows. */
 export function ShowMore({
@@ -17,6 +19,7 @@ export function ShowMore({
   onMore: () => void;
   onLess: () => void;
 }) {
+  useLocale();
   if (total <= limit) return null;
   const left = total - shown;
   const button =
@@ -27,18 +30,20 @@ export function ShowMore({
       {left > 0 && (
         <button type="button" onClick={onMore} className={button}>
           <IconChevronDownMedium className="size-icon-sm shrink-0" />
-          Show {Math.min(left, pageSize)} more
+          {studioT('Show') + ' '}
+          {Math.min(left, pageSize)} {' ' + studioT('more')}
         </button>
       )}
       {shown > limit && (
         <button type="button" onClick={onLess} className={button}>
           <IconChevronTopMedium className="size-icon-sm shrink-0" />
-          Show top {limit}
+          {studioT('Show top') + ' '}
+          {limit}
         </button>
       )}
       {left > 0 && (
         <span className="ml-auto pr-2 text-body-sm text-placeholder tabular-nums">
-          {n.format(shown)} of {n.format(total)}
+          <Trans id="{part0} of {part1}" values={{ part0: n.format(shown), part1: n.format(total) }} />
         </span>
       )}
     </li>

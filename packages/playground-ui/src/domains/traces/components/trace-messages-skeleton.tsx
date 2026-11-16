@@ -1,4 +1,6 @@
 import { Skeleton } from '@/ds/components/Skeleton';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export interface TraceMessagesSkeletonProps {
@@ -25,10 +27,11 @@ function BodyLine({ width }: { width: string }) {
  * body lines, then a one-line tool activity (`py-1` + caption line) — so the column keeps its shape while spans load.
  */
 export function TraceMessagesSkeleton({ className, delayed = true }: TraceMessagesSkeletonProps) {
+  useLocale();
   return (
     <div
       role="status"
-      aria-label="Loading messages"
+      aria-label={studioT('Loading messages')}
       className={cn(
         'min-w-0 p-4',
         delayed && 'animate-in delay-500 duration-200 fade-in-0 fill-mode-backwards',

@@ -1,5 +1,7 @@
 import type { CreateStoredScorerParams } from '@mastra/client-js';
 import { Form } from '@mastra/playground-ui/components/Form';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useStoredScorerMutations } from '@mastra/react/hooks/scores';
 import { useRef } from 'react';
@@ -14,6 +16,7 @@ interface ScorerCreateContentProps {
 }
 
 export function ScorerCreateContent({ onSuccess }: ScorerCreateContentProps) {
+  useLocale();
   const { createStoredScorer } = useStoredScorerMutations();
   const formRef = useRef<HTMLFormElement | null>(null);
   const { form } = useScorerEditForm();
@@ -21,7 +24,7 @@ export function ScorerCreateContent({ onSuccess }: ScorerCreateContentProps) {
   const handlePublish = async () => {
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error(studioT('Please fill in all required fields'));
       return;
     }
 
@@ -42,10 +45,14 @@ export function ScorerCreateContent({ onSuccess }: ScorerCreateContentProps) {
       };
 
       const created = await createStoredScorer.mutateAsync(createParams);
-      toast.success('Scorer created successfully');
+      toast.success(studioT('Scorer created successfully'));
       onSuccess?.(created);
     } catch (error) {
-      toast.error(`Failed to create scorer: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to create scorer: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 

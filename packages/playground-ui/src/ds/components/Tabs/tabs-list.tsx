@@ -10,6 +10,10 @@ import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium'
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { controlHeight } from '@/ds/primitives/control-size';
 import { transitions } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 const tabListVariants = cva('relative flex items-center text-body', {
@@ -47,6 +51,7 @@ function indicatorHeightClass(variant: TabListVariant, contained: boolean) {
 }
 
 export const TabList = ({ children, className, variant, size = 'md', sticky, style }: TabListProps) => {
+  useLocale();
   const resolvedVariant = variant ?? 'pill';
   const tabs = useContext(TabsContext);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -230,10 +235,14 @@ export const TabList = ({ children, className, variant, size = 'md', sticky, sty
                       />
                     }
                   >
-                    <span className="sr-only">Close {tab.label}</span>
+                    <span className="sr-only">
+                      <Trans id="Close {part0}" values={{ part0: tab.label }} />
+                    </span>
                     <IconCrossMedium aria-hidden="true" className="size-icon-xs" />
                   </TooltipTrigger>
-                  <TooltipContent>Close {tab.label}</TooltipContent>
+                  <TooltipContent>
+                    <Trans id="Close {part0}" values={{ part0: tab.label }} />
+                  </TooltipContent>
                 </Tooltip>
               </div>
             ))}
@@ -246,7 +255,7 @@ export const TabList = ({ children, className, variant, size = 'md', sticky, sty
             >
               <DropdownMenu>
                 <DropdownMenu.Trigger
-                  aria-label={`${hiddenTabs.length} more tabs`}
+                  aria-label={studioT('{value0} more tabs', { value0: hiddenTabs.length })}
                   variant="ghost"
                   size="sm"
                   className="tabular-nums"
@@ -281,10 +290,14 @@ export const TabList = ({ children, className, variant, size = 'md', sticky, sty
                               />
                             }
                           >
-                            <span className="sr-only">Close {tab.label}</span>
+                            <span className="sr-only">
+                              <Trans id="Close {part0}" values={{ part0: tab.label }} />
+                            </span>
                             <IconCrossMedium aria-hidden="true" className="size-icon-xs" />
                           </TooltipTrigger>
-                          <TooltipContent side="right">Close {tab.label}</TooltipContent>
+                          <TooltipContent side="right">
+                            <Trans id="Close {part0}" values={{ part0: tab.label }} />
+                          </TooltipContent>
                         </Tooltip>
                       ) : null}
                     </Fragment>

@@ -1,4 +1,6 @@
 import { CrumbSkeleton, crumbSwitcherTriggerProps } from '@mastra/playground-ui/components/Breadcrumb';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useStoredScorer } from '@mastra/react/hooks/scores';
 import { useParams } from 'react-router';
 import { ScorerCombobox } from './components/scorer-combobox';
@@ -14,10 +16,11 @@ export function ScorerCrumb() {
 }
 
 export function ScorerSwitcher() {
+  useLocale();
   const { scorerId } = useParams<{ scorerId: string }>();
   if (!scorerId) return null;
 
-  return <ScorerCombobox value={scorerId} {...crumbSwitcherTriggerProps} aria-label="Switch scorer" />;
+  return <ScorerCombobox value={scorerId} {...crumbSwitcherTriggerProps} aria-label={studioT('Switch scorer')} />;
 }
 
 export function StoredScorerCrumb() {

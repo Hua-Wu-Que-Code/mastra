@@ -9,6 +9,8 @@ import { IconChevronLeftMedium } from '@/ds/icons/central/IconChevronLeftMedium'
 import { TraceIcon } from '@/ds/icons/TraceIcon';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { textStyle } from '@/ds/primitives/text';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface TraceInsightViewProps {
@@ -17,6 +19,7 @@ interface TraceInsightViewProps {
 }
 
 export function TraceInsightView({ traceId, onBack }: TraceInsightViewProps) {
+  useLocale();
   const { LinkComponent, getTraceHref } = useTraceIntelligence();
   const insightQuery = useTraceInsight(traceId);
 
@@ -24,14 +27,16 @@ export function TraceInsightView({ traceId, onBack }: TraceInsightViewProps) {
     <div className="grid content-start gap-6">
       <div className="flex items-center justify-between gap-3">
         <Button icon={<IconChevronLeftMedium />} size="sm" onClick={onBack}>
-          Back to examples
+          {studioT('Back to examples')}
         </Button>
         <Button icon={<TraceIcon />} render={<LinkComponent href={getTraceHref(traceId)} />} size="sm">
-          Open full trace
+          {studioT('Open full trace')}
         </Button>
       </div>
-      {insightQuery.isPending && <Txt tone="muted">Loading trace insight…</Txt>}
-      {insightQuery.isError && <Txt className="text-destructive-foreground">Unable to load the trace insight.</Txt>}
+      {insightQuery.isPending && <Txt tone="muted">{studioT('Loading trace insight…')}</Txt>}
+      {insightQuery.isError && (
+        <Txt className="text-destructive-foreground">{studioT('Unable to load the trace insight.')}</Txt>
+      )}
       {insightQuery.data && <TraceInsightBody insight={insightQuery.data} />}
     </div>
   );
@@ -74,6 +79,7 @@ const OBSERVATION_SEVERITY_CARD: Record<ObservationSeverity, string> = {
 };
 
 function ObservationItem({ observation }: { observation: string }) {
+  useLocale();
   const { severity, kind, text } = parseTraceObservation(observation);
 
   return (
@@ -81,7 +87,9 @@ function ObservationItem({ observation }: { observation: string }) {
       {kind !== undefined && (
         <Txt variant="meta" tone="muted" className="uppercase">
           <Metadata>
-            {severity === 'problem' && <Metadata.Item className="text-destructive-foreground">problem</Metadata.Item>}
+            {severity === 'problem' && (
+              <Metadata.Item className="text-destructive-foreground">{studioT('problem')}</Metadata.Item>
+            )}
             <Metadata.Item>{kind}</Metadata.Item>
           </Metadata>
         </Txt>
@@ -94,27 +102,30 @@ function ObservationItem({ observation }: { observation: string }) {
 }
 
 function TraceInsightBody({ insight }: { insight: TraceInsightResponse }) {
+  useLocale();
   const { signalCatalog } = useTraceIntelligence();
   return (
     <>
       {insight.summary === undefined ? (
-        <Txt tone="muted">No insight available yet for this trace.</Txt>
+        <Txt tone="muted">{studioT('No insight available yet for this trace.')}</Txt>
       ) : (
         <section aria-labelledby="trace-insight-summary-heading">
           <Txt as="h2" variant="eyebrow" tone="muted" id="trace-insight-summary-heading">
-            Trace summary
+            {studioT('Trace summary')}
           </Txt>
           <Txt tone="ink" className="mt-3">
             {insight.summary.summary}
           </Txt>
           {insight.summary.currentTask !== undefined && (
             <dl className="mt-4">
-              <dt className={textStyle({ tone: 'muted', variant: 'body' })}>Current task</dt>
+              <dt className={textStyle({ tone: 'muted', variant: 'body' })}>{studioT('Current task')}</dt>
               <dd className={cn(textStyle({ tone: 'ink', variant: 'body' }), 'mt-1')}>{insight.summary.currentTask}</dd>
             </dl>
           )}
           {insight.summary.degenerate === true && (
-            <Txt className="mt-4 text-destructive-foreground">This trace was flagged as degenerate or looping.</Txt>
+            <Txt className="mt-4 text-destructive-foreground">
+              {studioT('This trace was flagged as degenerate or looping.')}
+            </Txt>
           )}
           {insight.summary.observations.length > 0 && (
             <>
@@ -126,7 +137,7 @@ function TraceInsightBody({ insight }: { insight: TraceInsightResponse }) {
                 id="trace-insight-observations-heading"
                 className="mt-4"
               >
-                Observations
+                {studioT('Observations')}
               </Txt>
               <ul aria-labelledby="trace-insight-observations-heading" className="mt-3 space-y-2">
                 {insight.summary.observations.map((observation, index) => (
@@ -140,7 +151,7 @@ function TraceInsightBody({ insight }: { insight: TraceInsightResponse }) {
       {insight.signals.length > 0 && (
         <section aria-labelledby="trace-insight-signals-heading">
           <Txt as="h2" variant="eyebrow" tone="muted" id="trace-insight-signals-heading">
-            Trace signal summaries
+            {studioT('Trace signal summaries')}
           </Txt>
           <ul className="mt-3 space-y-3">
             {insight.signals.map(signal => (

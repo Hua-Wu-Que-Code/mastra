@@ -1,6 +1,8 @@
 import { Checkbox } from '@mastra/playground-ui/components/Checkbox';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useMemo } from 'react';
 
@@ -11,6 +13,7 @@ interface SelectedToolListProps {
 }
 
 export function SelectedToolList({ providerId, selectedTools, onToggle }: SelectedToolListProps) {
+  useLocale();
   const tools = useMemo(() => {
     const result: { id: string; slug: string; description: string }[] = [];
     for (const [id, description] of selectedTools) {
@@ -26,7 +29,7 @@ export function SelectedToolList({ providerId, selectedTools, onToggle }: Select
     return (
       <div className="flex items-center justify-center py-8">
         <Txt variant="caption" tone="muted">
-          No tools selected
+          {studioT('No tools selected')}
         </Txt>
       </div>
     );

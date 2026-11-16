@@ -1,5 +1,6 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { SettingsItem } from '@mastra/playground-ui/new/settings';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import {
   describeSchemaType,
   getSchemaFields,
@@ -18,12 +19,13 @@ export interface ToolSchemaRowsProps {
 }
 
 export function ToolSchemaRows({ schema, emptyMessage, defaultsAreOptional }: ToolSchemaRowsProps) {
+  useLocale();
   if (isEmptySchema(schema)) return <ToolSettingsEmptyRow message={emptyMessage} />;
 
   // A non-object (or a dictionary, which has no named fields) reads as its type, e.g. `Record<string, string>`.
   if (!isObjectSchema(schema) || isDictionarySchema(schema)) {
     return (
-      <SettingsItem title="Type">
+      <SettingsItem title={studioT('Type')}>
         <Txt as="span" variant="caption" font="mono" tone="muted">
           {describeSchemaType(schema)}
         </Txt>

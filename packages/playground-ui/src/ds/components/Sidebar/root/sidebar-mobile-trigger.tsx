@@ -3,6 +3,8 @@ import { useSidebar } from './sidebar-context';
 import { IconBarsThree } from '@/ds/icons/central/IconBarsThree';
 import { focusRing } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SidebarMobileTriggerProps = ComponentPropsWithoutRef<'button'> & {
@@ -12,10 +14,11 @@ export type SidebarMobileTriggerProps = ComponentPropsWithoutRef<'button'> & {
 export function SidebarMobileTrigger({
   className,
   icon,
-  'aria-label': ariaLabel = 'Open navigation menu',
+  'aria-label': ariaLabel = studioT('Open navigation menu'),
   onClick,
   ...props
 }: SidebarMobileTriggerProps) {
+  useLocale();
   const { isMobile, mobileTriggerRef, setOpenMobile } = useSidebar();
   return (
     <button

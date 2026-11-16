@@ -1,6 +1,7 @@
 import type { SkillMetadata } from '@mastra/client-js';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { useWorkspaceDirectory } from '@mastra/playground-ui/domains/workspace';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 const INSTALLED_SKILLS_PATH = '.agents/skills';
 
@@ -16,6 +17,7 @@ export interface WorkspaceNoticesProps {
 
 /** Page-level notices shown above the workspace tree. */
 export function WorkspaceNotices({ workspaceId, showInitWarning, skills }: WorkspaceNoticesProps) {
+  useLocale();
   // Same query as the tree's `.agents/skills` folder, so React Query shares the request.
   const { data: installed } = useWorkspaceDirectory({
     workspaceId: workspaceId,
@@ -42,17 +44,20 @@ export function WorkspaceNotices({ workspaceId, showInitWarning, skills }: Works
       {showInitWarning && (
         <Notice variant="warning">
           <Notice.Message>
-            File search requires <code>workspace.init()</code> to index files from your configured{' '}
+            {studioT('File search requires') + ' '}
+            <code>workspace.init()</code> {' ' + studioT('to index files from your configured')}{' '}
             <code>autoIndexPaths</code>.
           </Notice.Message>
         </Notice>
       )}
       {undiscovered.length > 0 && (
-        <Notice variant="warning" title="Skills installed but not discovered">
+        <Notice variant="warning" title={studioT('Skills installed but not discovered')}>
           <Notice.Message>
-            {undiscovered.map(entry => entry.name).join(', ')} {undiscovered.length === 1 ? 'is' : 'are'} in{' '}
-            <code>{INSTALLED_SKILLS_PATH}</code> but not discovered. Add this path to your workspace skills
-            configuration to see {undiscovered.length === 1 ? 'it' : 'them'}.
+            {undiscovered.map(entry => entry.name).join(', ')}{' '}
+            {undiscovered.length === 1 ? studioT('is') : studioT('are')} {' ' + studioT('in')}{' '}
+            <code>{INSTALLED_SKILLS_PATH}</code>{' '}
+            {' ' + studioT('but not discovered. Add this path to your workspace skills configuration to see') + ' '}
+            {undiscovered.length === 1 ? studioT('it') : studioT('them')}.
           </Notice.Message>
         </Notice>
       )}

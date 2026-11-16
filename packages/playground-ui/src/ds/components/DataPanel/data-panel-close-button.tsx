@@ -2,6 +2,8 @@ import { Button } from '@/ds/components/Button';
 import type { ButtonProps } from '@/ds/components/Button';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface DataPanelCloseButtonProps {
@@ -20,12 +22,13 @@ export interface DataPanelCloseButtonProps {
 
 export function DataPanelCloseButton({
   onClick,
-  tooltip = 'Close panel',
-  label = 'Close panel',
+  tooltip = studioT('Close panel'),
+  label = studioT('Close panel'),
   icon = 'arrow',
   className,
   variant = 'ghost',
 }: DataPanelCloseButtonProps) {
+  useLocale();
   return (
     <Button
       size="icon-sm"

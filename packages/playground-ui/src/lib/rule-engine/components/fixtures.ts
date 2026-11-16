@@ -1,43 +1,102 @@
 import type { JsonSchema } from './types';
+import { t as studioT } from '@/lib/i18n';
 
 export const complexSchema: JsonSchema = {
   type: 'object',
   properties: {
     user: {
       type: 'object',
-      title: 'User',
+      get title() {
+        return studioT('User');
+      },
       properties: {
-        email: { type: 'string', title: 'Email' },
+        email: {
+          type: 'string',
+          get title() {
+            return studioT('Email');
+          },
+        },
         roles: {
           type: 'array',
-          title: 'Roles',
+          get title() {
+            return studioT('Roles');
+          },
           items: {
             type: 'object',
             properties: {
-              name: { type: 'string', title: 'Role Name' },
-              permissions: { type: 'string', title: 'Permissions' },
+              name: {
+                type: 'string',
+                get title() {
+                  return studioT('Role Name');
+                },
+              },
+              permissions: {
+                type: 'string',
+                get title() {
+                  return studioT('Permissions');
+                },
+              },
             },
           },
         },
         address: {
           type: 'object',
-          title: 'Address',
+          get title() {
+            return studioT('Address');
+          },
           properties: {
-            street: { type: 'string', title: 'Street' },
-            city: { type: 'string', title: 'City' },
-            country: { type: 'string', title: 'Country' },
-            zipCode: { type: 'string', title: 'Zip Code' },
+            street: {
+              type: 'string',
+              get title() {
+                return studioT('Street');
+              },
+            },
+            city: {
+              type: 'string',
+              get title() {
+                return studioT('City');
+              },
+            },
+            country: {
+              type: 'string',
+              get title() {
+                return studioT('Country');
+              },
+            },
+            zipCode: {
+              type: 'string',
+              get title() {
+                return studioT('Zip Code');
+              },
+            },
           },
         },
       },
     },
     metadata: {
       type: 'object',
-      title: 'Metadata',
+      get title() {
+        return studioT('Metadata');
+      },
       properties: {
-        createdAt: { type: 'string', title: 'Created At' },
-        updatedAt: { type: 'string', title: 'Updated At' },
-        version: { type: 'number', title: 'Version' },
+        createdAt: {
+          type: 'string',
+          get title() {
+            return studioT('Created At');
+          },
+        },
+        updatedAt: {
+          type: 'string',
+          get title() {
+            return studioT('Updated At');
+          },
+        },
+        version: {
+          type: 'number',
+          get title() {
+            return studioT('Version');
+          },
+        },
       },
     },
   },

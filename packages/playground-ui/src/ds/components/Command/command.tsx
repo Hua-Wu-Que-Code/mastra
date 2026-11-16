@@ -1,8 +1,8 @@
 import { Command as CommandPrimitive } from 'cmdk';
 import * as React from 'react';
-
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/ds/components/Dialog';
 import type { DialogSize } from '@/ds/components/Dialog';
+
 import { ScrollArea, ScrollAreaViewport } from '@/ds/components/ScrollArea';
 import type { ScrollAreaMask } from '@/ds/components/ScrollArea';
 import { Txt } from '@/ds/components/Txt';
@@ -10,6 +10,8 @@ import { IconMagnifyingGlass } from '@/ds/icons/central/IconMagnifyingGlass';
 import { controlIconState } from '@/ds/primitives/control-icon';
 import { passwordManagerOptOutProps } from '@/ds/primitives/password-manager-autofill';
 import { heightTransition, transitions } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const Command = React.forwardRef<
@@ -103,8 +105,8 @@ const CommandDialog = ({
   children,
   variant = 'default',
   footer,
-  title = 'Command Palette',
-  description = 'Search for commands and actions',
+  title = studioT('Command Palette'),
+  description = studioT('Search for commands and actions'),
   size,
   contentClassName,
   commandClassName,
@@ -113,6 +115,7 @@ const CommandDialog = ({
   overlayClassName,
   ...props
 }: CommandDialogProps) => {
+  useLocale();
   const filter = React.useCallback((value: string, search: string) => {
     const normalizedValue = value.toLowerCase();
     const normalizedSearch = search.toLowerCase();

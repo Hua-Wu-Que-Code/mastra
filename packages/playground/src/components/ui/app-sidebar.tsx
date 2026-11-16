@@ -4,17 +4,20 @@ import type { SidebarLink } from '@mastra/playground-ui/components/Sidebar';
 import { useConnectSurface } from '@mastra/playground-ui/domains/connect';
 import { useKeyboardShortcutLabel } from '@mastra/playground-ui/hooks/use-keyboard-shortcut-label';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
+
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useWorkspaces } from '@mastra/react/hooks/workspace';
 import { useLocation } from 'react-router';
+import { useAccount } from '@/domains/account/account-context';
+import { AccountMenu } from '@/domains/account/account-menu';
 import { useAgentBuilderSidebarVisibility } from '@/domains/agent-builder/hooks/use-agent-builder-sidebar-visibility';
 import { AuthStatus } from '@/domains/auth/components/auth-status';
 import { ImpersonationBanner } from '@/domains/auth/components/impersonation-banner';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 import { getPermissionForRoute, hasRoutePermission } from '@/domains/auth/route-permissions';
 import { useIsCmsAvailable } from '@/domains/cms/hooks/use-is-cms-available';
-import { MastraVersionNavLink } from '@/domains/configuration/components/mastra-version-nav-link';
 import { useNavigationCommand } from '@/lib/command';
 import { useMastraPlatform } from '@/lib/mastra-platform/hooks/use-mastra-platform';
 import { getIsLinkActive } from '@/lib/nav/get-is-link-active';
@@ -30,10 +33,12 @@ declare global {
 
 function toSidebarLink(item: NavItem): SidebarLink {
   const { Icon } = item;
-  return { name: item.name, url: item.url, icon: <Icon /> };
+  return { id: item.url, name: item.name, url: item.url, icon: <Icon /> };
 }
 
 export function AppSidebar() {
+  const account = useAccount();
+  useLocale();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { setOpen: setNavigationCommandOpen } = useNavigationCommand({ enableShortcut: false });
   const commandShortcutLabel = useKeyboardShortcutLabel('K');
@@ -80,43 +85,45 @@ export function AppSidebar() {
   const { data: mcpServers } = useMCPServers();
   const { data: workspaces } = useWorkspaces();
   const filteredBottom = bottomNav.filter(filterItem);
-  const sections = mainNav.map(section => {
-    const items = section.items.filter(filterItem);
-    const linkForItem = (item: NavItem) => ({
-      ...toSidebarLink(item),
-      isActive: getIsLinkActive(item, pathname, items),
-    });
-    return {
-      key: section.key,
-      title: section.title,
-      href: section.href,
-      isHeaderActive: !!(
-        section.href &&
-        pathname === section.href &&
-        !items.some(item => getIsLinkActive(item, pathname, items))
-      ),
-      links: items.filter(item => !item.foldable).map(linkForItem),
-      moreLinks: items
-        .filter(item => item.foldable)
-        .map(item => ({
-          ...linkForItem(item),
-          defaultVisible:
-            (item.url === '/mcps' && !!mcpServers?.length) ||
-            (item.url === '/workspaces' && !!workspaces?.workspaces.length),
-        })),
-    };
-  });
+  const sections = mainNav
+    .map(section => {
+      const items = section.items.filter(filterItem);
+      const linkForItem = (item: NavItem) => ({
+        ...toSidebarLink(item),
+        isActive: getIsLinkActive(item, pathname, items),
+      });
+      return {
+        key: section.key,
+        title: section.title,
+        href: section.href,
+        isHeaderActive: !!(
+          section.href &&
+          pathname === section.href &&
+          !items.some(item => getIsLinkActive(item, pathname, items))
+        ),
+        links: items.filter(item => !item.foldable).map(linkForItem),
+        moreLinks: items
+          .filter(item => item.foldable)
+          .map(item => ({
+            ...linkForItem(item),
+            defaultVisible:
+              (item.url === '/mcps' && !!mcpServers?.length) ||
+              (item.url === '/workspaces' && !!workspaces?.workspaces.length),
+          })),
+      };
+    })
+    .filter(section => section.links.length > 0 || section.moreLinks.length > 0);
 
   return (
-    <Sidebar aria-label="Sidebar">
+    <Sidebar aria-label={studioT('Sidebar')}>
       <Sidebar.Header
         collapsedLogo={<LogoWithoutText className="size-6" />}
-        actions={isUserAuthenticated && <AuthStatus />}
+        actions={!account && isUserAuthenticated && <AuthStatus />}
       >
         <Sidebar.Brand logo={<LogoWithoutText className="size-6" />} title="Mastra Studio" />
         {!isMobile && (
           <Sidebar.SearchTrigger
-            aria-label="Search and navigate"
+            aria-label={studioT('Search and navigate')}
             shortcut={commandShortcutLabel}
             onClick={openNavigationCommand}
           />
@@ -138,13 +145,14 @@ export function AppSidebar() {
         </Sidebar.NavList>
       )}
 
-      <ImpersonationBanner />
+      {!account && <ImpersonationBanner />}
 
       <Sidebar.Nav>
         <Sidebar.Sections sections={sections} visibilityStorageKey="mastra:studio:sidebar-visibility" />
       </Sidebar.Nav>
 
       <Sidebar.Footer>
+        <AccountMenu />
         <Sidebar.NavList>
           {filteredBottom.map(item => (
             <Sidebar.NavLink
@@ -154,7 +162,6 @@ export function AppSidebar() {
               isActive={getIsLinkActive(item, pathname)}
             />
           ))}
-          <MastraVersionNavLink state={state} />
         </Sidebar.NavList>
       </Sidebar.Footer>
     </Sidebar>

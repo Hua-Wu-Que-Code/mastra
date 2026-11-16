@@ -60,7 +60,6 @@ describe('GlobalShortcuts', () => {
       ['t', '/traces'],
       ['l', '/logs'],
       [',', '/settings'],
-      ['h', '/resources'],
     ])('g then %s navigates to %s', async (key, pathname) => {
       renderAt('/');
 

@@ -3,6 +3,8 @@ import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Switch } from '@mastra/playground-ui/components/Switch';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconGlobe } from '@mastra/playground-ui/icons/central/IconGlobe';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { CSSProperties } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useAgentColor } from '../../../contexts/agent-color-context';
@@ -15,6 +17,7 @@ export interface BrowserProps {
 const TOGGLE_ID = 'agent-browser-toggle';
 
 export const Browser = ({ editable = true }: BrowserProps) => {
+  useLocale();
   const { control, setValue } = useFormContext<AgentBuilderEditFormValues>();
   const browserEnabled = useWatch({ control, name: 'browserEnabled' }) ?? false;
   const agentColor = useAgentColor();
@@ -37,11 +40,12 @@ export const Browser = ({ editable = true }: BrowserProps) => {
 
         <div className="flex flex-col gap-2">
           <Txt variant="heading" tone="ink">
-            Browser access
+            {studioT('Browser access')}
           </Txt>
           <Txt variant="body" tone="muted">
-            Let this agent open a browser session to navigate websites, fill out forms, and read live web content as
-            part of a run.
+            {studioT(
+              'Let this agent open a browser session to navigate websites, fill out forms, and read live web content as part of a run.',
+            )}
           </Txt>
         </div>
 
@@ -52,9 +56,9 @@ export const Browser = ({ editable = true }: BrowserProps) => {
             data-testid={TOGGLE_ID}
             style={switchStyle}
           />
-          <FieldLabel size="smaller">Enable browser</FieldLabel>
+          <FieldLabel size="smaller">{studioT('Enable browser')}</FieldLabel>
           <Badge variant={browserEnabled ? 'success' : 'neutral'} size="sm" indicator="dot">
-            {browserEnabled ? 'Enabled' : 'Disabled'}
+            {browserEnabled ? studioT('Enabled') : studioT('Disabled')}
           </Badge>
         </Field>
       </div>

@@ -20,6 +20,7 @@ import { IconArrowLeftRight } from '@/ds/icons/central/IconArrowLeftRight';
 import { IconCodeBrackets } from '@/ds/icons/central/IconCodeBrackets';
 import { IconFileArrowRightIn } from '@/ds/icons/central/IconFileArrowRightIn';
 import { IconFileArrowRightOut } from '@/ds/icons/central/IconFileArrowRightOut';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const KV = DataDetailsPanel.KeyValueList;
 
@@ -37,12 +38,13 @@ export interface SpanDetailsViewProps {
  * full-width span view with scoring tab + prev/next nav, use `SpanDataPanelView`.
  */
 export function SpanDetailsView({ spanId, span, isLoading, onClose }: SpanDetailsViewProps) {
+  useLocale();
   return (
     <DataDetailsPanel>
       <DataDetailsPanel.Header>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <DataDetailsPanel.Heading className="items-center">
-            Span
+            {studioT('Span')}
             <TraceIdButton id={spanId} />
           </DataDetailsPanel.Heading>
           {span && (
@@ -56,15 +58,15 @@ export function SpanDetailsView({ spanId, span, isLoading, onClose }: SpanDetail
       </DataDetailsPanel.Header>
 
       {isLoading ? (
-        <DataDetailsPanel.LoadingData>Loading span...</DataDetailsPanel.LoadingData>
+        <DataDetailsPanel.LoadingData>{studioT('Loading span...')}</DataDetailsPanel.LoadingData>
       ) : !span ? (
-        <DataDetailsPanel.NoData>Span not found.</DataDetailsPanel.NoData>
+        <DataDetailsPanel.NoData>{studioT('Span not found.')}</DataDetailsPanel.NoData>
       ) : (
         <DataDetailsPanel.Content>
           {span.spanType && (
             <>
               <KV>
-                <KV.Key>Type</KV.Key>
+                <KV.Key>{studioT('Type')}</KV.Key>
                 <KV.Value>{span.spanType}</KV.Value>
               </KV>
               <br />
@@ -72,12 +74,12 @@ export function SpanDetailsView({ spanId, span, isLoading, onClose }: SpanDetail
           )}
           <SpanProcessorAttributes span={span} className="mb-4" />
 
-          <SpanPayloadSection title="Error" raw={span.error} layout="details" framed={false}>
+          <SpanPayloadSection title={studioT('Error')} raw={span.error} layout="details" framed={false}>
             <SpanErrorRenderer span={span} />
           </SpanPayloadSection>
           {getSpanChanges(span).length > 0 && (
             <SpanPayloadSection
-              title="Changes"
+              title={studioT('Changes')}
               icon={<IconArrowLeftRight />}
               raw={getSpanChanges(span)}
               layout="details"
@@ -87,7 +89,7 @@ export function SpanDetailsView({ spanId, span, isLoading, onClose }: SpanDetail
             </SpanPayloadSection>
           )}
           <SpanPayloadSection
-            title="Input"
+            title={studioT('Input')}
             icon={<IconFileArrowRightIn />}
             raw={span.input}
             hasPreview={hasSpanInputPreview(span)}
@@ -96,7 +98,7 @@ export function SpanDetailsView({ spanId, span, isLoading, onClose }: SpanDetail
             <SpanInputRenderer span={span} />
           </SpanPayloadSection>
           <SpanPayloadSection
-            title="Output"
+            title={studioT('Output')}
             icon={<IconFileArrowRightOut />}
             raw={getSpanOutputPayload(span)}
             hasPreview={hasSpanOutputPreview(span)}
@@ -105,9 +107,14 @@ export function SpanDetailsView({ spanId, span, isLoading, onClose }: SpanDetail
             <SpanOutputRenderer span={span} />
           </SpanPayloadSection>
           <SpanToolsSection span={span} layout="details" />
-          <SpanPayloadJsonSection title="Metadata" icon={<IconCodeBrackets />} raw={span.metadata} layout="details" />
           <SpanPayloadJsonSection
-            title="Attributes"
+            title={studioT('Metadata')}
+            icon={<IconCodeBrackets />}
+            raw={span.metadata}
+            layout="details"
+          />
+          <SpanPayloadJsonSection
+            title={studioT('Attributes')}
             icon={<IconCodeBrackets />}
             raw={span.attributes}
             layout="details"

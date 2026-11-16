@@ -6,6 +6,8 @@ import { useSidebar } from '../root/sidebar-context';
 import { useSidebarNavStack } from './sidebar-nav-stack-context';
 import { sidebarNavStackPageClasses } from './sidebar-nav-stack-page-classes';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SidebarNavStackViewProps = ComponentPropsWithoutRef<'div'> & {
@@ -21,7 +23,7 @@ export type SidebarNavStackViewProps = ComponentPropsWithoutRef<'div'> & {
 export function SidebarNavStackView({
   value,
   title,
-  backLabel = 'Back to main navigation',
+  backLabel = studioT('Back to main navigation'),
   returnFocusRef,
   onBack,
   closeOnEscape = true,
@@ -29,6 +31,7 @@ export function SidebarNavStackView({
   className,
   ...props
 }: SidebarNavStackViewProps) {
+  useLocale();
   const { state } = useSidebar();
   const { activeValue, closeView } = useSidebarNavStack();
   const open = activeValue === value;

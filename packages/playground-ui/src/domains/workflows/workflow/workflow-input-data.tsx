@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { useRef, useState } from 'react';
 import type { ZodSchema } from 'zod';
-
 import { createProcessorInput, parseProcessorDraft } from './input/processor-input';
 import type { ProcessorDraft } from './input/processor-input';
+
 import { WorkflowJsonInput } from './input/workflow-json-input';
 import { WorkflowProcessorInput } from './input/workflow-processor-input';
 import { WorkflowInputTypeToggle } from './workflow-input-type-toggle';
@@ -17,6 +17,8 @@ import { Icon } from '@/ds/icons/Icon';
 import { DynamicForm } from '@/lib/form';
 import { getFormShapeError, parseJsonDraft, validateJsonDraft } from '@/lib/form/json-draft';
 import type { JsonDraftValue } from '@/lib/form/json-draft';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export interface WorkflowInputDataProps {
@@ -73,9 +75,10 @@ export const WorkflowInputData = ({
   submitButtonVariant = 'primary',
   submitButtonFullWidth,
   hideInputTypeLabel,
-  inputTypeLabel = 'Run input',
+  inputTypeLabel = studioT('Run input'),
   hideHeading,
 }: WorkflowInputDataProps) => {
+  useLocale();
   const [draft, setDraft] = useState(() => createInitialDraft(defaultValues, isProcessorWorkflow));
   // The Form view is uncontrolled: state here would only re-render this tree on every keystroke.
   const formValues = useRef<unknown>(defaultValues);
@@ -113,7 +116,7 @@ export const WorkflowInputData = ({
 
   const defaultHeading = (
     <Txt as="span" variant="subheading" tone="ink">
-      Trigger a run
+      {studioT('Trigger a run')}
     </Txt>
   );
   const toggleSitsInLabelRow = !collapsible && !hideHeading;

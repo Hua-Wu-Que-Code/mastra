@@ -9,6 +9,7 @@ import { timelineTickPositions } from './snapshot-timeline-data';
 import type { ThemeSelection } from './theme-drilldown-data';
 import type { ThemeSnapshot, TraceSignalName } from './types';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /**
  * Lifelines mode: every theme holds a fixed row while landmarks run left to
@@ -34,6 +35,7 @@ export function ThemeLifelines({
   onSnapshotSelect: (index: number) => void;
   onThemeSelect: (selection: ThemeSelection, snapshotIndex: number) => void;
 }) {
+  useLocale();
   const flowQueries = useThemeFlows(
     entityId,
     entityType,
@@ -47,7 +49,7 @@ export function ThemeLifelines({
   if (failedFlowQueries.length > 0) {
     return (
       <SignalsErrorState
-        message="Unable to load theme lifelines."
+        message={studioT('Unable to load theme lifelines.')}
         onRetry={() => void Promise.all(failedFlowQueries.map(query => query.refetch()))}
       />
     );
@@ -55,14 +57,14 @@ export function ThemeLifelines({
 
   if (!flows.some(flow => flow !== undefined)) {
     return (
-      <section aria-label="Theme lifelines">
+      <section aria-label={studioT('Theme lifelines')}>
         <SignalsFrameLoadingSkeleton />
       </section>
     );
   }
 
   return (
-    <section aria-label="Theme lifelines" className="space-y-5">
+    <section aria-label={studioT('Theme lifelines')} className="space-y-5">
       {/* Spacers mirror each row's label and count columns so the shared track aligns with the rows. */}
       <div className="flex items-center gap-3">
         <span aria-hidden="true" className="w-52 shrink-0" />

@@ -1,3 +1,4 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import type { AgentTool } from '../../../types/agent-tool';
 import { BUILT_IN_TOOLKIT_ID } from './use-provider-toolkit-groups';
@@ -34,11 +35,17 @@ export function getEmptyStateDetails(args: {
     return 'No tools selected yet';
   }
   if (args.onlySelected) {
-    return <>No selected tools match {trimmedSearch}</>;
+    return (
+      <>
+        {studioT('No selected tools match') + ' '}
+        {trimmedSearch}
+      </>
+    );
   }
   return (
     <>
-      No tools match <strong>{trimmedSearch}</strong>
+      {studioT('No tools match') + ' '}
+      <strong>{trimmedSearch}</strong>
     </>
   );
 }

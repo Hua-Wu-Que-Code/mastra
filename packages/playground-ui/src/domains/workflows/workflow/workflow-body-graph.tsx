@@ -3,6 +3,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { WorkflowNestedGraph } from './workflow-nested-graph';
 import { Txt } from '@/ds/components/Txt';
 import { IconArrowsRepeat } from '@/ds/icons/central/IconArrowsRepeat';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function WorkflowBodyGraph({
   stepGraph,
@@ -15,12 +16,16 @@ export function WorkflowBodyGraph({
   isForEach?: boolean;
   requestContext: Record<string, any>;
 }) {
+  useLocale();
   return (
-    <section aria-label={isForEach ? 'Loop body' : 'Nested workflow'} className="flex h-full min-h-0 flex-col">
+    <section
+      aria-label={isForEach ? studioT('Loop body') : studioT('Nested workflow')}
+      className="flex h-full min-h-0 flex-col"
+    >
       {isForEach && (
         <div className="flex shrink-0 items-start gap-2 px-4 py-3 text-muted-foreground">
           <IconArrowsRepeat aria-hidden className="mt-0.5 size-icon-md shrink-0 text-muted-foreground" />
-          <Txt variant="meta">Runs for every item. All items finish before the workflow continues.</Txt>
+          <Txt variant="meta">{studioT('Runs for every item. All items finish before the workflow continues.')}</Txt>
         </div>
       )}
       <div className="min-h-0 flex-1 overflow-hidden">

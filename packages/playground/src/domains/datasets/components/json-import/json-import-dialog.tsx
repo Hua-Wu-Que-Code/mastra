@@ -13,6 +13,10 @@ import { InlineCode } from '@mastra/playground-ui/components/InlineCode';
 import { Metadata } from '@mastra/playground-ui/components/Metadata';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
@@ -41,6 +45,7 @@ const readFileText = (file: File) =>
   });
 
 export function JSONImportDialog({ datasetId, datasetName, open, onOpenChange, onSuccess }: JSONImportDialogProps) {
+  const studioLocale = useLocale();
   const [tab, setTab] = useState<JSONSourceTab>('upload');
   const [file, setFile] = useState<JSONSourceFile | null>(null);
   const [fileText, setFileText] = useState('');
@@ -127,25 +132,34 @@ export function JSONImportDialog({ datasetId, datasetName, open, onOpenChange, o
     setIsImporting(true);
     try {
       await batchInsertItems.mutateAsync({ datasetId, items: validation.items });
-      toast.success(`Imported ${validation.total} item${validation.total !== 1 ? 's' : ''}`);
+      toast.success(
+        studioT('Imported {value0} item{value1}', {
+          value0: validation.total,
+          value1: validation.total !== 1 ? studioT('English plural suffix') : '',
+        }),
+      );
       onSuccess?.();
       onOpenChange(false);
       scheduleReset();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to import items');
+      toast.error(err instanceof Error ? err.message : studioT('Failed to import items'));
     } finally {
       setIsImporting(false);
     }
-  }, [validation, batchInsertItems, datasetId, onSuccess, onOpenChange, scheduleReset]);
+  }, [validation, batchInsertItems, datasetId, onSuccess, onOpenChange, scheduleReset, studioLocale]);
 
   return (
     <Dialog open={open} onOpenChange={handleClose} pending={isImporting}>
       <DialogContent size="xl">
         <DialogHeader>
-          <DialogTitle>Import into dataset</DialogTitle>
+          <DialogTitle>{studioT('Import into dataset')}</DialogTitle>
           <DialogDescription>
-            Add items to {datasetName ? <span className="text-foreground">{datasetName}</span> : 'this dataset'} from a
-            JSON file or paste them directly.
+            <Trans
+              id="Add items to {part0} from a JSON file or paste them directly."
+              values={{
+                part0: datasetName ? <span className="text-foreground">{datasetName}</span> : studioT('this dataset'),
+              }}
+            />
           </DialogDescription>
         </DialogHeader>
 
@@ -172,12 +186,15 @@ export function JSONImportDialog({ datasetId, datasetName, open, onOpenChange, o
 
         <DialogFooter>
           <JSONImportStatus validation={validation} />
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
           <DialogAction onConfirm={handleImport} disabled={validation.status !== 'ready'}>
             {isImporting && <Spinner />}
             {validation.status === 'ready'
-              ? `Import ${validation.total} item${validation.total !== 1 ? 's' : ''}`
-              : 'Import'}
+              ? studioT('Import {value0} item{value1}', {
+                  value0: validation.total,
+                  value1: validation.total !== 1 ? studioT('English plural suffix') : '',
+                })
+              : studioT('Import')}
           </DialogAction>
         </DialogFooter>
       </DialogContent>
@@ -186,6 +203,7 @@ export function JSONImportDialog({ datasetId, datasetName, open, onOpenChange, o
 }
 
 function JSONImportStatus({ validation }: { validation: JSONImportValidation }) {
+  useLocale();
   const dotClassName = cn(
     'size-1.5 shrink-0 rounded-full',
     validation.status === 'idle' && 'bg-muted-foreground',
@@ -196,19 +214,27 @@ function JSONImportStatus({ validation }: { validation: JSONImportValidation }) 
   let message: React.ReactNode;
   switch (validation.status) {
     case 'idle':
-      message = 'No items yet';
+      message = studioT('No items yet');
       break;
     case 'ready':
       message = (
         <Metadata singleLine>
           <Metadata.Item className="shrink-0">
-            <Txt as="b" variant="label" tone="ink">
-              {validation.total}
-            </Txt>{' '}
-            item{validation.total !== 1 ? 's' : ''} ready
+            <Trans
+              id={validation.total === 1 ? '{count} item ready' : '{count} items ready'}
+              values={{
+                count: (
+                  <Txt as="b" variant="label" tone="ink">
+                    {validation.total}
+                  </Txt>
+                ),
+              }}
+            />
           </Metadata.Item>
           {validation.missingGroundTruthCount > 0 && (
-            <Metadata.Item>{validation.missingGroundTruthCount} without groundTruth</Metadata.Item>
+            <Metadata.Item>
+              {studioT('{count} without groundTruth', { count: validation.missingGroundTruthCount })}
+            </Metadata.Item>
           )}
         </Metadata>
       );
@@ -216,27 +242,37 @@ function JSONImportStatus({ validation }: { validation: JSONImportValidation }) 
     case 'error':
       switch (validation.kind) {
         case 'parse':
-          message = `Not valid JSON: ${validation.message}`;
+          message = studioT('Not valid JSON: {message}', { message: validation.message });
           break;
         case 'not-array':
-          message = 'Top level must be an array of items';
+          message = studioT('Top level must be an array of items');
           break;
         case 'empty':
-          message = 'The array has no items';
+          message = studioT('The array has no items');
           break;
         case 'too-large':
-          message = `JSON is larger than ${MAX_IMPORT_LABEL}`;
+          message = studioT('JSON is larger than {limit}', { limit: MAX_IMPORT_LABEL });
           break;
         case 'missing-input':
           message = (
-            <>
-              <Txt as="b" variant="label" tone="ink">
-                {validation.missingInputCount}
-              </Txt>{' '}
-              of {validation.total} item
-              {validation.total !== 1 ? 's' : ''} {validation.missingInputCount !== 1 ? 'have' : 'has'} no{' '}
-              <InlineCode>input</InlineCode>
-            </>
+            <Trans
+              id={
+                validation.total === 1
+                  ? '{count} of {total} item has no {input}'
+                  : validation.missingInputCount === 1
+                    ? '{count} of {total} items has no {input}'
+                    : '{count} of {total} items have no {input}'
+              }
+              values={{
+                count: (
+                  <Txt as="b" variant="label" tone="ink">
+                    {validation.missingInputCount}
+                  </Txt>
+                ),
+                total: validation.total,
+                input: <InlineCode>input</InlineCode>,
+              }}
+            />
           );
           break;
       }

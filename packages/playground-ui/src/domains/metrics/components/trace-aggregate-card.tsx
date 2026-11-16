@@ -4,6 +4,7 @@ import type { TraceAggregateScope } from '../hooks/use-metrics-trace-aggregate';
 import { ChartCard } from './chart-card';
 import type { ChartCardProps } from './chart-card';
 import { MetricsCard } from '@/ds/components/MetricsCard';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const FILTER_NAMES: Record<string, string> = {
   serviceName: 'service',
@@ -23,6 +24,7 @@ export type TraceAggregateCardProps = Pick<ChartCardProps, 'title' | 'className'
  * filter has no trace equivalent (rather than numbers that ignore the filter), else the card.
  */
 export function TraceAggregateCard({ requiresRootSpanFields, children, ...layout }: TraceAggregateCardProps) {
+  useLocale();
   const gate = useTraceAggregateGate({ requiresRootSpanFields });
   if (gate.status === 'unavailable') return null;
   if (gate.status === 'ready') return children(gate.scope);
@@ -33,7 +35,9 @@ export function TraceAggregateCard({ requiresRootSpanFields, children, ...layout
         <MetricsCard.Loading />
       ) : (
         <MetricsCard.NoData
-          message={`Not available with a ${gate.unsupportedFields.map(f => FILTER_NAMES[f] ?? f).join(' or ')} filter.`}
+          message={studioT('Not available with a {value0} filter.', {
+            value0: gate.unsupportedFields.map(f => FILTER_NAMES[f] ?? f).join(' or '),
+          })}
         />
       )}
     </ChartCard>

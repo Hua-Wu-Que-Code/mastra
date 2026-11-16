@@ -9,6 +9,7 @@ import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium'
 import { IconChevronRightMedium } from '@/ds/icons/central/IconChevronRightMedium';
 import { IconShield2 } from '@/ds/icons/central/IconShield2';
 import { IconTag } from '@/ds/icons/central/IconTag';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface TripwireNoticeProps {
   reason: string;
@@ -16,6 +17,7 @@ export interface TripwireNoticeProps {
 }
 
 export const TripwireNotice = ({ reason, tripwire }: TripwireNoticeProps) => {
+  useLocale();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hasMetadata = Boolean(
@@ -23,7 +25,7 @@ export const TripwireNotice = ({ reason, tripwire }: TripwireNoticeProps) => {
   );
 
   return (
-    <Notice variant="warning" title="Content Blocked" icon={<IconShield2 />}>
+    <Notice variant="warning" title={studioT('Content Blocked')} icon={<IconShield2 />}>
       <div className="flex flex-col gap-3">
         <Notice.Message className="break-words whitespace-pre-wrap">{reason}</Notice.Message>
 
@@ -40,7 +42,7 @@ export const TripwireNotice = ({ reason, tripwire }: TripwireNoticeProps) => {
                 <IconChevronRightMedium className="size-icon-sm" />
               )}
               <Txt as="span" variant="caption">
-                Details
+                {studioT('Details')}
               </Txt>
             </button>
 
@@ -50,10 +52,10 @@ export const TripwireNotice = ({ reason, tripwire }: TripwireNoticeProps) => {
                   <div className="flex items-center gap-2">
                     <IconArrowRotateClockwise className="size-icon-sm shrink-0 opacity-70" />
                     <Txt as="span" variant="caption">
-                      Retry
+                      {studioT('Retry')}
                     </Txt>
                     <Badge size="xs" variant={tripwire.retry ? 'success' : 'destructive'}>
-                      {tripwire.retry ? 'Allowed' : 'Not allowed'}
+                      {tripwire.retry ? studioT('Allowed') : studioT('Not allowed')}
                     </Badge>
                   </div>
                 )}
@@ -62,7 +64,7 @@ export const TripwireNotice = ({ reason, tripwire }: TripwireNoticeProps) => {
                   <div className="flex items-center gap-2">
                     <IconTag className="size-icon-sm shrink-0 opacity-70" />
                     <Txt as="span" variant="caption">
-                      Processor
+                      {studioT('Processor')}
                     </Txt>
                     <Badge size="xs" variant="warning">
                       {tripwire.processorId}
@@ -73,7 +75,7 @@ export const TripwireNotice = ({ reason, tripwire }: TripwireNoticeProps) => {
                 {tripwire.metadata !== undefined && tripwire.metadata !== null && (
                   <div className="flex flex-col gap-1.5">
                     <Txt as="span" variant="caption" className="opacity-70">
-                      Metadata
+                      {studioT('Metadata')}
                     </Txt>
                     <Code
                       code={JSON.stringify(tripwire.metadata, null, 2)}

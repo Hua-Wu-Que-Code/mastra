@@ -13,6 +13,8 @@ import { IconMagnifyingGlass } from '@mastra/playground-ui/icons/central/IconMag
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { IconWrite } from '@mastra/playground-ui/icons/central/IconWrite';
 import { MemoryIcon } from '@mastra/playground-ui/icons/MemoryIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { raisedSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useObservationalMemory, useMemoryConfig, useThread, useMemory } from '@mastra/react/hooks/memory';
@@ -112,6 +114,7 @@ export function MemorySidebarBody({
   threadsSlot,
   isThreadsLoading,
 }: MemorySidebarProps) {
+  useLocale();
   // Derive memory state from the shared (React Query deduped) hook instead of
   // accepting it as props — see structure-derive-dont-duplicate.
   const { data: memory, isLoading: isMemoryLoading } = useMemory({
@@ -253,8 +256,10 @@ export function MemorySidebarBody({
               />
             ) : (
               <EmptyState
-                titleSlot="Memory not enabled"
-                descriptionSlot="Conversations are only saved as threads when the agent has memory configured."
+                titleSlot={studioT('Memory not enabled')}
+                descriptionSlot={studioT(
+                  'Conversations are only saved as threads when the agent has memory configured.',
+                )}
                 actionSlot={
                   <Button
                     icon={<IconSquareArrowTopRight />}
@@ -262,7 +267,7 @@ export function MemorySidebarBody({
                       <a href="https://mastra.ai/docs/memory/overview" target="_blank" rel="noopener noreferrer" />
                     }
                   >
-                    View documentation
+                    {studioT('View documentation')}
                   </Button>
                 }
               />
@@ -294,7 +299,7 @@ export function MemorySidebarBody({
                 <span className="flex min-w-0 items-center gap-1.5 text-foreground">
                   <MemoryIcon className="size-icon-md shrink-0" />
                   <Txt as="span" variant="column">
-                    Memory
+                    {studioT('Memory')}
                   </Txt>
                 </span>
                 {showMemory ? (
@@ -318,8 +323,8 @@ export function MemorySidebarBody({
                       icon={IconMagnifyingGlass}
                       tooltip={
                         semanticRecallOn
-                          ? 'Semantic recall is on and retrieves relevant past messages'
-                          : 'Semantic recall is off'
+                          ? studioT('Semantic recall is on and retrieves relevant past messages')
+                          : studioT('Semantic recall is off')
                       }
                       enabled={semanticRecallOn}
                     />
@@ -327,8 +332,8 @@ export function MemorySidebarBody({
                       icon={IconWrite}
                       tooltip={
                         workingMemoryOn
-                          ? 'Working memory is on and persists notes across the conversation'
-                          : 'Working memory is off'
+                          ? studioT('Working memory is on and persists notes across the conversation')
+                          : studioT('Working memory is off')
                       }
                       enabled={workingMemoryOn}
                     />
@@ -336,8 +341,8 @@ export function MemorySidebarBody({
                       icon={IconEyeOpen}
                       tooltip={
                         observationalOn
-                          ? 'Observational memory is on and learns from the conversation'
-                          : 'Observational memory is off'
+                          ? studioT('Observational memory is on and learns from the conversation')
+                          : studioT('Observational memory is off')
                       }
                       enabled={observationalOn}
                     />

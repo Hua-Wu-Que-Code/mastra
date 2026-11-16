@@ -12,6 +12,8 @@ import {
 } from '@mastra/playground-ui/components/Dialog';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Tab, TabContent, TabList, Tabs } from '@mastra/playground-ui/components/Tabs';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 import { Controller, useForm } from 'react-hook-form';
@@ -28,21 +30,37 @@ type SchemaValue = Record<string, unknown> | null;
 type DatasetSchemaFormValues = Record<SchemaKey, SchemaValue>;
 
 const SCHEMA_TABS: Array<{ key: SchemaKey; label: string }> = [
-  { key: 'inputSchema', label: 'Input' },
-  { key: 'groundTruthSchema', label: 'Ground truth' },
-  { key: 'requestContextSchema', label: 'Request context' },
+  {
+    key: 'inputSchema',
+    get label() {
+      return studioT('Input');
+    },
+  },
+  {
+    key: 'groundTruthSchema',
+    get label() {
+      return studioT('Ground truth');
+    },
+  },
+  {
+    key: 'requestContextSchema',
+    get label() {
+      return studioT('Request context');
+    },
+  },
 ];
 
 export function DatasetSchemaDialog({ open, onOpenChange, dataset }: DatasetSchemaDialogProps) {
+  useLocale();
   const { updateDataset } = useDatasetMutations();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} pending={updateDataset.isPending}>
       <DialogContent size="full">
         <DialogHeader>
-          <DialogTitle>Dataset schema</DialogTitle>
+          <DialogTitle>{studioT('Dataset schema')}</DialogTitle>
           <DialogDescription>
-            JSON Schemas validate the items of this dataset. Leave a schema empty to skip validation.
+            {studioT('JSON Schemas validate the items of this dataset. Leave a schema empty to skip validation.')}
           </DialogDescription>
         </DialogHeader>
         {/* Mounted only while open, so every opening starts from the dataset's current schemas. */}
@@ -64,6 +82,7 @@ function getFailingItemsCount(error: unknown): number {
 }
 
 function DatasetSchemaForm({ dataset, updateDataset, onSaved }: DatasetSchemaFormProps) {
+  useLocale();
   const {
     control,
     handleSubmit,
@@ -87,16 +106,22 @@ function DatasetSchemaForm({ dataset, updateDataset, onSaved }: DatasetSchemaFor
   const onSave = handleSubmit(async schemas => {
     try {
       await updateDataset.mutateAsync({ datasetId: dataset.id, ...schemas });
-      toast.success('Dataset schema saved');
+      toast.success(studioT('Dataset schema saved'));
       onSaved();
     } catch (error) {
       const failingCount = getFailingItemsCount(error);
       if (failingCount > 0) {
         setError('root.server', {
-          message: `${failingCount} existing item(s) fail validation. Fix items or adjust schema.`,
+          message: studioT('{value0} existing item(s) fail validation. Fix items or adjust schema.', {
+            value0: failingCount,
+          }),
         });
       } else {
-        toast.error(`Failed to save schema: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to save schema: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
       }
     }
   });
@@ -140,9 +165,9 @@ function DatasetSchemaForm({ dataset, updateDataset, onSaved }: DatasetSchemaFor
         ) : null}
       </DialogBody>
       <DialogFooter>
-        <DialogCancel>Cancel</DialogCancel>
+        <DialogCancel>{studioT('Cancel')}</DialogCancel>
         <DialogAction onConfirm={onSave} disabled={hasInvalidSchema || updateDataset.isPending}>
-          {updateDataset.isPending ? 'Saving...' : 'Save schema'}
+          {updateDataset.isPending ? studioT('Saving...') : studioT('Save schema')}
         </DialogAction>
       </DialogFooter>
     </>

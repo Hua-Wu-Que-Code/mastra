@@ -5,6 +5,8 @@ import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@mastra/playground-ui/components/Tooltip';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMCPServerTools } from '@mastra/react/hooks/mcps';
 import { useMemo, useState } from 'react';
 import { z } from 'zod';
@@ -53,6 +55,7 @@ type TaskSurface = McpServerTaskSurface | undefined;
 
 /** How a tool runs as an MCP task: always, or only when the client asks (`auto`). */
 function TaskModeBadge({ surface }: { surface: TaskSurface }) {
+  useLocale();
   if (!surface) return null;
   return (
     <Tooltip>
@@ -63,26 +66,29 @@ function TaskModeBadge({ surface }: { surface: TaskSurface }) {
           </Badge>
           {surface.required && (
             <Badge size="xs" variant="warning" emphasis="subtle">
-              required
+              {studioT('required')}
             </Badge>
           )}
           {surface.recover && (
             <Badge size="xs" variant="neutral" emphasis="subtle">
-              recover
+              {studioT('recover')}
             </Badge>
           )}
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        {surface.mode === 'always' ? 'Always runs as a task' : 'Runs as a task when the client asks for one'}
-        {surface.required ? '; clients without task support are refused' : ''}
-        {surface.recover ? '; resumed after a server restart' : ''}
+        {surface.mode === 'always'
+          ? studioT('Always runs as a task')
+          : studioT('Runs as a task when the client asks for one')}
+        {surface.required ? studioT('; clients without task support are refused') : ''}
+        {surface.recover ? studioT('; resumed after a server restart') : ''}
       </TooltipContent>
     </Tooltip>
   );
 }
 
 export function McpServerToolsList({ server }: { server: McpServerInfo }) {
+  useLocale();
   const [search, setSearch] = useState('');
   const { data: tools = {}, isLoading } = useMCPServerTools({ selectedServer: server });
   const { Link, paths } = useLinkComponent();
@@ -104,7 +110,7 @@ export function McpServerToolsList({ server }: { server: McpServerInfo }) {
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Txt as="h2" variant="heading">
-          Available tools
+          {studioT('Available tools')}
         </Txt>
         <div className="max-w-120 flex-1">
           <SearchInput
@@ -112,8 +118,8 @@ export function McpServerToolsList({ server }: { server: McpServerInfo }) {
             debounceMs={300}
             className="max-w-120"
             onValueChange={setSearch}
-            label="Search tools"
-            placeholder="Search by name"
+            label={studioT('Search tools')}
+            placeholder={studioT('Search by name')}
           />
         </div>
       </div>
@@ -123,13 +129,15 @@ export function McpServerToolsList({ server }: { server: McpServerInfo }) {
       ) : (
         <DataList columns={columns} fit="container" scrollRef={containerRef}>
           <DataList.Top>
-            <DataList.TopCell>Name</DataList.TopCell>
-            <DataList.TopCell>Description</DataList.TopCell>
-            <DataList.TopCell className="justify-center text-center">Type</DataList.TopCell>
-            {showTasks && <DataList.TopCell>Task</DataList.TopCell>}
+            <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
+            <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
+            <DataList.TopCell className="justify-center text-center">{studioT('Type')}</DataList.TopCell>
+            {showTasks && <DataList.TopCell>{studioT('Task')}</DataList.TopCell>}
           </DataList.Top>
 
-          {filteredTools.length === 0 && search ? <DataList.NoMatch message="No tools match your search" /> : null}
+          {filteredTools.length === 0 && search ? (
+            <DataList.NoMatch message={studioT('No tools match your search')} />
+          ) : null}
 
           {filteredTools.map((tool, index) => (
             <DataList.RowLink
@@ -141,7 +149,7 @@ export function McpServerToolsList({ server }: { server: McpServerInfo }) {
               <DataList.NameCell>
                 <span className="flex items-center gap-2">
                   {tool.name}
-                  {hasAppUi(tool._meta) && <Badge size="xs">App</Badge>}
+                  {hasAppUi(tool._meta) && <Badge size="xs">{studioT('App')}</Badge>}
                 </span>
               </DataList.NameCell>
               <DataList.DescriptionCell>{tool.description}</DataList.DescriptionCell>

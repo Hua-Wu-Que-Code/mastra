@@ -1,9 +1,11 @@
 import type { LucideIcon } from 'lucide-react';
-
 import type { ActivityCall } from './activity-members';
+
 import { agentGlyph } from '@/ds/components/AgentIndicator';
 import type { AgentIndicatorState } from '@/ds/components/AgentIndicator';
 import { presentTool, toolPhrases } from '@/ds/components/ai/tool-call';
+
+import { t as studioT } from '@/lib/i18n';
 import { formatDuration } from '@/utils/duration';
 
 export interface ActivityWords {
@@ -40,7 +42,7 @@ function summarize(calls: readonly WordedCall[]): string {
     return count === 1 ? one : many;
   });
   const rest = phrases.length - SUMMARY_KINDS;
-  const said = rest > 0 ? [...phrases.slice(0, SUMMARY_KINDS), `and ${rest} more`] : phrases;
+  const said = rest > 0 ? [...phrases.slice(0, SUMMARY_KINDS), studioT('and {count} more', { count: rest })] : phrases;
   const sentence = said.join(', ');
   return sentence.charAt(0).toUpperCase() + sentence.slice(1);
 }
@@ -54,7 +56,13 @@ export function stretchPose(calls: readonly WordedCall[], live: boolean): AgentI
 /** What the stretch is doing now: the latest running call, or thinking between calls. */
 export function liveWords(calls: readonly WordedCall[]): ActivityWords {
   const running = calls.findLast(call => call.status === 'running');
-  if (!running) return { icon: agentGlyph('thinking'), label: 'Thinking' };
+  if (!running)
+    return {
+      icon: agentGlyph('thinking'),
+      get label() {
+        return studioT('Thinking');
+      },
+    };
   const { icon, label, detail, description } = presentTool(running.toolName, running.args);
   if (description) return { icon, label: description };
   return { icon, label: toolPhrases(label).live, detail };
@@ -64,7 +72,11 @@ export function liveWords(calls: readonly WordedCall[]): ActivityWords {
 export function settledWords(calls: readonly WordedCall[], elapsedMs?: number): ActivityWords {
   const duration = secondsDuration(elapsedMs);
   const [first] = calls;
-  if (!first) return { icon: agentGlyph('idle'), label: duration ? `Thought for ${duration}` : 'Thought' };
+  if (!first)
+    return {
+      icon: agentGlyph('idle'),
+      label: duration ? studioT('Thought for {value0}', { value0: duration }) : studioT('Thought'),
+    };
   const { icon, label, detail } = presentTool(first.toolName, first.args);
   if (calls.length === 1) return { icon, label: toolPhrases(label).done, detail, duration };
   const oneKind = new Set(calls.map(call => presentTool(call.toolName, call.args).pose)).size === 1;

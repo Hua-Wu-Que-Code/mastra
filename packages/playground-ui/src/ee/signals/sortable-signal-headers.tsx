@@ -8,9 +8,9 @@ import {
   useTouchSensor,
 } from '@hello-pangea/dnd';
 import { useState } from 'react';
-
 import { getSignalColor } from './signal-colors';
 import { signalDescription, signalLabel } from './signal-formatting';
+
 import type { TraceSignalName } from './types';
 import { useTraceIntelligence } from './use-trace-intelligence';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
@@ -19,6 +19,8 @@ import { IconDotGrid2x3 } from '@/ds/icons/central/IconDotGrid2x3';
 import { overlaySurfaceStyle } from '@/ds/primitives/raised-surface';
 import { controlStateColorTransition } from '@/ds/primitives/transitions';
 import { quietTextHover } from '@/ds/primitives/typography';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const DRAG_SENSORS = [useMouseSensor, useTouchSensor, useKeyboardSensor];
@@ -71,6 +73,7 @@ export function SortableSignalHeaders({
   reorderDisabled: boolean;
   onOrderChange: (signalNames: TraceSignalName[]) => void;
 }) {
+  useLocale();
   const { signalCatalog } = useTraceIntelligence();
   const [dragProjection, setDragProjection] = useState<DragProjection>();
 
@@ -98,7 +101,7 @@ export function SortableSignalHeaders({
   }
 
   return (
-    <div aria-label="Signals" role="group">
+    <div aria-label={studioT('Signals')} role="group">
       <DragDropContext
         enableDefaultSensors={false}
         sensors={DRAG_SENSORS}
@@ -111,7 +114,7 @@ export function SortableSignalHeaders({
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
-              aria-label="Trace signal column headers"
+              aria-label={studioT('Trace signal column headers')}
               className="flex items-center gap-1 px-8 pb-1"
               role="group"
             >
@@ -157,14 +160,14 @@ export function SortableSignalHeaders({
                             <div
                               {...dragProvided.dragHandleProps}
                               aria-disabled={reorderDisabled}
-                              aria-label={`Reorder ${label}`}
+                              aria-label={studioT('Reorder {value0}', { value0: label })}
                               className={cn(
                                 quietTextHover,
                                 controlStateColorTransition,
                                 'absolute top-1/2 ml-0.5 -translate-y-1/2 cursor-grab rounded-sm p-1 active:cursor-grabbing aria-disabled:cursor-wait aria-disabled:opacity-50',
                               )}
                               style={{ left: '100%' }}
-                              title={`Drag to reorder the ${label} column`}
+                              title={studioT('Drag to reorder the {value0} column', { value0: label })}
                             >
                               <IconDotGrid2x3 aria-hidden="true" className="size-icon-sm" />
                             </div>

@@ -4,6 +4,7 @@ import type { AnyWidgetKind, ResolvedView } from '../widget-kind';
 import { viewValue } from './chrome';
 import { inScope } from './definition';
 import type { DashboardScope } from './definition';
+import { t as studioT } from '@/lib/i18n';
 
 type Issue = { path: PropertyKey[]; message: string };
 export const describeIssue = (issue: Issue | undefined) =>
@@ -43,7 +44,13 @@ export function prepareWidget(
   // A widget for the other scope stays hidden, whether or not this version knows its kind.
   if (!inScope(widget, scope)) return { ok: 'hidden' };
   const kind = registry.get(widget.kind);
-  if (!kind) return { ok: false, message: 'This widget needs a newer version.' };
+  if (!kind)
+    return {
+      ok: false,
+      get message() {
+        return studioT('This widget needs a newer version.');
+      },
+    };
 
   const views: ResolvedView<unknown>[] = [];
   const values = new Set<string>();
@@ -51,17 +58,28 @@ export function prepareWidget(
     if (!inScope(view, scope)) continue;
     const options = kind.optionsSchema.safeParse(view.options ?? {});
     if (!options.success) {
-      const issue = options.error.issues[0] ?? { path: [], message: 'Invalid options' };
+      const issue = options.error.issues[0] ?? {
+        path: [],
+        get message() {
+          return studioT('Invalid options');
+        },
+      };
       return { ok: false, message: describeIssue({ ...issue, path: ['views', index, 'options', ...issue.path] }) };
     }
     // Columns at the other scope are left out before the kind sees them.
     const resolved = { ...view, columns: view.columns?.filter(c => inScope(c, scope)), options: options.data };
     const issue = kind.issues?.(resolved)[0];
-    if (issue) return { ok: false, message: `views.${index}: ${issue}` };
+    if (issue) return { ok: false, message: studioT('views.{value0}: {value1}', { value0: index, value1: issue }) };
     // Each view at the scope is an option in the card's menu, picked by its value; two with one value would leave one unreachable.
     const value = viewValue(view.label, views.length);
     if (values.has(value))
-      return { ok: false, message: `views.${index}: another view is already labelled '${view.label ?? value}'` };
+      return {
+        ok: false,
+        message: studioT("views.{value0}: another view is already labelled '{value1}'", {
+          value0: index,
+          value1: view.label ?? value,
+        }),
+      };
     values.add(value);
     views.push(resolved);
   }

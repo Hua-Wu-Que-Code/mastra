@@ -7,6 +7,8 @@ import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
 import { Switch } from '@mastra/playground-ui/components/Switch';
 import { MemoryIcon } from '@mastra/playground-ui/icons/MemoryIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useEmbedders } from '@mastra/react/hooks/embedders';
 import { useVectors } from '@mastra/react/hooks/vectors';
 import { Controller, useWatch } from 'react-hook-form';
@@ -17,6 +19,7 @@ import { SectionHeader, SubSectionHeader } from '@/domains/cms';
 import { LLMProviders, LLMModels } from '@/domains/llm';
 
 export function MemoryPage() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const isEnabled = useWatch({ control, name: 'memory.enabled' }) ?? false;
@@ -27,8 +30,8 @@ export function MemoryPage() {
       <ScrollArea className="h-full">
         <div className="flex flex-col gap-4">
           <SectionHeader
-            title="Memory"
-            subtitle="Configure memory settings for conversation persistence and semantic recall."
+            title={studioT('Memory')}
+            subtitle={studioT('Configure memory settings for conversation persistence and semantic recall.')}
           />
           <RegisteredMemoryNotice memoryId={memoryRef.memoryId} />
         </div>
@@ -41,8 +44,8 @@ export function MemoryPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <SectionHeader
-            title="Memory"
-            subtitle="Configure memory settings for conversation persistence and semantic recall."
+            title={studioT('Memory')}
+            subtitle={studioT('Configure memory settings for conversation persistence and semantic recall.')}
           />
           {!readOnly && isEnabled && (
             <Controller
@@ -56,8 +59,10 @@ export function MemoryPage() {
         {!isEnabled && (
           <div className="py-8">
             <EmptyState
-              titleSlot="Memory is not enabled"
-              descriptionSlot="Enable memory to store conversation history, add semantic recall for relevant retrieval, or observational memory for long-term learning."
+              titleSlot={studioT('Memory is not enabled')}
+              descriptionSlot={studioT(
+                'Enable memory to store conversation history, add semantic recall for relevant retrieval, or observational memory for long-term learning.',
+              )}
               actionSlot={
                 !readOnly && (
                   <Controller
@@ -65,7 +70,7 @@ export function MemoryPage() {
                     control={control}
                     render={({ field }) => (
                       <Button icon={<MemoryIcon />} variant="default" size="sm" onClick={() => field.onChange(true)}>
-                        Enable memory
+                        {studioT('Enable memory')}
                       </Button>
                     )}
                   />
@@ -89,6 +94,7 @@ export function MemoryPage() {
 }
 
 function LastMessagesEntity() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const lastMessages = useWatch({ control, name: 'memory.lastMessages' });
@@ -98,8 +104,8 @@ function LastMessagesEntity() {
     <Entity className="flex-col gap-0 overflow-hidden p-0">
       <div className="flex gap-3 px-4 py-3">
         <EntityContent>
-          <EntityName>Message History</EntityName>
-          <EntityDescription>Number of recent messages to include in context</EntityDescription>
+          <EntityName>{studioT('Message History')}</EntityName>
+          <EntityDescription>{studioT('Number of recent messages to include in context')}</EntityDescription>
         </EntityContent>
 
         {!readOnly && (
@@ -150,6 +156,7 @@ function LastMessagesEntity() {
 }
 
 function SemanticRecallEntity() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const semanticRecallEnabled = useWatch({ control, name: 'memory.semanticRecall' }) ?? false;
@@ -163,8 +170,8 @@ function SemanticRecallEntity() {
     <Entity className="flex-col gap-0 overflow-hidden p-0">
       <div className="flex gap-3 px-4 py-3">
         <EntityContent>
-          <EntityName>Semantic Recall</EntityName>
-          <EntityDescription>Enable semantic search in memory</EntityDescription>
+          <EntityName>{studioT('Semantic Recall')}</EntityName>
+          <EntityDescription>{studioT('Enable semantic search in memory')}</EntityDescription>
         </EntityContent>
 
         {!readOnly && (
@@ -183,13 +190,13 @@ function SemanticRecallEntity() {
             control={control}
             render={({ field }) => (
               <Field className="gap-1.5">
-                <FieldLabel>Vector Store</FieldLabel>
+                <FieldLabel>{studioT('Vector Store')}</FieldLabel>
                 <FieldDescription className="mt-0 text-placeholder">
-                  Select a vector store for semantic search
+                  {studioT('Select a vector store for semantic search')}
                 </FieldDescription>
                 <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={readOnly}>
                   <SelectTrigger className="bg-card">
-                    <SelectValue placeholder="Select a vector store" />
+                    <SelectValue placeholder={studioT('Select a vector store')} />
                   </SelectTrigger>
                   <SelectContent>
                     {vectors.map(vector => (
@@ -208,13 +215,13 @@ function SemanticRecallEntity() {
             control={control}
             render={({ field }) => (
               <Field className="gap-1.5">
-                <FieldLabel>Embedder Model</FieldLabel>
+                <FieldLabel>{studioT('Embedder Model')}</FieldLabel>
                 <FieldDescription className="mt-0 text-placeholder">
-                  Select an embedding model for semantic search
+                  {studioT('Select an embedding model for semantic search')}
                 </FieldDescription>
                 <Select value={field.value ?? ''} onValueChange={field.onChange} disabled={readOnly}>
                   <SelectTrigger className="bg-card">
-                    <SelectValue placeholder="Select an embedder model" />
+                    <SelectValue placeholder={studioT('Select an embedder model')} />
                   </SelectTrigger>
                   <SelectContent>
                     {embedders.map(embedder => (
@@ -234,14 +241,15 @@ function SemanticRecallEntity() {
 }
 
 function ReadOnlyEntity() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
 
   return (
     <Entity>
       <EntityContent>
-        <EntityName>Read Only</EntityName>
-        <EntityDescription>Memory is read-only (no new messages stored)</EntityDescription>
+        <EntityName>{studioT('Read Only')}</EntityName>
+        <EntityDescription>{studioT('Memory is read-only (no new messages stored)')}</EntityDescription>
       </EntityContent>
 
       {!readOnly && (
@@ -256,6 +264,7 @@ function ReadOnlyEntity() {
 }
 
 function ObservationalMemoryEntity() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
   const observationalMemoryEnabled = useWatch({ control, name: 'memory.observationalMemory.enabled' }) ?? false;
@@ -264,9 +273,9 @@ function ObservationalMemoryEntity() {
     <Entity className="flex-col gap-0 overflow-hidden p-0">
       <div className="flex gap-3 px-4 py-3">
         <EntityContent>
-          <EntityName>Observational Memory</EntityName>
+          <EntityName>{studioT('Observational Memory')}</EntityName>
           <EntityDescription>
-            Automatically observe and reflect on conversations to build long-term memory
+            {studioT('Automatically observe and reflect on conversations to build long-term memory')}
           </EntityDescription>
         </EntityContent>
 
@@ -299,6 +308,7 @@ function ObservationalMemoryEntity() {
 }
 
 function ObservationalMemoryFields() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control, setValue } = form;
   const omProvider = useWatch({ control, name: 'memory.observationalMemory.model.provider' }) ?? '';
@@ -309,9 +319,9 @@ function ObservationalMemoryFields() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
         <Field className="gap-1.5">
-          <FieldLabel>Provider</FieldLabel>
+          <FieldLabel>{studioT('Provider')}</FieldLabel>
           <FieldDescription className="mt-0 text-placeholder">
-            Provider for the observer and reflector agents
+            {studioT('Provider for the observer and reflector agents')}
           </FieldDescription>
           <Controller
             name="memory.observationalMemory.model.provider"
@@ -331,9 +341,9 @@ function ObservationalMemoryFields() {
         </Field>
 
         <Field className="gap-1.5">
-          <FieldLabel>Model</FieldLabel>
+          <FieldLabel>{studioT('Model')}</FieldLabel>
           <FieldDescription className="mt-0 text-placeholder">
-            Model for the observer and reflector agents
+            {studioT('Model for the observer and reflector agents')}
           </FieldDescription>
           <Controller
             name="memory.observationalMemory.model.name"
@@ -351,18 +361,19 @@ function ObservationalMemoryFields() {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Scope</FieldLabel>
+              <FieldLabel>{studioT('Scope')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Whether observations are scoped per thread or shared across all threads for a resource. Resource scope
-                is deprecated and will be removed in a future release.
+                {studioT(
+                  'Whether observations are scoped per thread or shared across all threads for a resource. Resource scope is deprecated and will be removed in a future release.',
+                )}
               </FieldDescription>
               <Select value={field.value ?? 'thread'} onValueChange={field.onChange} disabled={readOnly}>
                 <SelectTrigger className="bg-card">
-                  <SelectValue placeholder="Select scope" />
+                  <SelectValue placeholder={studioT('Select scope')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="thread">Thread</SelectItem>
-                  <SelectItem value="resource">Resource (deprecated)</SelectItem>
+                  <SelectItem value="thread">{studioT('Thread')}</SelectItem>
+                  <SelectItem value="resource">{studioT('Resource (deprecated)')}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -374,9 +385,9 @@ function ObservationalMemoryFields() {
           control={control}
           render={({ field }) => (
             <Field disabled={readOnly} className="gap-1.5">
-              <FieldLabel>Share Token Budget</FieldLabel>
+              <FieldLabel>{studioT('Share Token Budget')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Share token budget between observation and reflection
+                {studioT('Share token budget between observation and reflection')}
               </FieldDescription>
               <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
             </Field>
@@ -395,17 +406,18 @@ function ObservationalMemoryFields() {
 }
 
 function ObserverFields({ observerProvider }: { observerProvider: string }) {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control, setValue } = form;
 
   return (
     <div className="flex flex-col gap-4">
-      <SubSectionHeader title="Observer" />
+      <SubSectionHeader title={studioT('Observer')} />
       <div className="grid grid-cols-2 gap-4">
         <Field className="gap-1.5">
-          <FieldLabel>Provider Override</FieldLabel>
+          <FieldLabel>{studioT('Provider Override')}</FieldLabel>
           <FieldDescription className="mt-0 text-placeholder">
-            Override the default model provider for the observer
+            {studioT('Override the default model provider for the observer')}
           </FieldDescription>
           <Controller
             name="memory.observationalMemory.observation.model.provider"
@@ -425,9 +437,9 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
         </Field>
 
         <Field className="gap-1.5">
-          <FieldLabel>Model Override</FieldLabel>
+          <FieldLabel>{studioT('Model Override')}</FieldLabel>
           <FieldDescription className="mt-0 text-placeholder">
-            Override the default model for the observer
+            {studioT('Override the default model for the observer')}
           </FieldDescription>
           <Controller
             name="memory.observationalMemory.observation.model.name"
@@ -445,9 +457,9 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Message Tokens</FieldLabel>
+              <FieldLabel>{studioT('Message Tokens')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Token count of unobserved messages that triggers observation (default: 30000)
+                {studioT('Token count of unobserved messages that triggers observation (default: 30000)')}
               </FieldDescription>
               <Input
                 type="number"
@@ -471,9 +483,9 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Max Tokens Per Batch</FieldLabel>
+              <FieldLabel>{studioT('Max Tokens Per Batch')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Maximum tokens per batch when observing multiple threads (default: 10000)
+                {studioT('Maximum tokens per batch when observing multiple threads (default: 10000)')}
               </FieldDescription>
               <Input
                 type="number"
@@ -497,10 +509,11 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Buffer Tokens</FieldLabel>
+              <FieldLabel>{studioT('Buffer Tokens')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Token interval for async buffering (fraction of messageTokens or absolute count, empty to use default
-                0.2, set 0 to disable)
+                {studioT(
+                  'Token interval for async buffering (fraction of messageTokens or absolute count, empty to use default 0.2, set 0 to disable)',
+                )}
               </FieldDescription>
               <Input
                 type="number"
@@ -529,9 +542,9 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Buffer Activation</FieldLabel>
+              <FieldLabel>{studioT('Buffer Activation')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Ratio (0-1) of buffered observations to activate (default: 0.8)
+                {studioT('Ratio (0-1) of buffered observations to activate (default: 0.8)')}
               </FieldDescription>
               <Input
                 type="number"
@@ -556,9 +569,9 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Block After</FieldLabel>
+              <FieldLabel>{studioT('Block After')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Multiplier or absolute token count for synchronous blocking (default: 1.2)
+                {studioT('Multiplier or absolute token count for synchronous blocking (default: 1.2)')}
               </FieldDescription>
               <Input
                 type="number"
@@ -582,17 +595,18 @@ function ObserverFields({ observerProvider }: { observerProvider: string }) {
 }
 
 function ReflectorFields({ reflectorProvider }: { reflectorProvider: string }) {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control, setValue } = form;
 
   return (
     <div className="flex flex-col gap-4">
-      <SubSectionHeader title="Reflector" />
+      <SubSectionHeader title={studioT('Reflector')} />
       <div className="grid grid-cols-2 gap-4">
         <Field className="gap-1.5">
-          <FieldLabel>Provider Override</FieldLabel>
+          <FieldLabel>{studioT('Provider Override')}</FieldLabel>
           <FieldDescription className="mt-0 text-placeholder">
-            Override the default model provider for the reflector
+            {studioT('Override the default model provider for the reflector')}
           </FieldDescription>
           <Controller
             name="memory.observationalMemory.reflection.model.provider"
@@ -612,9 +626,9 @@ function ReflectorFields({ reflectorProvider }: { reflectorProvider: string }) {
         </Field>
 
         <Field className="gap-1.5">
-          <FieldLabel>Model Override</FieldLabel>
+          <FieldLabel>{studioT('Model Override')}</FieldLabel>
           <FieldDescription className="mt-0 text-placeholder">
-            Override the default model for the reflector
+            {studioT('Override the default model for the reflector')}
           </FieldDescription>
           <Controller
             name="memory.observationalMemory.reflection.model.name"
@@ -632,9 +646,9 @@ function ReflectorFields({ reflectorProvider }: { reflectorProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Observation Tokens</FieldLabel>
+              <FieldLabel>{studioT('Observation Tokens')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Token count of observations that triggers reflection (default: 40000)
+                {studioT('Token count of observations that triggers reflection (default: 40000)')}
               </FieldDescription>
               <Input
                 type="number"
@@ -658,9 +672,9 @@ function ReflectorFields({ reflectorProvider }: { reflectorProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Block After</FieldLabel>
+              <FieldLabel>{studioT('Block After')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Multiplier or absolute token count for synchronous blocking (default: 1.2)
+                {studioT('Multiplier or absolute token count for synchronous blocking (default: 1.2)')}
               </FieldDescription>
               <Input
                 type="number"
@@ -684,9 +698,9 @@ function ReflectorFields({ reflectorProvider }: { reflectorProvider: string }) {
           control={control}
           render={({ field }) => (
             <Field className="gap-1.5">
-              <FieldLabel>Buffer Activation</FieldLabel>
+              <FieldLabel>{studioT('Buffer Activation')}</FieldLabel>
               <FieldDescription className="mt-0 text-placeholder">
-                Ratio (0-1) controlling when async reflection buffering starts
+                {studioT('Ratio (0-1) controlling when async reflection buffering starts')}
               </FieldDescription>
               <Input
                 type="number"

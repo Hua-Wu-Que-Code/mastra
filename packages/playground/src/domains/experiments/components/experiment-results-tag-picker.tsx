@@ -2,6 +2,8 @@ import type { DatasetExperimentResult } from '@mastra/client-js';
 import { Combobox } from '@mastra/playground-ui/components/Combobox';
 import type { ComboboxOption, ComboboxVariant } from '@mastra/playground-ui/components/Combobox';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo, useState } from 'react';
 
 const CREATE_TAG_VALUE = '__create_tag__';
@@ -27,6 +29,7 @@ export function ExperimentResultsTagPicker({
   disabled,
   variant,
 }: ExperimentResultsTagPickerProps) {
+  const studioLocale = useLocale();
   const [search, setSearch] = useState('');
 
   const sortedVocabulary = useMemo(() => [...vocabulary].sort(), [vocabulary]);
@@ -48,8 +51,10 @@ export function ExperimentResultsTagPicker({
     }));
     const trimmed = search.trim();
     const canCreate = trimmed.length > 0 && !sortedVocabulary.includes(trimmed);
-    return canCreate ? [{ label: `Create "${trimmed}"`, value: CREATE_TAG_VALUE }, ...existing] : existing;
-  }, [sortedVocabulary, appliedToAll, search]);
+    return canCreate
+      ? [{ label: studioT('Create "{value0}"', { value0: trimmed }), value: CREATE_TAG_VALUE }, ...existing]
+      : existing;
+  }, [sortedVocabulary, appliedToAll, search, studioLocale]);
 
   const handleSelect = (value: string) => {
     const tag = value === CREATE_TAG_VALUE ? search.trim() : value;
@@ -64,9 +69,9 @@ export function ExperimentResultsTagPicker({
       value={undefined}
       onValueChange={handleSelect}
       onInputValueChange={setSearch}
-      placeholder="Add tag"
-      searchPlaceholder="Search or create tag"
-      emptyText="Type to create a tag"
+      placeholder={studioT('Add tag')}
+      searchPlaceholder={studioT('Search or create tag')}
+      emptyText={studioT('Type to create a tag')}
       variant={variant}
       size="sm"
       className="w-auto min-w-0"

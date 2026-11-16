@@ -1,9 +1,9 @@
 import type { TraceSignalDefinition } from '@mastra/client-js';
 import { useState } from 'react';
-
 import { useTraceIntelligence } from '../use-trace-intelligence';
 import { SignalDefinitionFormDialog } from './signal-definition-form-dialog';
 import { useSignalManagementList, useSignalManagementMutations } from './use-signal-management';
+
 import { Badge } from '@/ds/components/Badge';
 import { Button } from '@/ds/components/Button';
 import { DataDetailsPanel } from '@/ds/components/DataDetailsPanel';
@@ -16,8 +16,11 @@ import { IconLayoutGrid1 } from '@/ds/icons/central/IconLayoutGrid1';
 import { IconPencil } from '@/ds/icons/central/IconPencil';
 import { IconSettingsGear5 } from '@/ds/icons/central/IconSettingsGear5';
 import { IconUnarchiv } from '@/ds/icons/central/IconUnarchiv';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 export function TraceSignalSettingsButton({ open, onClick }: { open: boolean; onClick: () => void }) {
+  useLocale();
   const { signalManagement } = useTraceIntelligence();
   if (!signalManagement) return null;
 
@@ -26,8 +29,8 @@ export function TraceSignalSettingsButton({ open, onClick }: { open: boolean; on
       type="button"
       variant="ghost"
       size="icon-md"
-      tooltip="Signal settings"
-      aria-label="Signal settings"
+      tooltip={studioT('Signal settings')}
+      aria-label={studioT('Signal settings')}
       aria-controls="trace-signal-settings"
       aria-expanded={open}
       onClick={onClick}
@@ -38,14 +41,15 @@ export function TraceSignalSettingsButton({ open, onClick }: { open: boolean; on
 }
 
 export function TraceSignalSettingsPanel({ onClose }: { onClose: () => void }) {
+  useLocale();
   return (
-    <aside id="trace-signal-settings" aria-label="Trace signal settings" className="min-h-0">
+    <aside id="trace-signal-settings" aria-label={studioT('Trace signal settings')} className="min-h-0">
       <DataDetailsPanel>
         <DataDetailsPanel.Header>
           <DataDetailsPanel.Heading className="items-center text-subheading text-foreground">
-            <IconSettingsGear5 aria-hidden="true" /> Trace signal settings
+            <IconSettingsGear5 aria-hidden="true" /> {' ' + studioT('Trace signal settings')}
           </DataDetailsPanel.Heading>
-          <DataDetailsPanel.CloseButton onClick={onClose} tooltip="Close settings" />
+          <DataDetailsPanel.CloseButton onClick={onClose} tooltip={studioT('Close settings')} />
         </DataDetailsPanel.Header>
         <DataDetailsPanel.Content>
           <TraceSignalSettingsContent />
@@ -56,6 +60,7 @@ export function TraceSignalSettingsPanel({ onClose }: { onClose: () => void }) {
 }
 
 function TraceSignalSettingsContent() {
+  useLocale();
   const { signalManagement } = useTraceIntelligence();
   const query = useSignalManagementList();
   const mutations = useSignalManagementMutations();
@@ -66,7 +71,7 @@ function TraceSignalSettingsContent() {
 
   if (query.isPending) {
     return (
-      <div className="space-y-3" role="status" aria-label="Loading signal settings">
+      <div className="space-y-3" role="status" aria-label={studioT('Loading signal settings')}>
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-16 w-full" />
@@ -76,7 +81,7 @@ function TraceSignalSettingsContent() {
   if (query.error || !query.data) {
     return (
       <Notice variant="destructive">
-        <Notice.Message>{query.error?.message ?? 'Failed to load signal settings'}</Notice.Message>
+        <Notice.Message>{query.error?.message ?? studioT('Failed to load signal settings')}</Notice.Message>
       </Notice>
     );
   }
@@ -117,7 +122,9 @@ function TraceSignalSettingsContent() {
     <div className="space-y-6">
       {!canManage ? (
         <Notice variant="info">
-          <Notice.Message>You have read-only access. An organization admin can change these settings.</Notice.Message>
+          <Notice.Message>
+            {studioT('You have read-only access. An organization admin can change these settings.')}
+          </Notice.Message>
         </Notice>
       ) : null}
       {actionError ? (
@@ -130,10 +137,13 @@ function TraceSignalSettingsContent() {
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <div>
             <Txt as="h3" variant="subheading" tone="muted" id="custom-signals-heading">
-              Custom signals
+              {studioT('Custom signals')}
             </Txt>
             <Txt variant="meta" tone="muted">
-              {active.length} of {limit} active organization definitions
+              <Trans
+                id="{part0} of {part1} active organization definitions"
+                values={{ part0: active.length, part1: limit }}
+              />
             </Txt>
           </div>
           <Button
@@ -143,12 +153,14 @@ function TraceSignalSettingsContent() {
             disabled={!canManage || atLimit}
             onClick={openCreateForm}
           >
-            Create signal
+            {studioT('Create signal')}
           </Button>
         </div>
         {atLimit ? (
           <Notice variant="info">
-            <Notice.Message>Archive an active definition before creating or restoring another.</Notice.Message>
+            <Notice.Message>
+              {studioT('Archive an active definition before creating or restoring another.')}
+            </Notice.Message>
           </Notice>
         ) : null}
         <div className="divide-y divide-border">
@@ -160,7 +172,8 @@ function TraceSignalSettingsContent() {
                     {definition.displayLabel}
                   </Txt>
                   <Badge variant="neutral" size="sm">
-                    v{definition.version}
+                    {studioT('v')}
+                    {definition.version}
                   </Badge>
                 </div>
                 <Txt variant="meta" tone="muted" className="truncate">
@@ -175,7 +188,7 @@ function TraceSignalSettingsContent() {
                   disabled={!canManage}
                   onClick={() => openEditForm(definition)}
                 >
-                  Edit
+                  {studioT('Edit')}
                 </Button>
                 <Button
                   icon={<IconArchive />}
@@ -186,10 +199,10 @@ function TraceSignalSettingsContent() {
                   }
                   onClick={() => void runAction(() => mutations.archive.mutateAsync(definition.id))}
                 >
-                  Archive
+                  {studioT('Archive')}
                 </Button>
                 <Switch
-                  aria-label={`Enable ${definition.displayLabel}`}
+                  aria-label={studioT('Enable {value0}', { value0: definition.displayLabel })}
                   checked={definition.enabled ?? false}
                   disabled={
                     !canManage ||
@@ -206,7 +219,7 @@ function TraceSignalSettingsContent() {
         </div>
         {active.length === 0 ? (
           <Txt variant="caption" tone="muted" className="py-3">
-            No custom signals yet.
+            {studioT('No custom signals yet.')}
           </Txt>
         ) : null}
       </section>
@@ -215,7 +228,7 @@ function TraceSignalSettingsContent() {
         <details>
           <summary className="cursor-pointer text-muted-foreground">
             <Txt as="span" variant="caption" className="block">
-              Archived definitions ({archived.length})
+              <Trans id="Archived definitions ({part0})" values={{ part0: archived.length }} />
             </Txt>
           </summary>
           <div className="mt-2 divide-y divide-border">
@@ -235,7 +248,7 @@ function TraceSignalSettingsContent() {
                   }
                   onClick={() => void runAction(() => mutations.restore.mutateAsync(definition.id))}
                 >
-                  Restore
+                  {studioT('Restore')}
                 </Button>
               </div>
             ))}
@@ -244,8 +257,9 @@ function TraceSignalSettingsContent() {
       ) : null}
 
       <Txt variant="meta" tone="muted">
-        Enabling a signal starts collection for new traces. Entity status shows when enough generated data has been
-        processed and clustered.
+        {studioT(
+          'Enabling a signal starts collection for new traces. Entity status shows when enough generated data has been processed and clustered.',
+        )}
       </Txt>
 
       {creating ? (

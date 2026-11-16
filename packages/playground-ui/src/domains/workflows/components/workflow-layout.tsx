@@ -6,6 +6,8 @@ import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { ResizeHandleIndicator } from '@/ds/primitives/resize-handle-indicator';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useLocalStorageState } from '@/hooks/use-local-storage-state';
+import { t as studioT, useLocale } from '@/lib/i18n';
+
 import './workflow-layout.css';
 
 export interface WorkflowLayoutProps {
@@ -42,6 +44,7 @@ function clampPanelWidth(candidate: number, maxWidth: number) {
 }
 
 export function WorkflowPanelResizeHandle() {
+  useLocale();
   const resize = useContext(WorkflowPanelResizeContext);
   if (!resize) return null;
 
@@ -64,7 +67,7 @@ export function WorkflowPanelResizeHandle() {
     <div
       role="separator"
       aria-orientation="vertical"
-      aria-label="Resize panel"
+      aria-label={studioT('Resize panel')}
       aria-valuenow={resize.width}
       aria-valuemin={LEFT_PANEL_MIN_WIDTH}
       tabIndex={0}

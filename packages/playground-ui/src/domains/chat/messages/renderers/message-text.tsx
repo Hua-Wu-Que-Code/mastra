@@ -18,6 +18,7 @@ import type { MarkdownExternalLinkTarget } from '@/ds/components/MarkdownRendere
 import { Notice } from '@/ds/components/Notice';
 import { IconCircleCheck } from '@/ds/icons/central/IconCircleCheck';
 import { Icon } from '@/ds/icons/Icon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const REF_LINK_CLASS = 'text-foreground underline underline-offset-2';
 
@@ -67,6 +68,7 @@ export interface MessageTextProps {
  * metadata).
  */
 export const MessageText = ({ text, metadata, externalLinkTarget, streaming, tableActions }: MessageTextProps) => {
+  useLocale();
   const [collapsedCompletionCheck, setCollapsedCompletionCheck] = useState(false);
   const knowledgeLinks = useHasKnowledgeLinks();
 
@@ -76,14 +78,14 @@ export const MessageText = ({ text, metadata, externalLinkTarget, streaming, tab
 
     case 'warning':
       return (
-        <Notice variant="warning" title="Warning">
+        <Notice variant="warning" title={studioT('Warning')}>
           <Notice.Message>{text}</Notice.Message>
         </Notice>
       );
 
     case 'error':
       return (
-        <Notice variant="destructive" title="Error">
+        <Notice variant="destructive" title={studioT('Error')}>
           <Notice.Message>{errorMessage(text)}</Notice.Message>
         </Notice>
       );
@@ -100,11 +102,14 @@ export const MessageText = ({ text, metadata, externalLinkTarget, streaming, tab
               <DisclosureChevron direction="right" />
             </Icon>
             <Badge variant="blue" icon={<IconCircleCheck />}>
-              {collapsedCompletionCheck ? 'Show' : 'Hide'} completion check
+              {collapsedCompletionCheck ? studioT('Show') : studioT('Hide')} {' ' + studioT('completion check')}
             </Badge>
           </button>
           {!collapsedCompletionCheck && (
-            <Notice variant="info" title={metadata?.completionResult?.passed ? 'Complete' : 'Not Complete'}>
+            <Notice
+              variant="info"
+              title={metadata?.completionResult?.passed ? studioT('Complete') : studioT('Not Complete')}
+            >
               <MarkdownRenderer externalLinkTarget={externalLinkTarget}>{text}</MarkdownRenderer>
             </Notice>
           )}

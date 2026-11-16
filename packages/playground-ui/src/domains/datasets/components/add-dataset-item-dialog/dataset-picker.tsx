@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, Sele
 import { Txt } from '@/ds/components/Txt';
 import { Icon } from '@/ds/icons';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const CREATE_DATASET_VALUE = '__create-dataset__';
 
@@ -25,12 +26,13 @@ export function DatasetPicker({
   disabled,
   onCreateDataset,
 }: DatasetPickerProps) {
+  useLocale();
   // A just-created dataset is picked before the refetch lists it.
   const isListed = datasets.some(dataset => dataset.id === value);
 
   return (
     <Field>
-      <FieldLabel required>Dataset</FieldLabel>
+      <FieldLabel required>{studioT('Dataset')}</FieldLabel>
       <Select
         // Base UI resets an unmatched non-null value to null when items change, which would wipe a
         // just-created dataset before the refetch lists it; null means "no selection" and is left alone.
@@ -41,8 +43,8 @@ export function DatasetPicker({
         }}
         disabled={disabled || loading}
       >
-        <SelectTrigger aria-label="Dataset" className="sm:max-w-sm">
-          <SelectValue placeholder={loading ? 'Loading datasets…' : 'Select a dataset'} />
+        <SelectTrigger aria-label={studioT('Dataset')} className="sm:max-w-sm">
+          <SelectValue placeholder={loading ? studioT('Loading datasets…') : studioT('Select a dataset')} />
         </SelectTrigger>
         <SelectContent>
           {onCreateDataset && (
@@ -52,7 +54,7 @@ export function DatasetPicker({
                   <Icon size="sm">
                     <IconPlusMedium aria-hidden />
                   </Icon>
-                  Create dataset
+                  {studioT('Create dataset')}
                 </span>
               </SelectItem>
               {datasets.length > 0 && <SelectSeparator />}
@@ -60,7 +62,7 @@ export function DatasetPicker({
           )}
           {datasets.length === 0 && !onCreateDataset ? (
             <Txt as="p" variant="body" tone="muted" className="px-2 py-4 text-center">
-              No datasets available
+              {studioT('No datasets available')}
             </Txt>
           ) : (
             datasets.map(dataset => (

@@ -5,6 +5,8 @@ import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconMagnifyingGlass } from '@/ds/icons/central/IconMagnifyingGlass';
 import { menuEmptyClass, menuItemButtonClass, menuItemCheckClass, menuSearchClasses } from '@/ds/primitives/menu-item';
 import { passwordManagerOptOutProps } from '@/ds/primitives/password-manager-autofill';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // Same rendering as Combobox items: no visible control, a trailing check when selected.
@@ -59,6 +61,7 @@ export type PickMultiPanelProps = {
  * PropertyFilterApplied pill's inline editor so both surfaces use the exact same UI.
  */
 export function PickMultiPanel({ field, tokens, onChange }: PickMultiPanelProps) {
+  useLocale();
   const [query, setQuery] = useState('');
   const listClassName = 'max-h-[80dvh] overflow-auto p-1';
 
@@ -88,7 +91,7 @@ export function PickMultiPanel({ field, tokens, onChange }: PickMultiPanelProps)
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder={`Search ${field.label.toLowerCase()}`}
+            placeholder={studioT('Search {value0}', { value0: field.label.toLowerCase() })}
             className={menuSearchClasses.input}
             {...passwordManagerOptOutProps}
             onKeyDown={e => {
@@ -107,10 +110,10 @@ export function PickMultiPanel({ field, tokens, onChange }: PickMultiPanelProps)
       {field.isLoading ? (
         <div className={cn(menuEmptyClass, 'm-1')}>
           <Spinner size="sm" className="size-3 text-muted-foreground" />
-          Loading options…
+          {studioT('Loading options…')}
         </div>
       ) : filteredOptions.length === 0 ? (
-        <div className={cn(menuEmptyClass, 'm-1')}>{field.emptyText ?? 'No option found.'}</div>
+        <div className={cn(menuEmptyClass, 'm-1')}>{field.emptyText ?? studioT('No option found.')}</div>
       ) : field.multi ? (
         <div className={listClassName}>
           <>
@@ -149,7 +152,7 @@ export function PickMultiPanel({ field, tokens, onChange }: PickMultiPanelProps)
               <PickMultiItem
                 role="radio"
                 checked={selectedValue === 'Any'}
-                label="Any"
+                label={studioT('Any')}
                 onClick={() => onChange(field.id, 'Any')}
               />
             )}

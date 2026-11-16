@@ -1,8 +1,8 @@
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import * as React from 'react';
-
 import { DialogAction } from './dialog-action';
 import { DialogContext, dialogActionLayoutClasses, dialogActionSizeClasses, useDialogContext } from './dialog-context';
+
 import type { DialogIntent } from './dialog-context';
 import { DIALOG_DRAWER_BREAKPOINT_PX, dialogContentSizeClasses, dialogPopupClassName } from './dialog-shell';
 import type { DialogSize } from './dialog-shell';
@@ -13,6 +13,8 @@ import type { DrawerProps } from '@/ds/components/Drawer';
 import { ScrollArea, ScrollAreaViewport } from '@/ds/components/ScrollArea';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { useIsMobile } from '@/hooks/use-is-mobile';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './dialog.css';
@@ -109,6 +111,7 @@ function DialogContent({
   initialFocus,
   ...props
 }: DialogContentProps) {
+  useLocale();
   const { intent, pending, isDrawer } = useDialogContext();
   const closeRef = React.useRef<HTMLButtonElement>(null);
   const isDestructive = intent === 'destructive';
@@ -128,7 +131,7 @@ function DialogContent({
       data-slot="dialog-close"
       className={cn('absolute right-4', isDrawer ? 'top-1.5' : 'top-4')}
       render={
-        <Button variant="ghost" size="icon-sm" aria-label="Close">
+        <Button variant="ghost" size="icon-sm" aria-label={studioT('Close')}>
           <IconCrossMedium />
         </Button>
       }

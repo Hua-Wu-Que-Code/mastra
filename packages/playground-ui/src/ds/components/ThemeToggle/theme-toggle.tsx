@@ -6,6 +6,7 @@ import { IconMoon } from '@/ds/icons/central/IconMoon';
 import { IconStudioDisplay } from '@/ds/icons/central/IconStudioDisplay';
 import { IconSun } from '@/ds/icons/central/IconSun';
 import type { ControlSize } from '@/ds/primitives/control-size';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface ThemeToggleOption {
   value: Theme;
@@ -14,9 +15,27 @@ export interface ThemeToggleOption {
 }
 
 export const THEME_OPTIONS: ReadonlyArray<ThemeToggleOption> = [
-  { value: 'system', label: 'System', icon: <IconStudioDisplay /> },
-  { value: 'light', label: 'Light', icon: <IconSun /> },
-  { value: 'dark', label: 'Dark', icon: <IconMoon /> },
+  {
+    value: 'system',
+    get label() {
+      return studioT('System');
+    },
+    icon: <IconStudioDisplay />,
+  },
+  {
+    value: 'light',
+    get label() {
+      return studioT('Light');
+    },
+    icon: <IconSun />,
+  },
+  {
+    value: 'dark',
+    get label() {
+      return studioT('Dark');
+    },
+    icon: <IconMoon />,
+  },
 ];
 
 type ControlledProps = { value: Theme; onChange: (next: Theme) => void };
@@ -51,9 +70,10 @@ export const ThemeToggle = ({
   onChange,
   options = THEME_OPTIONS,
   size = 'md',
-  'aria-label': ariaLabel = 'Theme',
+  'aria-label': ariaLabel = studioT('Theme'),
   ...groupProps
 }: ThemeToggleProps) => {
+  useLocale();
   const { theme, setTheme } = useTheme();
   const current = value ?? theme;
   const commit = onChange ?? setTheme;

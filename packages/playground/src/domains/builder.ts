@@ -1,4 +1,6 @@
 import type { BuilderSettingsResponse, Provider } from '@mastra/client-js';
+
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 
 import { providerMatches } from './llm/hooks/use-filtered-models';
@@ -35,7 +37,7 @@ export function useBuilderFilteredModels(models: ModelInfo[], policy: BuilderMod
 
 export function isModelNotAllowedError(error: unknown) {
   if (error && typeof error === 'object' && 'code' in error && error.code === 'MODEL_NOT_ALLOWED') {
-    return { message: error instanceof Error ? error.message : 'Model is not allowed' };
+    return { message: error instanceof Error ? error.message : studioT('Model is not allowed') };
   }
 
   return null;

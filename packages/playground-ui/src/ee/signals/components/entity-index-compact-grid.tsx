@@ -1,13 +1,14 @@
 import type { ThemeLearningEntity } from '@mastra/client-js';
 import { useId } from 'react';
-
 import { entityIndexMetadata } from './entity-index-model';
 import { EntityIndexStatus } from './entity-index-status';
+
 import { Card, CardContent, CardDescription, CardLink, CardTitle } from '@/ds/components/Card';
 import { ScrollArea } from '@/ds/components/ScrollArea';
 import { Txt } from '@/ds/components/Txt';
 import { textStyle } from '@/ds/primitives/text';
 import type { LinkComponent } from '@/ds/types/link-component';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface EntityIndexCompactGridProps {
   entities: readonly ThemeLearningEntity[];
@@ -25,6 +26,7 @@ function EntityIndexCompactCard({
   getEntityHref: (entity: ThemeLearningEntity) => string;
   LinkComponent: LinkComponent;
 }) {
+  useLocale();
   const detailsId = useId();
   const metadata = entityIndexMetadata(entity);
   return (
@@ -36,7 +38,7 @@ function EntityIndexCompactCard({
         <CardLink
           LinkComponent={LinkComponent}
           href={getEntityHref(entity)}
-          aria-label={`Open ${entity.entityId}`}
+          aria-label={studioT('Open {value0}', { value0: entity.entityId })}
           aria-describedby={detailsId}
           className="absolute inset-0 group-focus-within/entity:bg-fill-subtle group-hover/entity:bg-fill-subtle"
         />
@@ -53,15 +55,15 @@ function EntityIndexCompactCard({
         </div>
         <dl id={detailsId} className="grid grid-cols-3 gap-3">
           <div>
-            <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>Traces</dt>
+            <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>{studioT('Traces')}</dt>
             <dd className={textStyle({ tone: 'ink', variant: 'caption' })}>{metadata.traceCount}</dd>
           </div>
           <div>
-            <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>Signals set</dt>
+            <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>{studioT('Signals set')}</dt>
             <dd className={textStyle({ tone: 'ink', variant: 'caption' })}>{metadata.signalsSet}</dd>
           </div>
           <div>
-            <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>Updated</dt>
+            <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>{studioT('Updated')}</dt>
             <dd title={entity.updatedAt} className={textStyle({ tone: 'ink', variant: 'caption' })}>
               {metadata.updatedAt}
             </dd>
@@ -78,10 +80,11 @@ export function EntityIndexCompactGrid({
   getEntityHref,
   LinkComponent,
 }: EntityIndexCompactGridProps) {
+  useLocale();
   if (entities.length === 0 && hasSearch) {
     return (
       <Txt variant="caption" tone="muted" className="py-8 text-center">
-        No agents match your search
+        {studioT('No agents match your search')}
       </Txt>
     );
   }

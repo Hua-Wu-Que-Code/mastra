@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-
 import { PendingSignalProgress } from './components/signals-empty-state';
 import { SignalsOverviewPage as SignalsEmptyState } from './components/signals-overview-page';
+
 import { fetchThemeFlow, fetchThemePaths, fetchThemeSnapshots, serializeThemeFilters } from './entity-learning-api';
 import { FlowCard } from './flow-card';
 import { useEntityLearningProgress } from './hooks/use-entity-learning-progress';
@@ -42,6 +42,7 @@ import { Txt } from '@/ds/components/Txt';
 import { IconAgents } from '@/ds/icons/central/IconAgents';
 import { IconArrowLeftRight } from '@/ds/icons/central/IconArrowLeftRight';
 import { IconGanttChart } from '@/ds/icons/central/IconGanttChart';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface SankeySignalsProps {
   entityId: string;
@@ -86,6 +87,7 @@ export function SankeySignals({
   onFrameIdChange,
   dateRangePicker,
 }: SankeySignalsProps) {
+  useLocale();
   const queryClient = useQueryClient();
   const traceIntelligence = useTraceIntelligence();
   const { cacheScope, request, LinkComponent, signalCatalog } = traceIntelligence;
@@ -260,7 +262,7 @@ export function SankeySignals({
       <>
         {dateRangePicker && <div className="flex justify-end px-4 pt-4 lg:px-6 lg:pt-6">{dateRangePicker}</div>}
         <SignalsErrorState
-          message="Unable to load trace signal flow."
+          message={studioT('Unable to load trace signal flow.')}
           onRetry={() => {
             setIsPlaying(false);
             void snapshotsQuery.refetch();
@@ -378,9 +380,9 @@ export function SankeySignals({
               className="w-fit"
             >
               <TabList variant="pill-ghost">
-                <ViewModeTab value="flow" icon={<IconAgents />} label="Flow" />
-                <ViewModeTab value="compare" icon={<IconArrowLeftRight />} label="Compare" />
-                <ViewModeTab value="lifelines" icon={<IconGanttChart />} label="Lifelines" />
+                <ViewModeTab value="flow" icon={<IconAgents />} label={studioT('Flow')} />
+                <ViewModeTab value="compare" icon={<IconArrowLeftRight />} label={studioT('Compare')} />
+                <ViewModeTab value="lifelines" icon={<IconGanttChart />} label={studioT('Lifelines')} />
               </TabList>
             </Tabs>
             <TraceIntelligenceExplainer signalCatalog={effectiveSignalCatalog} />
@@ -452,15 +454,17 @@ export function SankeySignals({
             {isDrilledEmpty ? (
               <section className="rounded-lg border border-border bg-background p-6 text-muted-foreground">
                 <Txt as="span" variant="body" className="block">
-                  This theme is not present in the selected snapshot. Use the clear filter action above to return to the
-                  full flow.
+                  {studioT(
+                    'This theme is not present in the selected snapshot. Use the clear filter action above to return to the full flow.',
+                  )}
                 </Txt>
               </section>
             ) : graphSummary.records.length === 0 ? (
               <section className="rounded-lg border border-border bg-background p-6 text-muted-foreground">
                 <Txt as="span" variant="body" className="block">
-                  No cross-signal flow for this snapshot. Its trace signals have not overlapped on shared traces yet.
-                  Pick another snapshot from the timeline below.
+                  {studioT(
+                    'No cross-signal flow for this snapshot. Its trace signals have not overlapped on shared traces yet. Pick another snapshot from the timeline below.',
+                  )}
                 </Txt>
               </section>
             ) : (
@@ -479,12 +483,12 @@ export function SankeySignals({
             )}
             {perspectiveMutation.isPending ? (
               <Txt variant="caption" tone="muted" role="status">
-                Reloading snapshots for new trace signal perspective…
+                {studioT('Reloading snapshots for new trace signal perspective…')}
               </Txt>
             ) : null}
             {perspectiveMutation.isError ? (
               <Txt variant="caption" className="text-destructive-foreground" role="alert">
-                Unable to load that trace signal perspective. Try reordering the columns again.
+                {studioT('Unable to load that trace signal perspective. Try reordering the columns again.')}
               </Txt>
             ) : null}
           </>

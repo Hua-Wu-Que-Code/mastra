@@ -2,6 +2,8 @@ import { ActionRow } from '@mastra/playground-ui/components/ActionRow';
 import { ClearFiltersButton } from '@mastra/playground-ui/components/ClearFiltersButton';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mastra/playground-ui/components/Select';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import { SCORER_SOURCE_OPTIONS } from './constants';
 
@@ -22,6 +24,7 @@ export function ScorersToolbar({
   onReset,
   hasActiveFilters,
 }: ScorersToolbarProps) {
+  useLocale();
   // Remount the search on Reset so a typed-but-uncommitted term is dropped: when `search` is
   // already '', Reset doesn't change it, so the field would keep showing the pending text.
   const [searchKey, setSearchKey] = useState(0);
@@ -38,15 +41,15 @@ export function ScorersToolbar({
           <SearchInput
             {...listSearchProps}
             key={searchKey}
-            label="Search scorers"
-            placeholder="Search by scorer name"
+            label={studioT('Search scorers')}
+            placeholder={studioT('Search by scorer name')}
             value={search}
             onValueChange={onSearchChange}
           />
         </div>
         <Select value={sourceFilter} onValueChange={onSourceFilterChange}>
-          <SelectTrigger aria-label="Source" size="sm" className="w-auto whitespace-nowrap">
-            <SelectValue placeholder="Select an option" />
+          <SelectTrigger aria-label={studioT('Source')} size="sm" className="w-auto whitespace-nowrap">
+            <SelectValue placeholder={studioT('Select an option')} />
           </SelectTrigger>
           <SelectContent>
             {SCORER_SOURCE_OPTIONS.map(option => (

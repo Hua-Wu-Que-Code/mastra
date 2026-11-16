@@ -7,6 +7,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconCalendar1 } from '@mastra/playground-ui/icons/central/IconCalendar1';
 import { IconCalendarClock4 } from '@mastra/playground-ui/icons/central/IconCalendarClock4';
 import { IconFingerPrint1 } from '@mastra/playground-ui/icons/central/IconFingerPrint1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { getShortId } from '@mastra/playground-ui/utils/id';
 import { datasetItemSections } from './dataset-item-sections';
@@ -26,6 +28,7 @@ export interface DatasetItemDetailsProps {
  * Shared by the item side panel and the version/item compare views.
  */
 export function DatasetItemDetails({ item, diff }: DatasetItemDetailsProps) {
+  useLocale();
   return (
     <div className={sectionStackClass}>
       <ComparisonMetricList metrics={metadataMetrics(item)} />
@@ -57,7 +60,7 @@ export function DatasetItemDetails({ item, diff }: DatasetItemDetailsProps) {
             <div key={section.key} className="flex flex-col gap-2">
               <DataPanel.SectionHeading icon={section.icon}>{section.title}</DataPanel.SectionHeading>
               <Txt as="p" variant="body" tone="muted">
-                Not set in this version
+                {studioT('Not set in this version')}
               </Txt>
             </div>
           );
@@ -83,13 +86,15 @@ function metadataMetrics(item: DatasetItem): ComparisonMetric[] {
     {
       id: 'item-id',
       icon: <IconFingerPrint1 />,
-      label: 'Item Id',
+      get label() {
+        return studioT('Item Id');
+      },
       value: (
         <span className="flex items-center gap-1.5">
           <span className="font-mono" title={item.id}>
             {getShortId(item.id)}
           </span>
-          <CopyButton content={item.id} tooltip="Copy item ID to clipboard" variant="link" />
+          <CopyButton content={item.id} tooltip={studioT('Copy item ID to clipboard')} variant="link" />
         </span>
       ),
       delta: null,
@@ -97,7 +102,9 @@ function metadataMetrics(item: DatasetItem): ComparisonMetric[] {
     {
       id: 'created',
       icon: <IconCalendar1 />,
-      label: 'Created',
+      get label() {
+        return studioT('Created');
+      },
       value: formatDate(item.createdAt, 'date-time'),
       delta: null,
     },
@@ -106,7 +113,9 @@ function metadataMetrics(item: DatasetItem): ComparisonMetric[] {
     metrics.push({
       id: 'updated',
       icon: <IconCalendarClock4 />,
-      label: 'Updated',
+      get label() {
+        return studioT('Updated');
+      },
       value: formatDate(item.updatedAt, 'date-time'),
       delta: null,
     });

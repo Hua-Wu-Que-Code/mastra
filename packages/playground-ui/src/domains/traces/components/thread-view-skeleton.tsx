@@ -3,6 +3,8 @@ import { TraceSpanTreeSkeleton } from './trace-span-tree-skeleton';
 import { Card } from '@/ds/components/Card';
 import { Skeleton } from '@/ds/components/Skeleton';
 import { controlSizeClasses } from '@/ds/primitives/control-size';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const ROWS = [0, 1, 2];
@@ -20,12 +22,13 @@ export interface ThreadViewSkeletonProps {
  * The whole skeleton waits 500ms before fading in, so fast responses swap straight to content without a flash.
  */
 export function ThreadViewSkeleton({ withFeedback = false }: ThreadViewSkeletonProps) {
+  useLocale();
   const tabWidths = withFeedback ? ['w-24', 'w-22', 'w-18'] : ['w-24', 'w-18'];
 
   return (
     <div
       role="status"
-      aria-label="Loading thread"
+      aria-label={studioT('Loading thread')}
       className="min-h-0 animate-in overflow-hidden delay-500 duration-200 fade-in-0 fill-mode-backwards"
     >
       {ROWS.map(idx => (

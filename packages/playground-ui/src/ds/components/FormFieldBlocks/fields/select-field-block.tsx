@@ -7,6 +7,7 @@ import type { FieldBlockLayoutProps } from '../block/field-block-layout';
 import { fieldErrorId } from '../block/field-error-id';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select';
 import { VisuallyHidden } from '@/ds/primitives/visually-hidden';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SelectFieldBlockProps = Pick<FieldBlockLayoutProps, 'layout' | 'labelColumnWidth'> &
   Pick<FieldBlockLabelProps, 'name' | 'required'> & {
@@ -40,10 +41,11 @@ export function SelectFieldBlock({
   layout = 'vertical',
   labelColumnWidth,
   options,
-  placeholder = 'Select an option',
+  placeholder = studioT('Select an option'),
   onValueChange,
   className,
 }: SelectFieldBlockProps) {
+  useLocale();
   return (
     <FieldBlock.Layout layout={layout} labelColumnWidth={labelColumnWidth} className={className}>
       {layout === 'horizontal' ? (

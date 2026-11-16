@@ -2,6 +2,8 @@ import type { DatasetExperiment } from '@mastra/client-js';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconPlay } from '@mastra/playground-ui/icons/central/IconPlay';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ExperimentTriggerDialog } from '@/domains/datasets/components/experiment-trigger/experiment-trigger-dialog';
@@ -20,6 +22,7 @@ const DIALOG_TARGET_TYPES: readonly TargetType[] = ['agent', 'workflow', 'scorer
  * Request context is not persisted on experiments, so it is not prefilled.
  */
 export function RerunExperimentButton({ experiment }: RerunExperimentButtonProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { paths } = useLinkComponent();
@@ -40,11 +43,13 @@ export function RerunExperimentButton({ experiment }: RerunExperimentButtonProps
         onClick={() => setOpen(true)}
         disabled={isActive}
         tooltip={
-          isActive ? 'Available once this run finishes' : 'Run this experiment again with the same configuration'
+          isActive
+            ? studioT('Available once this run finishes')
+            : studioT('Run this experiment again with the same configuration')
         }
         icon={<IconPlay />}
       >
-        Rerun
+        {studioT('Rerun')}
       </Button>
       {/* Mounted on demand and keyed on the resolved scorers so the dialog seeds its state
           from them even when they load asynchronously from score data. */}

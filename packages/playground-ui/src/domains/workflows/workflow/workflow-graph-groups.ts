@@ -2,6 +2,7 @@ import type { WorkflowGraphEdge, WorkflowGraphNode } from './utils';
 import { WORKFLOW_STEP_NODE_TYPE } from './workflow-step-node-utils';
 import type { WorkflowStepNode } from './workflow-step-node-utils';
 import type { WorkflowGraphGroup } from '@/ds/components/Workflow';
+import { t as studioT } from '@/lib/i18n';
 
 export function getWorkflowGraphGroups(nodes: WorkflowGraphNode[]): WorkflowGraphGroup[] {
   const groups = new Map<string, WorkflowGraphGroup>();
@@ -10,7 +11,15 @@ export function getWorkflowGraphGroups(nodes: WorkflowGraphNode[]): WorkflowGrap
     const { id, pathCount } = node.data.parallelGroup;
     const group = groups.get(id);
     if (group) group.nodeIds.push(node.id);
-    else groups.set(id, { id, label: 'Parallel', description: `${pathCount} paths run together`, nodeIds: [node.id] });
+    else
+      groups.set(id, {
+        id,
+        get label() {
+          return studioT('Parallel');
+        },
+        description: studioT('{value0} paths run together', { value0: pathCount }),
+        nodeIds: [node.id],
+      });
   }
   return [...groups.values()];
 }
@@ -24,17 +33,23 @@ export function getWorkflowMapContext(node: WorkflowStepNode, nodes: WorkflowGra
     const hasParallelInputs = inputs.every(input => input.type === WORKFLOW_STEP_NODE_TYPE && input.data.parallelGroup);
     if (hasParallelInputs) {
       return {
-        label: hasGeneratedName ? 'Map parallel results' : node.data.label,
-        description: 'Transform the outputs after all parallel paths finish.',
+        label: hasGeneratedName ? studioT('Map parallel results') : node.data.label,
+        get description() {
+          return studioT('Transform the outputs after all parallel paths finish.');
+        },
       };
     }
     return {
-      label: hasGeneratedName ? 'Map branch results' : node.data.label,
-      description: 'Transform the outputs of the matching branches.',
+      label: hasGeneratedName ? studioT('Map branch results') : node.data.label,
+      get description() {
+        return studioT('Transform the outputs of the matching branches.');
+      },
     };
   }
   return {
-    label: hasGeneratedName ? 'Map data' : node.data.label,
-    description: 'Transform the previous output into the next input.',
+    label: hasGeneratedName ? studioT('Map data') : node.data.label,
+    get description() {
+      return studioT('Transform the previous output into the next input.');
+    },
   };
 }

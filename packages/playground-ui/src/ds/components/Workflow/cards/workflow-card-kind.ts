@@ -11,6 +11,7 @@ import { IconMaintenance } from '@/ds/icons/central/IconMaintenance';
 import { IconRobot } from '@/ds/icons/central/IconRobot';
 import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
+import { t as studioT } from '@/lib/i18n';
 
 export type WorkflowTypeBadgeProps = Pick<
   WorkflowStepCardViewProps,
@@ -23,19 +24,89 @@ export function getWorkflowCardBadge(props: WorkflowTypeBadgeProps): {
   tone: BadgeVariant;
   indicator?: string;
 } {
-  if (props.isForEach) return { label: 'For each', tone: 'orange', Icon: IconArrowsRepeat, indicator: 'foreach' };
+  if (props.isForEach)
+    return {
+      get label() {
+        return studioT('For each');
+      },
+      tone: 'orange',
+      Icon: IconArrowsRepeat,
+      indicator: 'foreach',
+    };
   if (props.isNestedWorkflowStep || props.stepGraph)
-    return { label: 'Workflow', tone: 'purple', Icon: WorkflowIcon, indicator: 'workflow' };
+    return {
+      get label() {
+        return studioT('Workflow');
+      },
+      tone: 'purple',
+      Icon: WorkflowIcon,
+      indicator: 'workflow',
+    };
   if (props.isParallel && !props.nodeKind)
-    return { label: 'Parallel', tone: 'blue', Icon: IconFork, indicator: 'parallel' };
+    return {
+      get label() {
+        return studioT('Parallel');
+      },
+      tone: 'blue',
+      Icon: IconFork,
+      indicator: 'parallel',
+    };
   if (props.nodeKind === 'map' || props.mapConfig)
-    return { label: 'Map', tone: 'orange', Icon: IconArrowRightLeft, indicator: 'map' };
+    return {
+      get label() {
+        return studioT('Map');
+      },
+      tone: 'orange',
+      Icon: IconArrowRightLeft,
+      indicator: 'map',
+    };
   if (props.nodeKind === 'wait-until' || props.date)
-    return { label: 'Wait until', tone: 'purple', Icon: IconCalendarClock4, indicator: 'sleep-until' };
+    return {
+      get label() {
+        return studioT('Wait until');
+      },
+      tone: 'purple',
+      Icon: IconCalendarClock4,
+      indicator: 'sleep-until',
+    };
   if (props.nodeKind === 'delay' || props.duration !== undefined)
-    return { label: 'Delay', tone: 'purple', Icon: IconStopwatch, indicator: 'sleep' };
-  if (props.nodeKind === 'agent') return { label: 'Agent', tone: 'cyan', Icon: IconRobot };
-  if (props.nodeKind === 'tool') return { label: 'Tool', tone: 'pink', Icon: IconMaintenance };
-  if (props.nodeKind === 'classifier') return { label: 'Classifier', tone: 'blue', Icon: IconBranch };
-  return { label: 'Step', tone: 'neutral', Icon: IconCodeBrackets };
+    return {
+      get label() {
+        return studioT('Delay');
+      },
+      tone: 'purple',
+      Icon: IconStopwatch,
+      indicator: 'sleep',
+    };
+  if (props.nodeKind === 'agent')
+    return {
+      get label() {
+        return studioT('Agent');
+      },
+      tone: 'cyan',
+      Icon: IconRobot,
+    };
+  if (props.nodeKind === 'tool')
+    return {
+      get label() {
+        return studioT('Tool');
+      },
+      tone: 'pink',
+      Icon: IconMaintenance,
+    };
+  if (props.nodeKind === 'classifier')
+    return {
+      get label() {
+        return studioT('Classifier');
+      },
+      tone: 'blue',
+      Icon: IconBranch,
+    };
+  return {
+    get label() {
+      return studioT('Step');
+    },
+    tone: 'neutral',
+    Icon: IconCodeBrackets,
+  };
 }

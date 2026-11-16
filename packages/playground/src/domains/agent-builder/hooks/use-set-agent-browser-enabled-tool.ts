@@ -1,4 +1,6 @@
 import { createTool } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { z } from 'zod-v4';
@@ -8,14 +10,16 @@ import type { AgentBuilderEditFormValues } from '@/domains/agent-builder/schemas
 export const SET_AGENT_BROWSER_ENABLED_TOOL_NAME = 'set-agent-browser-enabled';
 
 export function useSetAgentBrowserEnabledTool() {
+  const studioLocale = useLocale();
   const formMethods = useFormContext<AgentBuilderEditFormValues>();
 
   return useMemo(
     () =>
       createTool({
         id: SET_AGENT_BROWSER_ENABLED_TOOL_NAME,
-        description:
+        description: studioT(
           'Enable or disable browser access for the agent. Set `browserEnabled` to true to let the agent browse the web.',
+        ),
         inputSchema: z.object({
           browserEnabled: z
             .boolean()
@@ -29,6 +33,6 @@ export function useSetAgentBrowserEnabledTool() {
           return { success: true };
         },
       }),
-    [formMethods],
+    [formMethods, studioLocale],
   );
 }

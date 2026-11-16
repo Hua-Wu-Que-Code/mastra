@@ -13,6 +13,8 @@ import {
 import { IconChevronDoubleRight } from '@/ds/icons/central/IconChevronDoubleRight';
 import { PortalContainerProvider } from '@/ds/primitives/portal-container';
 import { transitions } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SideDialogRootProps = {
@@ -36,6 +38,7 @@ export function SideDialogRoot({
   level = 1,
   className,
 }: SideDialogRootProps) {
+  useLocale();
   const isConfirmation = variant === 'confirmation';
 
   // Mount point for nested popups (Select, Popover, …). It sits *inside* Base
@@ -83,7 +86,7 @@ export function SideDialogRoot({
                       transitions.all,
                       'hover:bg-fill-subtle hover:text-foreground',
                     )}
-                    aria-label="Close"
+                    aria-label={studioT('Close')}
                   >
                     <IconChevronDoubleRight />
                   </button>

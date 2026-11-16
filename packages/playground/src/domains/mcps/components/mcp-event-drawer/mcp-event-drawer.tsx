@@ -1,11 +1,14 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
 import { IconSignalTower } from '@mastra/playground-ui/icons/central/IconSignalTower';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { useEventDrawerParam } from '../../hooks/use-event-drawer-param';
 import { McpEventDrawerBody } from './mcp-event-drawer-body';
 
 /** The side drawer an MCP event type opens in, driven by `?event=`. */
 export function McpEventDrawer({ serverId }: { serverId: string }) {
+  useLocale();
   const { eventName, close } = useEventDrawerParam();
 
   return (
@@ -18,7 +21,7 @@ export function McpEventDrawer({ serverId }: { serverId: string }) {
           <span className="truncate">{eventName}</span>
         </DataPanel.Heading>
         <DataPanel.HeaderActions>
-          <DataPanel.CloseButton icon="x" tooltip="Close event" onClick={close} />
+          <DataPanel.CloseButton icon="x" tooltip={studioT('Close event')} onClick={close} />
         </DataPanel.HeaderActions>
       </DataPanel.Header>
       <DataPanel.Content className="flex flex-col gap-4 px-3">

@@ -19,6 +19,7 @@ import { FileIcon, FolderIcon, TrashIcon } from '@/ds/icons';
 import { IconExclamationCircle } from '@/ds/icons/central/IconExclamationCircle';
 import { IconFolderAddRight } from '@/ds/icons/central/IconFolderAddRight';
 import { IconLock } from '@/ds/icons/central/IconLock';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const formatBytes = (bytes: number) => {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -29,6 +30,7 @@ const formatBytes = (bytes: number) => {
 type RequestDelete = (entry: WorkspaceEntryRef) => void;
 
 export function WorkspaceTree() {
+  useLocale();
   const { workspaceId, activeFilePath, setActiveFilePath } = useWorkspaceContext();
   const { data, isLoading, error } = useWorkspaceDirectory({ workspaceId: workspaceId, path: ROOT_PATH });
   const [pendingDelete, setPendingDelete] = useState<WorkspaceEntryRef | null>(null);
@@ -39,7 +41,12 @@ export function WorkspaceTree() {
 
   return (
     <>
-      <Tree aria-label="Workspace files" selectedId={activeFilePath} onSelect={setActiveFilePath} className="py-1">
+      <Tree
+        aria-label={studioT('Workspace files')}
+        selectedId={activeFilePath}
+        onSelect={setActiveFilePath}
+        className="py-1"
+      >
         <Entries entries={data} parent={ROOT_PATH} onRequestDelete={setPendingDelete} />
       </Tree>
       <DeleteDialog entry={pendingDelete} onClose={() => setPendingDelete(null)} />
@@ -82,11 +89,12 @@ function RowActions({ children }: { children: ReactNode }) {
 }
 
 function DeleteButton({ name, onClick }: { name: string; onClick: () => void }) {
+  useLocale();
   return (
     <Button
       variant="destructive-ghost"
       size="icon-sm"
-      tooltip={`Delete ${name}`}
+      tooltip={studioT('Delete {value0}', { value0: name })}
       onClick={event => {
         event.stopPropagation();
         onClick();
@@ -105,6 +113,7 @@ interface NodeProps {
 }
 
 function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?: WorkspaceMount }) {
+  useLocale();
   const { workspaceId, onDelete, onCreateDirectory, isReadOnly, openFolders, setFolderOpen } = useWorkspaceContext();
   const open = openFolders.has(path);
   // Shares the query with FolderChildren; only used to flag the first load next to the name.
@@ -127,7 +136,7 @@ function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  tooltip={`New folder in ${name}`}
+                  tooltip={studioT('New folder in {value0}', { value0: name })}
                   onClick={event => {
                     event.stopPropagation();
                     setFolderOpen(path, true);
@@ -149,7 +158,7 @@ function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?
           {mount ? (
             <span
               role="img"
-              aria-label={`Mount: ${mount.displayName ?? mount.provider}`}
+              aria-label={studioT('Mount: {value0}', { value0: mount.displayName ?? mount.provider })}
               title={[mount.displayName ?? mount.provider, mount.description].filter(Boolean).join(': ')}
               className="flex"
             >
@@ -163,7 +172,7 @@ function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?
         {mount?.status === 'error' ? (
           <span
             role="img"
-            aria-label={`Mount error: ${mount.error ?? 'unavailable'}`}
+            aria-label={studioT('Mount error: {value0}', { value0: mount.error ?? 'unavailable' })}
             title={mount.error}
             className="flex shrink-0"
           >
@@ -171,13 +180,17 @@ function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?
           </span>
         ) : null}
         {mount && isReadOnly(path) ? (
-          <span role="img" aria-label="Read-only" title="Read-only" className="flex shrink-0">
+          <span role="img" aria-label={studioT('Read-only')} title={studioT('Read-only')} className="flex shrink-0">
             <IconLock className="size-icon-xs text-muted-foreground" />
           </span>
         ) : null}
         {open && isLoading ? (
           <span className="flex shrink-0 animate-in delay-200 fill-mode-backwards fade-in">
-            <Spinner size="sm" aria-label={`Loading ${name}`} className="size-3 text-muted-foreground" />
+            <Spinner
+              size="sm"
+              aria-label={studioT('Loading {value0}', { value0: name })}
+              className="size-3 text-muted-foreground"
+            />
           </span>
         ) : null}
       </Tree.FolderTrigger>
@@ -207,6 +220,7 @@ function FolderChildren({
   onCreated: () => void;
   onRequestDelete: RequestDelete;
 }) {
+  useLocale();
   const { workspaceId, onCreateDirectory } = useWorkspaceContext();
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useWorkspaceDirectory({ workspaceId: workspaceId, path: path });
@@ -225,7 +239,12 @@ function FolderChildren({
   return (
     <>
       {creating ? (
-        <Tree.Input type="folder" placeholder="Folder name" onSubmit={name => void create(name)} onCancel={onCreated} />
+        <Tree.Input
+          type="folder"
+          placeholder={studioT('Folder name')}
+          onSubmit={name => void create(name)}
+          onCancel={onCreated}
+        />
       ) : null}
       {isLoading ? null : data ? (
         <Entries entries={data} parent={path} onRequestDelete={onRequestDelete} />
@@ -266,6 +285,7 @@ function FileNode({ name, size, path, onRequestDelete }: NodeProps & { size?: nu
 }
 
 function DeleteDialog({ entry, onClose }: { entry: WorkspaceEntryRef | null; onClose: () => void }) {
+  useLocale();
   const { workspaceId, activeFilePath, setActiveFilePath, onDelete } = useWorkspaceContext();
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -305,13 +325,18 @@ function DeleteDialog({ entry, onClose }: { entry: WorkspaceEntryRef | null; onC
     >
       <AlertDialog.Content>
         <AlertDialog.Header>
-          <AlertDialog.Title>Delete {entry?.type === 'directory' ? 'folder' : 'file'}?</AlertDialog.Title>
-          <AlertDialog.Description>{description} This action cannot be undone.</AlertDialog.Description>
+          <AlertDialog.Title>
+            {studioT('Delete') + ' '}
+            {entry?.type === 'directory' ? studioT('folder') : studioT('file')}?
+          </AlertDialog.Title>
+          <AlertDialog.Description>
+            {description} {' ' + studioT('This action cannot be undone.')}
+          </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Footer>
-          <AlertDialog.Cancel disabled={isDeleting}>Cancel</AlertDialog.Cancel>
+          <AlertDialog.Cancel disabled={isDeleting}>{studioT('Cancel')}</AlertDialog.Cancel>
           <Button variant="destructive" disabled={isDeleting} onClick={() => void confirm()}>
-            {isDeleting ? 'Deleting…' : 'Delete'}
+            {isDeleting ? studioT('Deleting…') : studioT('Delete')}
           </Button>
         </AlertDialog.Footer>
       </AlertDialog.Content>

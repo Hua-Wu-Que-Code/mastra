@@ -25,6 +25,8 @@ if (typeof Element !== 'undefined' && typeof Element.prototype.getAnimations !==
 }
 
 import { AppSidebar } from '../app-sidebar';
+import type { AccountSession } from '@/domains/account/account-api';
+import { AccountContext } from '@/domains/account/account-context';
 import { RoleImpersonationProvider } from '@/domains/auth/context/role-impersonation-context';
 
 export const BASE_URL = 'http://localhost:4111';
@@ -68,7 +70,7 @@ const noopPaths = {
   experimentLink: () => '',
 } as never;
 
-export function renderSidebar(initialPath = '/agents') {
+export function renderSidebar(initialPath = '/agents', account?: AccountSession) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -81,7 +83,9 @@ export function renderSidebar(initialPath = '/agents') {
             <MemoryRouter initialEntries={[initialPath]}>
               <TooltipProvider>
                 <Sidebar.Provider LinkComponent={'a' as never}>
-                  <AppSidebar />
+                  <AccountContext.Provider value={account}>
+                    <AppSidebar />
+                  </AccountContext.Provider>
                 </Sidebar.Provider>
               </TooltipProvider>
             </MemoryRouter>

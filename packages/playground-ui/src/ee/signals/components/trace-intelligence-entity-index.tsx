@@ -1,9 +1,9 @@
 import type { SignalCatalogEntry, ThemeLearningEntity } from '@mastra/client-js';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-
 import { useThemeEntities } from '../hooks';
 import { TraceSignalSettingsButton, TraceSignalSettingsPanel } from '../settings/trace-signal-settings';
+
 import { TraceIntelligenceExplainer } from '../trace-intelligence-explainer';
 import { useTraceIntelligence } from '../use-trace-intelligence';
 import { EntityIndexCompactGrid } from './entity-index-compact-grid';
@@ -20,6 +20,8 @@ import { SearchInput, listSearchProps } from '@/ds/components/SearchInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select';
 import { IconLayoutColumn } from '@/ds/icons/central/IconLayoutColumn';
 import { IconListBullets } from '@/ds/icons/central/IconListBullets';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@/utils/errors';
 
 export type { TraceIntelligenceEntitySort, TraceIntelligenceEntityView } from './entity-index-model';
@@ -39,6 +41,7 @@ export interface TraceIntelligenceEntityIndexProps {
 }
 
 function EntityIndexError({ error }: { error: Error }) {
+  useLocale();
   if (is401UnauthorizedError(error)) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -55,7 +58,11 @@ function EntityIndexError({ error }: { error: Error }) {
   }
   return (
     <div className="flex h-full items-center justify-center">
-      <EmptyState tone="error" titleSlot="Failed to load Trace Intelligence" descriptionSlot={error.message} />
+      <EmptyState
+        tone="error"
+        titleSlot={studioT('Failed to load Trace Intelligence')}
+        descriptionSlot={error.message}
+      />
     </div>
   );
 }
@@ -73,6 +80,7 @@ function EntityIndexControls({
   TraceIntelligenceEntityIndexProps,
   'search' | 'sort' | 'view' | 'onSearchChange' | 'onSortChange' | 'onViewChange' | 'headerAction'
 > & { signalCatalog: readonly SignalCatalogEntry[] }) {
+  useLocale();
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div className="max-w-120 flex-1">
@@ -80,29 +88,29 @@ function EntityIndexControls({
           {...listSearchProps}
           value={search}
           onValueChange={onSearchChange}
-          label="Search agents"
-          placeholder="Search by agent identifier"
+          label={studioT('Search agents')}
+          placeholder={studioT('Search by agent identifier')}
         />
       </div>
       <div className="flex items-center justify-between gap-2 sm:ml-auto sm:justify-end">
         <TraceIntelligenceExplainer signalCatalog={signalCatalog} />
         <Select<TraceIntelligenceEntitySort> value={sort} onValueChange={onSortChange}>
-          <SelectTrigger aria-label="Sort agents" size="md" variant="ghost" className="w-auto">
+          <SelectTrigger aria-label={studioT('Sort agents')} size="md" variant="ghost" className="w-auto">
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
-            <SelectItem value="default">Default order</SelectItem>
-            <SelectItem value="entity-asc">Agent: A–Z</SelectItem>
-            <SelectItem value="entity-desc">Agent: Z–A</SelectItem>
+            <SelectItem value="default">{studioT('Default order')}</SelectItem>
+            <SelectItem value="entity-asc">{studioT('Agent: A–Z')}</SelectItem>
+            <SelectItem value="entity-desc">{studioT('Agent: Z–A')}</SelectItem>
           </SelectContent>
         </Select>
         {headerAction}
-        <ButtonsGroup aria-label="Agents view">
+        <ButtonsGroup aria-label={studioT('Agents view')}>
           <Button
             type="button"
             variant={view === 'list' ? 'primary' : 'default'}
             size="icon-md"
-            tooltip="List view"
+            tooltip={studioT('List view')}
             aria-pressed={view === 'list'}
             onClick={() => onViewChange('list')}
           >
@@ -112,7 +120,7 @@ function EntityIndexControls({
             type="button"
             variant={view === 'compact' ? 'primary' : 'default'}
             size="icon-md"
-            tooltip="Compact view"
+            tooltip={studioT('Compact view')}
             aria-pressed={view === 'compact'}
             onClick={() => onViewChange('compact')}
           >
@@ -135,6 +143,7 @@ export function TraceIntelligenceEntityIndex({
   getEntityHref,
   headerAction,
 }: TraceIntelligenceEntityIndexProps) {
+  useLocale();
   const entitiesQuery = useThemeEntities(entityType);
   const { LinkComponent, signalCatalog: contextSignalCatalog, signalManagement } = useTraceIntelligence();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -156,15 +165,15 @@ export function TraceIntelligenceEntityIndex({
   );
   if (entitiesQuery.isPending) {
     body = (
-      <div role="status" aria-label="Loading Trace Intelligence agents">
+      <div role="status" aria-label={studioT('Loading Trace Intelligence agents')}>
         <DataListSkeleton columns={listColumns} />
       </div>
     );
   } else if (entitiesQuery.data.entities.length === 0 && !hasSearch) {
     body = (
       <EmptyState
-        titleSlot="No Trace Intelligence agents yet"
-        descriptionSlot="Agents appear after Trace Intelligence begins collecting generated signal data."
+        titleSlot={studioT('No Trace Intelligence agents yet')}
+        descriptionSlot={studioT('Agents appear after Trace Intelligence begins collecting generated signal data.')}
       />
     );
   } else if (view === 'compact') {

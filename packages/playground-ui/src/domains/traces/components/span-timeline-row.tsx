@@ -12,6 +12,8 @@ import { Txt } from '@/ds/components/Txt/Txt';
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
 import { IconChevronRightMedium } from '@/ds/icons/central/IconChevronRightMedium';
 import { focusRing, focusRingInset } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/utils/duration';
 
@@ -37,6 +39,7 @@ export type SpanTimelineRowProps = {
  * (subgrid) so hover and selection cover the name and the bar together.
  */
 export function SpanTimelineRow({ ctx }: SpanTimelineRowProps) {
+  useLocale();
   const {
     span,
     spanUI,
@@ -73,7 +76,7 @@ export function SpanTimelineRow({ ctx }: SpanTimelineRowProps) {
   return (
     <div
       ref={rowRef}
-      aria-label={`View details for span ${span.name}`}
+      aria-label={studioT('View details for span {value0}', { value0: span.name })}
       aria-selected={isSelected}
       // The whole row selects the span; the name button is the keyboard target and its click bubbles here.
       onClick={() => onSpanClick?.(span.id)}
@@ -113,7 +116,7 @@ export function SpanTimelineRow({ ctx }: SpanTimelineRowProps) {
               variant="body-sm"
               data-highlight={span.matchedInPayloadOnly ? undefined : ''}
               data-highlight-indirect={span.matchedInPayloadOnly ? '' : undefined}
-              title={span.matchedInPayloadOnly ? 'Matches your search in this span’s details' : undefined}
+              title={span.matchedInPayloadOnly ? studioT('Matches your search in this span’s details') : undefined}
               className="min-w-0 truncate font-[450]"
             >
               {kind ? <SegmentedName parts={[kind, value]} /> : span.name}

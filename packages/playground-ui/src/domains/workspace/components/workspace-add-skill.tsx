@@ -4,6 +4,7 @@ import { WorkspaceAddSkillDialog } from './workspace-add-skill-dialog';
 import type { AddSkillDialogProps } from './workspace-add-skill-dialog';
 import { Button } from '@/ds/components/Button';
 import { IconMagicWand } from '@/ds/icons/central/IconMagicWand';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type WorkspaceSkillInstallParams = Parameters<AddSkillDialogProps['onInstall']>[0];
 
@@ -17,6 +18,7 @@ export interface WorkspaceAddSkillOptions extends Omit<
 
 /** "Add skill" button that opens the skills.sh dialog. Renders nothing without `addSkill` options. */
 export function WorkspaceAddSkill({ labeled = false }: { labeled?: boolean }) {
+  useLocale();
   const { workspaceId, addSkill } = useWorkspaceContext();
   const [open, setOpen] = useState(false);
   const [isInstalling, setInstalling] = useState(false);
@@ -41,10 +43,16 @@ export function WorkspaceAddSkill({ labeled = false }: { labeled?: boolean }) {
       {labeled ? (
         <Button variant="ghost" onClick={() => setOpen(true)}>
           <IconMagicWand />
-          Add skill
+          {studioT('Add skill')}
         </Button>
       ) : (
-        <Button variant="ghost" size="icon-sm" aria-label="Add skill" tooltip="Add skill" onClick={() => setOpen(true)}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label={studioT('Add skill')}
+          tooltip={studioT('Add skill')}
+          onClick={() => setOpen(true)}
+        >
           <IconMagicWand />
         </Button>
       )}

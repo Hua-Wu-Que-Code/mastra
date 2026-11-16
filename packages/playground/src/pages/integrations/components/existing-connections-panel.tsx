@@ -1,6 +1,8 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Metadata } from '@mastra/playground-ui/components/Metadata';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { ConnectionItem, GroupedConnections } from '../types';
 
 function ConnectionRow({
@@ -14,6 +16,7 @@ function ConnectionRow({
   disconnectPending: boolean;
   onDisconnect: () => void;
 }) {
+  useLocale();
   const authorId = isAdmin ? connection.authorId : undefined;
 
   return (
@@ -25,7 +28,7 @@ function ConnectionRow({
         <Metadata>
           <Metadata.Item>
             <Txt as="span" variant="caption">
-              {connection.label ?? '(no label)'}
+              {connection.label ?? studioT('(no label)')}
             </Txt>
           </Metadata.Item>
           <Metadata.Item>
@@ -40,7 +43,7 @@ function ConnectionRow({
               <div className="flex min-w-0 items-baseline gap-1">
                 <dt>
                   <Txt as="span" variant="caption" tone="faint">
-                    Scope
+                    {studioT('Scope')}
                   </Txt>
                 </dt>
                 <dd className="min-w-0">
@@ -54,7 +57,7 @@ function ConnectionRow({
               <div className="flex min-w-0 items-baseline gap-1">
                 <dt>
                   <Txt as="span" variant="caption" tone="faint">
-                    Author
+                    {studioT('Author')}
                   </Txt>
                 </dt>
                 <dd className="min-w-0 wrap-anywhere">
@@ -73,7 +76,7 @@ function ConnectionRow({
         onClick={onDisconnect}
         disabled={disconnectPending}
       >
-        Disconnect
+        {studioT('Disconnect')}
       </button>
     </li>
   );
@@ -116,12 +119,13 @@ function ConnectionGroups({
   disconnectPending: boolean;
   onDisconnect: (connectionId: string) => void;
 }) {
+  useLocale();
   return (
     <div className="space-y-4">
       {groups.map(([authorKey, rows]) => (
         <div key={authorKey}>
           <Txt as="h3" variant="subheading" tone="ink" data-testid={`integration-author-group-${authorKey}`}>
-            {authorKey === 'shared' ? 'Shared' : `Owned by ${authorKey}`}
+            {authorKey === 'shared' ? studioT('Shared') : studioT('Owned by {value0}', { value0: authorKey })}
           </Txt>
           <ConnectionList
             connections={rows}
@@ -160,19 +164,20 @@ export function ExistingConnectionsPanel({
   disconnectError,
   onDisconnect,
 }: ExistingConnectionsPanelProps) {
+  useLocale();
   return (
     <div className="space-y-2 rounded border p-4">
       <Txt as="h2" variant="heading">
-        Existing connections
+        {studioT('Existing connections')}
       </Txt>
       {!providerId || !toolkit ? (
-        <p className="text-muted-foreground">Pick a provider and toolkit to list connections.</p>
+        <p className="text-muted-foreground">{studioT('Pick a provider and toolkit to list connections.')}</p>
       ) : isLoading ? (
-        <p className="text-muted-foreground">Loading…</p>
+        <p className="text-muted-foreground">{studioT('Loading…')}</p>
       ) : error ? (
         <p className="text-destructive-foreground">{String(error)}</p>
       ) : connections.length === 0 ? (
-        <p className="text-muted-foreground">No connections.</p>
+        <p className="text-muted-foreground">{studioT('No connections.')}</p>
       ) : groupedByAuthor ? (
         <ConnectionGroups
           groups={groupedByAuthor}

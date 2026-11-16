@@ -1,5 +1,7 @@
 import { Card } from '@mastra/playground-ui/components/Card';
 import { Tab, TabContent, TabList, Tabs } from '@mastra/playground-ui/components/Tabs';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import { ToolDescription } from './tool-description';
 
@@ -15,13 +17,14 @@ export interface ToolDrawerContentProps {
 
 /** What the tool is (Overview) apart from running it (Playground). */
 export function ToolDrawerContent({ description, overview, playground, canRun }: ToolDrawerContentProps) {
+  useLocale();
   return (
     <>
       <Tabs<ToolDrawerTab> defaultTab="overview" className="grid flex-1 grid-rows-[auto_1fr] gap-4 overflow-visible">
         <TabList variant="pill" size="sm">
-          <Tab value="overview">Overview</Tab>
+          <Tab value="overview">{studioT('Overview')}</Tab>
           <Tab value="playground" disabled={!canRun} disabledTooltip="You don't have permission to execute tools.">
-            Playground
+            {studioT('Playground')}
           </Tab>
         </TabList>
         <TabContent value="overview" flush className="content-start gap-6">

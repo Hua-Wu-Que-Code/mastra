@@ -11,6 +11,8 @@ import type { LinkComponentProps } from '@/lib/framework';
 
 /** What `LinkComponent` gets: anchor props, with `href` always set. */
 type ChartCardLinkProps = LinkComponentProps & { href: string };
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type ChartCardProps<V extends string = string> = {
@@ -206,11 +208,12 @@ function ChartCardTitle<V extends string>({
  * caller changes replaces what's typed.
  */
 function ChartCardTitleInput({ title, onTitleChange }: { title: string; onTitleChange: (title: string) => void }) {
+  useLocale();
   return (
     <h3 className="flex min-w-0">
       <input
         key={title}
-        aria-label="Widget title"
+        aria-label={studioT('Widget title')}
         defaultValue={title}
         {...passwordManagerOptOutProps}
         onBlur={event => {

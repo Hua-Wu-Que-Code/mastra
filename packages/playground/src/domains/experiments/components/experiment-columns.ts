@@ -1,4 +1,5 @@
 import type { BadgeVariant } from '@mastra/playground-ui/components/Badge';
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 
 // experiment name is free-form — an `auto` track would let it starve its neighbours
 export const EXPERIMENT_NAME_COLUMN = 'minmax(9rem,1fr)';
@@ -11,7 +12,9 @@ export const EXPERIMENT_USAGE_COLUMNS = 'auto auto auto';
 
 export const experimentColumnLabels = {
   experiment: 'Experiment',
-  description: 'Description',
+  get description() {
+    return studioT('Description');
+  },
   dataset: 'Dataset',
   target: 'Target',
   status: 'Status',

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDuration } from '@/utils/duration';
 
 interface WorkflowClockProps {
@@ -26,6 +28,7 @@ function RunningWorkflowClock({ startedAt, spansSuspension }: Omit<WorkflowClock
 }
 
 function ElapsedTime({ startedAt, endedAt, spansSuspension }: Omit<WorkflowClockProps, 'isRunning'>) {
+  useLocale();
   const elapsed = endedAt === undefined ? undefined : formatDuration(endedAt - startedAt);
 
   return (
@@ -34,9 +37,9 @@ function ElapsedTime({ startedAt, endedAt, spansSuspension }: Omit<WorkflowClock
       tone="muted"
       font="mono"
       className="whitespace-nowrap"
-      title={elapsed && spansSuspension ? 'Includes time spent suspended waiting for input' : undefined}
+      title={elapsed && spansSuspension ? studioT('Includes time spent suspended waiting for input') : undefined}
     >
-      {elapsed === undefined ? <span aria-label="Timing unavailable">—</span> : elapsed}
+      {elapsed === undefined ? <span aria-label={studioT('Timing unavailable')}>—</span> : elapsed}
     </Txt>
   );
 }

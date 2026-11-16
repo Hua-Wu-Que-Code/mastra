@@ -1,6 +1,8 @@
 import type { TracingOptionsEntityType } from '@mastra/playground-ui/domains/run-options/hooks/use-entity-tracing-options';
 import { useEntityTracingOptions } from '@mastra/playground-ui/domains/run-options/hooks/use-entity-tracing-options';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -26,6 +28,7 @@ export function RunOptionsPopover({
   onSaveExtra,
   onOpenChange,
 }: RunOptionsPopoverProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
   const [tracingOptions, setTracingOptions] = useEntityTracingOptions(entityType, entityId);
 
@@ -37,15 +40,15 @@ export function RunOptionsPopover({
   const handleSave = (value: Record<string, any>) => {
     setTracingOptions(value);
     onSaveExtra?.();
-    toast.success('Run options saved locally');
+    toast.success(studioT('Run options saved locally'));
     handleOpenChange(false);
   };
 
   return (
-    <RunActionPopover label="Run options" icon={<TraceIcon />} open={open} onOpenChange={handleOpenChange}>
+    <RunActionPopover label={studioT('Run options')} icon={<TraceIcon />} open={open} onOpenChange={handleOpenChange}>
       {extraFields}
       <JsonObjectEditor
-        label="Tracing Options"
+        label={studioT('Tracing Options')}
         value={tracingOptions}
         onSave={handleSave}
         editorClassName="h-[260px]"

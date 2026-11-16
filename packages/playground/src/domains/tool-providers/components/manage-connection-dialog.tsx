@@ -5,6 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useState } from 'react';
 
 import { ManageConnectionForm } from './manage-connection-form';
@@ -45,6 +47,7 @@ export const ManageConnectionDialog = ({
   onAddConnection,
   addingConnection = false,
 }: ManageConnectionDialogProps) => {
+  useLocale();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const showList = selectedId === null;
@@ -59,8 +62,12 @@ export const ManageConnectionDialog = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent data-testid={`${testIdPrefix}-dialog`}>
         <DialogHeader>
-          <DialogTitle>{showList ? `${titleize(providerId)} connections` : 'Manage connection'}</DialogTitle>
-          <DialogDescription>Rename or disconnect this authorized account.</DialogDescription>
+          <DialogTitle>
+            {showList
+              ? studioT('{value0} connections', { value0: titleize(providerId) })
+              : studioT('Manage connection')}
+          </DialogTitle>
+          <DialogDescription>{studioT('Rename or disconnect this authorized account.')}</DialogDescription>
         </DialogHeader>
         {open &&
           (showList ? (

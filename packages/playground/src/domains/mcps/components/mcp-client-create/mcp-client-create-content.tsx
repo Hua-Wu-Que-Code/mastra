@@ -1,4 +1,6 @@
 import type { StoredMCPServerConfig } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useTryConnectMcp } from '@mastra/react/hooks/mcps';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -30,6 +32,7 @@ export function MCPClientCreateContent({
   initialSelectedTools,
   submitLabel,
 }: MCPClientCreateContentProps) {
+  useLocale();
   const { form } = useMCPClientForm(initialValues);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -90,7 +93,7 @@ export function MCPClientCreateContent({
 
     const isValid = await form.trigger();
     if (!isValid) {
-      toast.error('Please fill in all required fields');
+      toast.error(studioT('Please fill in all required fields'));
       return;
     }
 

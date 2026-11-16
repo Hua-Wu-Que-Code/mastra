@@ -1,9 +1,9 @@
 import type { LucideIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-
 import type { ActivityCallState } from '../model/activity-members';
 import { callsOutcome, liveWords, outcomeText, settledWords, stretchPose, wordsName } from '../model/activity-words';
+
 import { useFadingEdge } from './use-fading-edge';
 import { useRollingWords } from './use-rolling-words';
 import { AgentIndicator, agentGlyph } from '@/ds/components/AgentIndicator';
@@ -23,6 +23,8 @@ import { Unwatched } from '@/ds/components/Arrival';
 import { Shimmer } from '@/ds/components/Shimmer';
 import { Txt } from '@/ds/components/Txt';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface ActivityFoldProps {
@@ -78,6 +80,7 @@ export function ActivityFold({
   slot,
   children,
 }: ActivityFoldProps) {
+  useLocale();
   const [animates] = useState(live);
   const words = live ? liveWords(calls) : settledWords(calls, elapsedMs);
   const outcome = callsOutcome(calls);
@@ -121,8 +124,8 @@ export function ActivityFold({
                 {failed && (
                   <IconCrossMedium
                     role="img"
-                    aria-label="Failed"
-                    className="size-icon-sm shrink-0 text-destructive-foreground"
+                    aria-label={studioT('Failed')}
+                    className="shrink-0 text-destructive-foreground"
                   />
                 )}
                 {outcomeLabel && (

@@ -1,4 +1,6 @@
 import type { StoredSkillResponse } from '@mastra/client-js';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useMastraClient } from '@mastra/react';
 import { useWriteWorkspaceFile } from '@mastra/react/hooks/workspace';
@@ -37,6 +39,7 @@ interface UseUpdateSkillOptions {
 }
 
 export function useUpdateSkill(options: UseUpdateSkillOptions = {}) {
+  useLocale();
   const client = useMastraClient();
   const queryClient = useQueryClient();
   const writeFile = useWriteWorkspaceFile();
@@ -88,12 +91,16 @@ export function useUpdateSkill(options: UseUpdateSkillOptions = {}) {
       void queryClient.invalidateQueries({ queryKey: ['stored-skills'] });
       void queryClient.invalidateQueries({ queryKey: ['stored-skill'] });
       if (!silent) {
-        toast.success('Skill updated');
+        toast.success(studioT('Skill updated'));
       }
     },
     onError: error => {
       if (!silent) {
-        toast.error(`Failed to update skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(
+          studioT('Failed to update skill: {value0}', {
+            value0: error instanceof Error ? error.message : 'Unknown error',
+          }),
+        );
       }
     },
   });

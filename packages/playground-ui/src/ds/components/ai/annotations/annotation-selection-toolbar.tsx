@@ -1,14 +1,16 @@
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 import { useEffect, useRef } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, RefObject } from 'react';
-
 import type { NewChatAnnotation } from './chat-annotations';
 import { useAnnotationSelection } from './use-annotation-selection';
+
 import { Button } from '@/ds/components/Button';
 import { IconOpenQuote1 } from '@/ds/icons/central/IconOpenQuote1';
 import { FLOATING_POSITION_METHOD } from '@/ds/primitives/floating';
 import { usePortalContainer } from '@/ds/primitives/portal-container';
 import { overlaySurfaceStyle } from '@/ds/primitives/raised-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface AnnotationSelectionToolbarProps {
@@ -19,6 +21,7 @@ export interface AnnotationSelectionToolbarProps {
 const hasModifier = (event: KeyboardEvent | ReactKeyboardEvent) => event.altKey || event.ctrlKey || event.metaKey;
 
 export function AnnotationSelectionToolbar({ containerRef, onAnnotate }: AnnotationSelectionToolbarProps) {
+  useLocale();
   const toolbarRef = useRef<HTMLDivElement>(null);
   const { open, selection, dismiss } = useAnnotationSelection(containerRef, toolbarRef);
   const portalContainer = usePortalContainer();
@@ -92,7 +95,7 @@ export function AnnotationSelectionToolbar({ containerRef, onAnnotate }: Annotat
           <PopoverPrimitive.Popup
             ref={toolbarRef}
             role="toolbar"
-            aria-label="Selected text"
+            aria-label={studioT('Selected text')}
             initialFocus={false}
             finalFocus={false}
             // A press here must not collapse the selection it acts on.
@@ -114,7 +117,7 @@ export function AnnotationSelectionToolbar({ containerRef, onAnnotate }: Annotat
               onClick={addToChat}
               onKeyDown={returnFocus}
             >
-              Add to chat
+              {studioT('Add to chat')}
             </Button>
           </PopoverPrimitive.Popup>
         </PopoverPrimitive.Positioner>

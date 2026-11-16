@@ -27,6 +27,8 @@ import { IconChevronDownMedium } from '@mastra/playground-ui/icons/central/IconC
 import { IconFloppyDisk1 } from '@mastra/playground-ui/icons/central/IconFloppyDisk1';
 import { IconPullRequest } from '@mastra/playground-ui/icons/central/IconPullRequest';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { useAgentVersions } from '@mastra/react/hooks/agents';
 import { useMemo, useState, useCallback } from 'react';
@@ -73,6 +75,7 @@ export function AgentPlaygroundVersionBar({
   onOpenPr,
   isViewingPreviousVersion = false,
 }: AgentPlaygroundVersionBarProps) {
+  const studioLocale = useLocale();
   const [showMessageDialog, setShowMessageDialog] = useState(false);
   const [changeMessage, setChangeMessage] = useState('');
 
@@ -101,15 +104,17 @@ export function AgentPlaygroundVersionBar({
           label: createdAt ? `${versionName} (${createdAt})` : versionName,
           description: v.changeMessage || undefined,
           end: isCodeSourceAgent ? (
-            <Badge variant={isPublished ? 'success' : 'info'}>{isPublished ? 'Current' : 'Saved'}</Badge>
+            <Badge variant={isPublished ? 'success' : 'info'}>
+              {isPublished ? studioT('Current') : studioT('Saved')}
+            </Badge>
           ) : isPublished ? (
-            <Badge variant="success">Published</Badge>
+            <Badge variant="success">{studioT('Published')}</Badge>
           ) : isDraftVersion ? (
-            <Badge variant="info">Draft</Badge>
+            <Badge variant="info">{studioT('Draft')}</Badge>
           ) : undefined,
         };
       }),
-    [versions, activeVersionId, activeVersionNumber, isCodeSourceAgent],
+    [versions, activeVersionId, activeVersionNumber, isCodeSourceAgent, studioLocale],
   );
 
   const currentValue = selectedVersionId ?? latestVersion?.id ?? '';
@@ -136,25 +141,30 @@ export function AgentPlaygroundVersionBar({
             options={versionOptions}
             value={currentValue}
             onValueChange={onVersionSelect}
-            placeholder="Select version"
+            placeholder={studioT('Select version')}
             variant="ghost"
             className="min-w-0 flex-1"
           />
         ) : (
           <Txt variant="meta" tone="muted">
-            {isCodeSourceAgent ? 'No filesystem saves yet' : 'No versions yet'}
+            {isCodeSourceAgent ? studioT('No filesystem saves yet') : studioT('No versions yet')}
           </Txt>
         )}
 
-        {currentValue && <CopyButton content={currentValue} tooltip="Copy version ID" />}
+        {currentValue && <CopyButton content={currentValue} tooltip={studioT('Copy version ID')} />}
 
-        <InfoTooltip aria-label="Version information" side="bottom" align="start" contentClassName="max-w-56">
+        <InfoTooltip
+          aria-label={studioT('Version information')}
+          side="bottom"
+          align="start"
+          contentClassName="max-w-56"
+        >
           {versionInfoText}
         </InfoTooltip>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          {readOnly && <Badge variant="warning">Read-only</Badge>}
-          {!readOnly && hasDraft && !isCodeSourceAgent && <Badge variant="info">Unpublished</Badge>}
+          {readOnly && <Badge variant="warning">{studioT('Read-only')}</Badge>}
+          {!readOnly && hasDraft && !isCodeSourceAgent && <Badge variant="info">{studioT('Unpublished')}</Badge>}
         </div>
       </div>
     ),
@@ -163,7 +173,7 @@ export function AgentPlaygroundVersionBar({
         {showCodeModeActions ? (
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button variant="default" size="md" onClick={() => void onDownloadJson?.()} icon={<IconArrowInbox />}>
-              Download JSON
+              {studioT('Download JSON')}
             </Button>
             {canOpenPr ? (
               <Button
@@ -173,7 +183,7 @@ export function AgentPlaygroundVersionBar({
                 title={openPrTitle}
                 icon={<IconPullRequest />}
               >
-                Open PR
+                {studioT('Open PR')}
               </Button>
             ) : (
               <Button
@@ -185,14 +195,14 @@ export function AgentPlaygroundVersionBar({
                 {isSavingDraft ? (
                   <>
                     <Spinner className="size-3.5" />
-                    Saving&hellip;
+                    {studioT('Saving…')}
                   </>
                 ) : (
                   <>
                     <Icon size="xs">
                       <IconFloppyDisk1 />
                     </Icon>
-                    Save to filesystem
+                    {studioT('Save to filesystem')}
                   </>
                 )}
               </Button>
@@ -205,20 +215,25 @@ export function AgentPlaygroundVersionBar({
                 {isSavingDraft ? (
                   <>
                     <Spinner className="size-3.5" />
-                    Saving&hellip;
+                    {studioT('Saving…')}
                   </>
                 ) : (
                   <>
                     <Icon size="xs">
                       <IconFloppyDisk1 />
                     </Icon>
-                    Save new version
+                    {studioT('Save new version')}
                   </>
                 )}
               </Button>
               <DropdownMenu>
                 <DropdownMenu.Trigger asChild>
-                  <Button size="icon-md" variant="default" disabled={saveDisabled} aria-label="More save options">
+                  <Button
+                    size="icon-md"
+                    variant="default"
+                    disabled={saveDisabled}
+                    aria-label={studioT('More save options')}
+                  >
                     <IconChevronDownMedium />
                   </Button>
                 </DropdownMenu.Trigger>
@@ -227,7 +242,7 @@ export function AgentPlaygroundVersionBar({
                     <Icon size="xs">
                       <IconChatBubble7 />
                     </Icon>
-                    Save with message
+                    {studioT('Save with message')}
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu>
@@ -246,14 +261,14 @@ export function AgentPlaygroundVersionBar({
               {isPublishing ? (
                 <>
                   <Spinner className="size-3.5" />
-                  Publishing&hellip;
+                  {studioT('Publishing…')}
                 </>
               ) : (
                 <>
                   <Icon size="xs">
                     <IconCheckmark2Medium />
                   </Icon>
-                  {isViewingPreviousVersion ? 'Publish this version' : 'Publish'}
+                  {isViewingPreviousVersion ? studioT('Publish this version') : studioT('Publish')}
                 </>
               )}
             </Button>
@@ -263,14 +278,14 @@ export function AgentPlaygroundVersionBar({
         <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog} pending={isSavingDraft}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Save New Version</DialogTitle>
-              <DialogDescription>Add a message to describe the changes in this version.</DialogDescription>
+              <DialogTitle>{studioT('Save New Version')}</DialogTitle>
+              <DialogDescription>{studioT('Add a message to describe the changes in this version.')}</DialogDescription>
             </DialogHeader>
             <DialogBody>
               <Field>
-                <FieldLabel>Change message</FieldLabel>
+                <FieldLabel>{studioT('Change message')}</FieldLabel>
                 <Input
-                  placeholder="Describe what changed"
+                  placeholder={studioT('Describe what changed')}
                   value={changeMessage}
                   onChange={e => setChangeMessage(e.target.value)}
                   onKeyDown={e => {
@@ -284,8 +299,8 @@ export function AgentPlaygroundVersionBar({
               </Field>
             </DialogBody>
             <DialogFooter>
-              <DialogCancel>Cancel</DialogCancel>
-              <DialogAction onConfirm={handleSaveWithMessage}>Save version</DialogAction>
+              <DialogCancel>{studioT('Cancel')}</DialogCancel>
+              <DialogAction onConfirm={handleSaveWithMessage}>{studioT('Save version')}</DialogAction>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -4,6 +4,8 @@ import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import type { TxtProps } from '@/ds/components/Txt';
 import { Txt } from '@/ds/components/Txt';
 import { useIsClamped } from '@/hooks/use-is-clamped';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 // Tailwind needs static class names — map instead of interpolating.
@@ -30,11 +32,12 @@ export interface ClampedTextProps extends Omit<TxtProps, 'children' | 'ref'> {
 export function ClampedText({
   children,
   lines = 2,
-  readMoreLabel = 'Read more',
-  showLessLabel = 'Show less',
+  readMoreLabel = studioT('Read more'),
+  showLessLabel = studioT('Show less'),
   className,
   ...txtProps
 }: ClampedTextProps) {
+  useLocale();
   const [isExpanded, setIsExpanded] = useState(false);
   const { ref, isClamped } = useIsClamped({ enabled: !isExpanded });
 

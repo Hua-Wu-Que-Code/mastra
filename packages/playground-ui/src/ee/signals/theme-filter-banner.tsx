@@ -7,6 +7,7 @@ import { Metadata } from '@/ds/components/Metadata';
 import { Txt } from '@/ds/components/Txt';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 function filterSummary({
   selections,
@@ -48,6 +49,7 @@ export function ThemeFilterBanner({
   onRemove: (signalName: ThemeSelection['signalName']) => void;
   onClear: () => void;
 }) {
+  useLocale();
   const { signalCatalog } = useTraceIntelligence();
   const colors = selections.map(selection => getSignalColor(selection.signalName));
   const latestSelection = selections.at(-1);
@@ -55,7 +57,7 @@ export function ThemeFilterBanner({
 
   return (
     <section
-      aria-label="Active theme drill-in"
+      aria-label={studioT('Active theme drill-in')}
       className="relative flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-transparent px-3 py-2"
       style={{
         backgroundImage: `linear-gradient(var(--card), var(--card)), ${borderGradient}`,
@@ -71,8 +73,8 @@ export function ThemeFilterBanner({
             key={selection.signalName}
             aria-label={
               selections.length === 1
-                ? `Clear ${selection.kind} filter`
-                : `Clear filter ${signalTitle}: ${selectionName}`
+                ? studioT('Clear {value0} filter', { value0: selection.kind })
+                : studioT('Clear filter {value0}: {value1}', { value0: signalTitle, value1: selectionName })
             }
             onClick={() => onRemove(selection.signalName)}
             type="button"
@@ -97,20 +99,22 @@ export function ThemeFilterBanner({
           icon={<IconEyeOpen />}
           aria-label={
             latestSelection.kind === 'theme'
-              ? `View theme details for ${latestSelection.label}`
-              : `View noise details for ${signalLabel(signalCatalog, latestSelection.signalName)}`
+              ? studioT('View theme details for {value0}', { value0: latestSelection.label })
+              : studioT('View noise details for {value0}', {
+                  value0: signalLabel(signalCatalog, latestSelection.signalName),
+                })
           }
           onClick={() => onViewDetails(latestSelection)}
           size="sm"
           type="button"
           variant="ghost"
         >
-          Details →
+          {studioT('Details →')}
         </Button>
       ) : null}
       {selections.length > 1 ? (
         <Button icon={<IconCrossMedium />} onClick={onClear} size="sm" type="button" variant="ghost">
-          Clear all
+          {studioT('Clear all')}
         </Button>
       ) : null}
     </section>

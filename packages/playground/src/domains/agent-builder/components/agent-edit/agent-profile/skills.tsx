@@ -2,6 +2,8 @@ import type { StoredSkillResponse } from '@mastra/client-js';
 import { Checkbox } from '@mastra/playground-ui/components/Checkbox';
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useFormContext } from 'react-hook-form';
 import type { AgentBuilderEditFormValues } from '../../../schemas';
 
@@ -70,10 +72,11 @@ const SkillItem = ({ skill, editable, onToggle, isChecked }: SkillItemProps) => 
 };
 
 const SkillEmptyState = () => {
+  useLocale();
   return (
     <div className="flex items-center justify-center py-8">
       <Txt variant="caption" tone="muted">
-        No skills available in this project.
+        {studioT('No skills available in this project.')}
       </Txt>
     </div>
   );

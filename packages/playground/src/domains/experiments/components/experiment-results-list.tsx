@@ -7,6 +7,8 @@ import { IconGauge } from '@mastra/playground-ui/icons/central/IconGauge';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { ScorersIcon } from '@mastra/playground-ui/icons/ScorersIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { formatDuration } from '@mastra/playground-ui/utils/duration';
 import { getResultErrorMessage, getResultOutputPreview } from '../utils/result-output';
 import { formatCostValue, formatTokenCount, totalTokens } from './comparison/comparison-metric-format';
@@ -96,6 +98,7 @@ export function ExperimentResultsList<T extends ExperimentResultsListItem>({
   onToggleSelect,
   onToggleSelectAll,
 }: ExperimentResultsListProps<T>) {
+  useLocale();
   const { Link: LinkComponent, paths } = useLinkComponent();
   const hasSelection = Boolean(selectedIds && onToggleSelect);
   // Only columns the body knows how to render get a track + header; otherwise
@@ -148,7 +151,7 @@ export function ExperimentResultsList<T extends ExperimentResultsListItem>({
             <DataList.TopSelectCell
               checked={isAllSelected ? true : selectedVisibleCount > 0 ? 'indeterminate' : false}
               onToggle={onToggleSelectAll}
-              aria-label="Select all"
+              aria-label={studioT('Select all')}
             />
           ) : (
             <DataList.TopCell>&nbsp;</DataList.TopCell>
@@ -284,7 +287,7 @@ export function ExperimentResultsList<T extends ExperimentResultsListItem>({
                 <DataList.SelectCell
                   checked={selectedIds!.has(result.id)}
                   onToggle={() => onToggleSelect!(result.id)}
-                  aria-label={`Select result ${result.itemId}`}
+                  aria-label={studioT('Select result {value0}', { value0: result.itemId })}
                 />
                 <DataList.RowButton
                   colStart={2}

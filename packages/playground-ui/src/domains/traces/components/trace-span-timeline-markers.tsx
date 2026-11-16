@@ -6,6 +6,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ds/compon
 import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { Txt } from '@/ds/components/Txt';
 import { IconStopwatch } from '@/ds/icons/central/IconStopwatch';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/utils/duration';
 
@@ -14,6 +16,7 @@ const SUBGRID_PANEL_STYLE = { gridColumn: '1 / -1', display: 'grid', gridTemplat
 
 /** A "Metrics" row, closed by default, revealing one row per streaming timing laid out like the span rows. */
 export function TimelineTimingRows({ layout }: { layout: TimelineMarkersLayout }) {
+  useLocale();
   return (
     <Collapsible className="col-span-2 grid grid-cols-subgrid">
       <div className="col-span-2 grid grid-cols-subgrid items-stretch">
@@ -27,7 +30,7 @@ export function TimelineTimingRows({ layout }: { layout: TimelineMarkersLayout }
               <DisclosureChevron direction="right" className="size-3" />
             </span>
             <Txt as="span" variant="body-sm" className="min-w-0 truncate px-2">
-              Metrics
+              {studioT('Metrics')}
             </Txt>
           </CollapsibleTrigger>
         </div>

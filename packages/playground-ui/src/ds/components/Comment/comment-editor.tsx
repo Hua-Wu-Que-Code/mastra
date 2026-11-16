@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import type { KeyboardEvent } from 'react';
-
 import { Button } from '@/ds/components/Button';
 import { Field, FieldError } from '@/ds/components/Field';
+
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { TextareaControl } from '@/ds/primitives/textarea-control';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface CommentEditorProps {
@@ -28,9 +30,10 @@ export function CommentEditor({
   onClose,
   isPending = false,
   error,
-  'aria-label': ariaLabel = 'Edit comment',
+  'aria-label': ariaLabel = studioT('Edit comment'),
   className,
 }: CommentEditorProps) {
+  useLocale();
   const [draft, setDraft] = useState(initialBody);
   const body = draft.trim();
   const canSave = body.length > 0 && !isPending;
@@ -74,10 +77,10 @@ export function CommentEditor({
             disabled={isPending}
             onClick={onClose}
           >
-            Cancel
+            {studioT('Cancel')}
           </Button>
           <Button icon={<IconCheckmark2Medium />} type="button" size="sm" disabled={!canSave} onClick={save}>
-            {isPending ? 'Saving…' : 'Save'}
+            {isPending ? studioT('Saving…') : studioT('Save')}
           </Button>
         </div>
       </div>

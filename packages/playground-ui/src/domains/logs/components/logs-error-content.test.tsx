@@ -1,12 +1,16 @@
 // @vitest-environment jsdom
 import { MastraReactProvider } from '@mastra/react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { LogsErrorContent } from './logs-error-content';
+import { locale, t } from '@/lib/i18n';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  act(() => locale.setLocale('en'));
+});
 
 /** The session-expired state reaches for the client to build its login URL. */
 const withClient = (children: ReactNode) => (
@@ -94,5 +98,27 @@ describe('LogsErrorContent', () => {
 
     expect(screen.getByText('Observability storage is not available')).toBeTruthy();
     expect(screen.queryByText('Failed to load logs')).toBeNull();
+  });
+});
+
+describe('when the current storage cannot list logs in Chinese', () => {
+  it('translates the unavailable title and explanation', () => {
+    act(() => locale.setLocale('zh'));
+    render(
+      <LogsErrorContent
+        error={new Error('This storage provider does not support listing logs')}
+        resource="logs"
+        errorTitle="Failed to load logs"
+      />,
+    );
+    expect(screen.getByRole('heading', { name: t('Logs are not available with your current storage') })).toBeTruthy();
+    expect(
+      screen.getByText(
+        t(
+          'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Studio.',
+        ),
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText('Logs are not available with your current storage')).toBeNull();
   });
 });

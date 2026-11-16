@@ -6,6 +6,8 @@ import { BrowserToolCallsProvider } from '@mastra/playground-ui/domains/agents/c
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useAgent } from '@mastra/react/hooks/agents';
 import { useMemory, useThreads } from '@mastra/react/hooks/memory';
@@ -24,6 +26,7 @@ import { ThreadInputProvider } from '@/domains/conversation/context/ThreadInputC
 import { AgentRunActions } from '@/domains/run-options/components/agent-run-actions';
 
 function AgentSession() {
+  useLocale();
   const { agentId, threadId } = useParams();
   const [searchParams] = useSearchParams();
   const {
@@ -85,7 +88,7 @@ function AgentSession() {
   }
 
   if (error) {
-    return <EmptyState tone="error" titleSlot="Failed to load agent" descriptionSlot={error.message} />;
+    return <EmptyState tone="error" titleSlot={studioT('Failed to load agent')} descriptionSlot={error.message} />;
   }
 
   if (!agent) {
@@ -148,12 +151,15 @@ function AgentSession() {
 
 export default AgentSession;
 
-const AgentSessionLoadingSkeleton = () => (
-  <PageLayout variant="fit">
-    <h1 className="sr-only">Agent session</h1>
-    <SessionHeader />
-    <div className="relative grid h-full overflow-y-auto pt-4" data-testid="agent-session-skeleton" aria-busy="true">
-      <AgentChatLoadingSkeleton />
-    </div>
-  </PageLayout>
-);
+const AgentSessionLoadingSkeleton = () => {
+  useLocale();
+  return (
+    <PageLayout variant="fit">
+      <h1 className="sr-only">{studioT('Agent session')}</h1>
+      <SessionHeader />
+      <div className="relative grid h-full overflow-y-auto pt-4" data-testid="agent-session-skeleton" aria-busy="true">
+        <AgentChatLoadingSkeleton />
+      </div>
+    </PageLayout>
+  );
+};

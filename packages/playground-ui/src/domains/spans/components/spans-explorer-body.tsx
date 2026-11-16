@@ -21,6 +21,7 @@ import type { TracesListSortField, TracesListViewTrace } from '@/domains/traces/
 import { useTraceColumnPreferences } from '@/domains/traces/hooks/use-trace-column-preferences';
 import { hasTraceColumn, withoutUnrecordedStreamingColumns } from '@/domains/traces/trace-list-columns';
 import { ActionRow } from '@/ds/components/ActionRow';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SpansExplorerPanelArgs = {
   selection: SpanSelection | undefined;
@@ -42,6 +43,7 @@ export type SpansExplorerBodyProps = {
 
 /** The spans page body: filter bar, span list and the host's span panel. Router-agnostic. */
 export function SpansExplorerBody({ selection, onSelectionChange, renderPanel, urlState }: SpansExplorerBodyProps) {
+  useLocale();
   const { data: capabilities, isLoading: isCapabilitiesLoading } = useObservabilityCapabilities();
   const withTokenSearch = !!(
     capabilities?.capabilities.spanQueryTokenSearch && capabilities.capabilities.spanAggregateTokenSearch
@@ -146,7 +148,7 @@ export function SpansExplorerBody({ selection, onSelectionChange, renderPanel, u
 
   return (
     <>
-      <h1 className="sr-only">Spans</h1>
+      <h1 className="sr-only">{studioT('Spans')}</h1>
       <ObservabilityListBody
         toolbar={
           <>
@@ -183,7 +185,9 @@ export function SpansExplorerBody({ selection, onSelectionChange, renderPanel, u
           />
         }
         error={
-          isError ? <TracesErrorContent error={error} resource="spans" errorTitle="Failed to load spans" /> : undefined
+          isError ? (
+            <TracesErrorContent error={error} resource="spans" errorTitle={studioT('Failed to load spans')} />
+          ) : undefined
         }
         empty={
           showEmptyState ? (

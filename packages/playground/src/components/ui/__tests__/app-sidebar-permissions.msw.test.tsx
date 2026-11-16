@@ -9,6 +9,7 @@ import {
   viewerSidebarCapabilities,
 } from './fixtures/sidebar-permissions';
 import { authHandler, BASE_URL, builderHandler, renderSidebar, systemPackagesHandler } from './render-sidebar';
+import { adminSession, creatorSession } from '@/domains/account/__tests__/fixtures/session';
 import { providersResponse } from '@/pages/connections/__tests__/fixtures/user-connect';
 import { server } from '@/test/msw-server';
 
@@ -29,6 +30,35 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe('AppSidebar permissions', () => {
+  describe('when a Go account is a regular user', () => {
+    it.each(['user', 'creator'] as const)('hides empty management groups for the %s role', async role => {
+      server.use(authHandler({ enabled: true, login: null }));
+      renderSidebar('/knowledge', { ...creatorSession, user: { ...creatorSession.user, role } });
+
+      await screen.findByRole('link', { name: 'Knowledge' });
+      expect(screen.getByRole('link', { name: 'Agents' })).toBeTruthy();
+      expect(screen.queryByText('Evaluation')).toBeNull();
+      expect(screen.queryByText('Observability')).toBeNull();
+      for (const name of ['Scorers', 'Datasets', 'Experiments', 'Review Queue', 'Metrics', 'Traces', 'Logs']) {
+        expect(screen.queryByRole('link', { name })).toBeNull();
+      }
+    });
+  });
+
+  describe('when a Go account is an administrator', () => {
+    it('keeps management groups and their destinations', async () => {
+      server.use(authHandler({ enabled: true, login: null }));
+      renderSidebar('/knowledge', adminSession);
+
+      await screen.findByRole('link', { name: 'Knowledge' });
+      expect(screen.getByText('Evaluation')).toBeTruthy();
+      expect(screen.getByText('Observability')).toBeTruthy();
+      for (const name of ['Scorers', 'Datasets', 'Experiments', 'Review Queue', 'Metrics', 'Traces', 'Logs']) {
+        expect(screen.getByRole('link', { name })).toBeTruthy();
+      }
+    });
+  });
+
   describe('when an admin has wildcard permissions', () => {
     it('provides the main links and optional destinations', async () => {
       server.use(authHandler(adminSidebarCapabilities));

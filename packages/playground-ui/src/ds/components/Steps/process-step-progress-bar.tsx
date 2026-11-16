@@ -1,6 +1,8 @@
 import type { ProcessStep } from './shared';
 import { Spinner } from '@/ds/components/Spinner';
 import { transitions } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type ProcessStepProgressBarProps = {
@@ -8,6 +10,7 @@ export type ProcessStepProgressBarProps = {
 };
 
 export function ProcessStepProgressBar({ steps }: ProcessStepProgressBarProps) {
+  useLocale();
   const totalSteps = steps.length;
   const completedSteps = steps.filter(step => step.status === 'success').length;
 
@@ -41,7 +44,8 @@ export function ProcessStepProgressBar({ steps }: ProcessStepProgressBarProps) {
         })}
       </div>
       <div className={cn('text-center text-caption text-muted-foreground', transitions.colors)}>
-        {completedSteps} of {totalSteps} steps completed
+        {completedSteps} {' ' + studioT('of') + ' '}
+        {totalSteps} {' ' + studioT('steps completed')}
       </div>
     </div>
   );

@@ -5,6 +5,8 @@ import { SidebarReveal } from './sidebar-reveal';
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/ds/components/Drawer';
 import { ResizeHandleIndicator } from '@/ds/primitives/resize-handle-indicator';
 import { VisuallyHidden } from '@/ds/primitives/visually-hidden';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SidebarPanelProps = {
@@ -19,6 +21,7 @@ const KEYBOARD_STEP = 10;
 const DRAG_THRESHOLD = 5;
 
 export function SidebarPanel({ children, className, mobileMode = 'drawer' }: SidebarPanelProps) {
+  useLocale();
   const {
     state,
     width,
@@ -210,10 +213,10 @@ export function SidebarPanel({ children, className, mobileMode = 'drawer' }: Sid
           )}
         >
           <VisuallyHidden asChild>
-            <DrawerTitle>Navigation</DrawerTitle>
+            <DrawerTitle>{studioT('Navigation')}</DrawerTitle>
           </VisuallyHidden>
           <VisuallyHidden asChild>
-            <DrawerDescription>Primary site navigation drawer</DrawerDescription>
+            <DrawerDescription>{studioT('Primary site navigation drawer')}</DrawerDescription>
           </VisuallyHidden>
           <div onClick={closeOnAnchor} className="flex h-full min-h-0 flex-col overflow-hidden px-3 py-2">
             {children}
@@ -269,7 +272,9 @@ export function SidebarPanel({ children, className, mobileMode = 'drawer' }: Sid
         aria-valuemin={isCollapsed ? undefined : minWidth}
         aria-valuemax={isCollapsed ? undefined : maxWidth}
         aria-valuetext={isCollapsed ? 'collapsed' : `${currentWidth} pixels`}
-        aria-label={`Resize sidebar. Arrow keys to resize, Enter to ${isCollapsed ? 'expand' : 'collapse'}.`}
+        aria-label={studioT('Resize sidebar. Arrow keys to resize, Enter to {value0}.', {
+          value0: isCollapsed ? studioT('expand') : studioT('collapse'),
+        })}
         tabIndex={0}
         onPointerDown={onPointerDown}
         onClick={onClick}

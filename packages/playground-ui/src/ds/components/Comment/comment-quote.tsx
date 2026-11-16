@@ -1,6 +1,8 @@
 import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface CommentQuoteProps {
@@ -13,6 +15,7 @@ export interface CommentQuoteProps {
 
 /** The passage a reply answers, above the reply itself or inside the composer writing it. */
 export function CommentQuote({ authorName, quote, onDismiss, className }: CommentQuoteProps) {
+  useLocale();
   return (
     <blockquote
       data-slot="comment-quote"
@@ -34,7 +37,7 @@ export function CommentQuote({ authorName, quote, onDismiss, className }: Commen
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Remove quote"
+          aria-label={studioT('Remove quote')}
           onClick={onDismiss}
           className="shrink-0"
         >

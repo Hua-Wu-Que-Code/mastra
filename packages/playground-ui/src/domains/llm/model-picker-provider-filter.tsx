@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import type { ModelPickerProvider } from './model-picker-types';
 import { Button } from '@/ds/components/Button';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 interface ModelPickerProviderFilterProps {
@@ -26,11 +28,12 @@ export function ModelPickerProviderFilter({
   renderProviderIcon,
   sheet,
 }: ModelPickerProviderFilterProps) {
+  useLocale();
   const pillClassName = cn('shrink-0 aria-pressed:bg-fill aria-pressed:text-foreground', sheet && 'h-11 px-4');
   return (
     <div
       role="group"
-      aria-label="Filter by provider"
+      aria-label={studioT('Filter by provider')}
       className="flex [scrollbar-width:thin] items-center gap-1 overflow-x-auto px-2 py-1.5"
     >
       <Button
@@ -41,7 +44,7 @@ export function ModelPickerProviderFilter({
         aria-pressed={!value && !browsingMore}
         onClick={() => onChange(undefined)}
       >
-        All
+        {studioT('All')}
       </Button>
       {providers.map(provider => {
         const disconnected = provider.connected === false;
@@ -53,8 +56,8 @@ export function ModelPickerProviderFilter({
             size="icon-sm"
             className={cn('relative shrink-0 aria-pressed:bg-fill', sheet && 'size-11')}
             aria-pressed={value === provider.id}
-            aria-label={disconnected ? `${provider.name}, not connected` : provider.name}
-            tooltip={disconnected ? `${provider.name} (not connected)` : provider.name}
+            aria-label={disconnected ? studioT('{value0}, not connected', { value0: provider.name }) : provider.name}
+            tooltip={disconnected ? studioT('{value0} (not connected)', { value0: provider.name }) : provider.name}
             onClick={() => onChange(value === provider.id ? undefined : provider.id)}
           >
             {renderProviderIcon(provider.id)}
@@ -71,7 +74,7 @@ export function ModelPickerProviderFilter({
           size="sm"
           className={pillClassName}
           aria-pressed={browsingMore}
-          aria-label={`${moreCount} more providers`}
+          aria-label={studioT('{value0} more providers', { value0: moreCount })}
           onClick={onBrowseMore}
         >
           +{moreCount}

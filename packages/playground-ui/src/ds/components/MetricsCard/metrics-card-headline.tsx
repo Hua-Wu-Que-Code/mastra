@@ -1,4 +1,8 @@
 import { Skeleton } from '@/ds/components/Skeleton';
+
+import { useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 /**
@@ -20,6 +24,7 @@ export function MetricsCardHeadline({
   isLoading?: boolean;
   className?: string;
 }) {
+  useLocale();
   return (
     <div className={cn('grid gap-1.5', className)}>
       <h3 className="text-body-sm text-muted-foreground">{label}</h3>
@@ -45,7 +50,7 @@ export function MetricsCardHeadline({
           change && (
             // Trimmed like the value, so its line box doesn't make the row taller than while loading.
             <span className="text-body-sm text-muted-foreground tabular-nums [text-box:trim-both_cap_alphabetic]">
-              {change} vs previous
+              <Trans id="{part0} vs previous" values={{ part0: change }} />
             </span>
           )}
       </span>

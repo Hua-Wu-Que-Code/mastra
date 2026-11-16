@@ -1,7 +1,8 @@
 import type { Ref } from 'react';
-
 import { annotationBubbleStyle } from './annotation-number';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface AnnotationMarkerProps {
@@ -26,6 +27,7 @@ export function AnnotationMarker({
   onHoverEnd,
   onToggle,
 }: AnnotationMarkerProps) {
+  useLocale();
   return (
     <button
       ref={ref}
@@ -34,7 +36,11 @@ export function AnnotationMarker({
       data-active={active || undefined}
       data-commented={commented || undefined}
       hidden
-      aria-label={commented ? `Annotation ${number}, with a comment` : `Annotation ${number}`}
+      aria-label={
+        commented
+          ? studioT('Annotation {value0}, with a comment', { value0: number })
+          : studioT('Annotation {value0}', { value0: number })
+      }
       aria-expanded={expanded}
       aria-haspopup="dialog"
       className={cn(

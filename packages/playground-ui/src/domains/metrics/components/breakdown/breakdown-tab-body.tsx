@@ -8,6 +8,7 @@ import type { BreakdownFrameProps } from './breakdown-frame';
 import { BreakdownModelsTab } from './breakdown-models-tab';
 import { BreakdownTraceTab } from './breakdown-trace-tab';
 import { MetricsCard } from '@/ds/components/MetricsCard';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type BreakdownGate<Scope> =
   | { status: 'ready'; scope: Scope }
@@ -33,6 +34,7 @@ export function BreakdownTabBody({
   traceGate: BreakdownGate<TraceAggregateScope>;
   spanGate: BreakdownGate<SpanAggregateScope>;
 }) {
+  useLocale();
   // Metrics answer every page filter.
   if (tab === 'models') return <BreakdownModelsTab key={tab} {...frame} />;
   const gate = isEntityTab(tab) ? spanGate : traceGate;
@@ -40,7 +42,9 @@ export function BreakdownTabBody({
     return (
       <BreakdownFrame {...frame} tab={tab}>
         <MetricsCard.NoData
-          message={`Not available with a ${gate.unsupportedFields.map(f => FILTER_NAMES[f] ?? f).join(' or ')} filter.`}
+          message={studioT('Not available with a {value0} filter.', {
+            value0: gate.unsupportedFields.map(f => FILTER_NAMES[f] ?? f).join(' or '),
+          })}
         />
       </BreakdownFrame>
     );

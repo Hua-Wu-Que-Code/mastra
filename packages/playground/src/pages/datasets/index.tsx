@@ -4,6 +4,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useUrlSort } from '@mastra/playground-ui/sort/use-url-sort';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useInfiniteDatasets, useExperiments } from '@mastra/react/hooks/datasets';
@@ -29,6 +31,7 @@ const crumbs = [navCrumb('/datasets')];
 const DATASETS_SORT_KEYS = ['name', 'updatedAt'] as const;
 
 export default function Datasets() {
+  useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const { sort, onSortChange } = useUrlSort({
     searchParams,
@@ -88,15 +91,15 @@ export default function Datasets() {
   const createDialog = <CreateDatasetDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />;
 
   const headerCreateAction = (
-    <CreateButton onClick={openCreateDialog} tooltip="Create a dataset" variant="ghost" size="sm">
-      New dataset
+    <CreateButton onClick={openCreateDialog} tooltip={studioT('Create a dataset')} variant="ghost" size="sm">
+      {studioT('New dataset')}
     </CreateButton>
   );
 
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Datasets</h1>
+        <h1 className="sr-only">{studioT('Datasets')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -105,7 +108,7 @@ export default function Datasets() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Datasets</h1>
+        <h1 className="sr-only">{studioT('Datasets')}</h1>
         <PermissionDenied variant="fill" resource="datasets" />
       </PageLayout>
     );
@@ -114,8 +117,13 @@ export default function Datasets() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Datasets</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load datasets" descriptionSlot={error.message} />
+        <h1 className="sr-only">{studioT('Datasets')}</h1>
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load datasets')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -124,7 +132,7 @@ export default function Datasets() {
   if (datasets.length === 0 && !isLoading && !targetType) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Datasets</h1>
+        <h1 className="sr-only">{studioT('Datasets')}</h1>
         <NoDatasetsInfo onCreateClick={openCreateDialog} />
         {createDialog}
       </PageLayout>
@@ -147,7 +155,7 @@ export default function Datasets() {
         />
       }
     >
-      <h1 className="sr-only">Datasets</h1>
+      <h1 className="sr-only">{studioT('Datasets')}</h1>
       {isLoading ? (
         <DatasetsListSkeleton />
       ) : (
@@ -161,7 +169,7 @@ export default function Datasets() {
                   as="span"
                   variant="caption"
                   tone="muted"
-                  aria-label={`Loading experiment summary for ${dataset.name}`}
+                  aria-label={studioT('Loading experiment summary for {value0}', { value0: dataset.name })}
                 >
                   …
                 </Txt>
@@ -173,9 +181,9 @@ export default function Datasets() {
                   as="span"
                   variant="caption"
                   tone="muted"
-                  aria-label={`Experiment summary unavailable for ${dataset.name}`}
+                  aria-label={studioT('Experiment summary unavailable for {value0}', { value0: dataset.name })}
                 >
-                  Unavailable
+                  {studioT('Unavailable')}
                 </Txt>
               );
             }

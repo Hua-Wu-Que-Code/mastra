@@ -2,6 +2,8 @@ import { JSONSchemaForm, jsonSchemaToFields } from '@mastra/playground-ui/compon
 import type { SchemaField } from '@mastra/playground-ui/components/JSONSchemaForm';
 import { ScrollArea } from '@mastra/playground-ui/components/ScrollArea';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { JsonSchema } from '@mastra/playground-ui/utils/json-schema';
 
 import { useCallback, useMemo } from 'react';
@@ -17,16 +19,17 @@ function RecursiveFieldRenderer({
   parentPath: string[];
   depth: number;
 }) {
+  useLocale();
   return (
     <div className="py-2">
       <JSONSchemaForm.Field key={field.id} field={field} parentPath={parentPath} depth={depth}>
         <div className="space-y-2 px-2">
           <div className="flex flex-row items-center gap-4">
-            <JSONSchemaForm.FieldName placeholder="Variable name" className="w-64" />
-            <JSONSchemaForm.FieldType placeholder="Type" />
+            <JSONSchemaForm.FieldName placeholder={studioT('Variable name')} className="w-64" />
+            <JSONSchemaForm.FieldType placeholder={studioT('Type')} />
             <JSONSchemaForm.FieldOptional />
             <JSONSchemaForm.FieldNullable />
-            <JSONSchemaForm.FieldRemove aria-label="Remove variable" />
+            <JSONSchemaForm.FieldRemove aria-label={studioT('Remove variable')} />
           </div>
         </div>
 
@@ -43,7 +46,7 @@ function RecursiveFieldRenderer({
           </JSONSchemaForm.FieldList>
           <JSONSchemaForm.AddField variant="ghost" size="sm" className="mt-2">
             <IconPlusMedium className="mr-1 size-icon-xs" />
-            Add nested variable
+            {studioT('Add nested variable')}
           </JSONSchemaForm.AddField>
         </JSONSchemaForm.NestedFields>
       </JSONSchemaForm.Field>
@@ -52,6 +55,7 @@ function RecursiveFieldRenderer({
 }
 
 export function VariablesPage() {
+  useLocale();
   const { form, readOnly } = useAgentEditFormContext();
   const { control } = form;
 
@@ -80,7 +84,7 @@ export function VariablesPage() {
             <div className="p-2">
               <JSONSchemaForm.AddField>
                 <IconPlusMedium />
-                Add variable
+                {studioT('Add variable')}
               </JSONSchemaForm.AddField>
             </div>
           </JSONSchemaForm.Root>

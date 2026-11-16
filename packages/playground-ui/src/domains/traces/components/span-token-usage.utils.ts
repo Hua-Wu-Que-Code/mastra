@@ -1,10 +1,12 @@
 import type { UsageStats } from '@mastra/core/observability';
 import { SpanType } from '@mastra/core/observability';
 import { getSpanDurationMs } from '../utils/span-utils';
+
+import { t as studioT } from '@/lib/i18n';
 import { formatDuration } from '@/utils/duration';
 
 export type TokenUsageRow = {
-  label: 'Input' | 'Output';
+  label: string;
   total: number;
   /** Non-zero breakdown, e.g. `5,632 cached, 974 text`. */
   breakdown: string | undefined;
@@ -33,10 +35,22 @@ export function getTokenUsageRows(usage: UsageStats | undefined | null): TokenUs
   if (!usage) return null;
   const rows: TokenUsageRow[] = [];
   if (typeof usage.inputTokens === 'number') {
-    rows.push({ label: 'Input', total: usage.inputTokens, breakdown: formatBreakdown(usage.inputDetails) });
+    rows.push({
+      get label() {
+        return studioT('Input');
+      },
+      total: usage.inputTokens,
+      breakdown: formatBreakdown(usage.inputDetails),
+    });
   }
   if (typeof usage.outputTokens === 'number') {
-    rows.push({ label: 'Output', total: usage.outputTokens, breakdown: formatBreakdown(usage.outputDetails) });
+    rows.push({
+      get label() {
+        return studioT('Output');
+      },
+      total: usage.outputTokens,
+      breakdown: formatBreakdown(usage.outputDetails),
+    });
   }
   return rows.length > 0 ? rows : null;
 }

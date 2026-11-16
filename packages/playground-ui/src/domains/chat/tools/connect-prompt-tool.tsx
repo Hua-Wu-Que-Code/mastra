@@ -10,6 +10,7 @@ import { Notice } from '@/ds/components/Notice';
 import { Txt } from '@/ds/components/Txt';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { Icon } from '@/ds/icons/Icon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export { CONNECT_PROMPT_TOOL_NAME } from './connect-prompt-tool-id';
 
@@ -102,6 +103,7 @@ interface ConnectPromptCardProps {
 }
 
 const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPromptCardProps) => {
+  useLocale();
   const { pending, connect, connectedProviders, isCreating, createError, settled } = usePendingConnect();
   const { approveToolcall, isRunning, toolCallApprovals } = useToolCall();
   // The outcome (settled flow or session-creation error) this call was resumed with.
@@ -127,11 +129,11 @@ const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPro
   }, [readOnly, paused, alreadyResumed, isRunning, settled, createError, payload, approveToolcall, toolCallId]);
 
   return (
-    <section aria-label="Connect an account" className="my-2 space-y-3">
+    <section aria-label={studioT('Connect an account')} className="my-2 space-y-3">
       <DataList columns="minmax(0, 1fr)" fit="container" scrollable={false}>
         <DataList.Subheader>
           <Txt as="h4" variant="subheading" tone="ink">
-            Connect an account
+            {studioT('Connect an account')}
           </Txt>
         </DataList.Subheader>
         {payload.providers.map(provider => {
@@ -150,7 +152,7 @@ const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPro
                   <div className="flex flex-wrap items-center gap-3">
                     {isPending ? (
                       <Txt as="span" variant="body-sm" tone="muted" role="status">
-                        Waiting for authorization…
+                        {studioT('Waiting for authorization…')}
                       </Txt>
                     ) : null}
                     {isPending && pending?.fallbackUrl ? (
@@ -160,7 +162,7 @@ const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPro
                         rel="noreferrer"
                         className="text-ui-md underline underline-offset-2"
                       >
-                        Open the connect window
+                        {studioT('Open the connect window')}
                       </a>
                     ) : null}
                     {isConnected ? (
@@ -173,7 +175,7 @@ const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPro
                         <Icon size="sm">
                           <IconCheckmark2Medium aria-hidden />
                         </Icon>
-                        Connected
+                        {studioT('Connected')}
                       </Txt>
                     ) : (
                       <Button
@@ -183,7 +185,7 @@ const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPro
                         disabled={readOnly || isCreating || isPending}
                         onClick={() => connect(provider)}
                       >
-                        Connect
+                        {studioT('Connect')}
                       </Button>
                     )}
                   </div>
@@ -195,7 +197,7 @@ const ConnectPromptCard = ({ toolCallId, payload, paused, readOnly }: ConnectPro
       </DataList>
       {errorMessage ? (
         <div role="alert">
-          <Notice variant="destructive" title="Couldn't connect">
+          <Notice variant="destructive" title={studioT("Couldn't connect")}>
             <Notice.Message>{errorMessage}</Notice.Message>
           </Notice>
         </div>

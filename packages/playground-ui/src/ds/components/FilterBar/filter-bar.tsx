@@ -9,6 +9,8 @@ import { FilterBarTimeRange } from './filter-bar-time-range';
 import { isFilterBarGroup } from './types';
 import type { FilterBarExpression, FilterBarField, FilterBarItem, FilterBarOperator } from './types';
 import { VisuallyHidden } from '@/ds/primitives/visually-hidden';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type FilterBarValueProps =
@@ -105,12 +107,13 @@ export function FilterBar({
   onValueChange,
   createItemId,
   maxDepth,
-  'aria-label': ariaLabel = 'Filters',
+  'aria-label': ariaLabel = studioT('Filters'),
   describeSuggestionsError,
-  clearLabel = 'Clear filters',
+  clearLabel = studioT('Clear filters'),
   className,
   children,
 }: FilterBarProps) {
+  useLocale();
   return (
     <FilterBarProvider
       fields={fields}

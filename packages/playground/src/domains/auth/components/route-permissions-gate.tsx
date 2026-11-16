@@ -1,8 +1,9 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { EmptyState } from '@mastra/playground-ui/components/EmptyState';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
-
 import { IconArrowRotateCounterClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateCounterClockwise';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { usePermissionPatterns } from '@mastra/react/hooks/auth';
 import { ALL_SIDEBAR_PERMISSIONS } from '../route-permissions';
 import { MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY } from '@/domains/configuration/context/studio-config-context';
@@ -76,6 +77,7 @@ interface GateInvalidBaseUrlProps {
 }
 
 const GateInvalidBaseUrl = ({ error, baseUrl }: GateInvalidBaseUrlProps) => {
+  useLocale();
   const messages = [
     `Studio could not reach the Mastra server at ${baseUrl}. Check that the instance URL and API prefix in Settings are correct, and that the server is running.`,
     `Error: ${error.message}`,
@@ -90,11 +92,11 @@ const GateInvalidBaseUrl = ({ error, baseUrl }: GateInvalidBaseUrlProps) => {
     <div className="flex h-screen w-full items-center justify-center">
       <EmptyState
         tone="error"
-        titleSlot="Failed to load studio"
+        titleSlot={studioT('Failed to load studio')}
         descriptionSlot={messages.join('\n\n')}
         actionSlot={
           <Button icon={<IconArrowRotateCounterClockwise />} onClick={handleReset}>
-            Reset Studio configuration
+            {studioT('Reset Studio configuration')}
           </Button>
         }
       />

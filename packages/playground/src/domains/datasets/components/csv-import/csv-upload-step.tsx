@@ -6,6 +6,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowOutOfBox } from '@mastra/playground-ui/icons/central/IconArrowOutOfBox';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useCallback, useRef, useState } from 'react';
 
@@ -20,6 +22,7 @@ export interface CSVUploadStepProps {
  * Supports click-to-upload and drag-drop.
  */
 export function CSVUploadStep({ onFileSelect, isParsing, error }: CSVUploadStepProps) {
+  useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -76,7 +79,7 @@ export function CSVUploadStep({ onFileSelect, isParsing, error }: CSVUploadStepP
 
   return (
     <Field invalid={Boolean(error)} className="flex flex-col gap-3">
-      <FieldLabel className="sr-only">CSV file</FieldLabel>
+      <FieldLabel className="sr-only">{studioT('CSV file')}</FieldLabel>
       <Input
         ref={inputRef}
         name="csv-file"
@@ -110,7 +113,7 @@ export function CSVUploadStep({ onFileSelect, isParsing, error }: CSVUploadStepP
           <>
             <Spinner />
             <Txt as="span" tone="muted">
-              Parsing CSV...
+              {studioT('Parsing CSV...')}
             </Txt>
           </>
         ) : (
@@ -120,10 +123,10 @@ export function CSVUploadStep({ onFileSelect, isParsing, error }: CSVUploadStepP
             </Icon>
             <div className="flex flex-col items-center gap-1">
               <Txt as="span" variant="subheading" tone="faint">
-                Click to upload or drag and drop
+                {studioT('Click to upload or drag and drop')}
               </Txt>
               <Txt as="span" variant="caption" tone="muted">
-                CSV files only
+                {studioT('CSV files only')}
               </Txt>
             </div>
           </>

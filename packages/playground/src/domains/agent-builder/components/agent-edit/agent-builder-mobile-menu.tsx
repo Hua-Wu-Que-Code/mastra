@@ -5,6 +5,8 @@ import { IconEyeOpen } from '@mastra/playground-ui/icons/central/IconEyeOpen';
 import { IconGlobe } from '@mastra/playground-ui/icons/central/IconGlobe';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { useVisibilityChange } from '../../hooks/use-visibility-change-agent';
@@ -37,6 +39,7 @@ export function AgentBuilderMobileMenu({
   agentName,
   disabled = false,
 }: AgentBuilderMobileMenuProps) {
+  useLocale();
   const navigate = useNavigate();
   const canDelete = showDelete && Boolean(agentId) && Boolean(agentName);
   const canSetVisibility = showSetVisibility && Boolean(agentId);
@@ -49,7 +52,12 @@ export function AgentBuilderMobileMenu({
     <div className="lg:hidden" data-testid="agent-builder-mobile-menu">
       <DropdownMenu>
         <DropdownMenu.Trigger asChild>
-          <Button size="icon-sm" variant="ghost" tooltip="More actions" data-testid="agent-builder-mobile-menu-trigger">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            tooltip={studioT('More actions')}
+            data-testid="agent-builder-mobile-menu-trigger"
+          >
             <IconDotGrid1x3Vertical />
           </Button>
         </DropdownMenu.Trigger>
@@ -63,7 +71,7 @@ export function AgentBuilderMobileMenu({
               }}
             >
               <IconEyeOpen />
-              <span>View agent</span>
+              <span>{studioT('View agent')}</span>
             </DropdownMenu.Item>
           )}
           {canEditAgent && (
@@ -75,7 +83,7 @@ export function AgentBuilderMobileMenu({
               }}
             >
               <IconPencil />
-              <span>Edit agent</span>
+              <span>{studioT('Edit agent')}</span>
             </DropdownMenu.Item>
           )}
           {(canViewAgent || canEditAgent) && (canSetVisibility || canDelete) && <DropdownMenu.Separator />}
@@ -98,6 +106,7 @@ interface VisibilityMenuItemProps {
 }
 
 function VisibilityMenuItem({ agentId, disabled }: VisibilityMenuItemProps) {
+  useLocale();
   const formMethods = useFormContext<AgentBuilderEditFormValues>();
   const value = useWatch({ control: formMethods.control, name: 'visibility' }) ?? 'private';
   const { requestChange, dialog } = useVisibilityChange(agentId);
@@ -114,7 +123,7 @@ function VisibilityMenuItem({ agentId, disabled }: VisibilityMenuItemProps) {
           }}
         >
           <IconGlobe />
-          <span>Add to library</span>
+          <span>{studioT('Add to library')}</span>
         </DropdownMenu.Item>
       ) : (
         <DropdownMenu.Item
@@ -126,7 +135,7 @@ function VisibilityMenuItem({ agentId, disabled }: VisibilityMenuItemProps) {
           }}
         >
           <IconLock />
-          <span>Remove from library</span>
+          <span>{studioT('Remove from library')}</span>
         </DropdownMenu.Item>
       )}
       {dialog}

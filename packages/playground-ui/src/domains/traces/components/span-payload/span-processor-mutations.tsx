@@ -5,6 +5,8 @@ import { SpanPayloadJson } from './span-payload-json';
 import { SpanPayloadMessages } from './span-payload-messages';
 import { SpanPayloadCollapsible } from './span-payload-primitives';
 import { Txt } from '@/ds/components/Txt/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { pluralize } from '@/lib/string';
 
 type Mutation = NonNullable<ProcessorPipelineDescription['messageListMutations']>[number];
@@ -66,6 +68,7 @@ const isSameKind = (a: CountOnlyMutation, b: CountOnlyMutation) =>
   a.type === b.type && a.source === b.source && a.tag === b.tag;
 
 function MutationSteps({ mutations }: { mutations: readonly Mutation[] }) {
+  useLocale();
   const steps = toSteps(mutations);
   return (
     <ol data-slot="span-processor-mutations" className="flex list-none flex-col divide-y divide-border">
@@ -88,7 +91,7 @@ function MutationSteps({ mutations }: { mutations: readonly Mutation[] }) {
                 )}
                 {mutation.message !== undefined && <SpanPayloadMessages value={[mutation.message]} />}
                 {mutation.ids && mutation.ids.length > 0 && (
-                  <SpanPayloadCollapsible label={`Removed ids (${mutation.ids.length})`}>
+                  <SpanPayloadCollapsible label={studioT('Removed ids ({value0})', { value0: mutation.ids.length })}>
                     <SpanPayloadJson value={mutation.ids} />
                   </SpanPayloadCollapsible>
                 )}

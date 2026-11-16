@@ -1,3 +1,5 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
+
 export type RequestContextResult =
   | { ok: true; requestContext?: Record<string, unknown> }
   | { ok: false; message: string };
@@ -24,8 +26,20 @@ function parseJson(raw: string): { ok: true; value: unknown } | { ok: false } {
 export function parseRequestContext(raw: string): RequestContextResult {
   if (!raw.trim()) return { ok: true };
   const parsed = parseJson(raw);
-  if (!parsed.ok) return { ok: false, message: 'Request context must be valid JSON' };
-  if (!isRecord(parsed.value)) return { ok: false, message: 'Request context must be a JSON object' };
+  if (!parsed.ok)
+    return {
+      ok: false,
+      get message() {
+        return studioT('Request context must be valid JSON');
+      },
+    };
+  if (!isRecord(parsed.value))
+    return {
+      ok: false,
+      get message() {
+        return studioT('Request context must be a JSON object');
+      },
+    };
   return { ok: true, requestContext: parsed.value };
 }
 

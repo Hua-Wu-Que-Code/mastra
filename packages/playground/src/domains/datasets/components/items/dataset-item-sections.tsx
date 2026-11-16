@@ -5,6 +5,8 @@ import { IconFileArrowRightIn } from '@mastra/playground-ui/icons/central/IconFi
 import { IconFileArrowRightOut } from '@mastra/playground-ui/icons/central/IconFileArrowRightOut';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
+
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 
 export interface DatasetItemSection {
@@ -29,35 +31,52 @@ const isEmptyPayload = (value: unknown) =>
 export const datasetItemSections: DatasetItemSection[] = [
   {
     key: 'input',
-    title: 'Input',
+    get title() {
+      return studioT('Input');
+    },
     icon: <IconFileArrowRightIn />,
     value: item => toJson(item.input),
     payload: item => item.input,
   },
   {
     key: 'groundTruth',
-    title: 'Ground Truth',
+    get title() {
+      return studioT('Ground Truth');
+    },
     icon: <IconFileArrowRightOut />,
     value: item => (isEmptyPayload(item.groundTruth) ? undefined : toJson(item.groundTruth)),
     payload: item => (isEmptyPayload(item.groundTruth) ? null : item.groundTruth),
   },
   {
     key: 'expectedTrajectory',
-    title: 'Expected Trajectory',
+    get title() {
+      return studioT('Expected Trajectory');
+    },
     icon: <IconDirection1 />,
     value: item => (item.expectedTrajectory != null ? toJson(item.expectedTrajectory) : undefined),
   },
   {
     key: 'toolMocks',
-    title: 'Tool Mocks',
+    get title() {
+      return studioT('Tool Mocks');
+    },
     icon: <IconMaintenance />,
     value: item => (item.toolMocks?.length ? toJson(item.toolMocks) : undefined),
   },
   {
     key: 'requestContext',
-    title: 'Request Context',
+    get title() {
+      return studioT('Request Context');
+    },
     icon: <IconCodeBrackets />,
     value: item => (item.requestContext != null ? toJson(item.requestContext) : undefined),
   },
-  { key: 'metadata', title: 'Metadata', icon: <IconTag />, value: item => toJson(item.metadata) },
+  {
+    key: 'metadata',
+    get title() {
+      return studioT('Metadata');
+    },
+    icon: <IconTag />,
+    value: item => toJson(item.metadata),
+  },
 ];

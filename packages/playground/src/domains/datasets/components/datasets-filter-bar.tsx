@@ -3,6 +3,8 @@ import type { FilterBarField, FilterBarItem, FilterBarOperator } from '@mastra/p
 import { IconLab } from '@mastra/playground-ui/icons/central/IconLab';
 import { IconMagnifyingGlass } from '@mastra/playground-ui/icons/central/IconMagnifyingGlass';
 import { IconTag } from '@mastra/playground-ui/icons/central/IconTag';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { hueAccentColor } from '@mastra/playground-ui/utils/colors';
 import { useMemo } from 'react';
 import { DATASET_EXPERIMENT_OPTIONS } from './datasets-list/helpers';
@@ -22,8 +24,18 @@ const TAG_FIELD_ID = 'tag';
 const ALL = 'all';
 
 const OPERATORS: FilterBarOperator[] = [
-  { id: 'contains', label: 'contains' },
-  { id: 'is', label: 'is' },
+  {
+    id: 'contains',
+    get label() {
+      return studioT('contains');
+    },
+  },
+  {
+    id: 'is',
+    get label() {
+      return studioT('is');
+    },
+  },
 ];
 
 const EXPERIMENTS_SUGGESTIONS = DATASET_EXPERIMENT_OPTIONS.filter(option => option.value !== ALL);
@@ -67,17 +79,24 @@ export function DatasetsFilterBar({
   tagOptions,
   onChange,
 }: DatasetsFilterBarProps) {
+  const studioLocale = useLocale();
   const targetFields = useTargetFilterFields(targetType);
 
   const fields = useMemo<FilterBarField[]>(() => {
     const tagSuggestions = tagOptions.filter(option => option.value !== ALL);
     return [
       // Listed first so free text lands on it by default.
-      { id: SEARCH_FIELD_ID, label: 'Search', icon: IconMagnifyingGlass, search: true, operators: ['contains'] },
+      {
+        id: SEARCH_FIELD_ID,
+        label: studioT('Search'),
+        icon: IconMagnifyingGlass,
+        search: true,
+        operators: ['contains'],
+      },
       ...targetFields,
       {
         id: EXPERIMENTS_FIELD_ID,
-        label: 'Experiments',
+        label: studioT('Experiments'),
         icon: IconLab,
         color: hueAccentColor('pink'),
         operators: ['is'],
@@ -86,7 +105,7 @@ export function DatasetsFilterBar({
       },
       {
         id: TAG_FIELD_ID,
-        label: 'Tag',
+        label: studioT('Tag'),
         icon: IconTag,
         color: hueAccentColor('pink'),
         operators: ['is'],
@@ -96,7 +115,7 @@ export function DatasetsFilterBar({
         suggestions: tagSuggestions,
       },
     ];
-  }, [targetFields, tagOptions]);
+  }, [targetFields, tagOptions, studioLocale]);
 
   const value = useMemo(
     () => toItems({ search, experimentFilter, tagFilter, targetType, targetId }),
@@ -111,11 +130,11 @@ export function DatasetsFilterBar({
       onValueChange={(items: FilterBarItem[]) => onChange(fromItems(items))}
       // Items are rebuilt from state with `id: fieldId`; keep the draft on the same id so the chip survives.
       createItemId={fieldId => fieldId}
-      aria-label="Datasets filters"
+      aria-label={studioT('Datasets filters')}
       className="min-w-64 flex-1"
     >
       <FilterBar.Chips />
-      <FilterBar.Input placeholder="Filter datasets" />
+      <FilterBar.Input placeholder={studioT('Filter datasets')} />
     </FilterBar>
   );
 }

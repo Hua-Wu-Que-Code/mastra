@@ -9,6 +9,8 @@ import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
 import { IconMagnifyingGlass } from '@mastra/playground-ui/icons/central/IconMagnifyingGlass';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { AppShell, MainCard } from '@mastra/playground-ui/new/layout/app-shell';
 import { CollapsiblePanel } from '@mastra/playground-ui/resize/collapsible-panel';
 import { PanelGroup } from '@mastra/playground-ui/resize/panel-group';
@@ -18,6 +20,7 @@ import type { CSSProperties } from 'react';
 import { Panel, useDefaultLayout } from 'react-resizable-panels';
 import { useLocation } from 'react-router';
 import { AppSidebar } from './ui/app-sidebar';
+import { useAccount } from '@/domains/account/account-context';
 import { AuthRequired } from '@/domains/auth/components/auth-required';
 import { ExperimentalUIProvider } from '@/domains/experimental-ui/experimental-ui-context';
 import { UI_EXPERIMENTS } from '@/domains/experimental-ui/experiments';
@@ -28,6 +31,7 @@ import { RouteSidePanelProvider, RouteSidePanelSlot, useRouteSidePanel } from '@
 import { cn } from '@/lib/utils';
 
 function MobileNavbar() {
+  useLocale();
   const { setOpenMobile } = useSidebar();
   const { setOpen: setNavigationCommandOpen } = useNavigationCommand({ enableShortcut: false });
 
@@ -51,8 +55,8 @@ function MobileNavbar() {
         type="button"
         variant="ghost"
         size="icon-md"
-        tooltip="Search"
-        aria-label="Search and navigate"
+        tooltip={studioT('Search')}
+        aria-label={studioT('Search and navigate')}
         onClick={openNavigationCommand}
         className="shrink-0"
       >
@@ -125,10 +129,11 @@ export function StudioFrame({ children, className }: { children: React.ReactNode
 }
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
+  const account = useAccount();
   const { data: authCapabilities, isFetched } = useAuthCapabilities();
   const { pathname } = useLocation();
   // Optimistic: render chrome by default so cold loads don't jump.
-  const shouldHideSidebar = isFetched && authCapabilities?.enabled && !isAuthenticated(authCapabilities);
+  const shouldHideSidebar = !account && isFetched && authCapabilities?.enabled && !isAuthenticated(authCapabilities);
   const shouldShowSidebar = !shouldHideSidebar;
 
   return (

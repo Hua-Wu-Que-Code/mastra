@@ -5,6 +5,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useUrlSort } from '@mastra/playground-ui/sort/use-url-sort';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useDatasets, useDatasetsByIds } from '@mastra/react/hooks/datasets';
@@ -37,6 +39,7 @@ const EXPERIMENTS_SORT_KEYS = ['createdAt', 'status'] as const;
 const NO_METRICS = new Map<string, ExperimentListMetrics>();
 
 export default function Experiments() {
+  useLocale();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [runDialogOpen, setRunDialogOpen] = useState(false);
@@ -175,7 +178,7 @@ export default function Experiments() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Experiments</h1>
+        <h1 className="sr-only">{studioT('Experiments')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -184,7 +187,7 @@ export default function Experiments() {
   if (errorExperiments && is403ForbiddenError(errorExperiments)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Experiments</h1>
+        <h1 className="sr-only">{studioT('Experiments')}</h1>
         <PermissionDenied variant="fill" resource="experiments" />
       </PageLayout>
     );
@@ -193,7 +196,7 @@ export default function Experiments() {
   if (errorDatasets && is403ForbiddenError(errorDatasets)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Experiments</h1>
+        <h1 className="sr-only">{studioT('Experiments')}</h1>
         <PermissionDenied variant="fill" resource="datasets" />
       </PageLayout>
     );
@@ -202,11 +205,11 @@ export default function Experiments() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Experiments</h1>
+        <h1 className="sr-only">{studioT('Experiments')}</h1>
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load experiments"
+          titleSlot={studioT('Failed to load experiments')}
           descriptionSlot={error.message}
         />
       </PageLayout>
@@ -225,7 +228,7 @@ export default function Experiments() {
   if (experiments.length === 0 && !isLoading && datasetFilter === 'all' && !targetType) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Experiments</h1>
+        <h1 className="sr-only">{studioT('Experiments')}</h1>
         <NoExperimentsInfo onRunExperiment={() => setRunDialogOpen(true)} />
         {runDialog}
       </PageLayout>
@@ -237,7 +240,7 @@ export default function Experiments() {
       breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}
       headerActions={
         <Button variant="primary" size="sm" icon={<IconPlusMedium />} onClick={() => setRunDialogOpen(true)}>
-          New experiment
+          {studioT('New experiment')}
         </Button>
       }
       actionRow={
@@ -259,7 +262,7 @@ export default function Experiments() {
         />
       }
     >
-      <h1 className="sr-only">Experiments</h1>
+      <h1 className="sr-only">{studioT('Experiments')}</h1>
       <ExperimentsList
         experiments={experiments}
         datasets={namedDatasets}

@@ -4,6 +4,8 @@ import { InlineCode } from '@mastra/playground-ui/components/InlineCode';
 import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 
 export interface ToolMockReportSectionProps {
   report: ToolMockReport;
@@ -29,6 +31,7 @@ function formatArgs(args: unknown): string {
  * - failure: the mock mis-call that failed the item, if any
  */
 export function ToolMockReportSection({ report }: ToolMockReportSectionProps) {
+  useLocale();
   const { served, unconsumed, liveCalls, failure } = report;
 
   const rows: ReportRow[] = [
@@ -39,20 +42,29 @@ export function ToolMockReportSection({ report }: ToolMockReportSectionProps) {
 
   return (
     <div className="grid gap-2" data-testid="tool-mock-report">
-      <DataPanel.SectionHeading icon={<IconMaintenance />}>Tool Mocks</DataPanel.SectionHeading>
+      <DataPanel.SectionHeading icon={<IconMaintenance />}>{studioT('Tool Mocks')}</DataPanel.SectionHeading>
 
       {failure && (
-        <Notice variant="destructive" title="Mock mismatch">
+        <Notice variant="destructive" title={studioT('Mock mismatch')}>
           <Notice.Message>
             <span className="block">
-              {`Tool "${failure.toolName}" was called with arguments that did not match an available mock (${failure.code}).`}
+              {studioT('Tool "{value0}" was called with arguments that did not match an available mock ({value1}).', {
+                value0: failure.toolName,
+                value1: failure.code,
+              })}
             </span>
             <Txt as="span" variant="caption" className="mt-1 block">
-              Called with: <InlineCode>{formatArgs(failure.args)}</InlineCode>
+              <Trans
+                id="Called with: {part0}"
+                values={{ part0: <InlineCode>{formatArgs(failure.args)}</InlineCode> }}
+              />
             </Txt>
             {unconsumed.length > 0 && (
               <Txt as="span" variant="caption" className="mt-1 block">
-                Unconsumed mocks: <InlineCode>{unconsumed.map(u => formatArgs(u.args)).join(', ')}</InlineCode>
+                <Trans
+                  id="Unconsumed mocks: {part0}"
+                  values={{ part0: <InlineCode>{unconsumed.map(u => formatArgs(u.args)).join(', ')}</InlineCode> }}
+                />
               </Txt>
             )}
           </Notice.Message>

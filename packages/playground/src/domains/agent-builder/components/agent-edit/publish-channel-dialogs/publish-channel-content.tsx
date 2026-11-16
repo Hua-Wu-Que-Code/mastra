@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ChannelInstallationInfo, ChannelPlatformInfo } from '@mastra/react/hooks/agents';
 import { PlatformIcon } from '@/domains/agents/components/agent-channels/platform-icons';
 import { useConnectChannelAction } from '@/domains/agents/hooks/use-connect-channel-action';
@@ -58,6 +60,7 @@ export function PublishChannelContent({
   onClose,
   onDisconnectRequest,
 }: PublishChannelContentProps) {
+  useLocale();
   const { connect, isConnecting } = useConnectChannelAction(platform.id, { onClose });
   const copy = copyFor(platform.id);
   const activeInstallation =
@@ -72,7 +75,9 @@ export function PublishChannelContent({
       <DialogHeader>
         <div className="flex items-center gap-2">
           <PlatformIcon platform={platform.id} className="h-8 w-8 shrink-0" />
-          <DialogTitle>{platform.name} integration</DialogTitle>
+          <DialogTitle>
+            {platform.name} {' ' + studioT('integration')}
+          </DialogTitle>
         </div>
 
         <DialogDescription>{copy.description(platform.name)}</DialogDescription>
@@ -84,8 +89,9 @@ export function PublishChannelContent({
             copy.notConfigured(platform.name)
           ) : activeInstallation ? (
             <>
-              Connected <span className="text-foreground">{platform.name}</span> to{' '}
-              <span className="text-foreground">Mastra</span>
+              {studioT('Connected') + ' '}
+              <span className="text-foreground">{platform.name}</span> {' ' + studioT('to')}{' '}
+              <span className="text-foreground">{studioT('Mastra')}</span>
             </>
           ) : (
             copy.notConnected(platform.name)
@@ -96,7 +102,7 @@ export function PublishChannelContent({
       <DialogFooter>
         {platform.isConfigured && activeInstallation ? (
           <Button onClick={onDisconnectRequest} data-testid={`publish-channel-dialog-${platform.id}-disconnect`}>
-            Disconnect
+            {studioT('Disconnect')}
           </Button>
         ) : platform.isConfigured ? (
           <DialogAction
@@ -104,10 +110,10 @@ export function PublishChannelContent({
             disabled={isConnecting}
             data-testid={`publish-channel-dialog-${platform.id}-connect`}
           >
-            {isConnecting ? 'Connecting…' : copy.connectLabel}
+            {isConnecting ? studioT('Connecting…') : copy.connectLabel}
           </DialogAction>
         ) : (
-          <DialogCancel>Close</DialogCancel>
+          <DialogCancel>{studioT('Close')}</DialogCancel>
         )}
       </DialogFooter>
     </>

@@ -4,6 +4,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { SearchInput, listSearchProps } from '@mastra/playground-ui/components/SearchInput';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useAgents } from '@mastra/react/hooks/agents';
 import { useState } from 'react';
@@ -22,6 +24,7 @@ import { navCrumb } from '@/domains/navigation/crumbs';
 const crumbs = [navCrumb('/agents')];
 
 function Agents() {
+  useLocale();
   const { data: agents = {}, isLoading, error } = useAgents();
   const [search, setSearch] = useState('');
   const [view, setView] = useState<AgentsView>('list');
@@ -30,7 +33,7 @@ function Agents() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Agents</h1>
+        <h1 className="sr-only">{studioT('Agents')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -39,7 +42,7 @@ function Agents() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Agents</h1>
+        <h1 className="sr-only">{studioT('Agents')}</h1>
         <PermissionDenied variant="fill" resource="agents" />
       </PageLayout>
     );
@@ -48,8 +51,13 @@ function Agents() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Agents</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load agents" descriptionSlot={error.message} />
+        <h1 className="sr-only">{studioT('Agents')}</h1>
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load agents')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -57,7 +65,7 @@ function Agents() {
   if (Object.keys(agents).length === 0 && !isLoading) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Agents</h1>
+        <h1 className="sr-only">{studioT('Agents')}</h1>
         <NoAgentsInfo />
       </PageLayout>
     );
@@ -94,8 +102,8 @@ function Agents() {
               <SearchInput
                 {...listSearchProps}
                 onValueChange={setSearch}
-                label="Search agents"
-                placeholder="Search by name or instructions"
+                label={studioT('Search agents')}
+                placeholder={studioT('Search by name or instructions')}
               />
             </div>
           </ActionRow.Start>
@@ -105,7 +113,7 @@ function Agents() {
         </ActionRow>
       }
     >
-      <h1 className="sr-only">Agents</h1>
+      <h1 className="sr-only">{studioT('Agents')}</h1>
       {agentsView}
     </PageLayout>
   );

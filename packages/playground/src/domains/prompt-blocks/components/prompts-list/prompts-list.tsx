@@ -3,6 +3,8 @@ import { DataList, DataListSkeleton, useDataListKeyboard } from '@mastra/playgro
 import type { DataListSort } from '@mastra/playground-ui/components/DataList';
 import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { truncateString } from '@mastra/playground-ui/utils/truncate-string';
 import { useMemo } from 'react';
 
@@ -31,6 +33,7 @@ export function PromptsList({
   updatedSort,
   onSortChange,
 }: PromptsListProps) {
+  useLocale();
   const { paths, Link } = useLinkComponent();
 
   const filteredData = useMemo(() => {
@@ -49,20 +52,22 @@ export function PromptsList({
   return (
     <DataList columns={COLUMNS} scrollRef={containerRef}>
       <DataList.Top>
-        <DataList.TopCell>Name</DataList.TopCell>
-        <DataList.TopCell>Description</DataList.TopCell>
-        <DataList.TopCell className="text-center">Has Draft</DataList.TopCell>
-        <DataList.TopCell className="text-center">Is Published</DataList.TopCell>
+        <DataList.TopCell>{studioT('Name')}</DataList.TopCell>
+        <DataList.TopCell>{studioT('Description')}</DataList.TopCell>
+        <DataList.TopCell className="text-center">{studioT('Has Draft')}</DataList.TopCell>
+        <DataList.TopCell className="text-center">{studioT('Is Published')}</DataList.TopCell>
         {onSortChange ? (
           <DataList.SortableTopCell sortKey="updatedAt" sort={updatedSort} onSortChange={onSortChange}>
-            Updated
+            {studioT('Updated')}
           </DataList.SortableTopCell>
         ) : (
-          <DataList.TopCell>Updated</DataList.TopCell>
+          <DataList.TopCell>{studioT('Updated')}</DataList.TopCell>
         )}
       </DataList.Top>
 
-      {filteredData.length === 0 && search ? <DataList.NoMatch message="No Prompts match your search" /> : null}
+      {filteredData.length === 0 && search ? (
+        <DataList.NoMatch message={studioT('No Prompts match your search')} />
+      ) : null}
 
       {filteredData.map((block, index) => {
         const name = truncateString(block.name, 50);

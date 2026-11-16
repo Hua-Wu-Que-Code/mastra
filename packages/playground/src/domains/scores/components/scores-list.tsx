@@ -2,6 +2,8 @@ import type { ClientScoreRowData } from '@mastra/client-js';
 import { ScoresDataList, DataListSkeleton, useDataListKeyboard } from '@mastra/playground-ui/components/DataList';
 import type { DataListSort } from '@mastra/playground-ui/components/DataList';
 import { ScoreDataPanel } from '@mastra/playground-ui/domains/scores';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ScoresColumnsState } from '@/domains/scores/hooks/use-scores-columns';
@@ -35,6 +37,7 @@ export function ScoresList({
   sort,
   onSortChange,
 }: ScoresListProps) {
+  useLocale();
   const [internalSelectedId, setInternalSelectedId] = useState<string | undefined>(controlledSelectedId);
   const selectedScoreId = controlledSelectedId ?? internalSelectedId;
 
@@ -100,25 +103,25 @@ export function ScoresList({
           sort={sort?.key === 'date' ? sort.direction : undefined}
           onSortChange={onSortChange}
         >
-          Date
+          {studioT('Date')}
         </ScoresDataList.SortableTopCell>
       ) : (
-        <ScoresDataList.TopCell>Date</ScoresDataList.TopCell>
+        <ScoresDataList.TopCell>{studioT('Date')}</ScoresDataList.TopCell>
       )}
-      <ScoresDataList.TopCell>Time</ScoresDataList.TopCell>
+      <ScoresDataList.TopCell>{studioT('Time')}</ScoresDataList.TopCell>
       {onSortChange ? (
         <ScoresDataList.SortableTopCell
           sortKey="score"
           sort={sort?.key === 'score' ? sort.direction : undefined}
           onSortChange={onSortChange}
         >
-          Score
+          {studioT('Score')}
         </ScoresDataList.SortableTopCell>
       ) : (
-        <ScoresDataList.TopCell>Score</ScoresDataList.TopCell>
+        <ScoresDataList.TopCell>{studioT('Score')}</ScoresDataList.TopCell>
       )}
-      {visibleColumns.has('entity') && <ScoresDataList.TopCell>Entity</ScoresDataList.TopCell>}
-      {visibleColumns.has('input') && <ScoresDataList.TopCell>Input</ScoresDataList.TopCell>}
+      {visibleColumns.has('entity') && <ScoresDataList.TopCell>{studioT('Entity')}</ScoresDataList.TopCell>}
+      {visibleColumns.has('input') && <ScoresDataList.TopCell>{studioT('Input')}</ScoresDataList.TopCell>}
     </ScoresDataList.Top>
   );
 

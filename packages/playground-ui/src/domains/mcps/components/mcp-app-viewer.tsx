@@ -6,6 +6,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import type { McpAppModelContextParams } from '../context/mcp-app-host-context-value';
 import { useTheme } from '@/ds/components/ThemeProvider';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type HostCapabilities = NonNullable<ComponentProps<typeof AppRenderer>['hostCapabilities']>;
 
@@ -95,7 +96,7 @@ export interface McpAppViewerProps {
  */
 export function McpAppViewer({
   html,
-  title: _title = 'MCP App',
+  title: _title = studioT('MCP App'),
   toolName = 'mcp-app',
   toolInput,
   toolResult,
@@ -107,6 +108,7 @@ export function McpAppViewer({
   sandboxUrl,
   className,
 }: McpAppViewerProps) {
+  useLocale();
   const appRef = useRef<AppRendererHandle>(null);
   const [height, setHeight] = useState(400);
 

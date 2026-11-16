@@ -2,6 +2,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { IconEyeOpen } from '@mastra/playground-ui/icons/central/IconEyeOpen';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { AgentStepContainer } from './agent-step-container';
@@ -9,6 +11,7 @@ import { useWizard } from '@/domains/agent-builder/contexts/wizard-context';
 import { startViewTransition } from '@/lib/routing';
 
 export const AgentProfileReadyStep = () => {
+  useLocale();
   const { next } = useWizard();
   const navigate = useNavigate();
   const { id: agentId } = useParams<{ id: string }>();
@@ -50,10 +53,10 @@ export const AgentProfileReadyStep = () => {
       cta={
         <div className="relative z-[2] flex items-center justify-center gap-3">
           <Button icon={<IconEyeOpen />} onClick={handleReview} data-testid="agent-builder-ready-review">
-            Review my agent
+            {studioT('Review my agent')}
           </Button>
           <Button icon={<AgentIcon />} variant="primary" onClick={handleTry} data-testid="agent-builder-ready-try">
-            Try my agent
+            {studioT('Try my agent')}
           </Button>
         </div>
       }
@@ -61,10 +64,10 @@ export const AgentProfileReadyStep = () => {
       <div className="flex h-full w-full flex-col items-center justify-center px-4 py-4 text-center">
         <div className="ready-stage-content flex flex-col items-center gap-4">
           <Txt as="h2" variant="display" tone="ink" data-testid="agent-builder-ready-heading">
-            Your agent is ready
+            {studioT('Your agent is ready')}
           </Txt>
           <Txt variant="heading" tone="muted" className="max-w-md">
-            You can review and fine-tune everything, or jump straight in and try it out.
+            {studioT('You can review and fine-tune everything, or jump straight in and try it out.')}
           </Txt>
         </div>
       </div>

@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -50,6 +52,7 @@ export function useVisibilityChangeDialog<V extends string>({
   renderExtraContent,
   confirmDisabled,
 }: UseVisibilityChangeDialogArgs<V>): UseVisibilityChangeDialogResult<V> {
+  useLocale();
   const [pending, setPending] = useState<V | null>(null);
   const isOpen = pending !== null;
 
@@ -63,7 +66,11 @@ export function useVisibilityChangeDialog<V extends string>({
       onSuccess(nextVisibility);
       toast.success(copy[nextVisibility].toast);
     } catch (error) {
-      toast.error(`Failed to update visibility: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to update visibility: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     } finally {
       setPending(null);
     }
@@ -82,13 +89,13 @@ export function useVisibilityChangeDialog<V extends string>({
             </DialogHeader>
             {renderExtraContent?.(pending)}
             <DialogFooter>
-              <DialogCancel data-testid={testIds.cancel}>Cancel</DialogCancel>
+              <DialogCancel data-testid={testIds.cancel}>{studioT('Cancel')}</DialogCancel>
               <DialogAction
                 onConfirm={confirmFor(pending)}
                 disabled={confirmDisabled?.(pending) ?? false}
                 data-testid={testIds.confirm}
               >
-                Confirm
+                {studioT('Confirm')}
               </DialogAction>
             </DialogFooter>
           </>

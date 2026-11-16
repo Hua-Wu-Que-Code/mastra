@@ -3,6 +3,10 @@ import type { ComponentProps, KeyboardEvent, MouseEvent, PointerEvent } from 're
 import { dialogActionLayoutClasses, dialogActionSizeClasses, useDialogContext } from './dialog-context';
 import { Button } from '@/ds/components/Button';
 import type { TextButtonSize } from '@/ds/components/Button';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 type DialogActionButtonProps = Omit<ComponentProps<typeof Button>, 'onClick' | 'variant' | 'as' | 'type' | 'size'> & {
@@ -34,6 +38,7 @@ function HoldAction({
   holdSeconds = 1.5,
   ...props
 }: Omit<DialogConfirmActionProps, 'confirmation' | 'type'>) {
+  useLocale();
   const { intent, pending } = useDialogContext();
   const [holding, setHolding] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -168,11 +173,13 @@ function HoldAction({
         </span>
       </Button>
       <span id={hintId} className="sr-only">
-        Hold Space or Enter for {holdSeconds} seconds to confirm. Release to cancel. Screen reader users can activate
-        twice.
+        <Trans
+          id="Hold Space or Enter for {part0} seconds to confirm. Release to cancel. Screen reader users can activate twice."
+          values={{ part0: holdSeconds }}
+        />
       </span>
       <span role="status" className="sr-only">
-        {armed ? 'Activate again to confirm.' : ''}
+        {armed ? studioT('Activate again to confirm.') : ''}
       </span>
     </>
   );

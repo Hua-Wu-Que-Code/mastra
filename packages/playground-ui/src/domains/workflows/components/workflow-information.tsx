@@ -2,22 +2,24 @@ import type { GetWorkflowResponse } from '@mastra/client-js';
 import { useWorkflow } from '@mastra/react/hooks/workflows';
 import type { ContextType, ReactNode } from 'react';
 import { useEffect, useContext, useState } from 'react';
-
 import { useWorkflowSelectedStep } from '../context/use-workflow-selected-step';
 import { WorkflowRunContext } from '../context/workflow-run-context';
+
 import { WorkflowRunDetail } from '../runs/workflow-run-details';
 import { WorkflowRecentRuns } from '../runs/workflow-run-list';
 import { WorkflowRunStatusBadge } from '../workflow/workflow-run-header';
 import { WorkflowTrigger } from '../workflow/workflow-trigger';
 import type { WorkflowRunActionsContext } from '../workflow/workflow-trigger';
 import { panelSurfaceStyle, WorkflowPanelResizeHandle } from './workflow-layout';
-
 import { Button } from '@/ds/components/Button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ds/components/Collapsible';
+
 import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
 import { ScrollArea, ScrollAreaViewport } from '@/ds/components/ScrollArea';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { useLinkComponent } from '@/lib/framework';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 import { toast } from '@/utils/toast';
 
@@ -66,6 +68,7 @@ function FloatingPanel({ className, children }: { className: string; children: R
 }
 
 function NewWorkflowRunButton({ workflowId, onClick }: { workflowId: string; onClick: () => void }) {
+  useLocale();
   const { Link, paths } = useLinkComponent();
 
   return (
@@ -74,7 +77,7 @@ function NewWorkflowRunButton({ workflowId, onClick }: { workflowId: string; onC
 
       variant="ghost"
       size="icon-md"
-      tooltip="New workflow run"
+      tooltip={studioT('New workflow run')}
       onClick={onClick}
     >
       <IconPlusMedium />
@@ -93,6 +96,7 @@ function WorkflowInformationTopSection({
   showNewRunButton: boolean;
   onNewRun: () => void;
 }) {
+  useLocale();
   const { result } = useContext(WorkflowRunContext);
   const [isOpen, setIsOpen] = useState(true);
   return (
@@ -107,7 +111,7 @@ function WorkflowInformationTopSection({
         <div className="flex shrink-0 items-center gap-1 pr-2">
           <CollapsibleTrigger className="flex min-w-0 flex-1 items-center gap-2 px-4 py-3 text-column text-muted-foreground">
             <DisclosureChevron direction="right" className="size-4 text-muted-foreground" />
-            <span>Workflow run</span>
+            <span>{studioT('Workflow run')}</span>
             {!isOpen && result?.status && <WorkflowRunStatusBadge status={result.status} />}
           </CollapsibleTrigger>
           {showNewRunButton && (
@@ -168,6 +172,7 @@ export function WorkflowInformation({
   canExecute,
   canDelete,
 }: WorkflowInformationProps) {
+  const studioLocale = useLocale();
   const {
     data: workflow,
     isLoading,
@@ -212,9 +217,9 @@ export function WorkflowInformation({
   useEffect(() => {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load workflow';
-      toast.error(`Error loading workflow: ${errorMessage}`);
+      toast.error(studioT('Error loading workflow: {value0}', { value0: errorMessage }));
     }
-  }, [error]);
+  }, [error, studioLocale]);
 
   if (error) {
     return null;

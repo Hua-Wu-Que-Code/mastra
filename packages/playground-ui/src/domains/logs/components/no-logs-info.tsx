@@ -2,14 +2,26 @@ import type { LogsDatePreset } from '../log-filters';
 import { Button } from '@/ds/components/Button';
 import { EmptyState } from '@/ds/components/EmptyState';
 import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRight';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate } from '@/utils/date-format';
 
 const PRESET_LABELS: Record<Exclude<LogsDatePreset, 'all' | 'custom'>, string> = {
-  'last-24h': 'the last 24 hours',
-  'last-3d': 'the last 3 days',
-  'last-7d': 'the last 7 days',
-  'last-14d': 'the last 14 days',
-  'last-30d': 'the last 30 days',
+  get 'last-24h'() {
+    return studioT('the last 24 hours');
+  },
+  get 'last-3d'() {
+    return studioT('the last 3 days');
+  },
+  get 'last-7d'() {
+    return studioT('the last 7 days');
+  },
+  get 'last-14d'() {
+    return studioT('the last 14 days');
+  },
+  get 'last-30d'() {
+    return studioT('the last 30 days');
+  },
 };
 
 export interface NoLogsInfoProps {
@@ -18,34 +30,43 @@ export interface NoLogsInfoProps {
   dateTo?: Date;
 }
 
-const LEVEL_TIP = 'Pick a wider range or lower the logging level. Verbose entries (debug, info) may be filtered out.';
+const LEVEL_TIP = () =>
+  studioT('Pick a wider range or lower the logging level. Verbose entries (debug, info) may be filtered out.');
 
 function describeRange({ datePreset, dateFrom, dateTo }: NoLogsInfoProps): { title: string; description: string } {
   if (datePreset && datePreset !== 'all' && datePreset !== 'custom') {
     return {
-      title: `No logs for ${PRESET_LABELS[datePreset]}`,
-      description: LEVEL_TIP,
+      title: studioT('No logs for {value0}', { value0: PRESET_LABELS[datePreset] }),
+      description: LEVEL_TIP(),
     };
   }
   if (dateFrom && dateTo) {
     return {
-      title: `No logs between ${formatDate(dateFrom, 'date-time')} and ${formatDate(dateTo, 'date-time')}`,
-      description: LEVEL_TIP,
+      title: studioT('No logs between {value0} and {value1}', {
+        value0: formatDate(dateFrom, 'date-time'),
+        value1: formatDate(dateTo, 'date-time'),
+      }),
+      description: LEVEL_TIP(),
     };
   }
   if (dateFrom) {
     return {
-      title: `No logs since ${formatDate(dateFrom, 'date-time')}`,
-      description: LEVEL_TIP,
+      title: studioT('No logs since {value0}', { value0: formatDate(dateFrom, 'date-time') }),
+      description: LEVEL_TIP(),
     };
   }
   return {
-    title: 'No logs yet',
-    description: 'Logs will appear here once agents, workflows, or tools are executed.',
+    get title() {
+      return studioT('No logs yet');
+    },
+    get description() {
+      return studioT('Logs will appear here once agents, workflows, or tools are executed.');
+    },
   };
 }
 
 export const NoLogsInfo = ({ datePreset, dateFrom, dateTo }: NoLogsInfoProps = {}) => {
+  useLocale();
   const { title, description } = describeRange({ datePreset, dateFrom, dateTo });
   return (
     <EmptyState
@@ -59,7 +80,7 @@ export const NoLogsInfo = ({ datePreset, dateFrom, dateTo }: NoLogsInfoProps = {
           }
           icon={<IconSquareArrowTopRight />}
         >
-          Logging documentation
+          {studioT('Logging documentation')}
         </Button>
       }
       variant="fill"

@@ -2,6 +2,10 @@ import { EmptyState } from '@mastra/playground-ui/components/EmptyState';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useDatasetExperimentsQueries } from '@mastra/react/hooks/datasets';
 import { useMemo } from 'react';
@@ -10,9 +14,10 @@ import { ExperimentIdLink } from './experiment-id-link';
 import { ExperimentsComparison } from '@/domains/experiments/components/comparison/experiments-comparison';
 
 function ExperimentIdLinks({ experimentIds }: { experimentIds: string[] }) {
+  useLocale();
   return experimentIds.map((id, index) => (
     <span key={id} className="flex items-center gap-2">
-      {index > 0 && index === experimentIds.length - 1 && 'and'}
+      {index > 0 && index === experimentIds.length - 1 && studioT('and')}
       <span className="flex items-center">
         <ExperimentIdLink experimentId={id} />
         {index < experimentIds.length - 2 && ','}
@@ -30,6 +35,7 @@ export function CompareExperimentsContent({
   baselineId: string;
   contenderIds: string[];
 }) {
+  useLocale();
   const [, setSearchParams] = useSearchParams();
   const experimentIds = useMemo(() => [baselineId, ...contenderIds], [baselineId, contenderIds]);
   // Fetch each experiment by id: the global list is paginated and may not contain them.
@@ -48,7 +54,7 @@ export function CompareExperimentsContent({
     return (
       <>
         <Txt as="h1" variant="heading" className="sr-only">
-          Compare
+          {studioT('Compare')}
         </Txt>
         <SessionExpired variant="fill" />
       </>
@@ -59,7 +65,7 @@ export function CompareExperimentsContent({
     return (
       <>
         <Txt as="h1" variant="heading" className="sr-only">
-          Compare
+          {studioT('Compare')}
         </Txt>
         <PermissionDenied variant="fill" resource="experiments" />
       </>
@@ -70,12 +76,12 @@ export function CompareExperimentsContent({
     return (
       <>
         <Txt as="h1" variant="heading" className="sr-only">
-          Compare
+          {studioT('Compare')}
         </Txt>
         <EmptyState
           tone="error"
           variant="fill"
-          titleSlot="Failed to load experiments"
+          titleSlot={studioT('Failed to load experiments')}
           descriptionSlot={error.message}
         />
       </>
@@ -87,15 +93,20 @@ export function CompareExperimentsContent({
     return (
       <>
         <Txt as="h1" variant="heading" className="sr-only">
-          Compare
+          {studioT('Compare')}
         </Txt>
         <div className="grid h-full min-w-min content-start items-start overflow-x-auto overflow-y-auto">
           <div className="py-5 text-center text-muted-foreground">
-            <Txt as="p">Experiments must belong to the same dataset ({datasetId}) to be compared.</Txt>
+            <Txt as="p">
+              <Trans
+                id="Experiments must belong to the same dataset ( {part0} ) to be compared."
+                values={{ part0: datasetId }}
+              />
+            </Txt>
             <Txt className="mt-2 flex items-center justify-center gap-2">
-              One of
+              {studioT('One of')}
               <ExperimentIdLinks experimentIds={experimentIds} />
-              was not found in it.
+              {studioT('was not found in it.')}
             </Txt>
           </div>
         </div>
@@ -108,7 +119,7 @@ export function CompareExperimentsContent({
     <div className="h-full overflow-auto">
       <div className="grid w-full content-start">
         <Txt as="h1" variant="heading" className="sr-only">
-          Experiments comparison
+          {studioT('Experiments comparison')}
         </Txt>
         <ExperimentsComparison
           datasetId={datasetId}

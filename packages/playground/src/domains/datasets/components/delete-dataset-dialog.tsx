@@ -1,6 +1,8 @@
 'use client';
 
 import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useDatasetMutations } from '@mastra/react/hooks/datasets';
 
@@ -19,16 +21,21 @@ export function DeleteDatasetDialog({
   datasetName,
   onSuccess,
 }: DeleteDatasetDialogProps) {
+  useLocale();
   const { deleteDataset } = useDatasetMutations();
 
   const handleDelete = async () => {
     try {
       await deleteDataset.mutateAsync(datasetId);
-      toast.success('Dataset deleted successfully');
+      toast.success(studioT('Dataset deleted successfully'));
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
-      toast.error(`Failed to delete dataset: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to delete dataset: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
   };
 
@@ -36,16 +43,19 @@ export function DeleteDatasetDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content>
         <AlertDialog.Header>
-          <AlertDialog.Title>Delete Dataset</AlertDialog.Title>
+          <AlertDialog.Title>{studioT('Delete Dataset')}</AlertDialog.Title>
           <AlertDialog.Description>
-            Are you sure you want to delete &quot;{datasetName}&quot;? This will permanently delete the dataset, all its
-            items, and run history. This action cannot be undone.
+            {studioT('Are you sure you want to delete "')}
+            {datasetName}
+            {studioT(
+              '"? This will permanently delete the dataset, all its items, and run history. This action cannot be undone.',
+            )}
           </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Footer>
-          <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+          <AlertDialog.Cancel>{studioT('Cancel')}</AlertDialog.Cancel>
           <AlertDialog.Action onClick={handleDelete} disabled={deleteDataset.isPending}>
-            {deleteDataset.isPending ? 'Deleting...' : 'Delete'}
+            {deleteDataset.isPending ? studioT('Deleting...') : studioT('Delete')}
           </AlertDialog.Action>
         </AlertDialog.Footer>
       </AlertDialog.Content>

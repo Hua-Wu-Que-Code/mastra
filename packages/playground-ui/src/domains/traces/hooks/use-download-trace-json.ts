@@ -1,9 +1,12 @@
 import { useFetchTraceSpans } from '@mastra/react/hooks/traces';
 import { useState } from 'react';
 import { downloadJson } from '@/lib/file';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 export function useDownloadTraceJson() {
+  useLocale();
   const fetchTraceSpans = useFetchTraceSpans();
   const [isPending, setIsPending] = useState(false);
 
@@ -17,7 +20,7 @@ export function useDownloadTraceJson() {
 
     toast.promise({
       myPromise: task,
-      loadingMessage: 'Preparing trace download…',
+      loadingMessage: studioT('Preparing trace download…'),
       successMessage: 'Trace downloaded',
       errorMessage: 'Failed to download trace',
     });

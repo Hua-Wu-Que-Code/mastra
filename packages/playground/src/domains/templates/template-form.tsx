@@ -6,6 +6,8 @@ import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowRight } from '@mastra/playground-ui/icons/central/IconArrowRight';
 import { IconPackage } from '@mastra/playground-ui/icons/central/IconPackage';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { Fragment } from 'react';
 import { AgentMetadataModelSwitcher } from '../agents/components/agent-metadata/agent-metadata-model-switcher';
@@ -42,6 +44,7 @@ export function TemplateForm({
   defaultModelId,
   onModelUpdate,
 }: TemplateFormProps) {
+  useLocale();
   return (
     <Container>
       <div className="mx-auto my-4 grid max-w-[40rem] gap-5 p-4 lg:p-5">
@@ -51,14 +54,15 @@ export function TemplateForm({
           tone="muted"
           className={cn('flex items-center gap-2', '[&_svg]:h-[1.2em] [&_svg]:opacity-70 [&>svg]:w-[1.2em]')}
         >
-          Install Template <IconPackage />
+          {studioT('Install Template') + ' '}
+          <IconPackage />
         </Txt>
         <Field orientation="horizontal">
-          <FieldLabel>Template AI Model Provider</FieldLabel>
+          <FieldLabel>{studioT('Template AI Model Provider')}</FieldLabel>
           <FieldContent className="flex-1">
             <Select name="template-provider" value={selectedProvider} onValueChange={onProviderChange}>
               <SelectTrigger size="md">
-                <SelectValue placeholder="Select" />
+                <SelectValue placeholder={studioT('Select')} />
               </SelectTrigger>
               <SelectContent>
                 {providerOptions.map(option => (
@@ -74,7 +78,7 @@ export function TemplateForm({
         {selectedProvider && Object.entries(variables || {}).length > 0 && (
           <>
             <Txt as="h3" tone="muted">
-              Set required Environmental Variables
+              {studioT('Set required Environmental Variables')}
             </Txt>
             <div className="grid grid-cols-[1fr_1fr] items-start gap-4">
               {isLoadingEnvVars ? (
@@ -89,18 +93,18 @@ export function TemplateForm({
                   <Spinner />
                   <Txt as="span" variant="caption" className="block">
                     {' '}
-                    Loading variables...
+                    {studioT('Loading variables...')}
                   </Txt>
                 </div>
               ) : (
                 Object.entries(variables).map(([key, value]) => (
                   <Fragment key={key}>
                     <Field className="w-full">
-                      <FieldLabel className="sr-only">Key</FieldLabel>
+                      <FieldLabel className="sr-only">{studioT('Key')}</FieldLabel>
                       <Input name={`env-${key}`} value={key} disabled className="w-full" />
                     </Field>
                     <Field invalid={errors.includes(key)} className="w-full">
-                      <FieldLabel className="sr-only">Value</FieldLabel>
+                      <FieldLabel className="sr-only">{studioT('Value')}</FieldLabel>
                       <Input
                         name={key}
                         value={value}
@@ -108,7 +112,7 @@ export function TemplateForm({
                         autoComplete="off"
                         className="w-full"
                       />
-                      <FieldError>{errors.includes(key) ? 'Value is required.' : undefined}</FieldError>
+                      <FieldError>{errors.includes(key) ? studioT('Value is required.') : undefined}</FieldError>
                     </Field>
                   </Fragment>
                 ))
@@ -117,21 +121,21 @@ export function TemplateForm({
             <div className="relative mt-3.5 border-t border-border pt-12">
               <div className="absolute top-0 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-4 items-center justify-center rounded-full bg-background">
                 <Txt tone="muted" as="span" variant="caption" className="block">
-                  And
+                  {studioT('And')}
                 </Txt>
               </div>
 
               <Txt as="h3" tone="muted">
-                Set AI Model for Template Installation
+                {studioT('Set AI Model for Template Installation')}
               </Txt>
               <Txt tone="muted" className="mt-2 mb-5">
-                This model will be used by the workflow to process and install the template
+                {studioT('This model will be used by the workflow to process and install the template')}
               </Txt>
 
               <AgentMetadataModelSwitcher
                 defaultProvider={defaultModelProvider || ''}
                 defaultModel={defaultModelId || ''}
-                updateModel={onModelUpdate || (() => Promise.resolve({ message: 'Updated' }))}
+                updateModel={onModelUpdate || (() => Promise.resolve({ message: studioT('Updated') }))}
                 closeEditor={() => {}} // No need to close in template context
                 autoSave
                 selectProviderPlaceholder="Provider"
@@ -153,11 +157,12 @@ export function TemplateForm({
           >
             {isInstalling ? (
               <>
-                <Spinner className="h-4 w-4" /> Installing...
+                <Spinner className="h-4 w-4" /> {' ' + studioT('Installing...')}
               </>
             ) : (
               <>
-                Install <IconArrowRight />
+                {studioT('Install') + ' '}
+                <IconArrowRight />
               </>
             )}
           </Button>

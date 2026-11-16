@@ -2,10 +2,11 @@ import { useEnvironmentVariablesEditorContext } from './environment-variables-ed
 import type { EnvironmentVariablesEditorUploadButtonProps } from './environment-variables-editor.types';
 import { Button } from '@/ds/components/Button';
 import { IconArrowOutOfBox } from '@/ds/icons/central/IconArrowOutOfBox';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export function EnvironmentVariablesEditorUploadButton({
   children = 'Import .env',
-  inputLabel = 'Import .env file',
+  inputLabel = studioT('Import .env file'),
   disabled,
   onClick,
   type = 'button',
@@ -13,6 +14,7 @@ export function EnvironmentVariablesEditorUploadButton({
   size = 'sm',
   ...props
 }: EnvironmentVariablesEditorUploadButtonProps) {
+  useLocale();
   const {
     editor,
     disabled: contextDisabled,

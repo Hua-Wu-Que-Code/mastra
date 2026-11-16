@@ -3,6 +3,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@mastra/playground-ui/components/HoverCard';
 import { IconChevronDownMedium } from '@mastra/playground-ui/icons/central/IconChevronDownMedium';
 import { IconStar } from '@mastra/playground-ui/icons/central/IconStar';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDatasetExperimentsQueries } from '@mastra/react/hooks/datasets';
 import { ExperimentIdLink } from './experiment-id-link';
 import { useComparedExperimentIds } from './use-compared-experiment-ids';
@@ -20,6 +22,7 @@ export function CompareCrumb() {
 
 /** Icon-only switcher, like the entity crumbs: hovering it lists the compared experiments. */
 export function CompareCrumbSwitcher() {
+  useLocale();
   const { datasetId, experimentIds } = useExperimentIds();
   // Same queries as the page body: served from the cache.
   const { data: experimentsById } = useDatasetExperimentsQueries({ datasetId: datasetId ?? '', experimentIds });
@@ -31,13 +34,13 @@ export function CompareCrumbSwitcher() {
         delay={0}
         closeDelay={100}
         render={
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Show compared experiments">
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={studioT('Show compared experiments')}>
             <IconChevronDownMedium />
           </Button>
         }
       />
       <HoverCardContent side="bottom" align="end" sideOffset={4} showArrow={false} className="w-72 p-1.5">
-        <ul aria-label="Compared experiments" className="grid gap-0.5">
+        <ul aria-label={studioT('Compared experiments')} className="grid gap-0.5">
           {experimentIds.map((id, index) => (
             <li key={id} className="grid">
               <ExperimentIdLink
@@ -48,7 +51,7 @@ export function CompareCrumbSwitcher() {
                 trailing={
                   index === 0 && (
                     <Badge variant="purple" size="sm" icon={<IconStar className="fill-current" />}>
-                      Baseline
+                      {studioT('Baseline')}
                     </Badge>
                   )
                 }

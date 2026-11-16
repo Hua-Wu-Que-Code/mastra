@@ -10,6 +10,7 @@ import {
 } from '@mastra/playground-ui/domains/connect';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import { useCallback, useMemo, useState } from 'react';
 import { AddConnectionDialog } from './components/add-connection-dialog';
@@ -24,7 +25,7 @@ const DOCS_URL = 'https://mastra.ai/docs/mastra-platform/connect/end-user-connec
 function fetchErrorNotice(message: string) {
   return (
     <div role="alert">
-      <Notice variant="destructive" title="Couldn't load connections">
+      <Notice variant="destructive" title={studioT("Couldn't load connections")}>
         <Notice.Message>{message}</Notice.Message>
       </Notice>
     </div>
@@ -45,6 +46,7 @@ function docsLink(label: string) {
  * the resource key the studio session resolves to.
  */
 export default function ConnectionsPage() {
+  const studioLocale = useLocale();
   const surface = useConnectSurface();
   const connectionsQuery = useUserConnections({ enabled: surface.data?.status === 'ready' });
   const disconnect = useDisconnectUserConnection();
@@ -56,12 +58,12 @@ export default function ConnectionsPage() {
       disconnectMutate(
         { connectionId },
         {
-          onSuccess: () => toast.success(`Disconnected ${displayName}`),
+          onSuccess: () => toast.success(studioT('Disconnected {value0}', { value0: displayName })),
           onError: error => toast.error(error.message),
         },
       );
     },
-    [disconnectMutate],
+    [disconnectMutate, studioLocale],
   );
 
   const connections = useMemo(() => connectionsQuery.data ?? [], [connectionsQuery.data]);
@@ -78,7 +80,7 @@ export default function ConnectionsPage() {
       <EmptyState
         tone="error"
         variant="fill"
-        titleSlot="Failed to load connections"
+        titleSlot={studioT('Failed to load connections')}
         descriptionSlot={surface.error.message}
       />
     );
@@ -86,8 +88,10 @@ export default function ConnectionsPage() {
     content = (
       <EmptyState
         variant="fill"
-        titleSlot="Connect routes are not mounted"
-        descriptionSlot="Mount userConnectRoutes() from @mastra/connect in server.apiRoutes to let your users connect their own accounts."
+        titleSlot={studioT('Connect routes are not mounted')}
+        descriptionSlot={studioT(
+          'Mount userConnectRoutes() from @mastra/connect in server.apiRoutes to let your users connect their own accounts.',
+        )}
         actionSlot={docsLink('Read the end-user connections docs')}
       />
     );
@@ -95,8 +99,10 @@ export default function ConnectionsPage() {
     content = (
       <EmptyState
         variant="fill"
-        titleSlot="No end-user identity"
-        descriptionSlot="End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so studio sessions resolve to a resource key."
+        titleSlot={studioT('No end-user identity')}
+        descriptionSlot={studioT(
+          'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so studio sessions resolve to a resource key.',
+        )}
         actionSlot={docsLink('Read the end-user connections docs')}
       />
     );
@@ -133,11 +139,11 @@ export default function ConnectionsPage() {
       variant="narrow"
       header={
         <PageHeader>
-          <PageHeader.Title>Connections</PageHeader.Title>
+          <PageHeader.Title>{studioT('Connections')}</PageHeader.Title>
           {surface.data?.status === 'ready' ? (
             <PageHeader.Action>
               <Button variant="primary" size="sm" onClick={() => setAddOpen(true)}>
-                <IconPlusMedium aria-hidden /> Add connection
+                <IconPlusMedium aria-hidden /> {' ' + studioT('Add connection')}
               </Button>
             </PageHeader.Action>
           ) : null}

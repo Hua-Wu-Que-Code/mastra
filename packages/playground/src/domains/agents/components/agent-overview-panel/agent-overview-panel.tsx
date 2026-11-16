@@ -16,6 +16,8 @@ import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMainten
 import { IconSignalTower } from '@mastra/playground-ui/icons/central/IconSignalTower';
 import { IconSparklesTwo } from '@mastra/playground-ui/icons/central/IconSparklesTwo';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { frameSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { toast } from '@mastra/playground-ui/utils/toast';
@@ -54,6 +56,7 @@ export interface AgentOverviewPanelProps {
 }
 
 export function AgentOverviewPanel({ agentId }: AgentOverviewPanelProps) {
+  useLocale();
   const { isCollapsed } = useRouteSidePanel();
 
   return (
@@ -64,7 +67,7 @@ export function AgentOverviewPanel({ agentId }: AgentOverviewPanelProps) {
       {/* The header route action owns the close control (see AgentDetailHeaderActions). */}
       <div className="flex h-10 min-h-10 items-center border-b border-border px-4">
         <Txt as="h2" variant="subheading" tone="ink">
-          Config
+          {studioT('Config')}
         </Txt>
       </div>
 
@@ -86,6 +89,7 @@ function EditorOwnedModelList({
   readOnly,
   form,
 }: Pick<ModelListProps, 'modelList' | 'editable' | 'readOnly'> & Pick<AgentEditFormContextValue, 'form'>) {
+  useLocale();
   const formModelList = useWatch({ control: form.control, name: 'modelList' });
 
   const reorderModelList: NonNullable<ModelListProps['reorderModelList']> = async params => {
@@ -99,7 +103,7 @@ function EditorOwnedModelList({
       }),
       { shouldDirty: true },
     );
-    return { message: 'Model list reordered' };
+    return { message: studioT('Model list reordered') };
   };
 
   const updateModelInModelList: NonNullable<ModelListProps['updateModelInModelList']> = async params => {
@@ -122,7 +126,7 @@ function EditorOwnedModelList({
       ),
       { shouldDirty: true },
     );
-    return { message: 'Model updated' };
+    return { message: studioT('Model updated') };
   };
 
   return (
@@ -137,6 +141,7 @@ function EditorOwnedModelList({
 }
 
 function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
+  useLocale();
   const editFormContext = useOptionalAgentEditFormContext();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
@@ -153,7 +158,7 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
   ).ownsModel;
 
   const reportModelListError = (error: Error & { body?: { error?: string } }) => {
-    toast.error(error.body?.error || error.message || 'Failed to update model list');
+    toast.error(error.body?.error || error.message || studioT('Failed to update model list'));
   };
 
   const handleReorderModelList = async (params: Parameters<typeof reorderModelList>[0]) => {
@@ -190,7 +195,7 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
   if (!agent) {
     return (
       <Txt variant="body" tone="muted" className="p-4">
-        Agent not found
+        {studioT('Agent not found')}
       </Txt>
     );
   }
@@ -212,10 +217,10 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
     <>
       {agent.modelList && (
         <AgentMetadataSection
-          title="Models"
+          title={studioT('Models')}
           accent="blue"
           icon={<IconBox2 />}
-          actions={editFormContext?.readOnly ? <Badge variant="warning">Read-only</Badge> : undefined}
+          actions={editFormContext?.readOnly ? <Badge variant="warning">{studioT('Read-only')}</Badge> : undefined}
         >
           {ownsModel && editFormContext ? (
             <EditorOwnedModelList
@@ -237,48 +242,48 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
 
       {networkAgents.length > 0 && (
         <AgentMetadataSection
-          title="Agents"
+          title={studioT('Agents')}
           count={networkAgents.length}
           accent="green"
           icon={<AgentIcon />}
-          hint={{ link: 'https://mastra.ai/en/docs/agents/overview', title: 'Agents documentation' }}
+          hint={{ link: 'https://mastra.ai/en/docs/agents/overview', title: studioT('Agents documentation') }}
         >
           <AgentMetadataNetworkList agents={networkAgents} />
         </AgentMetadataSection>
       )}
 
       <AgentMetadataSection
-        title="Tools"
+        title={studioT('Tools')}
         count={tools.length}
         accent="amber"
         icon={<IconMaintenance />}
         hint={{
           link: 'https://mastra.ai/en/docs/agents/using-tools-and-mcp',
-          title: 'Using Tools and MCP documentation',
+          title: studioT('Using Tools and MCP documentation'),
         }}
       >
         <AgentMetadataToolList agentId={agentId} tools={tools} />
       </AgentMetadataSection>
 
       <AgentMetadataSection
-        title="Workflows"
+        title={studioT('Workflows')}
         count={workflows.length}
         accent="blue"
         icon={<WorkflowIcon />}
-        hint={{ link: 'https://mastra.ai/en/docs/workflows/overview', title: 'Workflows documentation' }}
+        hint={{ link: 'https://mastra.ai/en/docs/workflows/overview', title: studioT('Workflows documentation') }}
       >
         <AgentMetadataWorkflowList workflows={workflows} />
       </AgentMetadataSection>
 
       {workspaceTools.length > 0 && (
         <AgentMetadataSection
-          title="Workspace Tools"
+          title={studioT('Workspace Tools')}
           count={workspaceTools.length}
           accent="green"
           icon={<IconFolder1 />}
           hint={{
             link: 'https://mastra.ai/en/reference/workspace/workspace-class#agent-tools',
-            title: 'Workspace tools documentation',
+            title: studioT('Workspace tools documentation'),
           }}
         >
           <AgentMetadataWorkspaceToolsList tools={workspaceTools} />
@@ -287,13 +292,13 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
 
       {browserTools.length > 0 && (
         <AgentMetadataSection
-          title="Browser Tools"
+          title={studioT('Browser Tools')}
           count={browserTools.length}
           accent="cyan"
           icon={<IconGlobe />}
           hint={{
             link: 'https://mastra.ai/en/docs/agents/adding-browser-control',
-            title: 'Browser tools documentation',
+            title: studioT('Browser tools documentation'),
           }}
         >
           <AgentMetadataBrowserToolsList tools={browserTools} />
@@ -302,50 +307,51 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
 
       {(inputProcessors.length > 0 || outputProcessors.length > 0) && (
         <AgentMetadataSection
-          title="Processors"
+          title={studioT('Processors')}
           accent="orange"
           icon={<IconChip />}
-          hint={{ link: 'https://mastra.ai/docs/agents/processors', title: 'Processors documentation' }}
+          hint={{ link: 'https://mastra.ai/docs/agents/processors', title: studioT('Processors documentation') }}
         >
           <AgentMetadataCombinedProcessorList inputProcessors={inputProcessors} outputProcessors={outputProcessors} />
         </AgentMetadataSection>
       )}
 
       <AgentMetadataSection
-        title="Skills"
+        title={studioT('Skills')}
         count={skills.length}
         accent="purple"
         icon={<IconSparklesTwo />}
-        hint={{ link: 'https://mastra.ai/en/docs/workspace/skills', title: 'Skills documentation' }}
+        hint={{ link: 'https://mastra.ai/en/docs/workspace/skills', title: studioT('Skills documentation') }}
       >
         <AgentMetadataSkillList skills={skills} agentId={agentId} workspaceId={agent.workspaceId} />
       </AgentMetadataSection>
 
-      <AgentMetadataSection title="Scorers" accent="pink" icon={<IconGauge />}>
+      <AgentMetadataSection title={studioT('Scorers')} accent="pink" icon={<IconGauge />}>
         <AgentMetadataScorerList entityId={agent.name} entityType="AGENT" />
       </AgentMetadataSection>
-      <AgentMetadataSection title="Memory" accent="purple" icon={<IconBrain />}>
+      <AgentMetadataSection title={studioT('Memory')} accent="purple" icon={<IconBrain />}>
         <AgentMemoryConfig agentId={agentId} />
       </AgentMetadataSection>
 
       {hasChannels && (
-        <AgentMetadataSection title="Channels" accent="cyan" icon={<IconSignalTower />}>
+        <AgentMetadataSection title={studioT('Channels')} accent="cyan" icon={<IconSignalTower />}>
           <AgentChannels agentId={agentId} />
         </AgentMetadataSection>
       )}
 
       <AgentSystemPrompt instructions={extractPrompt(agent.instructions)}>
         {!isCmsLoading && !isCmsAvailable && (
-          <Notice variant="warning" title="Read-only">
+          <Notice variant="warning" title={studioT('Read-only')}>
             <Notice.Message>
-              To edit the system prompt in Studio, add <InlineCode>@mastra/editor</InlineCode> to your project. See the{' '}
+              {studioT('To edit the system prompt in Studio, add') + ' '}
+              <InlineCode>@mastra/editor</InlineCode> {' ' + studioT('to your project. See the')}{' '}
               <a
                 href="https://mastra.ai/docs/editor/overview"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
               >
-                documentation
+                {studioT('documentation')}
               </a>
               .
             </Notice.Message>

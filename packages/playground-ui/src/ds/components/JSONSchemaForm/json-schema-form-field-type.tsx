@@ -11,12 +11,16 @@ import { IconFontStyle } from '@/ds/icons/central/IconFontStyle';
 import { IconHashtag } from '@/ds/icons/central/IconHashtag';
 import { IconListBullets } from '@/ds/icons/central/IconListBullets';
 import { IconToggle } from '@/ds/icons/central/IconToggle';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const TYPE_OPTIONS = [
   {
     value: 'string',
-    label: 'String',
+    get label() {
+      return studioT('String');
+    },
     icon: (
       <Icon size="xs">
         <IconFontStyle />
@@ -25,7 +29,9 @@ const TYPE_OPTIONS = [
   },
   {
     value: 'number',
-    label: 'Number',
+    get label() {
+      return studioT('Number');
+    },
     icon: (
       <Icon size="xs">
         <IconHashtag />
@@ -34,7 +40,9 @@ const TYPE_OPTIONS = [
   },
   {
     value: 'boolean',
-    label: 'Boolean',
+    get label() {
+      return studioT('Boolean');
+    },
     icon: (
       <Icon size="xs">
         <IconToggle />
@@ -43,7 +51,9 @@ const TYPE_OPTIONS = [
   },
   {
     value: 'text',
-    label: 'Text',
+    get label() {
+      return studioT('Text');
+    },
     icon: (
       <Icon size="xs">
         <IconAlignmentLeft />
@@ -52,7 +62,9 @@ const TYPE_OPTIONS = [
   },
   {
     value: 'object',
-    label: 'Object',
+    get label() {
+      return studioT('Object');
+    },
     icon: (
       <Icon size="xs">
         <IconCodeBrackets />
@@ -61,7 +73,9 @@ const TYPE_OPTIONS = [
   },
   {
     value: 'array',
-    label: 'Array',
+    get label() {
+      return studioT('Array');
+    },
     icon: (
       <Icon size="xs">
         <IconListBullets />
@@ -80,13 +94,14 @@ export type JSONSchemaFormFieldTypeProps = {
 };
 
 export function FieldType({
-  label = 'Select type',
+  label = studioT('Select type'),
   labelIsHidden = true,
-  placeholder = 'Select an option',
+  placeholder = studioT('Select an option'),
   size = 'md',
   disabled,
   className,
 }: JSONSchemaFormFieldTypeProps) {
+  useLocale();
   const { field, update } = useJSONSchemaFormField();
 
   const handleValueChange = React.useCallback(

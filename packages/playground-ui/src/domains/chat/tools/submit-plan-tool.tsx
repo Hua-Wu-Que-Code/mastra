@@ -24,6 +24,7 @@ import { Txt } from '@/ds/components/Txt';
 import { IconChatBubble7 } from '@/ds/icons/central/IconChatBubble7';
 import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface SubmitPlanToolProps {
   /** Omitted for read-only history (e.g. traces): submitted plans still render, pending ones can't be answered. */
@@ -61,7 +62,12 @@ function getPlanDocument(content: string): PlanDocument {
   const headingMatch = /^#\s+(.+)\r?$/m.exec(content);
 
   if (!headingMatch) {
-    return { title: 'Plan', body: content };
+    return {
+      get title() {
+        return studioT('Plan');
+      },
+      body: content,
+    };
   }
 
   const heading = headingMatch[0];
@@ -90,10 +96,11 @@ function getSubmittedPlan(output: unknown): SubmittedPlan | undefined {
 }
 
 function PlanDecision({ action, feedback }: Pick<SubmittedPlan, 'action' | 'feedback'>) {
-  if (action === 'approved') return <PlanStatus variant="green">Approved</PlanStatus>;
+  useLocale();
+  if (action === 'approved') return <PlanStatus variant="green">{studioT('Approved')}</PlanStatus>;
   if (action !== 'rejected') return null;
-  if (feedback) return <PlanStatus variant="orange">Changes requested</PlanStatus>;
-  return <PlanStatus variant="red">Rejected</PlanStatus>;
+  if (feedback) return <PlanStatus variant="orange">{studioT('Changes requested')}</PlanStatus>;
+  return <PlanStatus variant="red">{studioT('Rejected')}</PlanStatus>;
 }
 
 function getSuspendedPlanPath(
@@ -108,10 +115,11 @@ function getSuspendedPlanPath(
 }
 
 function SubmittedPlanCard({ plan }: { plan: SubmittedPlan }) {
+  useLocale();
   const document = getPlanDocument(plan.content);
 
   return (
-    <Plan role="group" aria-label="Submitted plan">
+    <Plan role="group" aria-label={studioT('Submitted plan')}>
       <PlanHeader>
         <PlanLabel />
         <PlanHeaderActions>
@@ -133,7 +141,7 @@ function SubmittedPlanCard({ plan }: { plan: SubmittedPlan }) {
             <div className="mt-5 space-y-3">
               <div role="separator" aria-orientation="horizontal" className="-mx-5 h-px bg-border/40" />
               <Txt as="p" variant="label" tone="muted" className="pt-1">
-                Requested changes
+                {studioT('Requested changes')}
               </Txt>
               <Txt as="p" variant="body-sm" tone="ink" className="whitespace-pre-wrap">
                 {plan.feedback}
@@ -155,6 +163,7 @@ interface PendingPlanCardProps {
 }
 
 function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, path }: PendingPlanCardProps) {
+  useLocale();
   const { data, isLoading, isError } = useAgentPlan({ agentId, agentVersionId, requestContext, path });
   const { approveToolcall, isRunning, toolCallApprovals } = useToolCall();
   const content = data?.content;
@@ -176,19 +185,19 @@ function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, 
   };
 
   return (
-    <Plan role="group" aria-label="Plan approval">
+    <Plan role="group" aria-label={studioT('Plan approval')}>
       <PlanHeader>
         <PlanLabel />
         <PlanHeaderActions>{data ? <PlanCopyButton content={data.content} /> : null}</PlanHeaderActions>
       </PlanHeader>
       <PlanBody>
         <PlanIntro>
-          <PlanTitle>{document?.title ?? 'Plan'}</PlanTitle>
+          <PlanTitle>{document?.title ?? studioT('Plan')}</PlanTitle>
           <PlanPath>{path}</PlanPath>
         </PlanIntro>
         <PlanMain>
           {isLoading ? (
-            <div className="space-y-3" aria-label="Loading submitted plan">
+            <div className="space-y-3" aria-label={studioT('Loading submitted plan')}>
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-4/5" />
               <Skeleton className="h-4 w-2/3" />
@@ -196,7 +205,7 @@ function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, 
           ) : null}
           {isError ? (
             <Txt as="p" variant="caption" tone="muted">
-              Unable to load the submitted plan.
+              {studioT('Unable to load the submitted plan.')}
             </Txt>
           ) : null}
           {document ? <PlanContent>{document.body}</PlanContent> : null}
@@ -213,11 +222,11 @@ function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, 
                   size="sm"
                   variant="ghost"
                   className="shrink-0 whitespace-nowrap"
-                  aria-label="Reject the plan"
+                  aria-label={studioT('Reject the plan')}
                   disabled={controlsDisabled}
                   onClick={() => resume('rejected')}
                 >
-                  Reject
+                  {studioT('Reject')}
                 </Button>
                 <Button
                   icon={<IconChatBubble7 />}
@@ -229,19 +238,19 @@ function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, 
                   disabled={controlsDisabled}
                   onClick={() => setIsRequestingChanges(true)}
                 >
-                  Request changes
+                  {studioT('Request changes')}
                 </Button>
                 <Button
                   icon={<IconCheckmark2Medium />}
                   type="button"
                   size="sm"
                   variant="primary"
-                  aria-label="Approve the plan"
+                  aria-label={studioT('Approve the plan')}
                   className="shrink-0 whitespace-nowrap"
                   disabled={controlsDisabled}
                   onClick={() => resume('approved')}
                 >
-                  Approve
+                  {studioT('Approve')}
                 </Button>
               </div>
             )}
@@ -256,8 +265,8 @@ function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, 
             >
               <div role="separator" aria-orientation="horizontal" className="-mx-5 h-px bg-border/40" />
               <Textarea
-                aria-label="Requested changes"
-                placeholder="Describe what should change in the plan"
+                aria-label={studioT('Requested changes')}
+                placeholder={studioT('Describe what should change in the plan')}
                 value={feedback}
                 disabled={controlsDisabled}
                 onChange={event => setFeedback(event.target.value)}
@@ -272,10 +281,10 @@ function PendingPlanCard({ agentId, agentVersionId, requestContext, toolCallId, 
                     setFeedback('');
                   }}
                 >
-                  Cancel
+                  {studioT('Cancel')}
                 </Button>
                 <Button type="submit" size="sm" variant="primary" disabled={controlsDisabled || !trimmedFeedback}>
-                  Send feedback
+                  {studioT('Send feedback')}
                 </Button>
               </div>
             </form>

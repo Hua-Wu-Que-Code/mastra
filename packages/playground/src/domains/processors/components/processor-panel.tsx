@@ -9,6 +9,10 @@ import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Textarea } from '@mastra/playground-ui/components/Textarea';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconPlay } from '@mastra/playground-ui/icons/central/IconPlay';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import type {
   ProcessorDetail,
@@ -39,6 +43,7 @@ const PHASE_LABELS: Record<ProcessorPhase, string> = {
 };
 
 export function ProcessorPanel({ processorId }: ProcessorPanelProps) {
+  const studioLocale = useLocale();
   const {
     data: processor,
     isLoading,
@@ -48,9 +53,9 @@ export function ProcessorPanel({ processorId }: ProcessorPanelProps) {
   useEffect(() => {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load processor';
-      toast.error(`Error loading processor: ${errorMessage}`);
+      toast.error(studioT('Error loading processor: {value0}', { value0: errorMessage }));
     }
-  }, [error]);
+  }, [error, studioLocale]);
 
   if (isLoading) {
     return (
@@ -67,7 +72,7 @@ export function ProcessorPanel({ processorId }: ProcessorPanelProps) {
     return (
       <div className="px-4 py-8 text-center">
         <Txt variant="heading" tone="muted">
-          Processor not found
+          {studioT('Processor not found')}
         </Txt>
       </div>
     );
@@ -76,6 +81,7 @@ export function ProcessorPanel({ processorId }: ProcessorPanelProps) {
 }
 
 function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
+  useLocale();
   const theme = useCodemirrorTheme();
 
   const [selectedPhase, setSelectedPhase] = useState<ProcessorPhase>(processor.phases[0] || 'input');
@@ -134,7 +140,7 @@ function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
         <div className="space-y-5 p-5">
           <div className="space-y-2">
             <Field>
-              <FieldLabel>Phase</FieldLabel>
+              <FieldLabel>{studioT('Phase')}</FieldLabel>
               <Select
                 value={selectedPhase}
                 onValueChange={value => {
@@ -143,7 +149,7 @@ function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select phase" />
+                  <SelectValue placeholder={studioT('Select phase')} />
                 </SelectTrigger>
                 <SelectContent>
                   {processor.phases.map(phase => (
@@ -161,10 +167,10 @@ function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
 
           {processor.configurations.length > 1 && (
             <Field>
-              <FieldLabel>Agent Configuration</FieldLabel>
+              <FieldLabel>{studioT('Agent Configuration')}</FieldLabel>
               <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select agent" />
+                  <SelectValue placeholder={studioT('Select agent')} />
                 </SelectTrigger>
                 <SelectContent>
                   {processor.configurations.map(config => (
@@ -178,11 +184,11 @@ function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
           )}
 
           <Field>
-            <FieldLabel>Test Message</FieldLabel>
+            <FieldLabel>{studioT('Test Message')}</FieldLabel>
             <Textarea
               value={testMessage}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTestMessage(e.target.value)}
-              placeholder="Enter a test message"
+              placeholder={studioT('Enter a test message')}
               rows={4}
             />
           </Field>
@@ -193,36 +199,38 @@ function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
             disabled={executeProcessor.isPending || selectedPhase === 'outputStream' || selectedPhase === 'llmRequest'}
             className="w-full"
           >
-            {executeProcessor.isPending ? 'Running...' : 'Run processor'}
+            {executeProcessor.isPending ? studioT('Running...') : studioT('Run processor')}
           </Button>
 
           {selectedPhase === 'outputStream' && (
             <Txt variant="meta" className="text-warning-foreground">
-              Output Stream phase cannot be executed directly. Use streaming instead.
+              {studioT('Output Stream phase cannot be executed directly. Use streaming instead.')}
             </Txt>
           )}
 
           {selectedPhase === 'llmRequest' && (
             <Txt variant="meta" className="text-warning-foreground">
-              LLM Request phase cannot be executed directly. It runs on the provider prompt during an agent call.
+              {studioT(
+                'LLM Request phase cannot be executed directly. It runs on the provider prompt during an agent call.',
+              )}
             </Txt>
           )}
 
           {result && (
             <div className="space-y-2 border-t border-border pt-4">
               <Txt variant="caption" tone="muted">
-                Status
+                {studioT('Status')}
               </Txt>
               <div className="flex items-center gap-2">
                 <Badge variant={result.success ? 'success' : 'destructive'}>
-                  {result.success ? 'Success' : 'Failed'}
+                  {result.success ? studioT('Success') : studioT('Failed')}
                 </Badge>
-                {result.tripwire?.triggered && <Badge variant="info">Tripwire Triggered</Badge>}
+                {result.tripwire?.triggered && <Badge variant="info">{studioT('Tripwire Triggered')}</Badge>}
               </div>
               {result.tripwire?.triggered && result.tripwire.reason && (
                 <div className="mt-2 rounded-md border border-warning-edge bg-warning-subtle p-3">
                   <Txt variant="column" className="text-warning-subtle-foreground">
-                    Tripwire Reason
+                    {studioT('Tripwire Reason')}
                   </Txt>
                   <Txt variant="caption" tone="muted" className="mt-1">
                     {result.tripwire.reason}
@@ -235,7 +243,7 @@ function ProcessorDetailPanel({ processor }: ProcessorDetailPanelProps) {
       </div>
 
       <div className="absolute top-4 right-4 z-10">
-        <CopyButton content={resultCode} tooltip="Copy JSON result to clipboard" />
+        <CopyButton content={resultCode} tooltip={studioT('Copy JSON result to clipboard')} />
       </div>
 
       <div className="relative h-full overflow-x-auto overflow-y-auto p-5">
@@ -256,6 +264,7 @@ interface ProcessorInformationProps {
 }
 
 function ProcessorInformation({ processor }: ProcessorInformationProps) {
+  useLocale();
   return (
     <div className="border-b border-border px-5 pt-5 pb-4">
       <Txt variant="heading" tone="faint" className="mb-2">
@@ -273,7 +282,13 @@ function ProcessorInformation({ processor }: ProcessorInformationProps) {
       </div>
       <div className="mt-3">
         <Txt variant="meta" tone="muted">
-          Attached to {processor.configurations.length} agent{processor.configurations.length !== 1 ? 's' : ''}
+          <Trans
+            id="Attached to {part0} agent {part1}"
+            values={{
+              part0: processor.configurations.length,
+              part1: processor.configurations.length !== 1 ? studioT('English plural suffix') : '',
+            }}
+          />
         </Txt>
       </div>
     </div>

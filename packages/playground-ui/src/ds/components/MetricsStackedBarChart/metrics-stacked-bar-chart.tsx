@@ -24,6 +24,8 @@ import { ChartTooltipPosition } from '@/ds/primitives/chart-tooltip-position';
 import { DragSelectionBand, activeIndex, useDragSelection } from '@/ds/primitives/charts/drag-selection';
 import type { DragSelectionRange } from '@/ds/primitives/charts/drag-selection';
 import { useChartDefsId } from '@/ds/primitives/use-chart-defs-id';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 /** Corner radius of every segment; thin segments scale it down so they stay crisp rectangles. */
@@ -105,6 +107,7 @@ function HoverDim({
   scope: string;
   setter: { current: (range: DragSelectionRange | undefined) => void };
 }) {
+  useLocale();
   const [lit, setLit] = useState<DragSelectionRange>();
   useLayoutEffect(() => {
     setter.current = setLit;
@@ -115,7 +118,11 @@ function HoverDim({
     { length: lit.end - lit.start + 1 },
     (_, i) => `${columns}[data-bucket="${lit.start + i}"]`,
   ).join(',');
-  return <style>{`${columns}{opacity:${DIMMED}}${kept}{opacity:1}`}</style>;
+  return (
+    <style>
+      {studioT('{value0}{opacity:{value1}}{value2}{opacity:1}', { value0: columns, value1: DIMMED, value2: kept })}
+    </style>
+  );
 }
 
 /** A line drawn over the bars on its own scale, e.g. average wake time over cold starts. */
@@ -210,6 +217,7 @@ function BarPlot({
   overlay,
   id,
 }: MetricsStackedBarChartProps & { id: string }) {
+  useLocale();
   const setLit = useRef<(range: DragSelectionRange | undefined) => void>(() => {});
   const { size, onResize, ref } = useChartSize();
   // The dragged columns stay lit through the same rule as hover, so a drag never re-renders the bars.

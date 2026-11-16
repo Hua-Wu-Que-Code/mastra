@@ -4,6 +4,7 @@ import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconDotGrid1x3Vertical } from '@/ds/icons/central/IconDotGrid1x3Vertical';
 import { IconFloppyDisk1 } from '@/ds/icons/central/IconFloppyDisk1';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type PropertyFilterActionsProps = {
   disabled?: boolean;
@@ -28,6 +29,7 @@ export function PropertyFilterActions({
   onSave,
   onRemoveSaved,
 }: PropertyFilterActionsProps) {
+  useLocale();
   const hasMenuItems = !!(onRemoveAll || onSave || onRemoveSaved);
   if (!onClear && !hasMenuItems) return null;
 
@@ -35,14 +37,14 @@ export function PropertyFilterActions({
     <div className="flex items-center gap-2">
       {onClear && (
         <Button disabled={disabled} size="md" onClick={onClear} icon={<IconCrossMedium />}>
-          Clear
+          {studioT('Clear')}
         </Button>
       )}
 
       {hasMenuItems && (
         <DropdownMenu>
           <DropdownMenu.Trigger asChild>
-            <Button disabled={disabled} size="icon-md" aria-label="More filter actions">
+            <Button disabled={disabled} size="icon-md" aria-label={studioT('More filter actions')}>
               <IconDotGrid1x3Vertical />
             </Button>
           </DropdownMenu.Trigger>
@@ -50,20 +52,20 @@ export function PropertyFilterActions({
             {onRemoveAll && (
               <DropdownMenu.Item onSelect={() => onRemoveAll()}>
                 <IconCrossMedium />
-                Remove all filters
+                {studioT('Remove all filters')}
               </DropdownMenu.Item>
             )}
             {onRemoveAll && (onSave || onRemoveSaved) && <DropdownMenu.Separator />}
             {onSave && (
               <DropdownMenu.Item onSelect={() => onSave()}>
                 <IconFloppyDisk1 />
-                Save filters for next time
+                {studioT('Save filters for next time')}
               </DropdownMenu.Item>
             )}
             {onRemoveSaved && (
               <DropdownMenu.Item onSelect={() => onRemoveSaved()}>
                 <TrashIcon />
-                Remove saved filters
+                {studioT('Remove saved filters')}
               </DropdownMenu.Item>
             )}
           </DropdownMenu.Content>

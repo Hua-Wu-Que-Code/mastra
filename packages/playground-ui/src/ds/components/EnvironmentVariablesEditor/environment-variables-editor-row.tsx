@@ -7,20 +7,23 @@ import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
 import { IconEyeSlash } from '@/ds/icons/central/IconEyeSlash';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
 import { DUPLICATE_ENVIRONMENT_VARIABLE_MESSAGE } from '@/lib/env-file';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export function EnvironmentVariablesEditorRow({
   row,
   index,
   rowErrors,
-  keyLabel = 'Key',
-  valueLabel = 'Value',
-  keyPlaceholder = 'e.g: OPEN_AI_KEY',
-  valuePlaceholder = 'e.g: sk-xxxxxxxx',
+  keyLabel = studioT('Key'),
+  valueLabel = studioT('Value'),
+  keyPlaceholder = studioT('e.g: OPEN_AI_KEY'),
+  valuePlaceholder = studioT('e.g: sk-xxxxxxxx'),
   duplicateKeyMessage = DUPLICATE_ENVIRONMENT_VARIABLE_MESSAGE,
   className,
   ...props
 }: EnvironmentVariablesEditorRowProps) {
+  useLocale();
   const {
     editor,
     disabled,
@@ -100,7 +103,7 @@ export function EnvironmentVariablesEditorRow({
             size="icon-md"
             disabled={disabled}
             aria-label={removeRowLabel}
-            tooltip="Remove variable"
+            tooltip={studioT('Remove variable')}
             onClick={() => editor.removeRow(index)}
           >
             <TrashIcon />

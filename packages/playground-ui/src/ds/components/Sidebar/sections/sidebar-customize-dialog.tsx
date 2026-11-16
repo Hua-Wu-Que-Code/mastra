@@ -18,6 +18,7 @@ import {
 } from '@/ds/components/Dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ds/components/Select';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type SidebarCustomizeDialogProps = {
   open: boolean;
@@ -36,6 +37,7 @@ export function SidebarCustomizeDialog({
   placementOf,
   onPlacementChange,
 }: SidebarCustomizeDialogProps) {
+  useLocale();
   const baseId = useId();
   const customizableSections = sections.filter(section => (section.moreLinks?.length ?? 0) > 0);
 
@@ -43,9 +45,9 @@ export function SidebarCustomizeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="md" finalFocus={returnFocusRef}>
         <DialogHeader>
-          <DialogTitle>Customize sidebar</DialogTitle>
+          <DialogTitle>{studioT('Customize sidebar')}</DialogTitle>
           <DialogDescription>
-            Choose where each optional link appears. Changes save automatically in this browser.
+            {studioT('Choose where each optional link appears. Changes save automatically in this browser.')}
           </DialogDescription>
         </DialogHeader>
         <DialogBody className="space-y-5">
@@ -84,7 +86,7 @@ export function SidebarCustomizeDialog({
                           size="sm"
                           variant="ghost"
                           className="w-44 shrink-0"
-                          aria-label={`${link.name} placement`}
+                          aria-label={studioT('{value0} placement', { value0: link.name })}
                         >
                           <SelectValue />
                         </SelectTrigger>

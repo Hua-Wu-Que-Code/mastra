@@ -1,3 +1,4 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { JSONSchema7 } from 'json-schema';
 
 /**
@@ -29,21 +30,34 @@ const messageObjectSchema: JSONSchema7 = {
 
 const AGENT_INPUT_SCHEMA: JSONSchema7 = {
   $schema: 'http://json-schema.org/draft-07/schema#',
-  description: 'Agent message input (MessageListInput)',
+  get description() {
+    return studioT('Agent message input (MessageListInput)');
+  },
   anyOf: [
-    { type: 'string', description: 'Simple text message' },
+    {
+      type: 'string',
+      get description() {
+        return studioT('Simple text message');
+      },
+    },
     {
       type: 'array',
       items: { type: 'string' },
-      description: 'Array of text messages',
+      get description() {
+        return studioT('Array of text messages');
+      },
     },
     {
       ...messageObjectSchema,
-      description: 'Single message object',
+      get description() {
+        return studioT('Single message object');
+      },
     },
     {
       type: 'array',
-      description: 'Array of message objects',
+      get description() {
+        return studioT('Array of message objects');
+      },
       items: messageObjectSchema,
     },
   ],
@@ -56,40 +70,66 @@ const AGENT_INPUT_SCHEMA: JSONSchema7 = {
 const AGENT_OUTPUT_SCHEMA: JSONSchema7 = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   type: 'object',
-  description: 'Agent generate() output',
+  get description() {
+    return studioT('Agent generate() output');
+  },
   properties: {
-    text: { type: 'string', description: 'Text response' },
-    object: { description: 'Structured output (if any)' },
+    text: {
+      type: 'string',
+      get description() {
+        return studioT('Text response');
+      },
+    },
+    object: {
+      get description() {
+        return studioT('Structured output (if any)');
+      },
+    },
     toolCalls: {
       type: 'array',
-      description: 'Tool calls made by the agent',
+      get description() {
+        return studioT('Tool calls made by the agent');
+      },
       items: { type: 'object', additionalProperties: true },
     },
     toolResults: {
       type: 'array',
-      description: 'Tool execution results',
+      get description() {
+        return studioT('Tool execution results');
+      },
       items: { type: 'object', additionalProperties: true },
     },
     sources: {
       type: 'array',
-      description: 'Sources referenced',
+      get description() {
+        return studioT('Sources referenced');
+      },
       items: { type: 'object', additionalProperties: true },
     },
     files: {
       type: 'array',
-      description: 'Files generated',
+      get description() {
+        return studioT('Files generated');
+      },
       items: { type: 'object', additionalProperties: true },
     },
     usage: {
       type: 'object',
-      description: 'Token usage',
+      get description() {
+        return studioT('Token usage');
+      },
       properties: {
         promptTokens: { type: 'number' },
         completionTokens: { type: 'number' },
         totalTokens: { type: 'number' },
       },
     },
-    reasoningText: { type: 'string', description: 'Reasoning text (if any)' },
+    reasoningText: {
+      type: 'string',
+      get description() {
+        return studioT('Reasoning text (if any)');
+      },
+    },
   },
 };
 

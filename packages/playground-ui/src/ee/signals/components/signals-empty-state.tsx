@@ -1,9 +1,9 @@
 import type { EntityLearningProgressResponse, SignalCatalogEntry } from '@mastra/client-js';
 import type { CSSProperties, ReactNode } from 'react';
-
 import { Button } from '../../../ds/components/Button';
 import { Card } from '../../../ds/components/Card';
 import type { LinkComponent } from '../../../ds/types/link-component';
+
 import { getSignalColor } from '../signal-colors';
 import { BUILT_IN_SIGNAL_CATALOG, orderedSignals, signalDescription, signalLabel } from '../signal-formatting';
 import { Metadata } from '@/ds/components/Metadata';
@@ -13,6 +13,10 @@ import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRi
 import { TraceIcon } from '@/ds/icons/TraceIcon';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { textStyle } from '@/ds/primitives/text';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 const traceRows = [
@@ -49,48 +53,58 @@ function formatNumber(value: number) {
 function statusCopy(progress?: TraceIntelligenceProgress, isRangeEmpty?: boolean) {
   if (isRangeEmpty) {
     return {
-      title: 'No Trace Intelligence themes in this date range.',
+      get title() {
+        return studioT('No Trace Intelligence themes in this date range.');
+      },
       body: 'Choose a wider snapshot date range, or wait for newly processed traces to form recurring themes.',
     };
   }
   if (!progress || progress.status === 'collecting') {
     return {
-      title: 'Collecting traces for Trace Intelligence.',
+      get title() {
+        return studioT('Collecting traces for Trace Intelligence.');
+      },
       body: 'Trace Intelligence starts grouping recurring patterns after your deployed agents send enough completed traces.',
     };
   }
   if (progress.status === 'ready') {
     return {
-      title: 'Trace Intelligence themes are ready.',
+      get title() {
+        return studioT('Trace Intelligence themes are ready.');
+      },
       body: 'Select at least two available trace signal types to see how goals, outcomes, behaviors, and sentiment connect.',
     };
   }
   return {
-    title: 'Analyzing traces for Trace Intelligence.',
+    get title() {
+      return studioT('Analyzing traces for Trace Intelligence.');
+    },
     body: 'Trace signals have started processing. Themes appear after enough generated and embedded trace signals form recurring patterns.',
   };
 }
 
 function ProgressSummary({ progress }: { progress: TraceIntelligenceProgress }) {
+  useLocale();
   const catalog = progress.signalCatalog ?? BUILT_IN_SIGNAL_CATALOG;
   const enabledSignalCount = catalog.filter(signal => signal.enabled).length;
   const readySignalCount = catalog.filter(signal => signal.enabled && signal.status === 'ready').length;
   return (
     <dl className="mt-4 grid gap-2 sm:grid-cols-3">
       <div className={cn(raisedSurfaceStyle, 'rounded-md px-3 py-2')}>
-        <dt className={textStyle({ tone: 'muted', variant: 'caption' })}>Traces analyzed</dt>
+        <dt className={textStyle({ tone: 'muted', variant: 'caption' })}>{studioT('Traces analyzed')}</dt>
         <dd className={cn(textStyle({ tone: 'ink', variant: 'heading' }), 'mt-1')}>
           {formatNumber(progress.traceCount)}
         </dd>
       </div>
       <div className={cn(raisedSurfaceStyle, 'rounded-md px-3 py-2')}>
-        <dt className={textStyle({ tone: 'muted', variant: 'caption' })}>Trace signal types ready</dt>
+        <dt className={textStyle({ tone: 'muted', variant: 'caption' })}>{studioT('Trace signal types ready')}</dt>
         <dd className={cn(textStyle({ tone: 'ink', variant: 'heading' }), 'mt-1')}>
-          {progress.signalCatalog ? readySignalCount : progress.availableSignals.length} of {enabledSignalCount}
+          {progress.signalCatalog ? readySignalCount : progress.availableSignals.length} {' ' + studioT('of') + ' '}
+          {enabledSignalCount}
         </dd>
       </div>
       <div className={cn(raisedSurfaceStyle, 'rounded-md px-3 py-2')}>
-        <dt className={textStyle({ tone: 'muted', variant: 'caption' })}>Status</dt>
+        <dt className={textStyle({ tone: 'muted', variant: 'caption' })}>{studioT('Status')}</dt>
         <dd className={cn(textStyle({ tone: 'ink', variant: 'heading' }), 'mt-1 capitalize')}>{progress.status}</dd>
       </div>
     </dl>
@@ -98,11 +112,15 @@ function ProgressSummary({ progress }: { progress: TraceIntelligenceProgress }) 
 }
 
 function SignalProgressList({ progress }: { progress?: TraceIntelligenceProgress }) {
+  useLocale();
   if (!progress) return null;
 
   const catalog = progress.signalCatalog ?? BUILT_IN_SIGNAL_CATALOG;
   return (
-    <ul aria-label="Trace signal processing progress" className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+    <ul
+      aria-label={studioT('Trace signal processing progress')}
+      className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
+    >
       {orderedSignals(
         catalog,
         catalog.filter(signal => signal.enabled).map(signal => signal.name),
@@ -118,13 +136,17 @@ function SignalProgressList({ progress }: { progress?: TraceIntelligenceProgress
                 {label}
               </Txt>
               <Txt as="span" variant="caption" tone="muted">
-                {isReady ? 'Themes ready' : 'Processing'}
+                {isReady ? studioT('Themes ready') : studioT('Processing')}
               </Txt>
             </div>
             <Txt variant="caption" tone="muted" className="mt-1">
               <Metadata>
-                <Metadata.Item>{formatNumber(value.generated)} generated</Metadata.Item>
-                <Metadata.Item>{formatNumber(value.embedded)} embedded</Metadata.Item>
+                <Metadata.Item>
+                  {formatNumber(value.generated)} {' ' + studioT('generated')}
+                </Metadata.Item>
+                <Metadata.Item>
+                  {formatNumber(value.embedded)} {' ' + studioT('embedded')}
+                </Metadata.Item>
               </Metadata>
             </Txt>
           </li>
@@ -141,6 +163,7 @@ export function PendingSignalProgress({
   progress?: TraceIntelligenceProgress;
   signalCatalog: readonly SignalCatalogEntry[];
 }) {
+  useLocale();
   const catalog = progress?.signalCatalog ?? signalCatalog;
   const pendingSignals = catalog.filter(signal => signal.enabled && signal.status !== 'ready');
   if (pendingSignals.length === 0) return null;
@@ -148,12 +171,12 @@ export function PendingSignalProgress({
   return (
     <section className="rounded-lg border border-border bg-background p-4" aria-labelledby="pending-signals-heading">
       <Txt as="h2" variant="subheading" tone="ink" id="pending-signals-heading">
-        Signals building themes
+        {studioT('Signals building themes')}
       </Txt>
       <Txt variant="caption" tone="muted" className="mt-1">
-        Themes appear once enough new traces are analyzed, embedded, and clustered.
+        {studioT('Themes appear once enough new traces are analyzed, embedded, and clustered.')}
       </Txt>
-      <ul aria-label="Pending trace signals" className="mt-3 grid gap-2 sm:grid-cols-2">
+      <ul aria-label={studioT('Pending trace signals')} className="mt-3 grid gap-2 sm:grid-cols-2">
         {pendingSignals.map(signal => {
           const value = progress?.signals[signal.name] ?? { generated: 0, embedded: 0 };
           return (
@@ -173,8 +196,12 @@ export function PendingSignalProgress({
               ) : null}
               <Txt font="body" variant="caption" tone="muted" className="mt-1">
                 <Metadata>
-                  <Metadata.Item>{formatNumber(value.generated)} generated</Metadata.Item>
-                  <Metadata.Item>{formatNumber(value.embedded)} embedded</Metadata.Item>
+                  <Metadata.Item>
+                    {formatNumber(value.generated)} {' ' + studioT('generated')}
+                  </Metadata.Item>
+                  <Metadata.Item>
+                    {formatNumber(value.embedded)} {' ' + studioT('embedded')}
+                  </Metadata.Item>
                 </Metadata>
               </Txt>
             </li>
@@ -192,6 +219,7 @@ export const SignalsEmptyState = ({
   signalCatalog,
   isRangeEmpty,
 }: SignalsEmptyStateProps) => {
+  useLocale();
   const copy = statusCopy(progress, isRangeEmpty);
   const catalog = signalCatalog ?? progress?.signalCatalog ?? BUILT_IN_SIGNAL_CATALOG;
   const enabledSignalNames = orderedSignals(
@@ -209,31 +237,35 @@ export const SignalsEmptyState = ({
       <div className="mx-auto w-full max-w-260">
         <header>
           <Txt variant="eyebrow" tone="muted" className="flex items-center gap-2">
-            <span aria-hidden="true" className="size-2 rounded-full bg-brand-green-indicator" />
-            Trace Intelligence
+            <Trans
+              id="{part0} Trace Intelligence"
+              values={{ part0: <span aria-hidden="true" className="size-2 rounded-full bg-brand-green-indicator" /> }}
+            />
           </Txt>
           <Txt as="h1" variant="display" tone="ink" className="mt-2">
-            Understand what drives every agent interaction
+            {studioT('Understand what drives every agent interaction')}
           </Txt>
           <Txt tone="muted" className="mt-2 max-w-180">
-            Trace Intelligence groups recurring goals, outcomes, behaviors, and sentiment across completed traces.
+            {studioT(
+              'Trace Intelligence groups recurring goals, outcomes, behaviors, and sentiment across completed traces.',
+            )}
           </Txt>
         </header>
 
         <div
           role="list"
-          aria-label="Trace Intelligence analysis pipeline"
+          aria-label={studioT('Trace Intelligence analysis pipeline')}
           className="mt-14 grid gap-4 lg:grid-cols-[17.5rem_4.5rem_17.5rem_4.5rem_minmax(0,1fr)] lg:gap-0"
         >
           <div role="listitem" className="min-h-50 p-5">
             <Txt as="h2" variant="heading" tone="ink">
-              Traces
+              {studioT('Traces')}
             </Txt>
             <Txt variant="caption" tone="muted" className="mt-0.5">
-              Every agent interaction
+              {studioT('Every agent interaction')}
             </Txt>
             <Txt variant="eyebrow" tone="muted" className="mt-5">
-              Input
+              {studioT('Input')}
             </Txt>
             <div className="mt-2.5 space-y-2">
               {traceRows.map(([name, duration]) => (
@@ -261,10 +293,10 @@ export const SignalsEmptyState = ({
             elevation="raised"
           >
             <Txt as="h2" variant="heading" tone="ink">
-              Trace Intelligence
+              {studioT('Trace Intelligence')}
             </Txt>
             <Txt variant="caption" tone="muted" className="mt-0.5">
-              Finds recurring themes
+              {studioT('Finds recurring themes')}
             </Txt>
             <div
               aria-hidden="true"
@@ -273,7 +305,7 @@ export const SignalsEmptyState = ({
               <IconChip className="size-icon-md text-brand-green-indicator" />
             </div>
             <Txt variant="meta" tone="muted" className="mt-3 max-w-40">
-              Clusters similar trace signals into themes for each dimension
+              {studioT('Clusters similar trace signals into themes for each dimension')}
             </Txt>
           </Card>
 
@@ -281,13 +313,13 @@ export const SignalsEmptyState = ({
 
           <div role="listitem" className="min-h-50 p-5">
             <Txt as="h2" variant="heading" tone="ink">
-              Theme analysis
+              {studioT('Theme analysis')}
             </Txt>
             <Txt variant="caption" tone="muted" className="mt-0.5">
-              How recurring patterns connect
+              {studioT('How recurring patterns connect')}
             </Txt>
             <Txt variant="eyebrow" tone="muted" className="mt-5">
-              Output
+              {studioT('Output')}
             </Txt>
             <div className="mt-3 flex flex-wrap gap-2">
               {signalDefinitions.map(signal => (
@@ -308,9 +340,9 @@ export const SignalsEmptyState = ({
 
         <section className="mt-10" aria-labelledby="signal-definitions-heading">
           <Txt as="h2" variant="heading" tone="ink" id="signal-definitions-heading">
-            What each trace signal means
+            {studioT('What each trace signal means')}
           </Txt>
-          <ul aria-label="Trace signal definitions" className="mt-4 grid gap-3 sm:grid-cols-2">
+          <ul aria-label={studioT('Trace signal definitions')} className="mt-4 grid gap-3 sm:grid-cols-2">
             {signalDefinitions.map(signal => (
               <li className="px-1 py-2" key={signal.key}>
                 <Txt as="h3" variant="subheading" style={signalStyle(signal.key)}>
@@ -353,10 +385,11 @@ export const SignalsEmptyState = ({
               }
               size="sm"
             >
-              Read the docs<span className="sr-only"> (opens in new tab)</span>
+              {studioT('Read the docs')}
+              <span className="sr-only"> {' ' + studioT('(opens in new tab)')}</span>
             </Button>
             <Button icon={<TraceIcon />} render={<LinkComponent href="/traces" />} variant="primary" size="sm">
-              View incoming traces
+              {studioT('View incoming traces')}
             </Button>
           </div>
         </aside>

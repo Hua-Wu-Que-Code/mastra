@@ -10,6 +10,8 @@ import { WorkflowSelectedStepProvider } from '@mastra/playground-ui/domains/work
 import { WorkflowStepDetailProvider } from '@mastra/playground-ui/domains/workflows/context/workflow-step-detail-provider';
 import { KeyboardScope } from '@mastra/playground-ui/keyboard/keyboard-shortcuts-context';
 import { useKeydown } from '@mastra/playground-ui/keyboard/use-keydown';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useWorkflow } from '@mastra/react/hooks/workflows';
 import { useMatch, useNavigate, useParams } from 'react-router';
 import { WorkflowRunCopyAction, WorkflowRunCrumb } from './workflow-crumbs';
@@ -24,12 +26,13 @@ import { WorkflowPageTabs } from '@/domains/workflows/components/workflow-page-t
 import type { WorkflowPageTab } from '@/domains/workflows/components/workflow-page-tabs';
 
 export const WorkflowLayout = ({ children }: { children: React.ReactNode }) => {
+  useLocale();
   const { workflowId, runId } = useParams();
   return (
     <ErrorBoundary
       resetKeys={[workflowId, runId]}
-      title="Unable to display this workflow"
-      description="The workflow data could not be displayed. Try again or open another workflow."
+      title={studioT('Unable to display this workflow')}
+      description={studioT('The workflow data could not be displayed. Try again or open another workflow.')}
     >
       <WorkflowRoute>{children}</WorkflowRoute>
     </ErrorBoundary>
@@ -47,6 +50,7 @@ const WorkflowShortcuts = ({ workflowId }: { workflowId: string }) => {
 };
 
 function WorkflowRoute({ children }: { children: React.ReactNode }) {
+  useLocale();
   const { workflowId, runId } = useParams();
   // Match the child segment rather than searching the pathname, so a workflow whose id is
   // itself "traces" or "schedules" doesn't get the wrong tab highlighted.
@@ -72,7 +76,7 @@ function WorkflowRoute({ children }: { children: React.ReactNode }) {
         <h1 className="sr-only">{workflowId}</h1>
         <div className="flex h-full flex-col items-center justify-center">
           <Txt variant="body" tone="ink" className="text-center">
-            No workflow ID provided
+            {studioT('No workflow ID provided')}
           </Txt>
         </div>
       </PageLayout>

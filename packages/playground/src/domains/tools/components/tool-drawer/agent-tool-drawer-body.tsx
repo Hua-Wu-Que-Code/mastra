@@ -1,5 +1,7 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgent, useExecuteAgentTool } from '@mastra/react/hooks/agents';
 import type { ToolExecution } from '../../utils/tool-run';
 import { useOpenToolId } from './open-tool-context';
@@ -10,6 +12,7 @@ export interface AgentToolDrawerBodyProps {
 }
 
 export function AgentToolDrawerBody({ agentId }: AgentToolDrawerBodyProps) {
+  useLocale();
   const toolId = useOpenToolId();
   const [agentRequestContext] = useEntityRequestContext('agent', agentId);
   const { data: agent, isLoading } = useAgent({ agentId, requestContext: agentRequestContext });
@@ -25,7 +28,13 @@ export function AgentToolDrawerBody({ agentId }: AgentToolDrawerBodyProps) {
   };
 
   if (isLoading) return <DataPanel.LoadingData />;
-  if (!tool) return <DataPanel.NoData>This agent has no tool "{toolId}".</DataPanel.NoData>;
+  if (!tool)
+    return (
+      <DataPanel.NoData>
+        {studioT('This agent has no tool "')}
+        {toolId}".
+      </DataPanel.NoData>
+    );
 
   return (
     <ToolDrawerBody

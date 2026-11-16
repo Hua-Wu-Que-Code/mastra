@@ -8,6 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@mastra/playground-ui/components/Dialog';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import type { ChannelInstallationInfo, ChannelPlatformInfo } from '@mastra/react/hooks/agents';
 import { useStoredAgentMutations } from '@mastra/react/hooks/agents';
@@ -49,6 +53,7 @@ export interface UsePublishAndConnectChannelResult {
  * plus an extra `channelDialog` for the follow-up channel UI).
  */
 export function usePublishAndConnectChannel(agentId: string): UsePublishAndConnectChannelResult {
+  const studioLocale = useLocale();
   const { canPublishToChannel } = useEditPage();
   const formMethods = useFormContext<AgentBuilderEditFormValues>();
   const { updateStoredAgent } = useStoredAgentMutations({ agentId: agentId });
@@ -95,15 +100,19 @@ export function usePublishAndConnectChannel(agentId: string): UsePublishAndConne
     try {
       await updateStoredAgent.mutateAsync({ visibility: 'public' });
       formMethods.setValue('visibility', 'public', { shouldDirty: false });
-      toast.success('Agent added to the library');
+      toast.success(studioT('Agent added to the library'));
       const request = pendingRequest;
       setConfirmOpen(false);
       setPendingRequest(null);
       runChannelAction(request);
     } catch (error) {
-      toast.error(`Failed to add to library: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        studioT('Failed to add to library: {value0}', {
+          value0: error instanceof Error ? error.message : 'Unknown error',
+        }),
+      );
     }
-  }, [pendingRequest, updateStoredAgent, formMethods, runChannelAction]);
+  }, [pendingRequest, updateStoredAgent, formMethods, runChannelAction, studioLocale]);
 
   const platformName = pendingRequest?.platform.name ?? 'this channel';
 
@@ -112,22 +121,29 @@ export function usePublishAndConnectChannel(agentId: string): UsePublishAndConne
       <Dialog open={confirmOpen} onOpenChange={open => !open && handleCancel()} pending={updateStoredAgent.isPending}>
         <DialogContent data-testid="agent-builder-publish-before-connect-dialog">
           <DialogHeader>
-            <DialogTitle>Add this agent to your library to connect {platformName}?</DialogTitle>
+            <DialogTitle>
+              {studioT('Add this agent to your library to connect') + ' '}
+              {platformName}?
+            </DialogTitle>
             <DialogDescription>
-              Connecting to {platformName} requires this agent to be in the library so your teammates can use the bot.
-              We&apos;ll add it to the library and then continue to {platformName}.
+              <Trans
+                id="Connecting to {part0} requires this agent to be in the library so your teammates can use the bot. We'll add it to the library and then continue to {part1}."
+                values={{ part0: platformName, part1: platformName }}
+              />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <DialogCancel data-testid="agent-builder-publish-before-connect-dialog-cancel">Cancel</DialogCancel>
+            <DialogCancel data-testid="agent-builder-publish-before-connect-dialog-cancel">
+              {studioT('Cancel')}
+            </DialogCancel>
             <DialogAction onConfirm={handleConfirm} data-testid="agent-builder-publish-before-connect-dialog-confirm">
-              Add to library &amp; continue
+              {studioT('Add to library & continue')}
             </DialogAction>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     ),
-    [confirmOpen, handleCancel, handleConfirm, platformName, updateStoredAgent.isPending],
+    [confirmOpen, handleCancel, handleConfirm, platformName, updateStoredAgent.isPending, studioLocale],
   );
 
   const channelDialog = activeChannelDialog ? (

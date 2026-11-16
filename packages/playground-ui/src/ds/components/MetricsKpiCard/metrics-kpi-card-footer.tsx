@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
 import { SkeletonText } from '@/ds/components/Skeleton';
 import { Txt } from '@/ds/components/Txt';
+
+import { useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 /**
@@ -20,6 +24,7 @@ export function MetricsKpiCardFooter({
   isLoading?: boolean;
   className?: string;
 }) {
+  useLocale();
   const frame = cn('mt-1 flex items-center justify-between gap-2 border-t border-border pt-2', className);
   if (isLoading) {
     return (
@@ -37,7 +42,7 @@ export function MetricsKpiCardFooter({
       </Txt>
       {prevValue && (
         <Txt as="span" variant="body-sm" tone="muted" className="shrink-0 tabular-nums">
-          vs {prevValue}
+          <Trans id="vs {part0}" values={{ part0: prevValue }} />
         </Txt>
       )}
     </div>

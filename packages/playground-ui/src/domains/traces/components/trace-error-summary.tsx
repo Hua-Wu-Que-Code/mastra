@@ -1,5 +1,6 @@
 import { CopyButton } from '@/ds/components/CopyButton';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export interface TraceErrorSummaryProps {
   name: string;
@@ -10,13 +11,14 @@ export interface TraceErrorSummaryProps {
 
 /** An error's name and copy button over its full message, wrapped and scrollable. */
 export function TraceErrorSummary({ name, message, notice }: TraceErrorSummaryProps) {
+  useLocale();
   return (
     <>
       <div className="flex items-center justify-between gap-2 border-b border-border py-1 pr-1.5 pl-3">
         <Txt as="span" variant="column" className="truncate text-destructive-foreground">
           {name}
         </Txt>
-        <CopyButton content={message} tooltip="Copy error" />
+        <CopyButton content={message} tooltip={studioT('Copy error')} />
       </div>
       <Txt
         as="p"

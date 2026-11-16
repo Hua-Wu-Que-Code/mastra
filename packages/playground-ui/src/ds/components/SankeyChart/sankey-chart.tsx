@@ -20,6 +20,8 @@ import { useSankeyChartMeasurements } from './use-sankey-chart-measurements';
 import { useSankeyGeometryTransition } from './use-sankey-geometry-transition';
 import { useSankeyHoverTooltip } from './use-sankey-hover-tooltip';
 import { CHART_LABEL_FONT_SIZE, CHART_TICK_FONT_SIZE, Colors } from '@/ds/tokens';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const NODE_LABEL_FONT_SIZE = CHART_TICK_FONT_SIZE;
@@ -56,6 +58,7 @@ export function SankeyChart({
   getNodeColor,
   getLinkColor,
 }: SankeyChartProps) {
+  useLocale();
   const { graph, enabledColumns, colorMap, usesFixedGeometry } = useSankeyRenderContext();
   const { chartContainerRef, fixedGeometry, labelWidths } = useSankeyChartMeasurements({
     graph,
@@ -88,7 +91,7 @@ export function SankeyChart({
           className="flex items-center justify-center rounded-md border border-border text-caption text-muted-foreground"
           style={{ height }}
         >
-          Select at least two columns with data to display a flow
+          {studioT('Select at least two columns with data to display a flow')}
         </div>
       ) : (
         <div ref={chartContainerRef} style={{ height }}>
@@ -443,6 +446,7 @@ function SankeyLink({
   onHoverChange,
   onSelect,
 }: SankeyLinkProps) {
+  useLocale();
   const visibleWidth = scaleSankeyDimension(linkWidth, displayValue, layoutValue);
   const sourceHalfWidth = Math.max(0, sourceWidth ?? visibleWidth) / 2;
   const targetHalfWidth = Math.max(0, targetWidth ?? visibleWidth) / 2;
@@ -477,7 +481,7 @@ function SankeyLink({
         stroke="none"
         role={clickable ? 'button' : undefined}
         tabIndex={clickable ? 0 : undefined}
-        aria-label={clickable ? 'Select Sankey curve' : undefined}
+        aria-label={clickable ? studioT('Select Sankey curve') : undefined}
         onClick={clickable ? onSelect : undefined}
         onKeyDown={clickable ? handleKeyDown : undefined}
         onMouseEnter={() => onHoverChange(sourceName)}

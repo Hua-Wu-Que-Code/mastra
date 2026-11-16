@@ -12,6 +12,10 @@ import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
 import { IconFolderAddRight } from '@mastra/playground-ui/icons/central/IconFolderAddRight';
 import { IconMoveFolder } from '@mastra/playground-ui/icons/central/IconMoveFolder';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { controlStateColorTransition } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -63,10 +67,14 @@ export function DatasetItemsToolbar({
   onReturnToLatestVersion,
   actionsSlot,
 }: DatasetItemsToolbarProps) {
+  useLocale();
   const oldVersionNotice = isViewingOldVersion && activeDatasetVersion != null && (
     <div className="flex min-w-0 items-center gap-3 text-warning-foreground">
       <Txt as="span" variant="caption" className="truncate">
-        You are seeing v{activeDatasetVersion}, which is an older version of the dataset
+        <Trans
+          id="You are seeing v {part0} , which is an older version of the dataset"
+          values={{ part0: activeDatasetVersion }}
+        />
       </Txt>
       {onReturnToLatestVersion && (
         <button
@@ -75,7 +83,7 @@ export function DatasetItemsToolbar({
           className={cn(quietTextHover, controlStateColorTransition, 'shrink-0 underline underline-offset-2')}
         >
           <Txt as="span" variant="caption" className="block">
-            Return to latest
+            {studioT('Return to latest')}
           </Txt>
         </button>
       )}
@@ -90,8 +98,8 @@ export function DatasetItemsToolbar({
     <div className="max-w-120 flex-1">
       <SearchInput
         {...listSearchProps}
-        label="Search items"
-        placeholder="Search items"
+        label={studioT('Search items')}
+        placeholder={studioT('Search items')}
         value={searchQuery ?? ''}
         onValueChange={query => onSearchChange?.(query)}
       />
@@ -102,37 +110,38 @@ export function DatasetItemsToolbar({
     <DropdownMenu>
       <DropdownMenu.Trigger asChild>
         <Button>
-          {selectedCount} selected <IconChevronDownMedium />
+          {selectedCount} {' ' + studioT('selected') + ' '}
+          <IconChevronDownMedium />
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end" className="w-72">
         {onExportClick && (
           <DropdownMenu.Item onSelect={onExportClick}>
-            <IconArrowInbox /> Export CSV
+            <IconArrowInbox /> {' ' + studioT('Export CSV')}
           </DropdownMenu.Item>
         )}
         {onExportJsonClick && (
           <DropdownMenu.Item onSelect={onExportJsonClick}>
-            <IconArrowInbox /> Export JSON
+            <IconArrowInbox /> {' ' + studioT('Export JSON')}
           </DropdownMenu.Item>
         )}
         {onCreateDatasetClick && (
           <DropdownMenu.Item onSelect={onCreateDatasetClick}>
             <IconFolderAddRight />
-            <span>Create dataset from items</span>
+            <span>{studioT('Create dataset from items')}</span>
           </DropdownMenu.Item>
         )}
         {onAddToDatasetClick && (
           <DropdownMenu.Item onSelect={onAddToDatasetClick}>
             <IconMoveFolder />
-            <span>Copy items to dataset</span>
+            <span>{studioT('Copy items to dataset')}</span>
           </DropdownMenu.Item>
         )}
         {onDeleteClick && (
           <>
             <DropdownMenu.Separator />
             <DropdownMenu.Item onSelect={onDeleteClick} variant="destructive">
-              <TrashIcon /> Delete items
+              <TrashIcon /> {' ' + studioT('Delete items')}
             </DropdownMenu.Item>
           </>
         )}
@@ -157,21 +166,21 @@ export function DatasetItemsToolbar({
         {actionsSlot}
         {showItemActions && !isItemPanelOpen && !isViewingOldVersion && (
           <ButtonsGroup>
-            <CreateButton onClick={onAddClick} tooltip="Add an item">
-              New item
+            <CreateButton onClick={onAddClick} tooltip={studioT('Add an item')}>
+              {studioT('New item')}
             </CreateButton>
             <DropdownMenu>
               <DropdownMenu.Trigger asChild>
-                <Button size="icon-md" aria-label="Dataset actions menu">
+                <Button size="icon-md" aria-label={studioT('Dataset actions menu')}>
                   <IconChevronDownMedium />
                 </Button>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content align="end">
                 <DropdownMenu.Item onSelect={onImportClick}>
-                  <IconArrowOutOfBox /> Import CSV
+                  <IconArrowOutOfBox /> {' ' + studioT('Import CSV')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item onSelect={onImportJsonClick}>
-                  <IconFileText /> Import JSON
+                  <IconFileText /> {' ' + studioT('Import JSON')}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu>

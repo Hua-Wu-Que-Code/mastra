@@ -29,6 +29,10 @@ import { IconSparklesTwo } from '@mastra/playground-ui/icons/central/IconSparkle
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
+import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useMastraClient } from '@mastra/react';
 import { useDatasetMutations, useDataset, useScoresByExperimentId } from '@mastra/react/hooks/datasets';
@@ -42,18 +46,52 @@ import { LLMProviders, LLMModels } from '@/domains/llm';
 import { BulkTagPicker } from '@/domains/shared/components/bulk-tag-picker';
 
 const REVIEW_LIST_COLUMNS = [
-  { name: 'itemId', label: 'Item ID', size: 'auto' },
-  { name: 'input', label: 'Input', size: '20rem' },
-  { name: 'tags', label: 'Tags', size: 'auto' },
-  { name: 'scores', label: 'Scores', size: '6rem' },
+  {
+    name: 'itemId',
+    get label() {
+      return studioT('Item ID');
+    },
+    size: 'auto',
+  },
+  {
+    name: 'input',
+    get label() {
+      return studioT('Input');
+    },
+    size: '20rem',
+  },
+  {
+    name: 'tags',
+    get label() {
+      return studioT('Tags');
+    },
+    size: 'auto',
+  },
+  {
+    name: 'scores',
+    get label() {
+      return studioT('Scores');
+    },
+    size: '6rem',
+  },
 ];
 
 const UNTAGGED = '__untagged__';
 const ALL_TAGS = 'all';
 
 const STATUS_OPTIONS = [
-  { value: 'review', label: 'Review queue' },
-  { value: 'completed', label: 'Completed' },
+  {
+    value: 'review',
+    get label() {
+      return studioT('Review queue');
+    },
+  },
+  {
+    value: 'completed',
+    get label() {
+      return studioT('Completed');
+    },
+  },
 ];
 
 export type ReviewListStatus = 'review' | 'completed';
@@ -123,6 +161,7 @@ export function DatasetReview({
   withQueryTrace,
   withFeedback,
 }: DatasetReviewProps) {
+  const studioLocale = useLocale();
   const client = useMastraClient();
   const { paths } = useLinkComponent();
   const { data: dataset } = useDataset({ datasetId: datasetId ?? '', queryOptions: { enabled: Boolean(datasetId) } });
@@ -195,11 +234,11 @@ export function DatasetReview({
     }
     const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([tag]) => ({ value: tag, label: tag }));
     return [
-      { value: ALL_TAGS, label: 'All tags' },
-      ...(untagged > 0 ? [{ value: UNTAGGED, label: 'Untagged' }] : []),
+      { value: ALL_TAGS, label: studioT('All tags') },
+      ...(untagged > 0 ? [{ value: UNTAGGED, label: studioT('Untagged') }] : []),
       ...sorted,
     ];
-  }, [items]);
+  }, [items, studioLocale]);
 
   const hasActiveFilters = Boolean(activeTagFilter) || showCompleted;
 
@@ -453,8 +492,8 @@ export function DatasetReview({
               value={status}
               onValueChange={value => onStatusChange(value === 'completed' ? 'completed' : 'review')}
             >
-              <SelectTrigger aria-label="Status" size="md" className="whitespace-nowrap">
-                <SelectValue placeholder="Select an option" />
+              <SelectTrigger aria-label={studioT('Status')} size="md" className="whitespace-nowrap">
+                <SelectValue placeholder={studioT('Select an option')} />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.map(option => (
@@ -469,8 +508,8 @@ export function DatasetReview({
                 value={activeTagFilter ?? ALL_TAGS}
                 onValueChange={value => setActiveTagFilter(value === ALL_TAGS ? null : value)}
               >
-                <SelectTrigger aria-label="Tags" size="md" className="whitespace-nowrap">
-                  <SelectValue placeholder="Select an option" />
+                <SelectTrigger aria-label={studioT('Tags')} size="md" className="whitespace-nowrap">
+                  <SelectValue placeholder={studioT('Select an option')} />
                 </SelectTrigger>
                 <SelectContent>
                   {tagOptions.map(option => (
@@ -483,7 +522,7 @@ export function DatasetReview({
             )}
             {hasActiveFilters && (
               <Button onClick={resetFilters} size="sm" variant="default" icon={<IconCrossMedium />}>
-                Reset
+                {studioT('Reset')}
               </Button>
             )}
           </>
@@ -501,7 +540,7 @@ export function DatasetReview({
               <Icon size="xs">
                 <IconGauge />
               </Icon>
-              Create scorer
+              {studioT('Create scorer')}
             </Button>
           )}
           {hasSelection && (
@@ -515,11 +554,11 @@ export function DatasetReview({
                 onNewTag={tag => handleBulkTag(tag)}
               />
               <Button variant="primary" onClick={handleBulkComplete} icon={<IconCircleCheck />}>
-                Mark as reviewed
+                {studioT('Mark as reviewed')}
               </Button>
               <DropdownMenu>
                 <DropdownMenu.Trigger asChild>
-                  <Button size="icon-md" disabled={isAnalyzing} aria-label="More actions">
+                  <Button size="icon-md" disabled={isAnalyzing} aria-label={studioT('More actions')}>
                     {isAnalyzing ? <Spinner className="h-4 w-4" /> : <IconDotGrid1x3Horizontal />}
                   </Button>
                 </DropdownMenu.Trigger>
@@ -528,14 +567,14 @@ export function DatasetReview({
                     <Icon size="xs">
                       <IconSparklesTwo />
                     </Icon>
-                    Analyze
+                    {studioT('Analyze')}
                   </DropdownMenu.Item>
                   <DropdownMenu.Separator />
                   <DropdownMenu.Item onSelect={handleBulkRemove}>
                     <Icon size="xs">
                       <TrashIcon />
                     </Icon>
-                    Remove from queue
+                    {studioT('Remove from queue')}
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
               </DropdownMenu>
@@ -549,7 +588,7 @@ export function DatasetReview({
   if (isLoadingReview) {
     return (
       <PageLayout breadcrumbs={breadcrumbs} actionRow={toolbar}>
-        <h1 className="sr-only">Review Queue</h1>
+        <h1 className="sr-only">{studioT('Review Queue')}</h1>
         <Spinner fill />
       </PageLayout>
     );
@@ -560,7 +599,7 @@ export function DatasetReview({
       withQueryTrace={withQueryTrace}
       withFeedback={withFeedback}
       result={featuredItem ?? undefined}
-      title={`Review item ${featuredItem?.id ?? ''}`}
+      title={studioT('Review item {value0}', { value0: featuredItem?.id ?? '' })}
       scores={featuredItem ? featuredScoresByItemId?.[featuredItem.itemId] : undefined}
       experimentLink={
         featuredItem?.experimentId
@@ -576,42 +615,50 @@ export function DatasetReview({
 
   return (
     <PageLayout breadcrumbs={breadcrumbs} actionRow={toolbar}>
-      <h1 className="sr-only">Review Queue</h1>
+      <h1 className="sr-only">{studioT('Review Queue')}</h1>
       <Dialog open={showAnalyzeDialog} onOpenChange={setShowAnalyzeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Analyze Items</DialogTitle>
-            <DialogDescription>Use an LLM to automatically suggest tags for the selected items.</DialogDescription>
+            <DialogTitle>{studioT('Analyze Items')}</DialogTitle>
+            <DialogDescription>
+              {studioT('Use an LLM to automatically suggest tags for the selected items.')}
+            </DialogDescription>
           </DialogHeader>
           <DialogBody>
             <div className="grid grid-cols-2 gap-2">
               <Field className="gap-1">
-                <FieldLabel>Provider</FieldLabel>
+                <FieldLabel>{studioT('Provider')}</FieldLabel>
                 <LLMProviders value={analyzeProvider} onValueChange={setAnalyzeProvider} />
               </Field>
               <Field className="gap-1">
-                <FieldLabel>Model</FieldLabel>
+                <FieldLabel>{studioT('Model')}</FieldLabel>
                 <LLMModels llmId={analyzeProvider} value={analyzeModel} onValueChange={setAnalyzeModel} />
               </Field>
             </div>
             <Txt variant="meta" tone="muted">
-              {selectedItemIds.size} item{selectedItemIds.size !== 1 ? 's' : ''} will be analyzed
+              <Trans
+                id="{part0} item {part1} will be analyzed"
+                values={{
+                  part0: selectedItemIds.size,
+                  part1: selectedItemIds.size !== 1 ? studioT('English plural suffix') : '',
+                }}
+              />
             </Txt>
             <Field className="gap-1">
-              <FieldLabel>Instructions (optional)</FieldLabel>
+              <FieldLabel>{studioT('Instructions (optional)')}</FieldLabel>
               <Textarea
                 className="text-caption"
                 value={analyzePrompt}
                 onChange={e => setAnalyzePrompt(e.target.value)}
-                placeholder="E.g., Focus on safety issues and factual errors"
+                placeholder={studioT('E.g., Focus on safety issues and factual errors')}
                 rows={3}
               />
             </Field>
           </DialogBody>
           <DialogFooter>
-            <DialogCancel>Cancel</DialogCancel>
+            <DialogCancel>{studioT('Cancel')}</DialogCancel>
             <DialogAction onConfirm={handleAnalyze} disabled={!analyzeProvider || !analyzeModel || isAnalyzing}>
-              Analyze
+              {studioT('Analyze')}
             </DialogAction>
           </DialogFooter>
         </DialogContent>
@@ -620,9 +667,15 @@ export function DatasetReview({
       <Dialog open={showProposalDialog} onOpenChange={setShowProposalDialog}>
         <DialogContent size="lg">
           <DialogHeader>
-            <DialogTitle>Review Proposed Tags</DialogTitle>
+            <DialogTitle>{studioT('Review Proposed Tags')}</DialogTitle>
             <DialogDescription>
-              {proposedAssignments.filter(p => p.accepted).length} of {proposedAssignments.length} proposals selected
+              <Trans
+                id="{part0} of {part1} proposals selected"
+                values={{
+                  part0: proposedAssignments.filter(p => p.accepted).length,
+                  part1: proposedAssignments.length,
+                }}
+              />
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
@@ -679,12 +732,13 @@ export function DatasetReview({
             })}
           </DialogBody>
           <DialogFooter>
-            <DialogCancel>Cancel</DialogCancel>
+            <DialogCancel>{studioT('Cancel')}</DialogCancel>
             <DialogAction
               onConfirm={handleAcceptProposals}
               disabled={proposedAssignments.filter(p => p.accepted).length === 0}
             >
-              Accept {proposedAssignments.filter(p => p.accepted).length} proposals
+              {studioT('Accept') + ' '}
+              {proposedAssignments.filter(p => p.accepted).length} {' ' + studioT('proposals')}
             </DialogAction>
           </DialogFooter>
         </DialogContent>
@@ -696,11 +750,11 @@ export function DatasetReview({
             <Spinner fill />
           ) : displayItems.length === 0 ? (
             <EmptyState
-              titleSlot={showCompleted ? 'No completed reviews yet' : 'No items to review'}
+              titleSlot={showCompleted ? studioT('No completed reviews yet') : studioT('No items to review')}
               descriptionSlot={
                 showCompleted
-                  ? 'Items marked as complete will appear here for auditing.'
-                  : 'When experiment results are flagged for review, they will appear here.'
+                  ? studioT('Items marked as complete will appear here for auditing.')
+                  : studioT('When experiment results are flagged for review, they will appear here.')
               }
               variant="fill"
             />

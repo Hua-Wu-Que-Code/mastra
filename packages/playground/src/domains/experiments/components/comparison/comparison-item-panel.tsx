@@ -1,4 +1,6 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useDatasetItem } from '@mastra/react/hooks/datasets';
 
 import { DatasetItemPanel } from '@/domains/datasets/components/items/dataset-item-panel';
@@ -15,6 +17,7 @@ interface ComparisonItemPanelProps {
  * It stays mounted while closed so it animates in and out.
  */
 export function ComparisonItemPanel({ datasetId, itemId, onClose }: ComparisonItemPanelProps) {
+  useLocale();
   const { data: item, isLoading } = useDatasetItem({
     datasetId,
     itemId: itemId ?? '',
@@ -26,7 +29,15 @@ export function ComparisonItemPanel({ datasetId, itemId, onClose }: ComparisonIt
       item={item}
       itemId={itemId}
       fallback={
-        isLoading ? <DataPanel.LoadingData /> : <DataPanel.NoData>Dataset item "{itemId}" not found.</DataPanel.NoData>
+        isLoading ? (
+          <DataPanel.LoadingData />
+        ) : (
+          <DataPanel.NoData>
+            {studioT('Dataset item "')}
+            {itemId}
+            {studioT('" not found.')}
+          </DataPanel.NoData>
+        )
       }
       // Comparison rows aren't a navigable item list, so previous/next stay disabled.
       items={item ? [item] : []}

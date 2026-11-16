@@ -1,4 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
 type UseCopyToClipboardProps = {
@@ -73,6 +75,7 @@ const copyTextToClipboard = async (value: string): Promise<boolean> => {
 export function useCopyToClipboard(props: UseCopyToClipboardProps): UseCopyToClipboardConfiguredResult;
 export function useCopyToClipboard(props: UseCopyToClipboardOptions): UseCopyToClipboardDynamicResult;
 export function useCopyToClipboard(props: UseCopyToClipboardProps | UseCopyToClipboardOptions) {
+  const studioLocale = useLocale();
   const { copyMessage = 'Copied to clipboard!', copiedDuration = 2000, showToast = true } = props;
   const hasConfiguredText = 'text' in props;
   const text = hasConfiguredText ? props.text : undefined;
@@ -83,7 +86,7 @@ export function useCopyToClipboard(props: UseCopyToClipboardProps | UseCopyToCli
     (value: string) => {
       void copyTextToClipboard(value).then(copied => {
         if (!copied) {
-          if (showToast) toast.error('Failed to copy to clipboard.');
+          if (showToast) toast.error(studioT('Failed to copy to clipboard.'));
           return;
         }
 
@@ -98,7 +101,7 @@ export function useCopyToClipboard(props: UseCopyToClipboardProps | UseCopyToCli
         }, copiedDuration);
       });
     },
-    [copiedDuration, copyMessage, showToast],
+    [copiedDuration, copyMessage, showToast, studioLocale],
   );
 
   const handleCopy = useCallback(() => {

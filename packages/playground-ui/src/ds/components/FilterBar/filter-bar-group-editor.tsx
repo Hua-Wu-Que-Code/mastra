@@ -13,6 +13,8 @@ import { IconFolder1 } from '@/ds/icons/central/IconFolder1';
 import { IconFolderAddRight } from '@/ds/icons/central/IconFolderAddRight';
 import { IconPlusMedium } from '@/ds/icons/central/IconPlusMedium';
 import { TrashIcon } from '@/ds/icons/TrashIcon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 const connectorClass =
@@ -26,6 +28,7 @@ export type FilterBarLogicToggleProps = {
 
 /** `and` / `or` connector in front of a row; every connector of a group shares its logic. */
 export function FilterBarLogicToggle({ groupId, logic, className }: FilterBarLogicToggleProps) {
+  useLocale();
   const ctx = useFilterBarContext();
   const next: FilterBarLogic = logic === 'and' ? 'or' : 'and';
   return (
@@ -33,8 +36,8 @@ export function FilterBarLogicToggle({ groupId, logic, className }: FilterBarLog
       type="button"
       data-slot="filter-bar-logic"
       data-logic={logic}
-      aria-label={`Joined with ${logic}, switch to ${next}`}
-      title={`Switch to ${next}`}
+      aria-label={studioT('Joined with {value0}, switch to {value1}', { value0: logic, value1: next })}
+      title={studioT('Switch to {value0}', { value0: next })}
       className={cn(
         connectorClass,
         'filter-bar-logic cursor-pointer border border-border bg-fill-subtle outline-none',
@@ -50,11 +53,12 @@ export function FilterBarLogicToggle({ groupId, logic, className }: FilterBarLog
 
 /** Segmented `and | or` control shown in a nested group's header. */
 function FilterBarLogicSwitch({ groupId, logic }: { groupId: string; logic: FilterBarLogic }) {
+  useLocale();
   const ctx = useFilterBarContext();
   return (
     <div
       role="radiogroup"
-      aria-label="Group logic"
+      aria-label={studioT('Group logic')}
       className="flex h-control-sm items-center gap-0.5 rounded-md border border-border bg-fill-subtle p-0.5"
     >
       {(['and', 'or'] as const).map(value => (
@@ -63,7 +67,7 @@ function FilterBarLogicSwitch({ groupId, logic }: { groupId: string; logic: Filt
           type="button"
           role="radio"
           aria-checked={logic === value}
-          aria-label={`Join with ${value}`}
+          aria-label={studioT('Join with {value0}', { value0: value })}
           className={cn(
             'h-full cursor-pointer rounded-sm px-1.5 text-column tracking-wide uppercase outline-none',
             'focus-visible:bg-fill-hover',
@@ -99,9 +103,10 @@ export function FilterBarGroupEditor({
   group,
   depth,
   onRemove,
-  removeLabel = 'Remove group',
+  removeLabel = studioT('Remove group'),
   className,
 }: FilterBarGroupEditorProps) {
+  useLocale();
   const ctx = useFilterBarContext();
   const addFilterRef = useRef<HTMLButtonElement>(null);
   const focusAddFilter = useRef(false);
@@ -119,7 +124,7 @@ export function FilterBarGroupEditor({
   const connector = (key: string) =>
     rows.length === 0 ? (
       <span key={`${key}:where`} className={connectorClass}>
-        where
+        {studioT('where')}
       </span>
     ) : (
       <FilterBarLogicToggle key={`${key}:logic`} groupId={group.id} logic={group.logic} />
@@ -151,7 +156,7 @@ export function FilterBarGroupEditor({
         {connector('input')}
         <FilterBarInput
           groupId={group.id}
-          placeholder="Add condition"
+          placeholder={studioT('Add condition')}
           onLeave={() => {
             focusAddFilter.current = true;
           }}
@@ -165,7 +170,7 @@ export function FilterBarGroupEditor({
       data-slot="filter-bar-group-editor"
       data-depth={depth}
       role="group"
-      aria-label={`Conditions joined with ${group.logic}`}
+      aria-label={studioT('Conditions joined with {value0}', { value0: group.logic })}
       className={cn('flex min-w-0 flex-col', className)}
     >
       {rows.length > 0 && (
@@ -183,7 +188,7 @@ export function FilterBarGroupEditor({
             icon={<IconPlusMedium />}
             onClick={() => ctx.openGroupInput(group.id)}
           >
-            Condition
+            {studioT('Condition')}
           </Button>
         )}
         <Button
@@ -191,11 +196,11 @@ export function FilterBarGroupEditor({
           size="sm"
           icon={<IconFolderAddRight />}
           className="text-muted-foreground"
-          tooltip={canNest ? undefined : `Groups can nest ${ctx.maxDepth} levels deep`}
+          tooltip={canNest ? undefined : studioT('Groups can nest {value0} levels deep', { value0: ctx.maxDepth })}
           disabled={!canNest}
           onClick={() => ctx.addGroup(group.id, group.logic === 'and' ? 'or' : 'and')}
         >
-          Group
+          {studioT('Group')}
         </Button>
         {onRemove && (
           <Button
@@ -206,7 +211,7 @@ export function FilterBarGroupEditor({
             aria-label={removeLabel}
             onClick={onRemove}
           >
-            Clear all
+            {studioT('Clear all')}
           </Button>
         )}
       </div>
@@ -215,6 +220,7 @@ export function FilterBarGroupEditor({
 }
 
 function NestedGroupCard({ group, depth }: { group: FilterBarGroup; depth: number }) {
+  useLocale();
   const ctx = useFilterBarContext();
   const rootRef = useRef<HTMLDivElement>(null);
   const leaving = ctx.leaving.has(group.id);
@@ -235,17 +241,17 @@ function NestedGroupCard({ group, depth }: { group: FilterBarGroup; depth: numbe
       <div className="flex items-center gap-2 border-b border-border px-2 py-1">
         <IconFolder1 className="size-icon-sm text-muted-foreground" />
         <Txt as="span" variant="label" tone="ink">
-          Group
+          {studioT('Group')}
         </Txt>
         <Txt as="span" variant="label" tone="muted">
-          {count} {count === 1 ? 'condition' : 'conditions'}
+          {count} {count === 1 ? studioT('condition') : studioT('conditions')}
         </Txt>
         <div className="ml-auto flex items-center gap-1">
           <FilterBarLogicSwitch groupId={group.id} logic={group.logic} />
           <Button
             variant="ghost"
             size="icon-sm"
-            tooltip="Remove group"
+            tooltip={studioT('Remove group')}
             disabled={leaving}
             onClick={() => ctx.removeGroup(group.id)}
           >

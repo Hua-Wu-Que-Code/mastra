@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
-
 import { useMastraInstanceStatus } from '../hooks/use-mastra-instance-status';
+
 import type { StudioConfig } from '../types';
 import { StudioConfigContext } from './studio-config-state';
+import { useAccount } from '@/domains/account/account-context';
 
 export interface StudioConfigProviderProps {
   children: React.ReactNode;
@@ -36,7 +37,7 @@ const getPersistentConfig = (config: StudioConfig): StudioConfig => {
   return { ...config, headers };
 };
 
-export const StudioConfigProvider = ({
+const NativeStudioConfigProvider = ({
   children,
   endpoint = 'http://localhost:4111',
   defaultApiPrefix = '/api',
@@ -112,6 +113,26 @@ export const StudioConfigProvider = ({
   return (
     <StudioConfigContext.Provider value={{ ...config, setConfig: doSetConfig }}>
       {children}
+    </StudioConfigContext.Provider>
+  );
+};
+
+// Managed sessions are bound to the server that authenticated the account.
+// A native Studio connection saved by an earlier user must not replace it.
+export const StudioConfigProvider = (props: StudioConfigProviderProps) => {
+  const account = useAccount();
+  if (!account) return <NativeStudioConfigProvider {...props} />;
+  return (
+    <StudioConfigContext.Provider
+      value={{
+        baseUrl: props.endpoint ?? 'http://localhost:4111',
+        apiPrefix: props.defaultApiPrefix ?? '/api',
+        headers: {},
+        isLoading: false,
+        setConfig: () => {},
+      }}
+    >
+      {props.children}
     </StudioConfigContext.Provider>
   );
 };

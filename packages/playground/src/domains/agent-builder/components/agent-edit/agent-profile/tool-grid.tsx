@@ -2,6 +2,8 @@ import { Checkbox } from '@mastra/playground-ui/components/Checkbox';
 import { Field, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { CSSProperties, ReactNode } from 'react';
 import { useAgentColor } from '../../../contexts/agent-color-context';
 import type { AgentTool } from '../../../types/agent-tool';
@@ -32,6 +34,7 @@ export const ToolGrid = ({
   emptyStateDetails,
   onToggle,
 }: ToolGridProps) => {
+  useLocale();
   const agentColor = useAgentColor();
   const filterCheckboxStyle: CSSProperties | undefined = onlySelected
     ? {
@@ -45,11 +48,11 @@ export const ToolGrid = ({
     <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 px-4 py-4">
       <div className="flex shrink-0 items-center justify-between gap-4">
         <SearchInput
-          label="Search tools"
+          label={studioT('Search tools')}
           size="md"
           className="max-w-[30ch] flex-1"
           data-testid="tools-card-picker-search"
-          placeholder="Search tools"
+          placeholder={studioT('Search tools')}
           value={search}
           onValueChange={onSearch}
         />
@@ -67,7 +70,7 @@ export const ToolGrid = ({
             style={filterCheckboxStyle}
             className="h-3 w-3 shadow-none data-[state=checked]:shadow-none [&_svg]:h-2.5 [&_svg]:w-2.5"
           />
-          <FieldLabel className="text-meta text-muted-foreground">Show only selected</FieldLabel>
+          <FieldLabel className="text-meta text-muted-foreground">{studioT('Show only selected')}</FieldLabel>
         </Field>
       </div>
 

@@ -2,6 +2,8 @@ import { Badge } from '@/ds/components/Badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { focusRing } from '@/ds/primitives/transitions';
 import { useClock } from '@/hooks/use-clock';
+
+import { getIntlLocale, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatDate, toDate } from '@/utils/date-format';
 import type { DateInput } from '@/utils/date-format';
@@ -21,7 +23,7 @@ const SINCE_UNITS = [
 ] as const;
 
 function formatUnit(count: number, unit: (typeof SINCE_UNITS)[number][0]) {
-  return new Intl.NumberFormat(undefined, { style: 'unit', unit, unitDisplay: 'long' }).format(count);
+  return new Intl.NumberFormat(getIntlLocale(), { style: 'unit', unit, unitDisplay: 'long' }).format(count);
 }
 
 function formatSince(date: Date, at: number) {
@@ -38,10 +40,12 @@ function formatSince(date: Date, at: number) {
     if (count > 0 || unit === 'second') parts.push(formatUnit(count, unit));
   }
   const label = parts.join(' ');
+  if (getIntlLocale().startsWith('zh')) return `${label}${diff < 0 ? '后' : '前'}`;
   return diff < 0 ? `${label} from now` : `${label} ago`;
 }
 
 function Relative({ date }: { date: Date }) {
+  useLocale();
   const parts = useClock(now => formatRelativeTime(date, { now }))?.split(/(\d+[smhd])/) ?? [];
   return parts.map((part, index) =>
     index % 2 ? (
@@ -55,11 +59,12 @@ function Relative({ date }: { date: Date }) {
 }
 
 function Since({ date }: { date: Date }) {
+  useLocale();
   return <>{useClock(now => formatSince(date, now))}</>;
 }
 
 function zoneName(date: Date, timeZone?: string) {
-  return new Intl.DateTimeFormat(undefined, { timeZone, timeZoneName: 'short' })
+  return new Intl.DateTimeFormat(getIntlLocale(), { timeZone, timeZoneName: 'short' })
     .formatToParts(date)
     .find(part => part.type === 'timeZoneName')?.value;
 }
@@ -67,8 +72,10 @@ function zoneName(date: Date, timeZone?: string) {
 function zoneRow(date: Date, timeZone?: string) {
   return {
     zone: zoneName(date, timeZone) ?? 'Local',
-    day: new Intl.DateTimeFormat(undefined, { timeZone, month: 'short', day: 'numeric', year: 'numeric' }).format(date),
-    time: new Intl.DateTimeFormat(undefined, {
+    day: new Intl.DateTimeFormat(getIntlLocale(), { timeZone, month: 'short', day: 'numeric', year: 'numeric' }).format(
+      date,
+    ),
+    time: new Intl.DateTimeFormat(getIntlLocale(), {
       timeZone,
       hour: 'numeric',
       minute: '2-digit',
@@ -78,6 +85,7 @@ function zoneRow(date: Date, timeZone?: string) {
 }
 
 export function RelativeTimestamp({ value, label, className }: RelativeTimestampProps) {
+  useLocale();
   const date = toDate(value);
   if (!date) return null;
 

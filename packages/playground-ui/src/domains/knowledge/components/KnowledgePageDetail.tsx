@@ -6,6 +6,7 @@ import { bodyHeadings } from '../lib/bodyHeadings';
 import { scopeTitle } from '../lib/pageAddress';
 import { bodyLinkRefs, knowledgePageRefIndex, noteMentionTarget } from '../lib/pageRefs';
 import type { KnowledgePageRefIndex } from '../lib/pageRefs';
+
 import { KnowledgePagesByRef } from '../lib/pagesByRefContext';
 import { parseRecordSegments } from '../lib/recordText';
 import { KNOWLEDGE_REF_PROPERTY, remarkKnowledgeLinks } from '../lib/remarkKnowledgeLinks';
@@ -18,12 +19,12 @@ import type {
 } from '../pageTypes';
 import { KnowledgeSourceIcon } from './KnowledgeSourceIcon';
 import { KnowledgeTooltip } from './KnowledgeTooltip';
-
 import { Badge } from '@/ds/components/Badge';
 import { Breadcrumb, Crumb } from '@/ds/components/Breadcrumb';
 import { Button } from '@/ds/components/Button';
 import { DataKeysAndValues } from '@/ds/components/DataKeysAndValues';
 import { MarkdownRenderer } from '@/ds/components/MarkdownRenderer';
+
 import { Metadata } from '@/ds/components/Metadata';
 import { RelativeTimestamp } from '@/ds/components/RelativeTimestamp';
 import { ScrollArea } from '@/ds/components/ScrollArea';
@@ -31,6 +32,8 @@ import { Txt } from '@/ds/components/Txt';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
 import { IconArrowRight } from '@/ds/icons/central/IconArrowRight';
 import { IconPin } from '@/ds/icons/central/IconPin';
+import { t as studioT, useLocale } from '@/lib/i18n';
+import { Trans } from '@/lib/i18n/trans';
 
 const ACTIVITY_LABELS: Record<KnowledgeActivityAction, string> = {
   'scope-created': 'Scope created',
@@ -96,6 +99,7 @@ const BodyLinks = createContext<{
  * itself in a quiet style when none does. Every other `<span>` the markdown makes passes through.
  */
 function BodySpan({ node, ...props }: ComponentProps<'span'> & ExtraProps) {
+  useLocale();
   const links = useContext(BodyLinks);
   const ref = node?.properties[KNOWLEDGE_REF_PROPERTY];
   if (typeof ref !== 'string' || !links) return <span {...props} />;
@@ -112,7 +116,7 @@ function BodySpan({ node, ...props }: ComponentProps<'span'> & ExtraProps) {
       </button>
     </KnowledgeTooltip>
   ) : (
-    <KnowledgeTooltip label="No loaded page has this address">
+    <KnowledgeTooltip label={studioT('No loaded page has this address')}>
       <span
         data-testid="knowledge-body-link-unresolved"
         className="rounded border border-dashed border-border px-1 wrap-anywhere text-muted-foreground"
@@ -230,6 +234,7 @@ export function KnowledgeNoteItem({
   /** A tighter layout for popups. */
   compact?: boolean;
 }) {
+  useLocale();
   const refIndex = loadedRefIndex(pagesById, useContext(KnowledgePagesByRef));
   // Only a page the server resolved the mention to is linked, however the ref is written.
   const mentionTarget = (ref: string) => noteMentionTarget(refIndex, pagesById, note.mentions, ref);
@@ -256,7 +261,8 @@ export function KnowledgeNoteItem({
           </Txt>
           {onPage ? (
             <Txt as="span" variant="caption" tone="muted">
-              on <PageLink page={onPage} onPageClick={onPageClick} />
+              {studioT('on') + ' '}
+              <PageLink page={onPage} onPageClick={onPageClick} />
             </Txt>
           ) : null}
         </div>
@@ -283,7 +289,7 @@ export function KnowledgeNoteItem({
           })}
         </p>
         {note.stampScopeIds.length > 0 ? (
-          <div className="flex min-w-0 flex-wrap gap-1" aria-label="Stamped to">
+          <div className="flex min-w-0 flex-wrap gap-1" aria-label={studioT('Stamped to')}>
             {note.stampScopeIds.map(id => (
               <Badge key={id} variant="neutral" size="xs" title={scopeLabel(id)}>
                 <span className="truncate">{scopeLabel(id)}</span>
@@ -342,6 +348,7 @@ export function KnowledgePageDetail({
   childPages?: ReactNode;
   activity?: KnowledgePageActivityPayload[];
 }) {
+  useLocale();
   const firstHighlighted = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
     firstHighlighted.current?.scrollIntoView?.({ block: 'nearest' });
@@ -380,7 +387,7 @@ export function KnowledgePageDetail({
   );
   const noBody = (
     <Txt variant="body" tone="muted">
-      This {page.isScope ? 'scope' : 'page'} has no body yet.
+      <Trans id="This {part0} has no body yet." values={{ part0: page.isScope ? studioT('scope') : studioT('page') }} />
     </Txt>
   );
   const noteList = (items: KnowledgeNotePayload[]) => (
@@ -418,14 +425,14 @@ export function KnowledgePageDetail({
   const connections =
     linksTo.length > 0 || linkedFrom.length > 0 || mentionedBy.length > 0 ? (
       <KnowledgeDetailSection
-        label="Connections"
+        label={studioT('Connections')}
         count={linksTo.length + Math.max(linkedFrom.length, mentionedBy.length)}
       >
         <div className="flex flex-col gap-4">
           {linksTo.length > 0 ? (
-            <section aria-label="Links to" className="flex flex-col gap-1.5">
+            <section aria-label={studioT('Links to')} className="flex flex-col gap-1.5">
               <Txt as="h4" variant="caption" tone="muted">
-                Links to
+                {studioT('Links to')}
               </Txt>
               <ul className="flex flex-col gap-1">
                 {linksTo.map(({ page: target, count }) => (
@@ -449,9 +456,9 @@ export function KnowledgePageDetail({
             </section>
           ) : null}
           {linkedFrom.length > 0 ? (
-            <section aria-label="Linked from" className="flex flex-col gap-1.5">
+            <section aria-label={studioT('Linked from')} className="flex flex-col gap-1.5">
               <Txt as="h4" variant="caption" tone="muted">
-                Linked from
+                {studioT('Linked from')}
               </Txt>
               <ul className="flex flex-col gap-1">
                 {linkedFrom.map(({ page: source, count }) => (
@@ -475,9 +482,9 @@ export function KnowledgePageDetail({
             </section>
           ) : null}
           {mentionedBy.length > 0 ? (
-            <section aria-label="Mentioned in" className="flex flex-col gap-1.5">
+            <section aria-label={studioT('Mentioned in')} className="flex flex-col gap-1.5">
               <Txt as="h4" variant="caption" tone="muted">
-                Mentioned in
+                {studioT('Mentioned in')}
               </Txt>
               <ul className="flex flex-col gap-2">
                 {mentionedBy.map(note => (
@@ -510,7 +517,7 @@ export function KnowledgePageDetail({
             : 'flex flex-col gap-3 border-b border-border bg-fill-subtle px-6 pt-5 pb-4'
         }
       >
-        <Breadcrumb label="Breadcrumb" className="ml-[-.9em] min-w-0" listClassName="overflow-hidden">
+        <Breadcrumb label={studioT('Breadcrumb')} className="ml-[-.9em] min-w-0" listClassName="overflow-hidden">
           {ancestors.map(ancestor => (
             <Crumb key={ancestor.id} as="button" onClick={() => onPageClick(ancestor)}>
               {scopeTitle(ancestor)}
@@ -530,7 +537,8 @@ export function KnowledgePageDetail({
                 </Txt>
               </KnowledgeTooltip>
               <Badge variant="neutral" size="sm" className="shrink-0 tabular-nums">
-                v{page.version}
+                {studioT('v')}
+                {page.version}
               </Badge>
             </div>
           )}
@@ -545,19 +553,29 @@ export function KnowledgePageDetail({
             </Badge>
             {pin ? (
               <Badge variant="warning" size="sm" icon={<IconPin aria-hidden />}>
-                {pin.audience.length > 0 ? `Pinned for ${pin.audience.join(', ')}` : 'Pinned'}
+                {pin.audience.length > 0
+                  ? studioT('Pinned for {value0}', { value0: pin.audience.join(', ') })
+                  : studioT('Pinned')}
               </Badge>
             ) : null}
             {compact ? (
               <Txt as="span" variant="caption" tone="muted" data-testid="knowledge-page-version">
                 <Metadata>
-                  {page.isScope || !scope ? null : <Metadata.Item>In {scopeTitle(scope)}</Metadata.Item>}
-                  <Metadata.Item>v{page.version}</Metadata.Item>
+                  {page.isScope || !scope ? null : (
+                    <Metadata.Item>
+                      {studioT('In') + ' '}
+                      {scopeTitle(scope)}
+                    </Metadata.Item>
+                  )}
                   <Metadata.Item>
-                    Updated{' '}
+                    {studioT('v')}
+                    {page.version}
+                  </Metadata.Item>
+                  <Metadata.Item>
+                    {studioT('Updated')}{' '}
                     <RelativeTimestamp
                       value={page.updatedAt}
-                      label={`Updated by ${authorName(page.updatedBy.author)}`}
+                      label={studioT('Updated by {value0}', { value0: authorName(page.updatedBy.author) })}
                     />
                   </Metadata.Item>
                 </Metadata>
@@ -570,14 +588,14 @@ export function KnowledgePageDetail({
       {compact ? (
         <div className="flex flex-col gap-6 p-4">
           <dl
-            aria-label="Links and notes"
+            aria-label={studioT('Links and notes')}
             className="grid grid-cols-3 divide-x divide-border rounded-lg border border-border"
           >
-            <PeekCount label="Links in" value={linksIn} />
-            <PeekCount label="Links out" value={linksTo.length} />
-            <PeekCount label="Notes" value={notesMore ? `${notes.length}+` : notes.length} />
+            <PeekCount label={studioT('Links in')} value={linksIn} />
+            <PeekCount label={studioT('Links out')} value={linksTo.length} />
+            <PeekCount label={studioT('Notes')} value={notesMore ? `${notes.length}+` : notes.length} />
           </dl>
-          <KnowledgeDetailSection label="Preview">
+          <KnowledgeDetailSection label={studioT('Preview')}>
             {page.body ? (
               <ScrollArea maxHeight="12rem">
                 <div data-testid="knowledge-page-body">{body}</div>
@@ -588,11 +606,13 @@ export function KnowledgePageDetail({
           </KnowledgeDetailSection>
           {connections}
           {peekNotes.length > 0 ? (
-            <KnowledgeDetailSection label={highlightMentionOf ? 'Notes that mention it' : 'Latest note'}>
+            <KnowledgeDetailSection
+              label={highlightMentionOf ? studioT('Notes that mention it') : studioT('Latest note')}
+            >
               {noteList(peekNotes)}
               {onOpenPage && notes.length > peekNotes.length ? (
                 <Button variant="ghost" size="sm" className="self-start" onClick={onOpenPage}>
-                  All {notesMore ? '' : `${notes.length} `}notes
+                  {notesMore ? studioT('All notes') : studioT('All {count} notes', { count: notes.length })}
                 </Button>
               ) : null}
             </KnowledgeDetailSection>
@@ -610,7 +630,7 @@ export function KnowledgePageDetail({
             )}
 
             {notes.length > 0 || notesMore ? (
-              <KnowledgeDetailSection label="Notes" count={notesMore ? undefined : notes.length}>
+              <KnowledgeDetailSection label={studioT('Notes')} count={notesMore ? undefined : notes.length}>
                 {noteList(notes)}
                 {notesMore}
               </KnowledgeDetailSection>
@@ -619,7 +639,7 @@ export function KnowledgePageDetail({
 
           <aside className="flex min-w-0 flex-col divide-y divide-border border-t border-border *:py-6 *:last:pb-0 @3xl:w-72 @3xl:shrink-0 @3xl:border-t-0 @3xl:border-l @3xl:pl-8 @3xl:*:first:pt-0">
             {headings.length > 1 ? (
-              <KnowledgeDetailSection label="On this page">
+              <KnowledgeDetailSection label={studioT('On this page')}>
                 <ol className="flex flex-col gap-1.5 border-l border-border">
                   {headings.map((heading, index) => (
                     <li key={index} className={heading.depth > 2 ? 'pl-6' : 'pl-3'}>
@@ -639,26 +659,29 @@ export function KnowledgePageDetail({
               </KnowledgeDetailSection>
             ) : null}
 
-            <KnowledgeDetailSection label="Details">
+            <KnowledgeDetailSection label={studioT('Details')}>
               <DataKeysAndValues>
                 {page.isScope ? null : (
                   <>
-                    <DataKeysAndValues.Key>Scope</DataKeysAndValues.Key>
+                    <DataKeysAndValues.Key>{studioT('Scope')}</DataKeysAndValues.Key>
                     <DataKeysAndValues.Value>{scope ? scopeTitle(scope) : page.scopeId}</DataKeysAndValues.Value>
                   </>
                 )}
-                <DataKeysAndValues.Key>Updated</DataKeysAndValues.Key>
+                <DataKeysAndValues.Key>{studioT('Updated')}</DataKeysAndValues.Key>
                 <DataKeysAndValues.Value>
                   <RelativeTimestamp value={page.updatedAt} />
                 </DataKeysAndValues.Value>
-                <DataKeysAndValues.Key>By</DataKeysAndValues.Key>
+                <DataKeysAndValues.Key>{studioT('By')}</DataKeysAndValues.Key>
                 <DataKeysAndValues.Value>{authorName(page.updatedBy.author)}</DataKeysAndValues.Value>
-                <DataKeysAndValues.Key>Created</DataKeysAndValues.Key>
+                <DataKeysAndValues.Key>{studioT('Created')}</DataKeysAndValues.Key>
                 <DataKeysAndValues.Value>
                   <RelativeTimestamp value={page.createdAt} />
                 </DataKeysAndValues.Value>
-                <DataKeysAndValues.Key>Version</DataKeysAndValues.Key>
-                <DataKeysAndValues.Value>v{page.version}</DataKeysAndValues.Value>
+                <DataKeysAndValues.Key>{studioT('Version')}</DataKeysAndValues.Key>
+                <DataKeysAndValues.Value>
+                  {studioT('v')}
+                  {page.version}
+                </DataKeysAndValues.Value>
               </DataKeysAndValues>
             </KnowledgeDetailSection>
 
@@ -667,7 +690,7 @@ export function KnowledgePageDetail({
             {childPages}
 
             {activity && activity.length > 0 ? (
-              <KnowledgeDetailSection label="Activity">
+              <KnowledgeDetailSection label={studioT('Activity')}>
                 <ol className="relative flex flex-col gap-3 border-l border-border pl-4">
                   {activity.map(event => (
                     <li key={event.id} className="relative flex flex-col">

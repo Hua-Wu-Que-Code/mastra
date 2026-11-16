@@ -651,3 +651,27 @@ See the [package changelog](https://github.com/mastra-ai/mastra/blob/main/packag
 ## Support
 
 We have an [open community Discord](https://discord.gg/mastra-ai). Come and say hello and let us know if you have any questions or need any help getting things running.
+
+## Studio languages
+
+Studio supports English and Simplified Chinese. Select **Settings → Language** to follow the browser language or choose a language explicitly. The selection is stored in `mastra.studio.locale.v1` in this browser and synchronized between tabs. Changing it preserves component state, drafts, and active conversations. User content, prompts, model names, API fields, and tool dispatch keys retain their original values.
+
+Applications embedding these components can initialize the same runtime before rendering:
+
+```tsx
+import { initializeLocale, useTranslation } from '@mastra/playground-ui/lib/i18n';
+
+// Call once at application startup. Dispose when the application is torn down.
+const disposeLocale = initializeLocale();
+
+export function LocalizedSaveButton() {
+  const { t } = useTranslation();
+  return <button>{t('Save changes')}</button>;
+}
+```
+
+`useTranslation()` subscribes to language changes. `t()` can also be called outside React; call it when the value is needed, rather than caching its result at module initialization. Use getters for exported label configurations. Existing memoized computations that produce translated text must depend on the locale returned by `useLocale()`.
+
+Add every interface message to both `src/lib/i18n/messages/en.ts` and `zh.ts`. English source strings are typed message keys. Use named `{placeholders}` for dynamic values. For a sentence containing links or emphasis, use `Trans` from `@mastra/playground-ui/lib/i18n/trans` and supply React nodes through its `values` prop. It keeps sentences intact for translation and does not interpret HTML.
+
+Run `pnpm check:studio-i18n` from the repository root, or `pnpm check:i18n` in either Studio package. The check compares dictionary keys and placeholders and scans common JSX, form-label, configuration-label, and toast patterns for untranslated copy. Both packages also run it before type checking. It is a static check; new helpers that return interface strings still require review and locale-switch testing. The runtime falls back to English for missing Chinese entries; the type and parity checks prevent such omissions in checked-in dictionaries.

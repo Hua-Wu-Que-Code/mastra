@@ -11,6 +11,7 @@ import type { TraceSpanPanelProps } from '../trace-span-panel';
 import { useTraceUsageColumns, useTracesConfig, useTracesList, useTracesSelection } from './traces-explorer-context';
 import { TraceAsItemDialog } from '@/domains/observability/components/trace-as-item-dialog';
 import { ScoreDataPanel, TraceScoresList } from '@/domains/scores';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type TracesExplorerPanelProps = {
   /** Opens a score of one of the full thread's traces (the host owns routing). */
@@ -33,6 +34,7 @@ export function TracesExplorerPanel({
   traceHref,
   withAddTraceToDataset = true,
 }: TracesExplorerPanelProps) {
+  useLocale();
   const { withQueryTrace, withFeedback, feedbackOptions } = useTracesConfig();
   const { rows, autoRefetch, isLoading: isListLoading } = useTracesList();
   const { selection, selectTrace, closeTrace, selectSpan, setSpanTab, setSpanView, selectScore, highlightSpans } =
@@ -101,7 +103,7 @@ export function TracesExplorerPanel({
   return (
     <>
       <TraceSpanPanel
-        title="Trace details"
+        title={studioT('Trace details')}
         size={panelSize}
         traceId={traceId}
         spans={spans}

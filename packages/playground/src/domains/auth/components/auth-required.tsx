@@ -1,9 +1,12 @@
 import { LogoWithoutText } from '@mastra/playground-ui/components/Logo';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import { AuthHeadersForm } from './auth-headers-form';
 import { LoginButton } from './login-button';
+import { useAccount } from '@/domains/account/account-context';
 import { withStudioBasePath } from '@/lib/studio-base-path';
 
 export type AuthRequiredProps = {
@@ -34,7 +37,11 @@ export type AuthRequiredProps = {
  * ```
  */
 export function AuthRequired({ children, loginUrl = '/login', signupUrl = '/signup' }: AuthRequiredProps) {
+  useLocale();
+  const account = useAccount();
   const { data: capabilities, isLoading } = useAuthCapabilities();
+
+  if (account) return <>{children}</>;
 
   // While loading, show nothing (or could show a skeleton)
   if (isLoading) {
@@ -64,10 +71,10 @@ export function AuthRequired({ children, loginUrl = '/login', signupUrl = '/sign
           <LogoWithoutText className="h-16 w-16 opacity-50" />
           <div className="space-y-2">
             <Txt as="h2" variant="heading" tone="ink">
-              Authentication Required
+              {studioT('Authentication Required')}
             </Txt>
             <p className="max-w-sm text-muted-foreground">
-              Add the authorization header that Studio needs to reach your Mastra server.
+              {studioT('Add the authorization header that Studio needs to reach your Mastra server.')}
             </p>
           </div>
           <AuthHeadersForm />
@@ -91,9 +98,9 @@ export function AuthRequired({ children, loginUrl = '/login', signupUrl = '/sign
         <LogoWithoutText className="h-16 w-16 opacity-50" />
         <div className="space-y-2">
           <Txt as="h2" variant="heading" tone="ink">
-            Sign in to continue
+            {studioT('Sign in to continue')}
           </Txt>
-          <p className="max-w-sm text-muted-foreground">You need to sign in to access this page.</p>
+          <p className="max-w-sm text-muted-foreground">{studioT('You need to sign in to access this page.')}</p>
         </div>
         {capabilities.login.description && (
           <div className="flex items-start gap-2.5 rounded-md border border-border bg-background p-3 text-left">
@@ -108,11 +115,11 @@ export function AuthRequired({ children, loginUrl = '/login', signupUrl = '/sign
           capabilities.login.signUpEnabled !== false && (
             <div>
               <Txt as="span" variant="body" tone="muted">
-                {"Don't have an account? "}
+                {studioT("Don't have an account?") + ' '}
               </Txt>
               <button type="button" onClick={handleSignUp} className="text-foreground hover:underline">
                 <Txt as="span" variant="body" className="block">
-                  Sign up
+                  {studioT('Sign up')}
                 </Txt>
               </button>
             </div>

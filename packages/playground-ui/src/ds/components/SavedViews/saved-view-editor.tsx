@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import type { SavedViewsController } from './use-saved-views';
 import { Button } from '@/ds/components/Button/Button';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SavedViewEditorProps<TSettings> = {
@@ -18,12 +20,13 @@ export function SavedViewEditor<TSettings>({
   children,
   className,
 }: SavedViewEditorProps<TSettings>) {
+  useLocale();
   const { draft } = views;
   const creating = draft?.viewId === undefined;
   return (
     <div
       role={draft ? 'group' : undefined}
-      aria-label={draft ? `Edit view ${draft.name}` : undefined}
+      aria-label={draft ? studioT('Edit view {value0}', { value0: draft.name }) : undefined}
       className={cn('flex min-w-0 flex-wrap items-center gap-2', className)}
     >
       {children}
@@ -31,7 +34,7 @@ export function SavedViewEditor<TSettings>({
         <>
           {!creating && views.unsaved && (
             <Txt as="span" variant="caption" tone="muted">
-              Unsaved changes
+              {studioT('Unsaved changes')}
             </Txt>
           )}
           <div className="ml-auto flex shrink-0 items-center gap-3">
@@ -42,7 +45,7 @@ export function SavedViewEditor<TSettings>({
             )}
             <div className="flex items-center gap-1">
               <Button type="button" variant="ghost" size="sm" disabled={views.pending} onClick={views.discard}>
-                {creating ? 'Cancel' : 'Reset'}
+                {creating ? studioT('Cancel') : studioT('Reset')}
               </Button>
               <Button
                 type="button"
@@ -51,7 +54,7 @@ export function SavedViewEditor<TSettings>({
                 disabled={!views.unsaved || views.pending}
                 onClick={views.save}
               >
-                {creating ? 'Save view' : 'Save changes'}
+                {creating ? studioT('Save view') : studioT('Save changes')}
               </Button>
             </div>
           </div>

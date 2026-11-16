@@ -1,5 +1,7 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { AgentTool } from '../../../types/agent-tool';
 import { AgentSelectableCard } from '../agent-selectable-card';
 
@@ -18,6 +20,7 @@ interface ToolCardProps {
  * cards stay aligned across the grid.
  */
 export const ToolCard = ({ item, editable, onToggle }: ToolCardProps) => {
+  useLocale();
   const isIntegration = item.type === 'integration' && !!item.providerId && !!item.toolkit;
   const needsConnection = isIntegration && item.hasConnection === false;
   const connectionLabels = item.connectionLabels ?? [];
@@ -26,7 +29,7 @@ export const ToolCard = ({ item, editable, onToggle }: ToolCardProps) => {
   return (
     <AgentSelectableCard
       title={item.name}
-      subtitle={item.description || 'No description provided'}
+      subtitle={item.description || studioT('No description provided')}
       isSelected={item.isChecked}
       disabled={!editable}
       onClick={() => onToggle(item, !item.isChecked)}
@@ -42,7 +45,7 @@ export const ToolCard = ({ item, editable, onToggle }: ToolCardProps) => {
               className="flex h-7 items-center"
               data-testid={`tool-card-requires-connection-${item.type}-${item.id}`}
             >
-              Requires connection
+              {studioT('Requires connection')}
             </Txt>
           ) : hasConnectionBadges ? (
             <div

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-
 import { rangeFromSource } from './annotatable-selection';
 import { AnnotationNumber } from './annotation-number';
+
 import { visibleComment } from './chat-annotations';
 import type { ChatAnnotation } from './chat-annotations';
 import { Button } from '@/ds/components/Button';
@@ -9,6 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/ds/components/Popover
 import { IconCrossMedium } from '@/ds/icons/central/IconCrossMedium';
 import { IconOpenQuote1 } from '@/ds/icons/central/IconOpenQuote1';
 import { focusRing } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { pluralize } from '@/lib/string';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +27,7 @@ function revealSource({ source }: ChatAnnotation): boolean {
 }
 
 export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnotationListProps) {
+  useLocale();
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,7 +42,7 @@ export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnota
           side="top"
           className="flex max-h-(--available-height) w-80 max-w-[calc(100vw-2rem)] flex-col gap-1 p-1.5"
         >
-          <ol aria-label="Annotations" className="flex min-h-0 flex-col overflow-y-auto">
+          <ol aria-label={studioT('Annotations')} className="flex min-h-0 flex-col overflow-y-auto">
             {annotations.map((annotation, index) => {
               const comment = visibleComment(annotation);
               return (
@@ -48,7 +51,7 @@ export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnota
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <button
                       type="button"
-                      title="Show in chat"
+                      title={studioT('Show in chat')}
                       className={cn(
                         'line-clamp-3 cursor-pointer rounded-xs text-left text-body-sm whitespace-pre-line text-muted-foreground hover:text-foreground',
                         focusRing,
@@ -68,7 +71,7 @@ export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnota
                     variant="ghost"
                     size="icon-sm"
                     className="-my-1"
-                    tooltip={`Remove annotation ${index + 1}`}
+                    tooltip={studioT('Remove annotation {value0}', { value0: index + 1 })}
                     onClick={() => onRemove(annotation.id)}
                   >
                     <IconCrossMedium />
@@ -87,7 +90,7 @@ export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnota
                 for (const annotation of annotations) onRemove(annotation.id);
               }}
             >
-              Remove all
+              {studioT('Remove all')}
             </Button>
           )}
         </PopoverContent>

@@ -1,3 +1,4 @@
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import type { InfrastructureStatusResponse } from '@mastra/client-js';
 import {
   SettingsContainer,
@@ -13,28 +14,38 @@ export interface ChannelsSectionProps {
   providers: InfrastructureStatusResponse['channels']['providers'];
 }
 
-export const ChannelsSection = ({ providers }: ChannelsSectionProps) => (
-  <SettingsGroup>
-    <SettingsTitle info="Configured channel providers available to Agent Builder publish/share flows. Unconfigured providers are omitted until their required environment/config is present.">
-      Channels
-    </SettingsTitle>
-    <SettingsContainer>
-      {providers.length === 0 ? (
-        <SettingsEmptyRow>No configured channel providers for Agent Builder.</SettingsEmptyRow>
-      ) : (
-        providers.map(provider => (
-          <SettingsItem
-            key={provider.id}
-            title={titleCase(provider.name)}
-            description={`Provider ID: ${provider.id}, ${provider.routeCount} provider routes`}
-          >
-            <InfrastructureStatusBadge
-              ok={provider.isConfigured}
-              label={provider.isConfigured ? 'Configured' : 'Not configured'}
-            />
-          </SettingsItem>
-        ))
-      )}
-    </SettingsContainer>
-  </SettingsGroup>
-);
+export const ChannelsSection = ({ providers }: ChannelsSectionProps) => {
+  useLocale();
+  return (
+    <SettingsGroup>
+      <SettingsTitle
+        info={studioT(
+          'Configured channel providers available to Agent Builder publish/share flows. Unconfigured providers are omitted until their required environment/config is present.',
+        )}
+      >
+        {studioT('Channels')}
+      </SettingsTitle>
+      <SettingsContainer>
+        {providers.length === 0 ? (
+          <SettingsEmptyRow>{studioT('No configured channel providers for Agent Builder.')}</SettingsEmptyRow>
+        ) : (
+          providers.map(provider => (
+            <SettingsItem
+              key={provider.id}
+              title={titleCase(provider.name)}
+              description={studioT('Provider ID: {value0}, {value1} provider routes', {
+                value0: provider.id,
+                value1: provider.routeCount,
+              })}
+            >
+              <InfrastructureStatusBadge
+                ok={provider.isConfigured}
+                label={provider.isConfigured ? studioT('Configured') : studioT('Not configured')}
+              />
+            </SettingsItem>
+          ))
+        )}
+      </SettingsContainer>
+    </SettingsGroup>
+  );
+};

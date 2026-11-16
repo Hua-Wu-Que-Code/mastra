@@ -1,7 +1,8 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { IconGlobe } from '@mastra/playground-ui/icons/central/IconGlobe';
-
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useVisibilityChange } from '../../hooks/use-visibility-change-skill';
 import type { SkillEditFormValues } from '@/domains/agent-builder/hooks/use-autosave-skill';
@@ -13,6 +14,7 @@ export interface VisibilitySelectProps {
 }
 
 export function VisibilitySelect({ skillId }: VisibilitySelectProps) {
+  useLocale();
   const formMethods = useFormContext<SkillEditFormValues>();
   const value = useWatch({ control: formMethods.control, name: 'visibility' }) ?? 'private';
   const { requestChange, dialog } = useVisibilityChange(skillId);
@@ -27,7 +29,7 @@ export function VisibilitySelect({ skillId }: VisibilitySelectProps) {
           data-testid="skill-builder-visibility-add"
           icon={<IconGlobe />}
         >
-          Add to library
+          {studioT('Add to library')}
         </Button>
       ) : (
         <Button
@@ -37,7 +39,7 @@ export function VisibilitySelect({ skillId }: VisibilitySelectProps) {
           data-testid="skill-builder-visibility-remove"
           icon={<IconLock />}
         >
-          Remove from library
+          {studioT('Remove from library')}
         </Button>
       )}
       {dialog}

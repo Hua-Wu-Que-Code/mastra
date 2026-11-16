@@ -297,6 +297,10 @@ export default defineConfig(({ mode }) => {
           },
           // Custom server routes (e.g. @mastra/livekit's connection-details endpoint)
           // mount at the server root, outside the /api prefix, so forward them too.
+          '/account': {
+            target: `http://${targetHost}:${targetPort}`,
+            changeOrigin: true,
+          },
           '/voice': {
             target: `http://${targetHost}:${targetPort}`,
             changeOrigin: true,

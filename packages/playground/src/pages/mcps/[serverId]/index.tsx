@@ -1,6 +1,8 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { PageHeader } from '@mastra/playground-ui/components/PageHeader';
 import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useParams } from 'react-router';
 import { PageBreadcrumbs } from '@/components/ui/page-breadcrumbs';
@@ -12,6 +14,7 @@ import { mcpServerCrumb, navCrumb } from '@/domains/navigation/crumbs';
 import { ToolDrawer } from '@/domains/tools/components/tool-drawer/tool-drawer';
 
 export const McpServerPage = () => {
+  useLocale();
   const { serverId } = useParams();
   const crumbs = [navCrumb('/mcps'), mcpServerCrumb];
   const { data: mcpServers = [], isLoading } = useMCPServers();
@@ -26,14 +29,19 @@ export const McpServerPage = () => {
         <PageHeader.Title isLoading={isLoading}>{server?.name}</PageHeader.Title>
         {server && (
           <PageHeader.Meta beside>
-            <Badge size="sm">v{server.version_detail.version}</Badge>
+            <Badge size="sm">
+              {studioT('v')}
+              {server.version_detail.version}
+            </Badge>
           </PageHeader.Meta>
         )}
         {server && (
           <PageHeader.Description>
             {hasSse
-              ? 'This MCP server can be accessed through multiple transport methods. Choose the one that best fits your use case.'
-              : 'This MCP server speaks Streamable HTTP only (protocol 2026-07-28).'}
+              ? studioT(
+                  'This MCP server can be accessed through multiple transport methods. Choose the one that best fits your use case.',
+                )
+              : studioT('This MCP server speaks Streamable HTTP only (protocol 2026-07-28).')}
           </PageHeader.Description>
         )}
       </PageHeader>

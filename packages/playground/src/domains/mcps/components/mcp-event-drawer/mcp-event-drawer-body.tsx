@@ -1,4 +1,6 @@
 import { DataPanel } from '@mastra/playground-ui/components/DataPanel';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import { useMcpServerEvents } from '../../hooks/use-mcp-server-events';
 import { McpEventDeliveryBadges } from './mcp-event-delivery-badges';
 import { McpEventLivePanel } from './mcp-event-live-panel';
@@ -13,12 +15,19 @@ export interface McpEventDrawerBodyProps {
 
 /** What the event is (Overview: delivery and schemas) apart from watching it (Playground). */
 export function McpEventDrawerBody({ serverId, eventName }: McpEventDrawerBodyProps) {
+  useLocale();
   const { canExecute, canEdit } = usePermissions();
   const { data, isLoading } = useMcpServerEvents(serverId);
   const event = data?.events.find(candidate => candidate.name === eventName);
 
   if (isLoading) return <DataPanel.LoadingData />;
-  if (!data || !event) return <DataPanel.NoData>This server has no event "{eventName}".</DataPanel.NoData>;
+  if (!data || !event)
+    return (
+      <DataPanel.NoData>
+        {studioT('This server has no event "')}
+        {eventName}".
+      </DataPanel.NoData>
+    );
 
   return (
     <ToolDrawerContent
@@ -27,12 +36,16 @@ export function McpEventDrawerBody({ serverId, eventName }: McpEventDrawerBodyPr
         <div className="grid grid-cols-1 gap-6">
           <McpEventDeliveryBadges delivery={event.delivery} />
           <ToolSchemaSection
-            title="Arguments"
+            title={studioT('Arguments')}
             schema={event.inputSchema}
-            emptyMessage="This event takes no arguments."
+            emptyMessage={studioT('This event takes no arguments.')}
             defaultsAreOptional
           />
-          <ToolSchemaSection title="Payload" schema={event.payloadSchema} emptyMessage="No payload schema defined." />
+          <ToolSchemaSection
+            title={studioT('Payload')}
+            schema={event.payloadSchema}
+            emptyMessage={studioT('No payload schema defined.')}
+          />
         </div>
       }
       canRun={canExecute('mcp')}

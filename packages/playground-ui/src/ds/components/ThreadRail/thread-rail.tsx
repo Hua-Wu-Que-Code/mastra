@@ -1,14 +1,16 @@
 import * as React from 'react';
-
 import type { ThreadRailTurn } from './thread-rail-turns';
-
 import { useOptionalMessageScroller, useOptionalMessageScrollerVisibility } from '@/ds/components/MessageScroller';
+
 import { ScrollArea, ScrollAreaViewport } from '@/ds/components/ScrollArea';
+
 import { Txt } from '@/ds/components/Txt';
 import { IconFileText } from '@/ds/icons/central/IconFileText';
 import { overlaySurfaceStyle } from '@/ds/primitives/raised-surface';
 import { focusRing } from '@/ds/primitives/transitions';
 import { useMeasuredAutoHeight } from '@/hooks/use-measured-auto-height';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 type ThreadRailPreviewPhase = 'hidden' | 'entering' | 'visible' | 'exiting';
@@ -49,12 +51,13 @@ export function ThreadRail({
   turns,
   currentAnchorId,
   visibleMessageIds,
-  label = 'Conversation timeline',
+  label = studioT('Conversation timeline'),
   className,
   maxHeight = 'calc(100dvh - 12rem)',
   scrollAreaClassName,
   onSelect,
 }: ThreadRailProps) {
+  useLocale();
   const railRef = React.useRef<HTMLElement>(null);
   const previewId = React.useId();
   const [previewState, setPreviewState] = React.useState<ThreadRailPreviewState>(DEFAULT_PREVIEW_STATE);
@@ -271,6 +274,7 @@ const ThreadRailItem = React.memo(function ThreadRailItem({
   onHoverChange,
   onSelect,
 }: ThreadRailItemProps) {
+  useLocale();
   const size = getRailItemWidth(distance);
   const tone = getRailItemTone({ distance, active, inView });
 
@@ -282,7 +286,7 @@ const ThreadRailItem = React.memo(function ThreadRailItem({
     >
       <button
         type="button"
-        aria-label={`Jump to ${turn.prompt}`}
+        aria-label={studioT('Jump to {value0}', { value0: turn.prompt })}
         aria-current={active ? 'location' : undefined}
         aria-describedby={previewId}
         data-in-view={inView ? 'true' : undefined}

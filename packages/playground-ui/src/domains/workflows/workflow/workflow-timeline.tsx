@@ -13,9 +13,14 @@ import { IconChevronGrabberVerticalToward } from '@/ds/icons/central/IconChevron
 import { IconGanttChart } from '@/ds/icons/central/IconGanttChart';
 import { raisedSurfaceStyle } from '@/ds/primitives/raised-surface';
 import { useAutoscroll } from '@/hooks/use-autoscroll';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/utils/cn';
 
 export function WorkflowTimeline() {
+  useLocale();
   const { steps } = useCurrentRun();
   const { selectedStepId, hoverStepId, setSelectedStepId, setHoverStepId } = useWorkflowSelectedStep();
   const [now, setNow] = useState(() => Date.now());
@@ -54,14 +59,14 @@ export function WorkflowTimeline() {
         <div className="flex items-center">
           <CollapsibleTrigger
             className="flex min-h-11 min-w-0 flex-1 items-center gap-2 px-3.5 py-2.5 text-caption text-foreground hover:bg-fill-subtle"
-            aria-label={isCollapsed ? 'Expand timeline' : 'Collapse timeline'}
+            aria-label={isCollapsed ? studioT('Expand timeline') : studioT('Collapse timeline')}
           >
             <span>
               <IconGanttChart aria-hidden className="size-icon-md text-muted-foreground" />
             </span>
-            <span>Timeline</span>
+            <span>{studioT('Timeline')}</span>
             <Txt as="span" variant="meta" tone="muted">
-              {rows.length} events
+              <Trans id="{part0} events" values={{ part0: rows.length }} />
             </Txt>
             <span className="ml-auto">
               <DisclosureChevron direction="right" className="size-4" />
@@ -71,7 +76,7 @@ export function WorkflowTimeline() {
             <Button
               variant="ghost"
               size="icon-sm"
-              tooltip={isEnlarged ? 'Restore timeline height' : 'Enlarge timeline'}
+              tooltip={isEnlarged ? studioT('Restore timeline height') : studioT('Enlarge timeline')}
               aria-pressed={isEnlarged}
               onClick={() => setIsEnlarged(!isEnlarged)}
               className="mr-2 shrink-0"

@@ -5,6 +5,8 @@ import { PageLayout } from '@mastra/playground-ui/components/PageLayout';
 import { PermissionDenied } from '@mastra/playground-ui/domains/auth/components/permission-denied';
 import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/session-expired';
 import { IconServer1 } from '@mastra/playground-ui/icons/central/IconServer1';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useDataset } from '@mastra/react/hooks/datasets';
 import type { ReactNode } from 'react';
@@ -13,12 +15,22 @@ import { PageBreadcrumbs } from '@/components/ui/page-breadcrumbs';
 import { EditDatasetForm } from '@/domains/datasets/components/edit-dataset-form';
 import { datasetCrumb, navCrumb } from '@/domains/navigation/crumbs';
 
-const crumbs = [navCrumb('/datasets'), datasetCrumb, { id: 'dataset-edit', label: 'Edit dataset' }];
+const crumbs = [
+  navCrumb('/datasets'),
+  datasetCrumb,
+  {
+    id: 'dataset-edit',
+    get label() {
+      return studioT('Edit dataset');
+    },
+  },
+];
 
 function EditDatasetPageShell({ children }: { children?: ReactNode }) {
+  useLocale();
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Edit dataset</h1>
+      <h1 className="sr-only">{studioT('Edit dataset')}</h1>
       <div />
       <div className="flex h-full items-center justify-center">{children}</div>
     </PageLayout>
@@ -26,6 +38,7 @@ function EditDatasetPageShell({ children }: { children?: ReactNode }) {
 }
 
 function EditDatasetPage() {
+  useLocale();
   const { datasetId } = useParams() as { datasetId: string };
   const navigate = useNavigate();
   const {
@@ -59,8 +72,10 @@ function EditDatasetPage() {
       <EditDatasetPageShell>
         <EmptyState
           tone="error"
-          titleSlot="Failed to load dataset"
-          descriptionSlot={error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'}
+          titleSlot={studioT('Failed to load dataset')}
+          descriptionSlot={
+            error instanceof Error ? error.message : studioT('An unexpected error occurred. Please try again.')
+          }
         />
       </EditDatasetPageShell>
     );
@@ -68,14 +83,14 @@ function EditDatasetPage() {
 
   return (
     <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-      <h1 className="sr-only">Edit dataset</h1>
+      <h1 className="sr-only">{studioT('Edit dataset')}</h1>
       <div />
       <div className="flex h-full items-center justify-center">
         <div className="w-full max-w-2xl overflow-y-auto px-4 py-5">
           <MainHeader className="mb-6 p-0">
             <MainHeader.Column>
               <MainHeader.Title>
-                <IconServer1 /> Edit dataset
+                <IconServer1 /> {' ' + studioT('Edit dataset')}
               </MainHeader.Title>
               <MainHeader.Description>{dataset.name}</MainHeader.Description>
             </MainHeader.Column>

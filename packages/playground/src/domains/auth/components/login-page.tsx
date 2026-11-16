@@ -6,6 +6,8 @@ import { Notice } from '@mastra/playground-ui/components/Notice';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowBoxRight } from '@mastra/playground-ui/icons/central/IconArrowBoxRight';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useSSOLogin, useAuthCapabilities, useCredentialsLogin, useCredentialsSignUp } from '@mastra/react/hooks/auth';
 import { useState } from 'react';
 import { LoginLayout } from './login-layout';
@@ -45,6 +47,7 @@ export type LoginPageProps = {
  * ```
  */
 export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', errorMessage }: LoginPageProps) {
+  useLocale();
   const { data: capabilities, isLoading: isLoadingCapabilities } = useAuthCapabilities();
   const { mutate: credentialsLogin, isPending: isLoginPending, error: loginError } = useCredentialsLogin();
   const { mutate: credentialsSignUp, isPending: isSignUpPending, error: signUpError } = useCredentialsSignUp();
@@ -56,11 +59,11 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
   const [password, setPassword] = useState('');
 
   if (isLoadingCapabilities) {
-    return <div className="text-muted-foreground">Loading...</div>;
+    return <div className="text-muted-foreground">{studioT('Loading...')}</div>;
   }
 
   if (!capabilities?.enabled || !capabilities?.login) {
-    return <div className="text-muted-foreground">Authentication is not configured</div>;
+    return <div className="text-muted-foreground">{studioT('Authentication is not configured')}</div>;
   }
 
   const { login } = capabilities;
@@ -123,7 +126,7 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
 
   return (
     <LoginLayout
-      title={isSignIn ? 'Sign in to Mastra Studio' : 'Create your account'}
+      title={isSignIn ? studioT('Sign in to Mastra Studio') : studioT('Create your account')}
       description={description}
       errorBanner={errorBanner}
     >
@@ -131,14 +134,14 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
         <Form onSubmit={handleCredentialsSubmit}>
           {!isSignIn && (
             <Field>
-              <FieldLabel>Name</FieldLabel>
+              <FieldLabel>{studioT('Name')}</FieldLabel>
               <Input
                 name="name"
                 type="text"
                 autoComplete="name"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Your name"
+                placeholder={studioT('Your name')}
                 variant="default"
                 size="lg"
               />
@@ -146,14 +149,14 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
           )}
 
           <Field>
-            <FieldLabel required>Email</FieldLabel>
+            <FieldLabel required>{studioT('Email')}</FieldLabel>
             <Input
               name="email"
               type="email"
               autoComplete="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={studioT('you@example.com')}
               required
               variant="default"
               size="lg"
@@ -162,14 +165,14 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
           </Field>
 
           <Field>
-            <FieldLabel required>Password</FieldLabel>
+            <FieldLabel required>{studioT('Password')}</FieldLabel>
             <Input
               name="password"
               type="password"
               autoComplete={isSignIn ? 'current-password' : 'new-password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder={isSignIn ? 'Enter your password' : 'Create a password'}
+              placeholder={isSignIn ? studioT('Enter your password') : studioT('Create a password')}
               required
               variant="default"
               size="lg"
@@ -184,17 +187,23 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
           ) : null}
 
           <Button icon={<IconArrowBoxRight />} type="submit" disabled={isPending} className="w-full" size="lg">
-            {isPending ? (isSignIn ? 'Signing in...' : 'Creating account...') : isSignIn ? 'Sign in' : 'Create account'}
+            {isPending
+              ? isSignIn
+                ? studioT('Signing in...')
+                : studioT('Creating account...')
+              : isSignIn
+                ? studioT('Sign in')
+                : studioT('Create account')}
           </Button>
 
           {signUpEnabled && (
             <div className="text-center">
               <Txt as="span" variant="body" tone="muted">
-                {isSignIn ? "Don't have an account? " : 'Already have an account? '}
+                {isSignIn ? studioT("Don't have an account?") + ' ' : studioT('Already have an account?') + ' '}
               </Txt>
               <button type="button" onClick={toggleMode} className="text-foreground hover:underline">
                 <Txt as="span" variant="body" className="block">
-                  {isSignIn ? 'Sign up' : 'Sign in'}
+                  {isSignIn ? studioT('Sign up') : studioT('Sign in')}
                 </Txt>
               </button>
             </div>
@@ -209,7 +218,7 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
           </div>
           <div className="relative flex justify-center">
             <Txt as="span" variant="body" tone="muted" className="bg-sidebar px-2">
-              or continue with
+              {studioT('or continue with')}
             </Txt>
           </div>
         </div>
@@ -218,7 +227,7 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
       {hasSSO && sso && (
         <Button onClick={handleSSOLogin} disabled={isSSOPending} className="w-full" size="lg">
           {sso.icon && <span className="mr-2">{sso.icon}</span>}
-          {isSSOPending ? 'Redirecting...' : sso.text || 'Sign in'}
+          {isSSOPending ? studioT('Redirecting...') : sso.text || studioT('Sign in')}
         </Button>
       )}
     </LoginLayout>

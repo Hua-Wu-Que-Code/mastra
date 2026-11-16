@@ -4,7 +4,6 @@ import type {
   UpdateTraceSignalDefinitionInput,
 } from '@mastra/client-js';
 import { useId, useState } from 'react';
-
 import {
   Dialog,
   DialogAction,
@@ -17,11 +16,13 @@ import {
   DialogTitle,
 } from '@/ds/components/Dialog';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/ds/components/Field';
+
 import { Form } from '@/ds/components/Form';
 import { Input } from '@/ds/components/Input';
 import { Notice } from '@/ds/components/Notice';
 import { Textarea } from '@/ds/components/Textarea';
 import { Txt } from '@/ds/components/Txt';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const reservedNames = new Set([
   'goal',
@@ -85,6 +86,7 @@ export function SignalDefinitionFormDialog({
   onCreate,
   onUpdate,
 }: SignalDefinitionFormDialogProps) {
+  useLocale();
   const formId = useId();
   const [value, setValue] = useState(() => initialValue(definition));
   const [validationErrors, setValidationErrors] = useState<FormErrors>({});
@@ -99,9 +101,11 @@ export function SignalDefinitionFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange} pending={pending}>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>{editing ? 'Edit custom signal' : 'Create custom signal'}</DialogTitle>
+          <DialogTitle>{editing ? studioT('Edit custom signal') : studioT('Create custom signal')}</DialogTitle>
           <DialogDescription>
-            Definitions belong to the organization. Every signal receives all available bounded trace context.
+            {studioT(
+              'Definitions belong to the organization. Every signal receives all available bounded trace context.',
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
@@ -123,28 +127,30 @@ export function SignalDefinitionFormDialog({
             }}
           >
             <Field invalid={Boolean(validationErrors.name)} disabled={editing || pending}>
-              <FieldLabel>Signal name</FieldLabel>
+              <FieldLabel>{studioT('Signal name')}</FieldLabel>
               <Input
                 name="name"
-                placeholder="handoff_quality"
+                placeholder={studioT('handoff_quality')}
                 value={value.name}
                 onChange={event => setField('name', event.target.value)}
               />
-              <FieldDescription>A stable lowercase slug. It cannot be changed after creation.</FieldDescription>
+              <FieldDescription>
+                {studioT('A stable lowercase slug. It cannot be changed after creation.')}
+              </FieldDescription>
               <FieldError>{validationErrors.name}</FieldError>
             </Field>
             <Field invalid={Boolean(validationErrors.displayLabel)} disabled={pending}>
-              <FieldLabel>Display label</FieldLabel>
+              <FieldLabel>{studioT('Display label')}</FieldLabel>
               <Input
                 name="displayLabel"
-                placeholder="Handoff quality"
+                placeholder={studioT('Handoff quality')}
                 value={value.displayLabel}
                 onChange={event => setField('displayLabel', event.target.value)}
               />
               <FieldError>{validationErrors.displayLabel}</FieldError>
             </Field>
             <Field disabled={pending}>
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>{studioT('Description')}</FieldLabel>
               <Textarea
                 name="description"
                 rows={2}
@@ -153,23 +159,26 @@ export function SignalDefinitionFormDialog({
               />
             </Field>
             <Field invalid={Boolean(validationErrors.taskPrompt)} disabled={pending}>
-              <FieldLabel>Signal instructions</FieldLabel>
+              <FieldLabel>{studioT('Signal instructions')}</FieldLabel>
               <Textarea
                 name="taskPrompt"
                 rows={5}
                 value={value.taskPrompt}
-                placeholder="Describe what this signal should evaluate and how the result should be written."
+                placeholder={studioT('Describe what this signal should evaluate and how the result should be written.')}
                 onChange={event => setField('taskPrompt', event.target.value)}
               />
               <FieldDescription>
-                Tell the model what to evaluate and what the signal result should contain. {value.taskPrompt.length}
-                /2,000 characters
+                {studioT('Tell the model what to evaluate and what the signal result should contain.') + ' '}
+                {value.taskPrompt.length}
+                {studioT('/2,000 characters')}
               </FieldDescription>
               <FieldError>{validationErrors.taskPrompt}</FieldError>
             </Field>
             {editing ? (
               <Txt variant="meta" tone="muted">
-                Instruction changes create a new version and apply only to new traces. Existing analysis is unchanged.
+                {studioT(
+                  'Instruction changes create a new version and apply only to new traces. Existing analysis is unchanged.',
+                )}
               </Txt>
             ) : null}
             {error ? (
@@ -180,9 +189,9 @@ export function SignalDefinitionFormDialog({
           </Form>
         </DialogBody>
         <DialogFooter>
-          <DialogCancel>Cancel</DialogCancel>
+          <DialogCancel>{studioT('Cancel')}</DialogCancel>
           <DialogAction type="submit" form={formId}>
-            {editing ? 'Save signal' : 'Create signal'}
+            {editing ? studioT('Save signal') : studioT('Create signal')}
           </DialogAction>
         </DialogFooter>
       </DialogContent>

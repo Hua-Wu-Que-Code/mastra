@@ -1,6 +1,8 @@
 import type { ReactNode, Ref } from 'react';
 import { Txt } from '../Txt';
 import { messageSurfaceStyle } from '@/ds/primitives/message-surface';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export interface AttachmentCardProps {
@@ -15,6 +17,7 @@ export interface AttachmentCardProps {
 
 /** Sent-file presentation. Upload state and removal controls belong to the composer. */
 export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, buttonRef }: AttachmentCardProps) {
+  useLocale();
   const className = cn(
     messageSurfaceStyle,
     'relative isolate block w-64 max-w-full min-w-0 overflow-hidden text-left',
@@ -49,7 +52,7 @@ export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, 
         type="button"
         className={className}
         onClick={onClick}
-        aria-label={`Preview ${name}`}
+        aria-label={studioT('Preview {value0}', { value0: name })}
         title={name}
       >
         {content}
@@ -63,7 +66,7 @@ export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, 
         href={href}
         target="_blank"
         rel="noreferrer noopener"
-        aria-label={`Open ${name}`}
+        aria-label={studioT('Open {value0}', { value0: name })}
         title={name}
       >
         {content}

@@ -2,6 +2,8 @@ import { Button } from '@mastra/playground-ui/components/Button';
 import { IconCall } from '@mastra/playground-ui/icons/central/IconCall';
 import { IconCallCancel } from '@mastra/playground-ui/icons/central/IconCallCancel';
 import { IconLoadingCircle } from '@mastra/playground-ui/icons/central/IconLoadingCircle';
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
+
 import type { VoiceCallControls } from '../types';
 
 export interface VoiceCallButtonProps {
@@ -9,6 +11,7 @@ export interface VoiceCallButtonProps {
 }
 
 export const VoiceCallButton = ({ voiceCall }: VoiceCallButtonProps) => {
+  useLocale();
   const { isLiveKitAvailable } = voiceCall;
 
   if (voiceCall.status === 'idle') {
@@ -17,9 +20,11 @@ export const VoiceCallButton = ({ voiceCall }: VoiceCallButtonProps) => {
         variant="ghost"
         size="icon-md"
         type="button"
-        aria-label="Start voice call"
+        aria-label={studioT('Start voice call')}
         aria-disabled={!isLiveKitAvailable || undefined}
-        tooltip={isLiveKitAvailable ? 'Start voice call' : 'Configure @mastra/livekit to start voice calls.'}
+        tooltip={
+          isLiveKitAvailable ? studioT('Start voice call') : studioT('Configure @mastra/livekit to start voice calls.')
+        }
         data-testid="voice-call-button"
         onClick={() => voiceCall.start()}
       >
@@ -30,7 +35,13 @@ export const VoiceCallButton = ({ voiceCall }: VoiceCallButtonProps) => {
 
   if (voiceCall.status === 'connecting') {
     return (
-      <Button variant="ghost" size="icon-md" type="button" tooltip="Connecting…" data-testid="voice-call-button">
+      <Button
+        variant="ghost"
+        size="icon-md"
+        type="button"
+        tooltip={studioT('Connecting…')}
+        data-testid="voice-call-button"
+      >
         <IconLoadingCircle className="animate-spin" />
       </Button>
     );
@@ -41,7 +52,7 @@ export const VoiceCallButton = ({ voiceCall }: VoiceCallButtonProps) => {
       variant="destructive-ghost"
       size="icon-md"
       type="button"
-      tooltip="End voice call"
+      tooltip={studioT('End voice call')}
       data-testid="voice-call-button"
       onClick={() => voiceCall.stop()}
     >

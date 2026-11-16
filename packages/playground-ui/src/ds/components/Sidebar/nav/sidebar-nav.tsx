@@ -1,11 +1,19 @@
 import type { ComponentPropsWithoutRef } from 'react';
 import { useMaybeSidebarState } from '../root/sidebar-context';
 import { ScrollArea, ScrollAreaViewport } from '@/ds/components/ScrollArea';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type SidebarNavProps = ComponentPropsWithoutRef<'nav'>;
 
-export function SidebarNav({ 'aria-label': ariaLabel = 'Main', children, className, ...props }: SidebarNavProps) {
+export function SidebarNav({
+  'aria-label': ariaLabel = studioT('Main'),
+  children,
+  className,
+  ...props
+}: SidebarNavProps) {
+  useLocale();
   const isMobile = useMaybeSidebarState()?.isMobile ?? false;
 
   return (

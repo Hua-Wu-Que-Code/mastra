@@ -45,6 +45,8 @@ import { IconFileArrowRightIn } from '@/ds/icons/central/IconFileArrowRightIn';
 import { IconFileArrowRightOut } from '@/ds/icons/central/IconFileArrowRightOut';
 import { IconSquareArrowTopRight } from '@/ds/icons/central/IconSquareArrowTopRight';
 import { Icon } from '@/ds/icons/Icon';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatTimestampPrecise } from '@/utils/date-format';
 import { formatDuration, formatDurationPrecise } from '@/utils/duration';
@@ -105,6 +107,7 @@ export function SpanDataPanelView({
   feedbackTabBadge,
   className,
 }: SpanDataPanelViewProps) {
+  useLocale();
   const [ownTab, setOwnTab] = useState<SpanTab>('details');
   const [view, setView] = useState<PayloadView>('rich');
 
@@ -141,7 +144,7 @@ export function SpanDataPanelView({
         ) : (
           <DataPanel.HeaderContent>
             <DataPanel.Heading>
-              <span id={headingId}>Span</span>
+              <span id={headingId}>{studioT('Span')}</span>
             </DataPanel.Heading>
           </DataPanel.HeaderContent>
         )}
@@ -150,8 +153,8 @@ export function SpanDataPanelView({
             <Button
               size="icon-sm"
               variant="ghost"
-              aria-label="Go to trace"
-              tooltip="Go to trace"
+              aria-label={studioT('Go to trace')}
+              tooltip={studioT('Go to trace')}
               className="shrink-0"
               onClick={() => onShowTrace({ traceId, spanId })}
             >
@@ -162,18 +165,25 @@ export function SpanDataPanelView({
             <DataPanel.NextPrevNav
               onPrevious={onPrevious}
               onNext={onNext}
-              previousLabel="Go to previous span"
-              nextLabel="Go to next span"
+              previousLabel={studioT('Go to previous span')}
+              nextLabel={studioT('Go to next span')}
             />
           )}
-          {onClose && <DataPanel.CloseButton icon="x" onClick={onClose} label="Close span" tooltip="Close span" />}
+          {onClose && (
+            <DataPanel.CloseButton
+              icon="x"
+              onClick={onClose}
+              label={studioT('Close span')}
+              tooltip={studioT('Close span')}
+            />
+          )}
         </DataPanel.HeaderActions>
       </DataPanel.Header>
 
       {isLoading ? (
-        <DataPanel.LoadingData>Loading span details...</DataPanel.LoadingData>
+        <DataPanel.LoadingData>{studioT('Loading span details...')}</DataPanel.LoadingData>
       ) : !span ? (
-        <DataPanel.NoData>Span not found.</DataPanel.NoData>
+        <DataPanel.NoData>{studioT('Span not found.')}</DataPanel.NoData>
       ) : (
         <>
           <Tabs<SpanTab> defaultTab="details" value={tab} onValueChange={changeTab}>
@@ -226,6 +236,7 @@ function getRetryCount(span: SpanRecord) {
  * running, or a processor that had to retry. A normal success says nothing extra.
  */
 function SpanIdentity({ span, headingId }: { span: SpanRecord; headingId: string }) {
+  useLocale();
   const durationMs = getSpanDurationMs(span.startedAt, span.endedAt);
   const retries = getRetryCount(span);
 
@@ -247,22 +258,24 @@ function SpanIdentity({ span, headingId }: { span: SpanRecord; headingId: string
         <TooltipTrigger
           render={
             <Txt as="span" variant="body-sm" tone="muted" className="shrink-0 cursor-help tabular-nums" tabIndex={0}>
-              {durationMs == null ? 'Running' : formatDuration(durationMs)}
+              {durationMs == null ? studioT('Running') : formatDuration(durationMs)}
             </Txt>
           }
         />
         <TooltipContent>
-          {durationMs == null ? 'Still running' : `Duration ${formatDurationPrecise(durationMs)}`}
+          {durationMs == null
+            ? studioT('Still running')
+            : studioT('Duration {value0}', { value0: formatDurationPrecise(durationMs) })}
         </TooltipContent>
       </Tooltip>
       {span.error != null && (
         <Badge size="xs" variant="destructive" className="shrink-0">
-          Failed
+          {studioT('Failed')}
         </Badge>
       )}
       {retries > 0 && (
         <Badge size="xs" variant="warning" className="shrink-0 tabular-nums">
-          {retries === 1 ? 'Retried once' : `Retried ${retries}×`}
+          {retries === 1 ? studioT('Retried once') : studioT('Retried {value0}×', { value0: retries })}
         </Badge>
       )}
     </div>
@@ -282,17 +295,18 @@ type PayloadTabProps = { span: SpanRecord; view: PayloadView; onViewChange: (vie
 const PROCESSOR_INPUT_HIDDEN = ['tools', 'toolChoice', 'retryCount', 'stepNumber'];
 
 function InputTab({ span, view, onViewChange }: PayloadTabProps) {
+  useLocale();
   const tools = getSpanTools(span);
   const processorInput = getProcessorInput(span);
   return (
     <Stack>
       <Payload
-        label="Input"
+        label={studioT('Input')}
         raw={span.input}
         hasPreview={hasSpanInputPreview(span, PROCESSOR_INPUT_HIDDEN)}
         view={view}
         onViewChange={onViewChange}
-        empty="No input recorded."
+        empty={studioT('No input recorded.')}
       >
         {processorInput ? (
           <SpanPayloadProcessor value={processorInput} hidden={PROCESSOR_INPUT_HIDDEN} />
@@ -301,7 +315,7 @@ function InputTab({ span, view, onViewChange }: PayloadTabProps) {
         )}
       </Payload>
       {tools && (
-        <Section title="Available tools" count={tools.tools.length}>
+        <Section title={studioT('Available tools')} count={tools.tools.length}>
           <SpanToolList tools={tools.tools} />
         </Section>
       )}
@@ -310,23 +324,24 @@ function InputTab({ span, view, onViewChange }: PayloadTabProps) {
 }
 
 function OutputTab({ span, view, onViewChange }: PayloadTabProps) {
+  useLocale();
   const output = getSpanOutputPayload(span);
   return (
     <Stack>
       <SpanProblem span={span} />
       {isTokenLimitExceeded(span) && (
-        <Notice variant="warning" title="Token Limit Exceeded">
+        <Notice variant="warning" title={studioT('Token Limit Exceeded')}>
           <Notice.Message>{getTokenLimitMessage(span)}</Notice.Message>
         </Notice>
       )}
       {(output != null || span.error == null) && (
         <Payload
-          label="Output"
+          label={studioT('Output')}
           raw={output}
           hasPreview={hasSpanOutputPreview(span)}
           view={view}
           onViewChange={onViewChange}
-          empty="No output recorded."
+          empty={studioT('No output recorded.')}
         >
           <SpanOutputRenderer span={span} />
         </Payload>
@@ -338,6 +353,7 @@ function OutputTab({ span, view, onViewChange }: PayloadTabProps) {
 
 /** Everything looked up rather than read, grouped the same way for every span type. */
 function DetailsTab({ traceId, span }: { traceId: string; span: SpanRecord }) {
+  useLocale();
   const { finishReason, firstToken, speed, ...facts } = getModelFacts(span);
   // Agent runs and model steps record the model they ran natively, not only model-call spans.
   const model = span.model || facts.model;
@@ -364,49 +380,49 @@ function DetailsTab({ traceId, span }: { traceId: string; span: SpanRecord }) {
       <PromptSection span={span} />
 
       {hasModel && (
-        <Section title="Model">
+        <Section title={studioT('Model')}>
           <DataKeysAndValues>
             {model && (
-              <Row label="Model">
+              <Row label={studioT('Model')}>
                 <span className="inline-flex min-w-0 items-center gap-1.5">
                   {provider && <ProviderLogo providerId={provider} size="xs" />}
                   <span className="truncate">{model}</span>
                 </span>
               </Row>
             )}
-            {provider && <Row label="Provider">{provider}</Row>}
-            {finishReason && <Row label="Finish reason">{finishReason}</Row>}
-            {firstToken && <Row label="First token">{firstToken}</Row>}
-            {speed && <Row label="Speed">{speed}</Row>}
+            {provider && <Row label={studioT('Provider')}>{provider}</Row>}
+            {finishReason && <Row label={studioT('Finish reason')}>{finishReason}</Row>}
+            {firstToken && <Row label={studioT('First token')}>{firstToken}</Row>}
+            {speed && <Row label={studioT('Speed')}>{speed}</Row>}
           </DataKeysAndValues>
         </Section>
       )}
 
       {usage && getTokenUsageRows(usage) && (
-        <Section title="Token usage">
+        <Section title={studioT('Token usage')}>
           <SpanTokenUsage usage={usage} />
         </Section>
       )}
 
-      <Section title="Timing">
+      <Section title={studioT('Timing')}>
         <DataKeysAndValues>
-          <Row label="Started">{formatTimestampPrecise(span.startedAt)}</Row>
-          {span.endedAt && <Row label="Ended">{formatTimestampPrecise(span.endedAt)}</Row>}
-          {durationMs != null && <Row label="Duration">{formatDurationPrecise(durationMs)}</Row>}
+          <Row label={studioT('Started')}>{formatTimestampPrecise(span.startedAt)}</Row>
+          {span.endedAt && <Row label={studioT('Ended')}>{formatTimestampPrecise(span.endedAt)}</Row>}
+          {durationMs != null && <Row label={studioT('Duration')}>{formatDurationPrecise(durationMs)}</Row>}
           {span.timeToFirstChunkMs != null && (
-            <Row label="Time to first chunk">{formatDurationPrecise(span.timeToFirstChunkMs)}</Row>
+            <Row label={studioT('Time to first chunk')}>{formatDurationPrecise(span.timeToFirstChunkMs)}</Row>
           )}
           {span.timeToFirstTokenMs != null && (
-            <Row label="Time to first token">{formatDurationPrecise(span.timeToFirstTokenMs)}</Row>
+            <Row label={studioT('Time to first token')}>{formatDurationPrecise(span.timeToFirstTokenMs)}</Row>
           )}
         </DataKeysAndValues>
       </Section>
 
-      <Section title="Identifiers">
+      <Section title={studioT('Identifiers')}>
         <DataKeysAndValues>
           {ids.map(([label, value]) => (value ? <IdRow key={label} label={label} value={value} /> : null))}
           {span.tags && span.tags.length > 0 && (
-            <Row label="Tags">
+            <Row label={studioT('Tags')}>
               <span className="flex flex-wrap gap-1">
                 {span.tags.map(tag => (
                   <Badge key={tag} size="xs" variant="neutral" emphasis="subtle">
@@ -419,8 +435,8 @@ function DetailsTab({ traceId, span }: { traceId: string; span: SpanRecord }) {
         </DataKeysAndValues>
       </Section>
 
-      <JsonSection title="Metadata" value={span.metadata} />
-      <JsonSection title="Attributes" value={span.attributes} />
+      <JsonSection title={studioT('Metadata')} value={span.metadata} />
+      <JsonSection title={studioT('Attributes')} value={span.attributes} />
     </Stack>
   );
 }
@@ -431,13 +447,16 @@ function DetailsTab({ traceId, span }: { traceId: string; span: SpanRecord }) {
  * when the span changed nothing.
  */
 function PromptSection({ span }: { span: SpanRecord }) {
+  useLocale();
   if (getPromptChanges(span).length === 0) return null;
 
   return (
-    <Section title="Prompt">
+    <Section title={studioT('Prompt')}>
       {runsAfterModel(span) && (
         <Txt as="p" variant="body-sm" tone="muted">
-          Ran after the model answered: its changes are kept for later turns and could not shape this request.
+          {studioT(
+            'Ran after the model answered: its changes are kept for later turns and could not shape this request.',
+          )}
         </Txt>
       )}
       <SpanPromptChanges span={span} />
@@ -447,6 +466,7 @@ function PromptSection({ span }: { span: SpanRecord }) {
 
 /** Why the span failed or stopped, above whatever output it still produced. */
 function SpanProblem({ span }: { span: SpanRecord }) {
+  useLocale();
   const outcome = getSpanOutcome(span);
   if (outcome?.tone !== 'error' && outcome?.tone !== 'warning') return null;
   if (span.error != null) {
@@ -464,7 +484,7 @@ function SpanProblem({ span }: { span: SpanRecord }) {
       {tripwire.reason && <p className="break-words whitespace-pre-wrap">{tripwire.reason}</p>}
       {tripwire.retry !== undefined && (
         <Txt as="p" variant="body-sm" tone="muted">
-          {tripwire.retry ? 'The model was asked to retry.' : 'Not retried.'}
+          {tripwire.retry ? studioT('The model was asked to retry.') : studioT('Not retried.')}
         </Txt>
       )}
     </Notice>
@@ -472,10 +492,11 @@ function SpanProblem({ span }: { span: SpanRecord }) {
 }
 
 function ToolCalls({ span }: { span: SpanRecord }) {
+  useLocale();
   const toolCalls = useSpanToolCalls(span);
   if (toolCalls.length === 0) return null;
   return (
-    <Section title="Tool calls" count={toolCalls.length}>
+    <Section title={studioT('Tool calls')} count={toolCalls.length}>
       <SpanToolCallList toolCalls={toolCalls} />
     </Section>
   );
@@ -527,6 +548,7 @@ function Section({
  * collapses through the code block's own fold markers instead of a second disclosure around it.
  */
 function JsonSection({ title, value }: { title: string; value: unknown }) {
+  useLocale();
   if (value == null || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
   return (
     <Section label={title}>
@@ -534,8 +556,8 @@ function JsonSection({ title, value }: { title: string; value: unknown }) {
         <DataPanel.SectionHeading>{title}</DataPanel.SectionHeading>
         <CopyButton
           content={JSON.stringify(value, null, 2)}
-          copyMessage={`${title} copied`}
-          tooltip={`Copy ${title.toLowerCase()} as JSON`}
+          copyMessage={studioT('{value0} copied', { value0: title })}
+          tooltip={studioT('Copy {value0} as JSON', { value0: title.toLowerCase() })}
           variant="ghost"
         />
       </div>
@@ -565,6 +587,7 @@ function Payload({
   empty: string;
   children: ReactNode;
 }) {
+  useLocale();
   if (raw == null) {
     return (
       <Txt variant="body-sm" tone="muted">
@@ -581,7 +604,11 @@ function Payload({
             variant="ghost"
             size="icon-sm"
             aria-pressed={view === 'raw'}
-            tooltip={view === 'raw' ? `Show ${label.toLowerCase()} preview` : `Show ${label.toLowerCase()} as JSON`}
+            tooltip={
+              view === 'raw'
+                ? studioT('Show {value0} preview', { value0: label.toLowerCase() })
+                : studioT('Show {value0} as JSON', { value0: label.toLowerCase() })
+            }
             onClick={() => onViewChange(view === 'raw' ? 'rich' : 'raw')}
           >
             {view === 'raw' ? <IconEyeOpen /> : <IconCodeBrackets />}
@@ -589,8 +616,8 @@ function Payload({
         )}
         <CopyButton
           content={JSON.stringify(raw, null, 2)}
-          copyMessage={`${label} copied`}
-          tooltip={`Copy ${label.toLowerCase()} as JSON`}
+          copyMessage={studioT('{value0} copied', { value0: label })}
+          tooltip={studioT('Copy {value0} as JSON', { value0: label.toLowerCase() })}
           variant="ghost"
         />
       </div>

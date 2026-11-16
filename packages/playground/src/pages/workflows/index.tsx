@@ -9,6 +9,8 @@ import { NoWorkflowsInfo } from '@mastra/playground-ui/domains/workflows/compone
 import { WorkflowsList } from '@mastra/playground-ui/domains/workflows/components/workflows-list/workflows-list';
 import type { WorkflowsSort } from '@mastra/playground-ui/domains/workflows/components/workflows-list/workflows-sort';
 import { IconCalendarClock4 } from '@mastra/playground-ui/icons/central/IconCalendarClock4';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError } from '@mastra/playground-ui/utils/errors';
 import { useWorkflows } from '@mastra/react/hooks/workflows';
 import { useState } from 'react';
@@ -19,6 +21,7 @@ import { navCrumb } from '@/domains/navigation/crumbs';
 const crumbs = [navCrumb('/workflows')];
 
 function Workflows() {
+  useLocale();
   const { data: workflows, isLoading, error } = useWorkflows();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<WorkflowsSort>();
@@ -26,7 +29,7 @@ function Workflows() {
   if (error && is401UnauthorizedError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workflows</h1>
+        <h1 className="sr-only">{studioT('Workflows')}</h1>
         <SessionExpired variant="fill" />
       </PageLayout>
     );
@@ -35,7 +38,7 @@ function Workflows() {
   if (error && is403ForbiddenError(error)) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workflows</h1>
+        <h1 className="sr-only">{studioT('Workflows')}</h1>
         <PermissionDenied variant="fill" resource="workflows" />
       </PageLayout>
     );
@@ -44,8 +47,13 @@ function Workflows() {
   if (error) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workflows</h1>
-        <EmptyState tone="error" variant="fill" titleSlot="Failed to load workflows" descriptionSlot={error.message} />
+        <h1 className="sr-only">{studioT('Workflows')}</h1>
+        <EmptyState
+          tone="error"
+          variant="fill"
+          titleSlot={studioT('Failed to load workflows')}
+          descriptionSlot={error.message}
+        />
       </PageLayout>
     );
   }
@@ -53,7 +61,7 @@ function Workflows() {
   if (Object.keys(workflows || {}).length === 0 && !isLoading) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
-        <h1 className="sr-only">Workflows</h1>
+        <h1 className="sr-only">{studioT('Workflows')}</h1>
         <NoWorkflowsInfo />
       </PageLayout>
     );
@@ -69,20 +77,20 @@ function Workflows() {
               <SearchInput
                 {...listSearchProps}
                 onValueChange={setSearch}
-                label="Search workflows"
-                placeholder="Search by name or description"
+                label={studioT('Search workflows')}
+                placeholder={studioT('Search by name or description')}
               />
             </div>
           </ActionRow.Start>
           <ActionRow.End>
             <Button render={<Link to="/workflows/schedules" />} variant="primary" icon={<IconCalendarClock4 />}>
-              Schedules
+              {studioT('Schedules')}
             </Button>
           </ActionRow.End>
         </ActionRow>
       }
     >
-      <h1 className="sr-only">Workflows</h1>
+      <h1 className="sr-only">{studioT('Workflows')}</h1>
       <WorkflowsList
         workflows={workflows || {}}
         isLoading={isLoading}

@@ -1,8 +1,10 @@
 import { ThemeProvider } from '@mastra/playground-ui/components/ThemeProvider';
+
+import { locale, LOCALE_STORAGE_KEY } from '@mastra/playground-ui/lib/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { StudioSettingsPage } from './index';
 import { authDisabledCapabilities } from '@/domains/configuration/context/__tests__/fixtures/capabilities';
 import {
@@ -32,8 +34,15 @@ async function renderSettingsPage() {
   );
 }
 
+beforeAll(() => {
+  if (window.PointerEvent === undefined) {
+    Object.defineProperty(window, 'PointerEvent', { value: window.MouseEvent, configurable: true });
+  }
+});
+
 afterEach(() => {
   cleanup();
+  act(() => locale.setLocale('en'));
   localStorage.clear();
 });
 
@@ -66,6 +75,23 @@ describe('StudioSettingsPage', () => {
         apiPrefix: '/custom-api',
         headers: {},
       });
+    });
+  });
+});
+
+describe('Studio language settings', () => {
+  describe('when Chinese is selected with unsaved connection edits', () => {
+    it('translates the page and preserves those edits', async () => {
+      await renderSettingsPage();
+      const prefix = screen.getByRole('textbox', { name: 'API prefix' });
+      fireEvent.change(prefix, { target: { value: '/unsaved-api' } });
+      fireEvent.click(screen.getByRole('combobox', { name: 'Language' }));
+      const chinese = await screen.findByRole('option', { name: '中文' });
+      fireEvent.pointerDown(chinese, { pointerType: 'mouse' });
+      fireEvent.click(chinese, { detail: 1 });
+      expect(screen.getByRole('heading', { level: 1, name: '设置' })).toBeDefined();
+      expect(prefix).toHaveProperty('value', '/unsaved-api');
+      expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('zh');
     });
   });
 });

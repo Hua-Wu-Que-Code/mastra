@@ -14,6 +14,8 @@ import { messagePreview, messagePreviewShowsAll } from './message-preview';
 import { agentGlyph } from '@/ds/components/AgentIndicator';
 import { Badge } from '@/ds/components/Badge';
 import { Txt } from '@/ds/components/Txt';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { humanize } from '@/lib/string';
 
 export interface SignalActivityProps {
@@ -46,6 +48,7 @@ const signalKinds = {
 } as const;
 
 function SignalLine({ kind, label, message, detail, mode, defaultOpen }: Omit<SignalActivityProps, 'appearance'>) {
+  useLocale();
   const { Icon } = signalKinds[kind];
   const name = humanize(label);
   const lineHoldsMessage = detail === undefined && messagePreviewShowsAll(message);
@@ -56,7 +59,7 @@ function SignalLine({ kind, label, message, detail, mode, defaultOpen }: Omit<Si
       foldable={!lineHoldsMessage}
       defaultOpen={defaultOpen}
       data-signal-kind={kind}
-      aria-label={`Signal: ${name}`}
+      aria-label={studioT('Signal: {value0}', { value0: name })}
     >
       <ActivityTrigger>
         <ActivityHeader>
@@ -86,6 +89,7 @@ function SignalLine({ kind, label, message, detail, mode, defaultOpen }: Omit<Si
 }
 
 export function SignalActivity({ appearance = 'row', ...signal }: SignalActivityProps) {
+  useLocale();
   if (appearance === 'inline') return <SignalLine {...signal} />;
   const { kind, label, message, detail, mode, defaultOpen } = signal;
   const { Icon, accent, body } = signalKinds[kind];
@@ -99,7 +103,7 @@ export function SignalActivity({ appearance = 'row', ...signal }: SignalActivity
       badges={mode ? <Badge size="xs">{mode}</Badge> : undefined}
       defaultOpen={defaultOpen}
       data-signal-kind={kind}
-      aria-label={`Signal: ${label}`}
+      aria-label={studioT('Signal: {value0}', { value0: label })}
     >
       {message && !lineHoldsMessage && (
         <>

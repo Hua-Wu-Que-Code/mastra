@@ -4,6 +4,8 @@ import { IconChecklist } from '@mastra/playground-ui/icons/central/IconChecklist
 import { IconCircleCheck } from '@mastra/playground-ui/icons/central/IconCircleCheck';
 import { IconLightBulbSimple } from '@mastra/playground-ui/icons/central/IconLightBulbSimple';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { controlStateColorTransition, focusRing } from '@mastra/playground-ui/primitives/transitions';
 import { quietTextHoverInGroup } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
@@ -42,26 +44,42 @@ const EMPTY_MESSAGES: never[] = [];
 
 const STARTER_PROMPTS = [
   {
-    title: 'What can you do?',
-    description: 'Get an overview of capabilities',
+    get title() {
+      return studioT('What can you do?');
+    },
+    get description() {
+      return studioT('Get an overview of capabilities');
+    },
     prompt: 'What can you do? Give me a quick overview of your capabilities.',
     Icon: IconChecklist,
   },
   {
-    title: 'Show available tools',
-    description: 'See what this agent can call',
+    get title() {
+      return studioT('Show available tools');
+    },
+    get description() {
+      return studioT('See what this agent can call');
+    },
     prompt: 'Show me the available tools you can call and explain when you would use each one.',
     Icon: IconMaintenance,
   },
   {
-    title: 'Suggest a task',
-    description: 'Get an example prompt to try',
+    get title() {
+      return studioT('Suggest a task');
+    },
+    get description() {
+      return studioT('Get an example prompt to try');
+    },
     prompt: 'Suggest a useful task I can try with you, including an example prompt.',
     Icon: IconLightBulbSimple,
   },
   {
-    title: 'Run a self-check',
-    description: 'Verify tools are reachable',
+    get title() {
+      return studioT('Run a self-check');
+    },
+    get description() {
+      return studioT('Verify tools are reachable');
+    },
     prompt: 'Run a self-check and verify whether your tools are reachable. Tell me what works and what does not.',
     Icon: IconCircleCheck,
   },
@@ -117,6 +135,7 @@ interface AgentChatPanelChatProps {
 }
 
 export const AgentChatPanelChat = ({ hasBrowser = false }: AgentChatPanelChatProps) => {
+  useLocale();
   const isRunning = useStreamRunning();
   const send = useStreamSend();
   const { draft, setDraft, trimmed, handleFormSubmit, handleKeyDown } = useChatDraft({ onSubmit: send });
@@ -133,7 +152,7 @@ export const AgentChatPanelChat = ({ hasBrowser = false }: AgentChatPanelChatPro
         disabled={isRunning}
         isRunning={isRunning}
         canSubmit={trimmed.length > 0 && !isRunning}
-        placeholder="Message your agent"
+        placeholder={studioT('Message your agent')}
         inputTestId="agent-builder-agent-chat-input"
         submitTestId="agent-builder-agent-chat-submit"
         containerTestId="agent-builder-agent-chat-composer"
@@ -158,6 +177,7 @@ interface AgentChatMessageListProps {
 }
 
 const AgentChatMessageList = ({ onStarterPromptSelect }: AgentChatMessageListProps) => {
+  useLocale();
   const messages = useStreamMessages();
   const isRunning = useStreamRunning();
   const { isConversationLoading, loadPrevious, isLoadingPrevious, agentName, agentDescription, agentAvatarUrl } =
@@ -182,7 +202,7 @@ const AgentChatMessageList = ({ onStarterPromptSelect }: AgentChatMessageListPro
             </div>
             <div className="starter-chip" style={{ animationDelay: '150ms' }}>
               <Txt variant="heading" tone="ink" style={{ viewTransitionName: 'agent-name' }}>
-                {agentName ?? 'your agent'}
+                {agentName ?? studioT('your agent')}
               </Txt>
             </div>
             {agentDescription ? (

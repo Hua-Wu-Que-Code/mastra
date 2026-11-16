@@ -8,6 +8,8 @@ import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSqua
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
 import { focusRing } from '@/ds/primitives/transitions';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/utils/cn';
 
 export interface WorkflowEntityHeaderProps {
@@ -16,6 +18,7 @@ export interface WorkflowEntityHeaderProps {
 }
 
 export const WorkflowEntityHeader = ({ workflowId, requestContext }: WorkflowEntityHeaderProps) => {
+  useLocale();
   const { data: workflow, isLoading } = useWorkflow({
     workflowId: workflowId,
     requestContext: requestContext,
@@ -36,16 +39,17 @@ export const WorkflowEntityHeader = ({ workflowId, requestContext }: WorkflowEnt
                 <Badge icon={<IconSquareBehindSquare1 />}>{workflowId}</Badge>
               </button>
             </TooltipTrigger>
-            <TooltipContent>Copy workflow ID for use in code</TooltipContent>
+            <TooltipContent>{studioT('Copy workflow ID for use in code')}</TooltipContent>
           </Tooltip>
 
           <Badge>
-            {stepsCount} step{stepsCount === 1 ? '' : 's'}
+            {stepsCount} {' ' + studioT('step')}
+            {stepsCount === 1 ? '' : studioT('English plural suffix')}
           </Badge>
 
           {workflow?.isProcessorWorkflow && (
             <Badge icon={<IconChip />} variant="purple">
-              Processor
+              {studioT('Processor')}
             </Badge>
           )}
 
@@ -55,14 +59,16 @@ export const WorkflowEntityHeader = ({ workflowId, requestContext }: WorkflowEnt
                 render={<span />}
                 role="note"
                 tabIndex={0}
-                aria-label="Dynamic workflow"
+                aria-label={studioT('Dynamic workflow')}
                 className={cn('rounded-[7px]', focusRing)}
               >
                 <Badge icon={<IconServer1 />} variant="blue">
-                  Dynamic
+                  {studioT('Dynamic')}
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent>Registered via the dynamic-workflows API and saved in storage</TooltipContent>
+              <TooltipContent>
+                {studioT('Registered via the dynamic-workflows API and saved in storage')}
+              </TooltipContent>
             </Tooltip>
           )}
         </div>

@@ -7,16 +7,59 @@ import { IconPlay } from '@/ds/icons/central/IconPlay';
 import { IconShield2 } from '@/ds/icons/central/IconShield2';
 import { IconSidebarSimpleRightWide } from '@/ds/icons/central/IconSidebarSimpleRightWide';
 import { IconStepForwards } from '@/ds/icons/central/IconStepForwards';
+import { t as studioT } from '@/lib/i18n';
 
 const actions = {
-  nested: { icon: IconSidebarSimpleRightWide, label: 'View nested graph', activeLabel: 'Hide nested graph' },
-  map: { icon: IconCodeBrackets, label: 'Map config', activeLabel: 'Hide map config' },
-  timeTravel: { icon: IconClock, label: 'Time travel' },
-  runStep: { icon: IconPlay, label: 'Run step' },
-  continueRun: { icon: IconStepForwards, label: 'Continue run' },
-  resumeData: { icon: IconArrowRotateCounterClockwise, label: 'Resume data' },
-  error: { icon: IconExclamationCircle, label: 'Error' },
-  tripwire: { icon: IconShield2, label: 'Tripwire' },
+  nested: {
+    icon: IconSidebarSimpleRightWide,
+    get label() {
+      return studioT('View nested graph');
+    },
+    activeLabel: 'Hide nested graph',
+  },
+  map: {
+    icon: IconCodeBrackets,
+    get label() {
+      return studioT('Map config');
+    },
+    activeLabel: 'Hide map config',
+  },
+  timeTravel: {
+    icon: IconClock,
+    get label() {
+      return studioT('Time travel');
+    },
+  },
+  runStep: {
+    icon: IconPlay,
+    get label() {
+      return studioT('Run step');
+    },
+  },
+  continueRun: {
+    icon: IconStepForwards,
+    get label() {
+      return studioT('Continue run');
+    },
+  },
+  resumeData: {
+    icon: IconArrowRotateCounterClockwise,
+    get label() {
+      return studioT('Resume data');
+    },
+  },
+  error: {
+    icon: IconExclamationCircle,
+    get label() {
+      return studioT('Error');
+    },
+  },
+  tripwire: {
+    icon: IconShield2,
+    get label() {
+      return studioT('Tripwire');
+    },
+  },
 };
 
 export interface WorkflowStepActionProps {

@@ -6,6 +6,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mastr
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconDotGrid2x3 } from '@mastra/playground-ui/icons/central/IconDotGrid2x3';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useEffect, useState } from 'react';
 import { AgentMetadataModelSwitcher } from './agent-metadata-model-switcher';
 
@@ -117,25 +119,28 @@ const AgentMetadataReadOnlyModelList = ({
 }: {
   modelList: AgentMetadataModelListType;
   showDynamicListNote: boolean;
-}) => (
-  <div className="flex flex-col gap-2">
-    {showDynamicListNote && (
-      <Txt variant="caption" tone="muted">
-        This model list is dynamically set and cannot be edited in Studio.
-      </Txt>
-    )}
-    {modelList.map(modelConfig => (
-      <div key={modelConfig.id} className="flex items-center gap-2 rounded-lg bg-sidebar p-2">
-        <Txt as="span" variant="caption" tone="ink" className="min-w-0 flex-1 truncate">
-          {modelConfig.model.provider}/{modelConfig.model.modelId}
+}) => {
+  useLocale();
+  return (
+    <div className="flex flex-col gap-2">
+      {showDynamicListNote && (
+        <Txt variant="caption" tone="muted">
+          {studioT('This model list is dynamically set and cannot be edited in Studio.')}
         </Txt>
-        <Txt as="span" variant="meta" tone="muted" className="shrink-0">
-          {modelConfig.enabled === false ? 'Disabled' : 'Enabled'}
-        </Txt>
-      </div>
-    ))}
-  </div>
-);
+      )}
+      {modelList.map(modelConfig => (
+        <div key={modelConfig.id} className="flex items-center gap-2 rounded-lg bg-sidebar p-2">
+          <Txt as="span" variant="caption" tone="ink" className="min-w-0 flex-1 truncate">
+            {modelConfig.model.provider}/{modelConfig.model.modelId}
+          </Txt>
+          <Txt as="span" variant="meta" tone="muted" className="shrink-0">
+            {modelConfig.enabled === false ? studioT('Disabled') : studioT('Enabled')}
+          </Txt>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 interface AgentMetadataModelListItemProps {
   modelConfig: AgentMetadataModelListType[number];
@@ -152,6 +157,7 @@ const AgentMetadataModelListItem = ({
   dragHandleProps,
   isLastEnabled,
 }: AgentMetadataModelListItemProps) => {
+  useLocale();
   return (
     <div className="rounded-lg bg-sidebar state-layer">
       <div className="flex items-center gap-2 p-2">
@@ -179,7 +185,7 @@ const AgentMetadataModelListItem = ({
                 </span>
               </TooltipTrigger>
               <TooltipContent>
-                <p>At least one model must be enabled</p>
+                <p>{studioT('At least one model must be enabled')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

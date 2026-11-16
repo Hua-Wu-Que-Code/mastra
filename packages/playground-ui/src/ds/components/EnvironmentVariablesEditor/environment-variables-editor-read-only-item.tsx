@@ -1,8 +1,8 @@
 import { use, useState } from 'react';
 import type { ReactNode } from 'react';
-
 import { EnvironmentVariablesEditorReadOnlyListContext } from './environment-variables-editor-context';
 import type { EnvironmentVariablesEditorReadOnlyItemProps } from './environment-variables-editor.types';
+
 import { Button } from '@/ds/components/Button';
 import { DataList } from '@/ds/components/DataList/data-list';
 import { Txt } from '@/ds/components/Txt';
@@ -12,6 +12,8 @@ import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
 import { IconEyeSlash } from '@/ds/icons/central/IconEyeSlash';
 import { IconSquareBehindSquare1 } from '@/ds/icons/central/IconSquareBehindSquare1';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export function EnvironmentVariablesEditorReadOnlyItem({
@@ -19,7 +21,7 @@ export function EnvironmentVariablesEditorReadOnlyItem({
   name,
   value,
   copyValue,
-  copyLabel = 'Copy value',
+  copyLabel = studioT('Copy value'),
   updatedAt,
   revealed,
   defaultRevealed,
@@ -28,6 +30,7 @@ export function EnvironmentVariablesEditorReadOnlyItem({
   icon,
   ...props
 }: EnvironmentVariablesEditorReadOnlyItemProps) {
+  useLocale();
   const { showIcon } = use(EnvironmentVariablesEditorReadOnlyListContext);
   const [uncontrolledRevealed, setUncontrolledRevealed] = useState(defaultRevealed ?? false);
   const { isCopied, copyToClipboard } = useCopyToClipboard({ copiedDuration: 1500, showToast: false });
@@ -74,7 +77,7 @@ export function EnvironmentVariablesEditorReadOnlyItem({
               type="button"
               variant="ghost"
               size="icon-sm"
-              aria-label={isRevealed ? 'Hide value' : 'Show value'}
+              aria-label={isRevealed ? studioT('Hide value') : studioT('Show value')}
               onClick={toggleRevealed}
             >
               {isRevealed ? <IconEyeSlash aria-hidden /> : <IconEyeOpen aria-hidden />}
@@ -94,8 +97,8 @@ export function EnvironmentVariablesEditorReadOnlyItem({
                   type="button"
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={isCopied ? 'Copied value' : copyLabel}
-                  tooltip={isCopied ? 'Copied' : copyLabel}
+                  aria-label={isCopied ? studioT('Copied value') : copyLabel}
+                  tooltip={isCopied ? studioT('Copied') : copyLabel}
                   className="absolute right-0 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100"
                   onClick={handleCopyValue}
                 >

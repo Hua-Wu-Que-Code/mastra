@@ -3,6 +3,8 @@
 import { CodeEditor } from '@mastra/playground-ui/components/CodeEditor';
 import { Field, FieldError, FieldLabel } from '@mastra/playground-ui/components/Field';
 import { Switch } from '@mastra/playground-ui/components/Switch';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import type { JSONSchema7 } from 'json-schema';
 import { useState, useEffect, useRef } from 'react';
@@ -25,6 +27,7 @@ interface SchemaFieldProps {
  * Supports auto-population from sourceSchema when autoPopulate is true.
  */
 export function SchemaField({ label, value, onChange, error, sourceSchema, autoPopulate = false }: SchemaFieldProps) {
+  useLocale();
   const isEnabled = value !== null && value !== undefined;
   const [jsonText, setJsonText] = useState(() => (value ? JSON.stringify(value, null, 2) : ''));
   const [parseError, setParseError] = useState<string | null>(null);
@@ -93,7 +96,7 @@ export function SchemaField({ label, value, onChange, error, sourceSchema, autoP
 
       {isEnabled && (
         <Field invalid={Boolean(errorMessage)}>
-          <FieldLabel className="sr-only">{`${label} JSON`}</FieldLabel>
+          <FieldLabel className="sr-only">{studioT('{value0} JSON', { value0: label })}</FieldLabel>
           <CodeEditor
             value={jsonText}
             onChange={handleJsonChange}

@@ -12,6 +12,8 @@ import { SearchInput } from '@mastra/playground-ui/components/SearchInput';
 import { Spinner } from '@mastra/playground-ui/components/Spinner';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconFileText } from '@mastra/playground-ui/icons/central/IconFileText';
+
+import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { cn } from '@mastra/playground-ui/utils/cn';
 
 import { useState } from 'react';
@@ -26,6 +28,7 @@ interface PromptBlockPickerDialogProps {
 }
 
 export function PromptBlockPickerDialog({ open, onOpenChange, onSelect }: PromptBlockPickerDialogProps) {
+  useLocale();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const { data, isLoading, isPlaceholderData } = useStoredPromptBlocks({
@@ -75,12 +78,12 @@ export function PromptBlockPickerDialog({ open, onOpenChange, onSelect }: Prompt
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Select a prompt block</DialogTitle>
-          <DialogDescription>Choose a saved prompt block to reference</DialogDescription>
+          <DialogTitle>{studioT('Select a prompt block')}</DialogTitle>
+          <DialogDescription>{studioT('Choose a saved prompt block to reference')}</DialogDescription>
           <SearchInput
-            label="Search prompt blocks"
+            label={studioT('Search prompt blocks')}
             className="mt-2"
-            placeholder="Search prompt blocks"
+            placeholder={studioT('Search prompt blocks')}
             value={search}
             onValueChange={handleSearchChange}
           />
@@ -89,12 +92,12 @@ export function PromptBlockPickerDialog({ open, onOpenChange, onSelect }: Prompt
           {isLoading ? (
             <div className="flex flex-col items-center justify-center gap-2 py-5 text-muted-foreground">
               <Spinner />
-              <Txt variant="caption">Loading prompt blocks...</Txt>
+              <Txt variant="caption">{studioT('Loading prompt blocks...')}</Txt>
             </div>
           ) : filtered.length === 0 ? (
             <EmptyState
               iconSlot={<IconFileText />}
-              titleSlot={search ? 'No matching prompt blocks' : 'No prompt blocks available'}
+              titleSlot={search ? studioT('No matching prompt blocks') : studioT('No prompt blocks available')}
             />
           ) : (
             <div className="flex flex-col gap-1">

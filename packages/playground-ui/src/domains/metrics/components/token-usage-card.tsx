@@ -14,15 +14,42 @@ import { MetricsCard } from '@/ds/components/MetricsCard';
 import { MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
 import { MetricsStackedBarChart } from '@/ds/components/MetricsStackedBarChart';
+import { t as studioT } from '@/lib/i18n';
 
 type View = 'tokens' | 'cost';
 
 const TOKEN_SERIES: MetricsLineChartSeries[] = [
-  { dataKey: 'input', label: 'Input', color: CHART_COLORS.green },
-  { dataKey: 'cacheRead', label: 'Cache read', color: CHART_COLORS.violet },
-  { dataKey: 'output', label: 'Output', color: CHART_COLORS.sky },
+  {
+    dataKey: 'input',
+    get label() {
+      return studioT('Input');
+    },
+    color: CHART_COLORS.green,
+  },
+  {
+    dataKey: 'cacheRead',
+    get label() {
+      return studioT('Cache read');
+    },
+    color: CHART_COLORS.violet,
+  },
+  {
+    dataKey: 'output',
+    get label() {
+      return studioT('Output');
+    },
+    color: CHART_COLORS.sky,
+  },
 ];
-const COST_SERIES: MetricsLineChartSeries[] = [{ dataKey: 'cost', label: 'Cost', color: CHART_COLORS.green }];
+const COST_SERIES: MetricsLineChartSeries[] = [
+  {
+    dataKey: 'cost',
+    get label() {
+      return studioT('Cost');
+    },
+    color: CHART_COLORS.green,
+  },
+];
 
 const TITLE: Record<View, string> = {
   tokens: 'Token usage',

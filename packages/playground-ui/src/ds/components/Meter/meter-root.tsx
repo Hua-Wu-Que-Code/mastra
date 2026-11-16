@@ -7,6 +7,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip
 import { Txt } from '@/ds/components/Txt/Txt';
 import { focusRing, transitions } from '@/ds/primitives/transitions';
 import { formatCost, formatFullNumber } from '@/lib/cost';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
+
+import { Trans } from '@/lib/i18n/trans';
 import { cn } from '@/lib/utils';
 
 export type MeterProps = Omit<ComponentProps<'span'>, 'children'> & {
@@ -46,6 +50,7 @@ export function MeterRoot({
   'aria-describedby': describedBy,
   ...props
 }: MeterProps) {
+  useLocale();
   const captionId = useId();
   const reading = readingOf(value, max);
   const showCaption =
@@ -99,7 +104,7 @@ export function MeterRoot({
             tone="muted"
             className="ml-auto shrink-0 whitespace-nowrap tabular-nums"
           >
-            {formatCost(paidFromCredits)} paid from credits
+            <Trans id="{part0} paid from credits" values={{ part0: formatCost(paidFromCredits) }} />
           </Txt>
         )}
       </span>
@@ -233,12 +238,13 @@ function MeterKey({
   overClassName: string;
   children: ReactNode;
 }) {
+  useLocale();
   const { over, rest } = reading;
   return (
     <div data-slot="meter-key" className={cn('flex min-w-40 flex-col gap-1', sourceColorClassName)}>
       <MeterPartContext value={{ part: 'key', format }}>{children}</MeterPartContext>
-      {rest > 0 && <MeterKeyRow swatch="bg-fill-strong" label="Remaining" amount={format(rest)} />}
-      {over > 0 && <MeterKeyRow swatch={overClassName} label="Over allowance" amount={format(over)} />}
+      {rest > 0 && <MeterKeyRow swatch="bg-fill-strong" label={studioT('Remaining')} amount={format(rest)} />}
+      {over > 0 && <MeterKeyRow swatch={overClassName} label={studioT('Over allowance')} amount={format(over)} />}
     </div>
   );
 }

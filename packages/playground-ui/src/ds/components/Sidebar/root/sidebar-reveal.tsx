@@ -4,6 +4,8 @@ import { flushSync } from 'react-dom';
 import { useSidebar } from './sidebar-context';
 import { REVEAL_EASE, useRevealGesture } from './use-reveal-gesture';
 import { focusRingInset } from '@/ds/primitives/transitions';
+
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 import './sidebar-reveal.css';
@@ -18,6 +20,7 @@ type SidebarRevealProps = {
 };
 
 export function SidebarReveal({ children, className, onClick }: SidebarRevealProps) {
+  useLocale();
   const { scopeRef, openMobile, mobileTriggerRef, setOpenMobile, setMobileDrawerPresent } = useSidebar();
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -74,7 +77,7 @@ export function SidebarReveal({ children, className, onClick }: SidebarRevealPro
       onKeyDown={closeOnEscape}
       role={openMobile ? 'dialog' : undefined}
       aria-modal={openMobile || undefined}
-      aria-label={openMobile ? 'Navigation' : undefined}
+      aria-label={openMobile ? studioT('Navigation') : undefined}
       data-mobile-mode="takeover"
       inert={!openMobile}
       aria-hidden={!openMobile || undefined}
@@ -96,7 +99,7 @@ export function SidebarReveal({ children, className, onClick }: SidebarRevealPro
       <button
         ref={scrimRef}
         type="button"
-        aria-label="Close navigation menu"
+        aria-label={studioT('Close navigation menu')}
         data-sidebar-reveal-layer="scrim"
         onClick={() => setOpenMobile(false)}
         className={cn('fixed inset-0 z-2 bg-fill', focusRingInset)}
