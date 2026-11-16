@@ -1,0 +1,30 @@
+{
+  "name": "altflow-mastra-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node start-local.mjs",
+    "typecheck": "tsc --noEmit",
+    "verify": "node scripts/verify.mjs",
+    "dev:auth": "node start-auth.mjs",
+    "test": "node --test scripts/modelhub-gateway.test.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "2.0.88",
+    "@huggingface/transformers": "3.8.1",
+    "@mastra/core": "1.83.0",
+    "@mastra/duckdb": "1.19.0",
+    "@mastra/editor": "0.17.1",
+    "@mastra/libsql": "1.30.0",
+    "@mastra/mcp": "2.9.0",
+    "@mastra/memory": "1.41.1",
+    "@mastra/observability": "1.24.0",
+    "@mastra/server": "1.83.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.9",
+    "mastra": "1.39.0",
+    "typescript": "^5.9.3"
+  }
+}

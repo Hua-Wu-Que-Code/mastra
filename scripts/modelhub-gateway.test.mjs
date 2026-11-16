@@ -1,0 +1,65 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { ModelHubGateway } from '../src/mastra/modelhub-gateway.ts';
+import { modelHubFixture } from './modelhub-fixture.mjs';
+
+test('ModelHub catalog drives listing and real SDK request routing, including cached instances', async t => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  const gateway = new ModelHubGateway({ apiKey: 'server-test-key', baseURL: hub.baseURL });
+  const providers = await gateway.fetchProviders();
+  assert.deepEqual(Object.keys(providers), ['altflow']);
+  assert.deepEqual(providers.altflow.models, ['deepseek-v4-pro', 'qwen3.8-max']);
+  assert.equal(JSON.stringify(gateway).includes('server-test-key'), false);
+  await assert.rejects(gateway.resolveLanguageModel({ modelId: 'gpt-external' }));
+  const model = await gateway.resolveLanguageModel({ modelId: 'qwen3.8-max' });
+  const generate = () =>
+    model.doGenerate({
+      prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+      providerOptions: { altflow: { reasoning_effort: 'wrong', modelhub_thinking_budget: 99 } },
+    });
+  await generate();
+  assert.equal(hub.state.requests[0].authorization, 'Bearer server-test-key');
+  assert.equal(hub.state.requests[0].body.model, 'internal-qwen-route');
+  assert.equal(hub.state.requests[0].body.modelhub_reasoning_effort, 'high');
+  assert.equal(hub.state.requests[0].body.modelhub_thinking_budget, 8000);
+  assert.equal('reasoning_effort' in hub.state.requests[0].body, false);
+  assert.equal(hub.state.requests[0].body.metadata.modelhub_product_model, 'qwen3.8-max');
+  assert.equal(hub.state.catalogs, 1);
+  const now = Date.now();
+  t.mock.timers.enable({ apis: ['Date'], now });
+  t.mock.timers.setTime(now + 60001);
+  hub.state.catalog.config_version = 2;
+  hub.state.catalog.free_chat_models[1].thinking_options[0].target = 'new-qwen-route';
+  await generate();
+  assert.equal(hub.state.requests[1].body.model, 'new-qwen-route');
+  assert.equal(hub.state.requests[1].body.metadata.modelhub_catalog_version, '2');
+  t.mock.timers.setTime(Date.now() + 60001);
+  hub.state.unavailable = true;
+  await generate();
+  assert.equal(hub.state.requests[2].body.model, 'new-qwen-route', 'temporary failure retains validated snapshot');
+});
+
+test('invalid or unavailable first catalog fails closed', async t => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  for (const corrupt of [
+    catalog => {
+      catalog.free_chat_models = [];
+    },
+    catalog => {
+      catalog.free_chat_models.push(catalog.free_chat_models[0]);
+    },
+    catalog => {
+      catalog.free_chat_models[0].default_thinking_level = 'missing';
+    },
+  ]) {
+    const original = structuredClone(hub.state.catalog);
+    corrupt(hub.state.catalog);
+    await assert.rejects(new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL }).fetchProviders());
+    hub.state.catalog = original;
+  }
+  hub.state.unavailable = true;
+  await assert.rejects(new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL }).fetchProviders());
+  assert.throws(() => new ModelHubGateway({ apiKey: 'test-key', baseURL: 'http://untrusted.example/v1' }));
+});
