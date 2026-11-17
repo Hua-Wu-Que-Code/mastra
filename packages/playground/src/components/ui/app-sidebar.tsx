@@ -18,6 +18,7 @@ import { ImpersonationBanner } from '@/domains/auth/components/impersonation-ban
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 import { getPermissionForRoute, hasRoutePermission } from '@/domains/auth/route-permissions';
 import { useIsCmsAvailable } from '@/domains/cms/hooks/use-is-cms-available';
+import { SidebarConversations } from '@/domains/navigation/components/sidebar-conversations';
 import { useNavigationCommand } from '@/lib/command';
 import { useMastraPlatform } from '@/lib/mastra-platform/hooks/use-mastra-platform';
 import { getIsLinkActive } from '@/lib/nav/get-is-link-active';
@@ -149,6 +150,7 @@ export function AppSidebar() {
 
       <Sidebar.Nav>
         <Sidebar.Sections sections={sections} visibilityStorageKey="mastra:studio:sidebar-visibility" />
+        <SidebarConversations />
       </Sidebar.Nav>
 
       <Sidebar.Footer>

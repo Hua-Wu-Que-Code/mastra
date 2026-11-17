@@ -1,4 +1,17 @@
 export const en = {
+  Projects: 'Projects',
+  'No projects': 'No projects',
+  'New project': 'New project',
+  'Rename project': 'Rename project',
+  'Project name': 'Project name',
+  'Project actions': 'Project actions',
+  'Move to recent': 'Move to recent',
+  'Ungroup project': 'Ungroup project',
+  'Move conversations here from their actions menu.': 'Move conversations here from their actions menu.',
+  'Loading conversations': 'Loading conversations',
+  'Failed to load conversations': 'Failed to load conversations',
+  'No recent conversations': 'No recent conversations',
+
   Download: 'Download',
   Storage: 'Storage',
   'See how much storage you are using and manage your files.':

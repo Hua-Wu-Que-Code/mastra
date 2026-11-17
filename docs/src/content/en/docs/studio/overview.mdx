@@ -60,6 +60,16 @@ Use [Editor](/docs/studio/editor) to let non-technical team members iterate on a
 
 Use [Agent Builder](https://agent-builder.mastra.ai) to create and manage fully stored agents through a separate browser-based interface.
 
+#### Conversation sidebar
+
+The main sidebar lists conversations across agents under **Recent**, ordered by latest activity. Open a conversation to continue chatting, or select **New Thread** to start another. Generated titles update while the conversation stays open.
+
+Use the conversation's actions menu to pin, rename, or delete it. Rename and delete actions require permission to edit or delete memory. Older conversations remain available in the list.
+
+To organize conversations, select **New project** beside **Projects**, enter a name, then choose the project from a conversation's actions menu. Select **Move to recent** to remove a conversation from its project. **Ungroup project** returns its conversations to **Recent** without deleting them. Both sections and individual projects can be collapsed.
+
+Project groups, pinned conversations, and collapse choices are saved in the current browser for each server and signed-in user. They don't sync between devices. Conversation messages remain in the server's configured memory storage. Press `[` to toggle the main sidebar. `{` also toggles it on agent chat pages.
+
 #### Models panel
 
 Open an agent's **Models** panel to view its primary model and fallback models in priority order. For static model lists, you can reorder models, enable or disable fallbacks, and change the provider or model. The panel stays synchronized when Studio refetches the agent.

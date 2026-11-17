@@ -3,12 +3,13 @@ import type { GetMemoryStatusResponse } from '@mastra/client-js';
 import type { StorageThreadType } from '@mastra/core/memory';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import AgentPage from '../thread';
+import { emptyThreadTracesList } from './fixtures/thread-traces';
 import { StudioConfigContext } from '@/domains/configuration';
 import { memoryDisabled, memoryEnabled, v2Agent } from '@/lib/ai-ui/__tests__/fixtures/agent';
 import { server } from '@/test/msw-server';
@@ -39,6 +40,8 @@ const useHandlers = (
   { agentGate, memory = memoryEnabled }: { agentGate?: Promise<void>; memory?: GetMemoryStatusResponse } = {},
 ) => {
   server.use(
+    http.get(`${BASE_URL}/api/channels/platforms`, () => HttpResponse.json([])),
+    http.get(`${BASE_URL}/api/observability/traces`, () => HttpResponse.json(emptyThreadTracesList)),
     http.get(`${BASE_URL}/api/agents/${AGENT_ID}`, async () => {
       await agentGate;
       return HttpResponse.json({ ...v2Agent, metadata: { suggestedPrompts: [SUGGESTED_PROMPT] } });
@@ -115,14 +118,12 @@ describe('new thread landing', () => {
   });
 
   describe('when visiting /new and the agent has memory but no threads', () => {
-    it('keeps the panel mounted but collapsed so the memory card stays reachable', async () => {
+    it('keeps the landing wide after conversations move to the main sidebar', async () => {
       useHandlers([]);
       renderPage();
 
       expect(await screen.findByRole('button', { name: SUGGESTED_PROMPT })).not.toBeNull();
-      // The panel starts collapsed (a layout concern jsdom cannot observe; covered by
-      // e2e/tests/agents/observational-memory.spec.ts) but stays mounted.
-      expect(screen.getByTestId('left-slot')).not.toBeNull();
+      expect(screen.queryByTestId('left-slot')).toBeNull();
     });
 
     it('renders the story greeting', async () => {
@@ -135,13 +136,13 @@ describe('new thread landing', () => {
   });
 
   describe('when visiting /new and the agent already has threads', () => {
-    it('shows the threads panel', async () => {
+    it('does not duplicate the conversation list inside the chat page', async () => {
       useHandlers([existingThread]);
       renderPage();
 
       expect(await screen.findByRole('button', { name: SUGGESTED_PROMPT })).not.toBeNull();
-      await waitFor(() => expect(screen.getByTestId('memory-sidebar-thread-layer')).not.toBeNull());
-      expect(screen.getByTestId('left-slot')).not.toBeNull();
+      expect(screen.queryByTestId('left-slot')).toBeNull();
+      expect(screen.queryByText('Earlier chat')).toBeNull();
     });
   });
 });

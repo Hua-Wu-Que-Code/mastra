@@ -1,5 +1,6 @@
 import { useSidebar } from '@mastra/playground-ui/components/Sidebar';
 import { useKeydown } from '@mastra/playground-ui/keyboard/use-keydown';
+import { useLocation } from 'react-router';
 
 /**
  * `[` toggles the main sidebar. Lives inside `Layout` because it needs the
@@ -8,7 +9,16 @@ import { useKeydown } from '@mastra/playground-ui/keyboard/use-keydown';
 export const SidebarShortcuts = () => {
   const { toggleSidebar } = useSidebar();
 
-  useKeydown({ '[': toggleSidebar }, { repeat: false });
+  const { pathname } = useLocation();
+  useKeydown(
+    {
+      '[': toggleSidebar,
+      '{': () => {
+        if (/^\/agents\/[^/]+\/threads\//.test(pathname)) toggleSidebar();
+      },
+    },
+    { repeat: false },
+  );
 
   return null;
 };

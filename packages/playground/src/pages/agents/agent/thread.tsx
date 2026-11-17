@@ -13,10 +13,10 @@ import { useMastraClient } from '@mastra/react';
 import { useAgent } from '@mastra/react/hooks/agents';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import { useMemory, useThreads } from '@mastra/react/hooks/memory';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useAccount } from '@/domains/account/account-context';
-import { AgentSidebar } from '@/domains/agents/agent-sidebar';
 import { AgentChat } from '@/domains/agents/components/agent-chat';
 import { AgentLayout } from '@/domains/agents/components/agent-layout';
 import {
@@ -24,16 +24,12 @@ import {
   AgentLandingLoadingSkeleton,
 } from '@/domains/agents/components/agent-loading-skeletons';
 import { AgentUnavailable } from '@/domains/agents/components/agent-unavailable';
-import { ChatThreads } from '@/domains/agents/components/chat-threads';
-import { SidebarPanel } from '@/domains/agents/components/sidebar-panel';
-import { ThreadsPanelShortcuts } from '@/domains/agents/components/threads-panel-shortcuts';
 import { ObservationalMemoryProvider } from '@/domains/agents/context/agent-observational-memory-context';
 import { WorkingMemoryProvider } from '@/domains/agents/context/agent-working-memory-context';
 import { BrowserSessionProvider } from '@/domains/agents/context/browser-session-provider';
 import { MemoryTimelineProvider } from '@/domains/agents/context/memory-timeline-context';
 import { ThreadPreferencesProvider } from '@/domains/agents/context/thread-preferences-provider';
 import { ThreadsPanelProvider } from '@/domains/agents/context/threads-panel-context';
-import { useThreadsPanel } from '@/domains/agents/context/use-threads-panel';
 import { buildAgentDefaultSettings } from '@/domains/agents/utils/agent-default-settings';
 import { getAgentSuggestedPrompts } from '@/domains/agents/utils/agent-suggested-prompts';
 import type { ThreadDraftHandle } from '@/domains/conversation/context/ThreadInputContext';
@@ -45,6 +41,7 @@ function AgentThread() {
   useLocale();
   const { agentId, threadId } = useParams();
   const client = useMastraClient();
+  const queryClient = useQueryClient();
   const { data: auth, error: authError } = useAuthCapabilities();
   const signedIn = auth && isAuthenticated(auth);
   const userId = account?.user.id ?? (signedIn ? auth.user.id : undefined);
@@ -61,13 +58,12 @@ function AgentThread() {
     requestContext: useEntityRequestContext('agent', agentId!)[0],
     queryOptions: { enabled: Boolean(agentId) },
   });
-  const { data: memory, isLoading: isMemoryLoading } = useMemory({
+  const { data: memory } = useMemory({
     agentId: agentId!,
     requestContext: useEntityRequestContext('agent', agentId!)[0],
     queryOptions: { enabled: Boolean(agentId) },
   });
   const navigate = useNavigate();
-  const threadsPanel = useThreadsPanel();
   const draftHandle = useRef<ThreadDraftHandle>(null);
   const isNewThread = threadId === 'new';
 
@@ -84,11 +80,7 @@ function AgentThread() {
 
   const hasMemory = Boolean(memory?.result);
 
-  const {
-    data: threads,
-    isLoading: isThreadsLoading,
-    refetch: refreshThreads,
-  } = useThreads({
+  const { refetch: refreshThreads } = useThreads({
     agentId: agentId!,
     isMemoryEnabled: hasMemory,
     resourceId: agentId!,
@@ -122,15 +114,9 @@ function AgentThread() {
   }
 
   if (isAgentLoading || !auth) {
-    // Same layout shell as the resolved page, so the threads panel doesn't pop in and push the chat sideways.
+    // History stays in the global sidebar while the chat content loads.
     return (
-      <AgentLayout
-        agentId={agentId!}
-        leftSlot={
-          isNewThread && !isMemoryLoading && !hasMemory ? undefined : <ThreadsPanelLoadingShell agentId={agentId!} />
-        }
-        leftDrawerLabel={studioT('Threads')}
-      >
+      <AgentLayout agentId={agentId!}>
         {isNewThread ? <AgentLandingLoadingSkeleton /> : <AgentThreadLoadingSkeleton />}
       </AgentLayout>
     );
@@ -150,10 +136,6 @@ function AgentThread() {
   }
 
   const actualThreadId = isNewThread ? newThreadId : (threadId ?? newThreadId);
-  // A first visit has nothing to list: give the landing the full width until a thread exists.
-  // Without memory there is nothing else in the panel, so it is dropped entirely.
-  const hideThreadsPanel = isNewThread && !hasMemory && (isThreadsLoading || !threads?.length);
-
   const handleRefreshThreadList = async () => {
     if (isNewThread && activeNewThread.current === newThreadKey) {
       const currentDraft = draftHandle.current;
@@ -162,10 +144,10 @@ function AgentThread() {
         void navigate(`/agents/${agentId}/threads/${newThreadId}`, { replace: true });
       }
     }
-    // The first thread now exists: reopen the panel if the empty landing folded it away.
-    threadsPanel?.expandIfAutoCollapsed();
-
-    await refreshThreads();
+    await Promise.all([
+      refreshThreads(),
+      queryClient.invalidateQueries({ queryKey: ['memory', 'threads', 'sidebar'] }),
+    ]);
   };
 
   return (
@@ -192,14 +174,7 @@ function AgentThread() {
               <ObservationalMemoryProvider>
                 <MemoryTimelineProvider key={`memory-timeline-${agentId}-${actualThreadId}`}>
                   <ActivatedSkillsProvider key={`${agentId}-${actualThreadId}`}>
-                    <ThreadsPanelShortcuts />
-                    <AgentLayout
-                      agentId={agentId!}
-                      leftSlot={
-                        hideThreadsPanel ? undefined : <AgentSidebar agentId={agentId!} threadId={actualThreadId} />
-                      }
-                      leftDrawerLabel={studioT('Threads')}
-                    >
+                    <AgentLayout agentId={agentId!}>
                       <div key={actualThreadId} className="relative flex h-full min-h-0 flex-col">
                         <div className="relative grid min-h-0 flex-1">
                           <AgentChat
@@ -241,20 +216,6 @@ function AgentThreadPage() {
 }
 
 export default AgentThreadPage;
-
-const ThreadsPanelLoadingShell = ({ agentId }: { agentId: string }) => (
-  <SidebarPanel>
-    <ChatThreads
-      threads={[]}
-      threadId=""
-      onDelete={() => {}}
-      resourceId={agentId}
-      resourceType="agent"
-      embedded
-      isLoading
-    />
-  </SidebarPanel>
-);
 
 const AgentThreadLoadingSkeleton = () => (
   <div className="relative grid h-full overflow-y-auto pt-4" data-testid="agent-thread-skeleton" aria-busy="true">

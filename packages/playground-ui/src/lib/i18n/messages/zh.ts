@@ -1,6 +1,19 @@
 import type { en } from './en';
 
 export const zh = {
+  Projects: '项目',
+  'No projects': '没有项目',
+  'New project': '新建项目',
+  'Rename project': '重命名项目',
+  'Project name': '项目名称',
+  'Project actions': '项目操作',
+  'Move to recent': '移至最近',
+  'Ungroup project': '取消项目分组',
+  'Move conversations here from their actions menu.': '在会话操作菜单中将会话移入此项目。',
+  'Loading conversations': '正在加载会话',
+  'Failed to load conversations': '加载会话失败',
+  'No recent conversations': '没有最近的会话',
+
   Download: '下载',
   Storage: '存储',
   'See how much storage you are using and manage your files.': '查看存储空间使用情况并管理文件。',

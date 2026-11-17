@@ -2,6 +2,7 @@
 import { SidebarProvider, useSidebar } from '@mastra/playground-ui/components/Sidebar';
 import { KeyboardShortcutsProvider } from '@mastra/playground-ui/keyboard/keyboard-shortcuts-context';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SidebarShortcuts } from '@/domains/navigation/components/sidebar-shortcuts';
@@ -28,15 +29,17 @@ const StateProbe = () => {
   return <div data-testid="sidebar-state">{state}</div>;
 };
 
-const renderSidebar = () =>
+const renderSidebar = (path = '/') =>
   render(
-    <KeyboardShortcutsProvider>
-      <SidebarProvider>
-        <SidebarShortcuts />
-        <StateProbe />
-        <textarea data-testid="composer" />
-      </SidebarProvider>
-    </KeyboardShortcutsProvider>,
+    <MemoryRouter initialEntries={[path]}>
+      <KeyboardShortcutsProvider>
+        <SidebarProvider>
+          <SidebarShortcuts />
+          <StateProbe />
+          <textarea data-testid="composer" />
+        </SidebarProvider>
+      </KeyboardShortcutsProvider>
+    </MemoryRouter>,
   );
 
 const sidebarState = () => screen.getByTestId('sidebar-state').textContent;
@@ -76,7 +79,13 @@ describe('SidebarShortcuts', () => {
     expect(sidebarState()).toBe('default');
   });
 
-  it('{ does not toggle the sidebar', () => {
+  it('preserves the conversation panel shortcut after moving the list', () => {
+    renderSidebar('/agents/creator-agent/threads/new');
+    fireEvent.keyDown(window, { key: '{', shiftKey: true });
+    expect(sidebarState()).toBe('collapsed');
+  });
+
+  it('{ does not toggle the sidebar outside agent conversations', () => {
     renderSidebar();
 
     fireEvent.keyDown(window, { key: '{', shiftKey: true });
