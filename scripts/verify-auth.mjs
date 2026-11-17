@@ -34,6 +34,7 @@ function sql(statement) {
   );
 }
 const checks = [];
+let completed = false;
 try {
   await mkdir(resolve(sandbox, 'data'), { recursive: true });
   await mkdir(resolve(sandbox, 'src/mastra/public'), { recursive: true });
@@ -44,7 +45,7 @@ try {
   await writeFile(
     fixtureModule,
     (await readFile(fixtureModule, 'utf8')) +
-      `\nawait knowledge.upsertPage({scope:'resource:altflow:studio-check-alice',path:'alice-private',name:'Alice private note',body:'ALICE_PRIVATE_KNOWLEDGE'});\n`,
+      `\nawait knowledge.upsertPage({scope:'resource:altflow%3Astudio-check-alice',path:'alice-private',name:'Alice private note',body:'ALICE_PRIVATE_KNOWLEDGE'});\n`,
   );
   await cp(resolve(root, 'package.json'), resolve(sandbox, 'package.json'));
   await cp(resolve(root, 'workspace'), resolve(sandbox, 'workspace'), { recursive: true });
@@ -147,8 +148,12 @@ try {
     'internal routes stay on the server',
   );
   assert.equal(
-    (await request('/api/agents/creator-agent/stream', alice, 'POST', { messages: [], model: { id: 'external' } }))
-      .status,
+    (
+      await request('/api/agents/creator-agent/stream', alice, 'POST', {
+        messages: [],
+        model: { id: 'external' },
+      })
+    ).status,
     403,
   );
   assert.equal(
@@ -237,6 +242,121 @@ try {
       ).status,
     ),
   );
+  for (const endpoint of ['send-message', 'queue-message', 'threads/subscribe']) {
+    const body =
+      endpoint === 'threads/subscribe'
+        ? { threadId: actualId, resourceId: alice.body.resourceId, withRunStatus: true }
+        : {
+            threadId: actualId,
+            resourceId: alice.body.resourceId,
+            message: [{ type: 'text', text: 'Cross-user delivery must fail' }],
+          };
+    for (const outsider of [bob, admin]) {
+      assert.equal(
+        (await request('/api/agents/creator-agent/' + endpoint, outsider, 'POST', body)).status,
+        403,
+        'cross-user ' + endpoint + ' must fail even for administrators',
+      );
+    }
+    if (endpoint !== 'threads/subscribe') {
+      assert.equal(
+        (
+          await request('/api/agents/creator-agent/' + endpoint, alice, 'POST', {
+            ...body,
+            ifIdle: {
+              streamOptions: { requireToolApproval: true, model: 'altflow/deepseek-v4-pro' },
+            },
+          })
+        ).status,
+        403,
+        'creator cannot inject execution settings through ' + endpoint,
+      );
+    }
+  }
+  const subscription = await fetch(origin + '/api/agents/creator-agent/threads/subscribe', {
+    method: 'POST',
+    headers: { Origin: origin, Cookie: alice.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      threadId: actualId,
+      resourceId: alice.body.resourceId,
+      withRunStatus: true,
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  assert.equal(subscription.status, 200, 'creator can subscribe to their own conversation');
+  await subscription.body.cancel();
+  if (modelHub) {
+    modelHub.state.toolCallText = '一二三';
+    const toolRun = await request('/api/agents/creator-agent/generate', alice, 'POST', {
+      messages: [{ role: 'user', content: 'Run the countText tool automatically.' }],
+      memory: { thread: actualId, resource: alice.body.resourceId },
+    });
+    assert.equal(toolRun.status, 200, 'tools can run without a user approval request: ' + JSON.stringify(toolRun.body));
+    assert.equal(toolRun.body.text, 'verified', 'agent continues after executing the tool');
+    assert.ok(
+      modelHub.state.requests.some(({ body }) =>
+        body.messages.some(message => message.role === 'tool' && String(message.content).includes('"characters":3')),
+      ),
+      'the next model step must receive the actual countText result',
+    );
+    modelHub.state.toolCallText = undefined;
+    checks.push('tool executes without approval and supplies its real result to the next model step');
+
+    async function eventually(predicate, label) {
+      for (let attempt = 0; attempt < 100; attempt++) {
+        if (await predicate()) return;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      assert.fail(label);
+    }
+    modelHub.state.blocked = true;
+    try {
+      const initial = await request('/api/agents/creator-agent/send-message', alice, 'POST', {
+        threadId: actualId,
+        resourceId: alice.body.resourceId,
+        message: 'Busy initial marker',
+      });
+      assert.equal(initial.status, 200, 'creator starts a run through message admission');
+      await eventually(
+        () => modelHub.state.requests.some(({ body }) => JSON.stringify(body.messages).includes('Busy initial marker')),
+        'first run must be busy at the model boundary',
+      );
+      const queued = await request('/api/agents/creator-agent/queue-message', alice, 'POST', {
+        threadId: actualId,
+        resourceId: alice.body.resourceId,
+        message: 'Queued follow-up marker',
+      });
+      assert.equal(queued.status, 200, 'creator can queue a follow-up');
+      const steered = await request('/api/agents/creator-agent/send-message', alice, 'POST', {
+        threadId: actualId,
+        resourceId: alice.body.resourceId,
+        message: 'Steer current marker',
+      });
+      assert.equal(steered.status, 200, 'creator can steer a busy run');
+      assert.equal(steered.body.runId, initial.body.runId, 'steering targets the active run');
+      assert.notEqual(queued.body.runId, initial.body.runId, 'queued input belongs to a future run');
+      assert.equal(
+        modelHub.state.requests.some(({ body }) => JSON.stringify(body.messages).includes('Queued follow-up marker')),
+        false,
+        'queued input must not interrupt the blocked current run',
+      );
+    } finally {
+      modelHub.state.blocked = false;
+    }
+    await eventually(
+      () =>
+        modelHub.state.requests.some(({ body }) => JSON.stringify(body.messages).includes('Queued follow-up marker')),
+      'queued input must start a new model turn after the current run finishes',
+    );
+    await eventually(async () => {
+      const saved = await request(`/api/memory/threads/${actualId}/messages?agentId=creator-agent`, alice);
+      return (
+        JSON.stringify(saved.body).includes('Queued follow-up marker') &&
+        JSON.stringify(saved.body).includes('Steer current marker')
+      );
+    }, 'queued and steered messages must both persist');
+    checks.push('busy steering joins the active run; queued input waits for a separate run and both persist');
+  }
   const userMetadata = await request('/api/memory/threads?agentId=creator-agent', alice, 'POST', {
     resourceId: alice.body.resourceId,
     title: 'JSON field notes',
@@ -261,7 +381,10 @@ try {
     'thread listing, read, write, delete, clone, working memory, observation and private knowledge isolation',
   );
   const spoofContext = encodeURIComponent(
-    JSON.stringify({ mastra__resourceId: alice.body.resourceId, mastra__scopes: ['library:creator'] }),
+    JSON.stringify({
+      mastra__resourceId: alice.body.resourceId,
+      mastra__scopes: ['library:creator'],
+    }),
   );
   assert.ok(
     [403, 404].includes(
@@ -301,6 +424,7 @@ try {
   assert.equal((await request('/account/sign-out', bob, 'POST', {})).status, 200);
   assert.equal((await request('/api/agents', bob)).status, 401);
   checks.push('logout revokes the Go token');
+  completed = true;
   console.log(JSON.stringify({ passed: checks.length, checks }, null, 2));
 } finally {
   if (server?.pid) {
@@ -327,6 +451,5 @@ try {
   await modelHub?.close();
   await log.close();
   // Preserve logs on a failed run; successful artifacts contain no user data.
-  if (checks.length === (process.env.TEST_STUDIO_LIVE_MODEL === '1' ? 6 : 5))
-    await rm(sandbox, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  if (completed) await rm(sandbox, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }

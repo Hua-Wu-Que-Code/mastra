@@ -1,5 +1,6 @@
 import { defineAuth, registerApiRoute } from '@mastra/core/server';
 import { MASTRA_RESOURCE_ID_KEY, MASTRA_SCOPES_KEY } from '@mastra/core/request-context';
+import { encodeKnowledgeScopeId } from '@mastra/core/knowledge';
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -54,6 +55,7 @@ const forbiddenOverrides = new Set([
   'tools',
   'toolsets',
   'toolChoice',
+  'requireToolApproval',
   'activeTools',
   'workflows',
   'agents',
@@ -79,7 +81,9 @@ function hasOverride(value: unknown): boolean {
   if (Array.isArray(value)) return value.some(hasOverride);
   return Object.entries(value).some(
     ([key, child]) =>
-      key.startsWith('mastra__') || forbiddenOverrides.has(key) || (key === 'requestContext' && hasOverride(child)),
+      key.startsWith('mastra__') ||
+      forbiddenOverrides.has(key) ||
+      ((key === 'requestContext' || key === 'ifIdle') && hasOverride(child)),
   );
 }
 function permitted(user: AltFlowUser, path: string, method: string) {
@@ -94,7 +98,7 @@ function permitted(user: AltFlowUser, path: string, method: string) {
   if (method === 'GET' && /^\/agents\/(creator-agent|creatorAgent)$/.test(route)) return true;
   return (
     method === 'POST' &&
-    /^\/agents\/(creator-agent|creatorAgent)\/(generate|stream|send-message|stream-until-idle|threads\/abort|runs\/[^/]+\/abort)$/.test(
+    /^\/agents\/(creator-agent|creatorAgent)\/(generate|stream|send-message|queue-message|stream-until-idle|threads\/(abort|subscribe)|runs\/[^/]+\/abort)$/.test(
       route,
     )
   );
@@ -193,6 +197,12 @@ export function createAltFlowAuth(options: {
           .json()
           .catch(() => undefined);
         if (hasOverride(body)) return false;
+        // Message admission must carry a thread so ownership is checked before targeting a run.
+        if (
+          /\/(send-message|queue-message)$/.test(path) &&
+          (!body || typeof body.threadId !== 'string' || body.runId !== undefined)
+        )
+          return false;
       }
       const requestContext = context.get('requestContext');
       requestContext.set(MASTRA_RESOURCE_ID_KEY, resourceFor(user));
@@ -200,8 +210,9 @@ export function createAltFlowAuth(options: {
         `resource:${resourceFor(user)}`,
         user.role === 'admin' ? 'library:creator' : 'audience:creators',
       ]);
+      // Agent identity scopes use raw Memory IDs; Knowledge addresses encode reserved characters.
       requestContext.set('mastra__knowledgePrincipals', [
-        `resource:${resourceFor(user)}`,
+        `resource:${encodeKnowledgeScopeId(resourceFor(user))}`,
         user.role === 'admin' ? 'library:creator' : 'audience:creators',
       ]);
       requestContext.set('mastra__userPermissions', userPermissions(user));

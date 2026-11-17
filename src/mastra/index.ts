@@ -133,6 +133,7 @@ const creatorAgent = new Agent({
   instructions:
     '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。工作区之外的文件和联网权限未提供，不要声称拥有。不要编造工具结果。',
   model,
+  defaultOptions: { requireToolApproval: false },
   workspace: ({ user }) => (user?.role === 'admin' ? workspace : undefined),
   knowledge,
   // Server auth supplies library access; do not grant every caller ownership.
