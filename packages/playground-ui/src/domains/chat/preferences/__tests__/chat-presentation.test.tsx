@@ -181,6 +181,20 @@ describe('Chat presentation', () => {
       expect(input).toHaveProperty('value', '22');
     });
   });
+  describe('when busy sending is configured', () => {
+    it('defaults to queue and persists the alternative per account', async () => {
+      const view = render(tree());
+      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Queue message');
+      await choose('Sending while busy', 'Steer agent');
+      view.rerender(tree({ scope: 'bob' }));
+      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Queue message');
+      view.rerender(tree());
+      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Steer agent');
+      view.unmount();
+      render(tree());
+      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Steer agent');
+    });
+  });
   describe('when accounts change', () => {
     it('isolates saved presentation choices', async () => {
       const view = render(tree());

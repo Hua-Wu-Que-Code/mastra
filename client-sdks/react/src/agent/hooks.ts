@@ -249,6 +249,8 @@ export type GenerateArgs = SharedArgs & {
 };
 
 export type StreamArgs = SharedArgs & {
+  /** With thread signals, queue a follow-up turn instead of injecting into the active run. Defaults to steer. */
+  deliveryMode?: 'queue' | 'steer';
   onChunk?: (chunk: ChunkType) => Promise<void>;
   clientTools?: ClientToolsInput;
   clientToolsResolver?: ClientToolsResolver;
@@ -894,6 +896,7 @@ export const useChat = ({
     signalId,
     clientMessageId,
     metadata,
+    deliveryMode,
   }: StreamArgs) => {
     const {
       frequencyPenalty,
@@ -934,9 +937,14 @@ export const useChat = ({
       model,
       requestContext: resolvedRequestContext,
     };
+    const wasRunning = isRunning || isAwaitingToolApproval;
     setIsRunning(true);
 
-    _streamAbortRef.current?.abort();
+    // Thread messages are independent admissions. A later queued message must not
+    // abort an earlier HTTP request before the server has acknowledged it.
+    if (!threadId || _threadSignalsUnsupportedRef.current || threadSignalsDisabled) {
+      _streamAbortRef.current?.abort();
+    }
     const internalAbort = new AbortController();
     _streamAbortRef.current = internalAbort;
 
@@ -1063,7 +1071,7 @@ export const useChat = ({
     const earlyRunStatuses = new Map<string, ThreadRunStatusChunk>();
     pendingRunStatuses.current = earlyRunStatuses;
     try {
-      const result = await agent.sendMessage({
+      const result = await (deliveryMode === 'queue' ? agent.queueMessage.bind(agent) : agent.sendMessage.bind(agent))({
         message:
           clientMessageId || metadata
             ? {
@@ -1084,6 +1092,7 @@ export const useChat = ({
       });
       // SSE may already have finished this run or moved on while the request was pending.
       if (
+        !(deliveryMode === 'queue' && wasRunning) &&
         _streamAbortRef.current === internalAbort &&
         liveRunId.current === liveRunIdBeforeSend &&
         liveRunId.current !== result.runId
@@ -1120,7 +1129,8 @@ export const useChat = ({
         settleStopped();
         return;
       }
-      if (isThreadSignalUnsupportedError(error)) {
+      // Never downgrade a queued follow-up to a signal that interrupts the active run.
+      if (isThreadSignalUnsupportedError(error) && deliveryMode !== 'queue') {
         try {
           await agent.sendSignal({
             signal: {
@@ -1577,7 +1587,7 @@ export const useChat = ({
     } catch (error) {
       // A failed send (subscription setup, request, or stream) must not leave
       // the chat stranded in a "running" state until reload (issue #18768).
-      setIsRunning(false);
+      if (!isRunning && !isAwaitingToolApproval && (!liveRunId.current || liveRunFinished.current)) setIsRunning(false);
       // Drop the optimistic bubble instead of leaving it pending until reload
       // (issue #26831). If the server did accept the turn before the response
       // was lost, the message can still reappear through the live subscription

@@ -267,7 +267,7 @@ export const useChatSendHandler = ({
   );
 
   const send = useCallback(
-    async ({ message, attachments = [] }: ChatSendArgs): Promise<boolean> => {
+    async ({ message, attachments = [], deliveryMode }: ChatSendArgs): Promise<boolean> => {
       const deps = sendDepsRef.current;
       if (threadSignalsUnsupportedRef.current && (isRunningStream || abortControllerRef.current)) return false;
 
@@ -334,6 +334,7 @@ export const useChatSendHandler = ({
           await sendMessage({
             message,
             mode: 'stream',
+            deliveryMode,
             coreUserMessages,
             requestContext: requestContextInstance,
             threadId: deps.threadId,
@@ -374,7 +375,7 @@ export const useChatSendHandler = ({
           return true;
         }
         setStreamErrors(prev => [...prev, buildStreamErrorMessage({ runId: 'thrown', payload: { error } })]);
-        resetObservationalMemoryStreamState();
+        if (!isRunningStream) resetObservationalMemoryStreamState();
         const stored = delivered || mayHaveBeenStored(error);
         if (!stored) {
           // The message goes back to the composer, so its context waits for the retry.
@@ -384,7 +385,7 @@ export const useChatSendHandler = ({
         }
         return stored;
       } finally {
-        abortControllerRef.current = null;
+        if (abortControllerRef.current === controller) abortControllerRef.current = null;
       }
     },
     [

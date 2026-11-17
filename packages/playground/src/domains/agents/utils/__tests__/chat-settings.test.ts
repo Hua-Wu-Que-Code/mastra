@@ -37,7 +37,7 @@ describe('Chat settings', () => {
       });
       expect(settings.modelSettings.topP).toBeUndefined();
     });
-    it('leaves sampling and approval unset when the server supplies no defaults', () => {
+    it('uses automatic tool execution when the server supplies no defaults', () => {
       const { modelSettings } = resolveChatSettings(undefined, {
         modelSettings: {
           temperature: 1,
@@ -50,7 +50,7 @@ describe('Chat settings', () => {
       expect(modelSettings).toMatchObject({ maxSteps: 15, maxRetries: 2 });
       expect(modelSettings.temperature).toBeUndefined();
       expect(modelSettings.topP).toBeUndefined();
-      expect(modelSettings.requireToolApproval).toBeUndefined();
+      expect(modelSettings.requireToolApproval).toBe(false);
       expect(modelSettings.seed).toBeUndefined();
     });
   });

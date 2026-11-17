@@ -1,7 +1,7 @@
 import type { AgentSettingsType } from '@/types';
 
 export const defaultSettings: AgentSettingsType = {
-  modelSettings: { maxRetries: 2, maxSteps: 15 },
+  modelSettings: { maxRetries: 2, maxSteps: 15, requireToolApproval: false },
 };
 
 /** Browser preferences only own reasoning; execution and sampling defaults belong to the agent. */

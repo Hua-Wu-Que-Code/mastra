@@ -6,6 +6,7 @@ export const WORK_DETAIL_MODES = ['compact', 'standard', 'detailed', 'verbose'] 
 export type WorkDetailMode = (typeof WORK_DETAIL_MODES)[number];
 
 export interface ChatPreferences {
+  busyEnter: 'queue' | 'steer';
   fontSize: number;
   workDetails: WorkDetailMode;
   collapseTiming: 'completion' | 'next-input';
@@ -13,6 +14,7 @@ export interface ChatPreferences {
 }
 
 export const DEFAULT_CHAT_PREFERENCES: ChatPreferences = {
+  busyEnter: 'queue',
   fontSize: 14,
   workDetails: 'detailed',
   collapseTiming: 'completion',
@@ -27,6 +29,7 @@ function parsePreferences(stored: unknown): ChatPreferences {
   if (typeof stored !== 'object' || stored === null) return DEFAULT_CHAT_PREFERENCES;
   const fontSize = 'fontSize' in stored ? stored.fontSize : undefined;
   return {
+    busyEnter: 'busyEnter' in stored && stored.busyEnter === 'steer' ? 'steer' : 'queue',
     fontSize:
       typeof fontSize === 'number' &&
       Number.isInteger(fontSize) &&
@@ -40,7 +43,7 @@ function parsePreferences(stored: unknown): ChatPreferences {
   };
 }
 
-/** Presentation stays separate from messages and run options. Each account has its own browser-local scope. */
+/** Composer and presentation preferences stay separate from stored messages. Each account has its own browser-local scope. */
 export function createChatPreferencesStore(scope: string) {
   return createLocalStorageStore({
     key: `mastra:chat-preferences:v1:${encodeURIComponent(scope)}`,

@@ -14,6 +14,8 @@ import { createContext, useContext } from 'react';
 export interface ChatSendArgs {
   /** Plain user text. */
   message: string;
+  /** Queue a new turn, or steer the active run through thread signals. */
+  deliveryMode?: 'queue' | 'steer';
   /** Attachments already converted to core user messages (images / files). */
   attachments?: CoreUserMessage[];
 }

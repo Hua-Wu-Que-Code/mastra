@@ -4369,4 +4369,9 @@ export const zh = {
   By: '操作人',
   'Close page': '关闭页面',
   'Sending…': '发送中…',
+  'Sending while busy': '繁忙时的发送行为',
+  'While the agent is running, Enter and Send use this behavior; Cmd/Ctrl+Enter uses the other.':
+    '智能体运行时 Enter 键和发送按钮的行为；Cmd/Ctrl+Enter 使用另一行为',
+  'Queue message': '排队发送',
+  'Steer agent': '插话发送',
 } as const satisfies Record<keyof typeof en, string>;

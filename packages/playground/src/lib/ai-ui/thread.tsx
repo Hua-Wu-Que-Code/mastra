@@ -29,7 +29,12 @@ import {
 } from '@mastra/playground-ui/components/ThreadRail';
 import type { ThreadRailTurn } from '@mastra/playground-ui/components/ThreadRail';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-import { SaveFullConversationAction, WorkDetails, WorkDetailsToggle } from '@mastra/playground-ui/domains/chat';
+import {
+  SaveFullConversationAction,
+  useChatPreferences,
+  WorkDetails,
+  WorkDetailsToggle,
+} from '@mastra/playground-ui/domains/chat';
 import { useChatMessages, useChatRunning, useChatSend } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { MessageRow } from '@mastra/playground-ui/domains/chat/messages/message-row';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
@@ -358,6 +363,7 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
   );
   const [submitError, setSubmitError] = useState<string>();
   const send = useChatSend();
+  const { preferences } = useChatPreferences();
   const { attachments, toCoreUserMessages, clear, restore, isAddingAttachments } = useComposerAttachments();
   const { isRunning, canSendWhileStreaming, cancelRun } = useChatRunning();
   const [sendPulseKey, setSendPulseKey] = useState(0);
@@ -373,7 +379,15 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
   const showModelSwitcher = Boolean(canSelectModel && agentId && !hasModelList && !hideModelSwitcher);
   const shownError = submitError || draftStatus?.error;
 
-  const submit = async () => {
+  const submit = async (accelerated = false) => {
+    const deliveryMode =
+      isRunning && canSendWhileStreaming
+        ? accelerated
+          ? preferences.busyEnter === 'queue'
+            ? 'steer'
+            : 'queue'
+          : preferences.busyEnter
+        : undefined;
     if (
       isEmpty ||
       sendBlocked ||
@@ -420,7 +434,7 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
       const sentAnnotations = takeAnnotations();
       setSendPulseKey(k => k + 1);
       const message = formatAnnotatedMessage(text, sentAnnotations);
-      void Promise.resolve(send({ message, attachments: coreUserMessages })).then(delivered => {
+      void Promise.resolve(send({ message, attachments: coreUserMessages, deliveryMode })).then(delivered => {
         if (delivered === false) restoreSubmission(sentAnnotations);
       });
     } catch {
@@ -477,7 +491,7 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
                     if (sendBlocked) return;
                     event.preventDefault();
                     event.stopPropagation();
-                    void submit();
+                    void submit(event.metaKey || event.ctrlKey);
                   }
                 }}
                 disabled={inputDisabled}
@@ -585,6 +599,8 @@ const ComposerSendButton = ({
 }: ComposerSendButtonProps) => {
   useLocale();
   const { isAddingAttachments } = useComposerAttachments();
+  const { preferences } = useChatPreferences();
+  const busyLabel = preferences.busyEnter === 'queue' ? studioT('Queue message') : studioT('Steer agent');
   const draftCanSteerRun = canSendWhileStreaming && !isEmpty;
   if (isRunning && !draftCanSteerRun) {
     return (
@@ -609,7 +625,7 @@ const ComposerSendButton = ({
       type="submit"
       variant="primary"
       size="icon-md"
-      tooltip={canExecute ? studioT('Send') : studioT('No permission to execute')}
+      aria-label={canExecute ? (isRunning ? busyLabel : studioT('Send')) : studioT('No permission to execute')}
       disabled={!canExecute || isEmpty || isAddingAttachments}
     >
       <IconArrowUp />

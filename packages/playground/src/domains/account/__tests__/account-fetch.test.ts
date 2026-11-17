@@ -53,6 +53,35 @@ describe('Account fetch', () => {
       expect(response.status).toBe(200);
     });
   });
+  describe('when a creator sends or queues a thread message', () => {
+    it.each(['send-message', 'queue-message'])('removes execution overrides from %s', async endpoint => {
+      const signalUrl = url.replace('/stream', '/' + endpoint);
+      const message = { contents: [{ type: 'text', text: 'Next task' }], metadata: { clientMessageId: 'local-id' } };
+      server.use(
+        http.post(signalUrl, async ({ request }) => {
+          expect(await request.json()).toEqual({
+            message,
+            threadId: 'thread-1',
+            resourceId: creatorSession.resourceId,
+          });
+          return HttpResponse.json({ accepted: true, runId: 'run-1' });
+        }),
+      );
+      const response = await createAccountFetch(creatorSession)(signalUrl, {
+        method: 'POST',
+        body: JSON.stringify({
+          message,
+          threadId: 'thread-1',
+          resourceId: 'someone-else',
+          runId: 'another-run',
+          ifIdle: { streamOptions: { model: 'override', requireToolApproval: true } },
+          ifActive: { behavior: 'discard' },
+          requestContext: { injected: true },
+        }),
+      });
+      expect(response.status).toBe(200);
+    });
+  });
   describe('when an administrator sends a request', () => {
     it('preserves administrator configuration', async () => {
       const body = { messages: [], model: 'provider/model' };

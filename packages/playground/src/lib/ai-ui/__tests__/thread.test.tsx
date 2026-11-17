@@ -2,6 +2,8 @@ import { MastraClient } from '@mastra/client-js';
 import type { ListMemoryThreadMessagesResponse, StreamParams } from '@mastra/client-js';
 import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import type { TaskItem } from '@mastra/core/signals';
+import { ChatPreferencesProvider } from '@mastra/playground-ui/domains/chat';
+import { createChatPreferencesStore } from '@mastra/playground-ui/domains/chat/preferences/chat-preferences';
 import { locale } from '@mastra/playground-ui/lib/i18n';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -97,11 +99,13 @@ const Wrapper = ({ children, threadId = 'thread-1' }: { children: ReactNode; thr
     <MastraReactProvider baseUrl={BASE_URL}>
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
-          <BrowserSessionProvider agentId="agent-1" threadId={threadId} enabled={false}>
-            <WorkingMemoryProvider agentId="agent-1" threadId={threadId} resourceId="agent-1">
-              {children}
-            </WorkingMemoryProvider>
-          </BrowserSessionProvider>
+          <ChatPreferencesProvider scope="thread-test">
+            <BrowserSessionProvider agentId="agent-1" threadId={threadId} enabled={false}>
+              <WorkingMemoryProvider agentId="agent-1" threadId={threadId} resourceId="agent-1">
+                {children}
+              </WorkingMemoryProvider>
+            </BrowserSessionProvider>
+          </ChatPreferencesProvider>
         </MemoryRouter>
       </QueryClientProvider>
     </MastraReactProvider>
@@ -937,12 +941,11 @@ describe('Thread', () => {
         }),
       );
       const read = FileReader.prototype.readAsArrayBuffer;
-      const probe = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (
-        this: FileReader,
-        blob,
-      ) {
-        void pending.then(() => read.call(this, blob));
-      });
+      const probe = vi
+        .spyOn(FileReader.prototype, 'readAsArrayBuffer')
+        .mockImplementation(function (this: FileReader, blob) {
+          void pending.then(() => read.call(this, blob));
+        });
       try {
         await act(async () => {
           renderThread([]);
@@ -1201,11 +1204,14 @@ describe('Thread', () => {
     let subscription: ReadableStreamDefaultController<Uint8Array> | undefined;
     let sentMessages: string[];
     let abortRequests: number;
+    let queuedMessages: string[];
 
     beforeEach(async () => {
+      localStorage.removeItem('mastra:chat-preferences:v1:thread-test');
       window.MASTRA_AGENT_SIGNALS = 'true';
       subscription = undefined;
       sentMessages = [];
+      queuedMessages = [];
       abortRequests = 0;
       server.use(...baseHandlers());
       server.use(
@@ -1222,6 +1228,10 @@ describe('Thread', () => {
               { headers: { 'content-type': 'text/event-stream' } },
             ),
         ),
+        http.post(`${BASE_URL}/api/agents/:agentId/queue-message`, async ({ request }) => {
+          queuedMessages.push(JSON.stringify(await request.json()));
+          return HttpResponse.json(acceptedSignalMessage);
+        }),
         http.post(`${BASE_URL}/api/agents/:agentId/send-message`, async ({ request }) => {
           sentMessages.push(JSON.stringify(await request.json()));
           return HttpResponse.json(acceptedSignalMessage);
@@ -1245,32 +1255,107 @@ describe('Thread', () => {
     });
 
     it('replaces cancel with send while drafting and restores cancel after clearing the draft', () => {
-      expect(screen.queryByRole('button', { name: 'Send' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Queue message' })).toBeNull();
 
       const textarea = screen.getByPlaceholderText('Enter your message');
       fireEvent.change(textarea, { target: { value: '   ' } });
-      expect(screen.queryByRole('button', { name: 'Send' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Queue message' })).toBeNull();
 
       fireEvent.change(textarea, { target: { value: 'Continue with the new instructions' } });
       expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull();
-      expect(screen.getByRole('button', { name: 'Send' }).hasAttribute('disabled')).toBe(false);
+      expect(screen.getByRole('button', { name: 'Queue message' }).hasAttribute('disabled')).toBe(false);
 
       fireEvent.change(textarea, { target: { value: '' } });
       expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
-      expect(screen.queryByRole('button', { name: 'Send' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Queue message' })).toBeNull();
     });
 
     it('does not cancel the run when Send is double-clicked', async () => {
       fireEvent.change(screen.getByPlaceholderText('Enter your message'), {
         target: { value: 'Continue with the new instructions' },
       });
-      const primaryAction = screen.getByRole('button', { name: 'Send' });
+      const primaryAction = screen.getByRole('button', { name: 'Queue message' });
       fireEvent.click(primaryAction, { detail: 1 });
-      await waitFor(() => expect(sentMessages.join()).toContain('Continue with the new instructions'));
+      await waitFor(() => expect(queuedMessages.join()).toContain('Continue with the new instructions'));
       fireEvent.click(primaryAction, { detail: 2 });
       await act(async () => new Promise(resolve => setTimeout(resolve, 100)));
 
       expect(abortRequests).toBe(0);
+    });
+
+    it('queues ordinary Enter and uses Cmd/Ctrl+Enter to steer without aborting', async () => {
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      fireEvent.change(textarea, { target: { value: 'After this answer' } });
+      fireEvent.keyDown(textarea, { key: 'Enter' });
+      await waitFor(() => expect(queuedMessages.join()).toContain('After this answer'));
+      fireEvent.change(textarea, { target: { value: 'Change the current direction' } });
+      fireEvent.keyDown(textarea, { key: 'Enter', ctrlKey: true });
+      await waitFor(() => expect(sentMessages.join()).toContain('Change the current direction'));
+      expect(queuedMessages).toHaveLength(1);
+      expect(queuedMessages[0]).toContain('\"requireToolApproval\":false');
+      expect(abortRequests).toBe(0);
+    });
+
+    it('reverses both gestures immediately when the saved preference is steer', async () => {
+      act(() =>
+        createChatPreferencesStore('thread-test').write({
+          ...createChatPreferencesStore('thread-test').read(),
+          busyEnter: 'steer',
+        }),
+      );
+      act(() => window.dispatchEvent(new StorageEvent('storage', { key: 'mastra:chat-preferences:v1:thread-test' })));
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      fireEvent.change(textarea, { target: { value: 'Steer with button' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Steer agent' }));
+      await waitFor(() => expect(sentMessages.join()).toContain('Steer with button'));
+      fireEvent.change(textarea, { target: { value: 'Queue with shortcut' } });
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
+      await waitFor(() => expect(queuedMessages.join()).toContain('Queue with shortcut'));
+      expect(abortRequests).toBe(0);
+    });
+
+    it('keeps both queued messages when the first acceptance is slow', async () => {
+      const firstResponse = Promise.withResolvers<void>();
+      let firstRequest: Request | undefined;
+      const requests: string[] = [];
+      server.use(
+        http.post(`${BASE_URL}/api/agents/:agentId/queue-message`, async ({ request }) => {
+          requests.push(JSON.stringify(await request.json()));
+          if (requests.length === 1) {
+            firstRequest = request;
+            await firstResponse.promise;
+          }
+          return HttpResponse.json({ ...acceptedSignalMessage, runId: 'queued-run' });
+        }),
+      );
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      try {
+        fireEvent.change(textarea, { target: { value: 'First queued task' } });
+        fireEvent.keyDown(textarea, { key: 'Enter' });
+        await waitFor(() => expect(requests).toHaveLength(1));
+        fireEvent.change(textarea, { target: { value: 'Second queued task' } });
+        fireEvent.keyDown(textarea, { key: 'Enter' });
+        await waitFor(() => expect(requests).toHaveLength(2));
+        expect(firstRequest?.signal.aborted).toBe(false);
+      } finally {
+        await act(async () => firstResponse.resolve());
+      }
+    });
+
+    it('restores a refused queued draft and keeps the active run available to cancel', async () => {
+      server.use(
+        http.post(`${BASE_URL}/api/agents/:agentId/queue-message`, () =>
+          HttpResponse.json({ error: 'Message too large' }, { status: 413 }),
+        ),
+      );
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      fireEvent.change(textarea, { target: { value: 'Keep this refused message' } });
+      fireEvent.keyDown(textarea, { key: 'Enter' });
+      await screen.findByText('Your message could not be sent. Your draft has been restored.');
+      expect(textarea).toHaveProperty('value', 'Keep this refused message');
+      fireEvent.change(textarea, { target: { value: '' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }), { detail: 1 });
+      await waitFor(() => expect(abortRequests).toBe(1));
     });
 
     it('cancels the run when Cancel is clicked', async () => {

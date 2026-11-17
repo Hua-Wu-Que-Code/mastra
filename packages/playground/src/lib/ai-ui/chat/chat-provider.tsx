@@ -38,7 +38,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useChatSendHandler } from './use-chat-send-handler';
-import { useAccount } from '@/domains/account/account-context';
 import { useObservationalMemoryContext } from '@/domains/agents/context';
 import { useWorkingMemory } from '@/domains/agents/context/agent-working-memory-context';
 import { usePlaygroundModelOptional } from '@/domains/agents/context/playground-model-context';
@@ -66,8 +65,6 @@ export function ChatProvider({
   agentVersionId,
   supportsMemory,
 }: Readonly<{ children: ReactNode }> & ChatProps) {
-  const account = useAccount();
-  const managedAccount = account && account.user.role !== 'admin';
   const [tracingOptions] = useEntityTracingOptions('agent', agentId);
   const modelOverride = usePlaygroundModelOptional()?.modelOverride;
 
@@ -80,10 +77,7 @@ export function ChatProvider({
   const threadSignalsUnsupportedRef = useRef(false);
   const modelSettings = settings?.modelSettings ?? {};
   const threadSignalsEnabled =
-    !managedAccount &&
-    window.MASTRA_AGENT_SIGNALS !== 'false' &&
-    supportsMemory !== false &&
-    !modelSettings.chatWithLegacyStream;
+    window.MASTRA_AGENT_SIGNALS !== 'false' && supportsMemory !== false && !modelSettings.chatWithLegacyStream;
 
   // Clear persisted stream errors when switching threads/agents so they don't
   // leak across conversations.
@@ -274,7 +268,7 @@ export function ChatProvider({
     chatWithNetwork,
     chatWithLegacyStream,
     providerOptions,
-    requireToolApproval,
+    requireToolApproval = false,
   } = modelSettings;
 
   const modelSettingsArgs = {

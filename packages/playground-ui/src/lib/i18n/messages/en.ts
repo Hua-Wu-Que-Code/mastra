@@ -4437,4 +4437,9 @@ export const en = {
   By: 'By',
   'Close page': 'Close page',
   'Sending…': 'Sending…',
+  'Sending while busy': 'Sending while busy',
+  'While the agent is running, Enter and Send use this behavior; Cmd/Ctrl+Enter uses the other.':
+    'While the agent is running, Enter and Send use this behavior; Cmd/Ctrl+Enter uses the other.',
+  'Queue message': 'Queue message',
+  'Steer agent': 'Steer agent',
 } as const;

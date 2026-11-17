@@ -3,7 +3,7 @@
 `/settings` opens a dedicated settings workspace with its own sidebar. The main
 Studio navigation and rounded content frame are not rendered on this route.
 
-- General contains language, appearance, and conversation display preferences.
+- General contains language, appearance, conversation display preferences, and busy-send behavior.
   Appearance offers Light, Dark, and Follow system choices, using the app theme
   provider. Old `?section=appearance` links open the same consolidated page.
 - Account and main sidebar links carry the current path, query and fragment in
@@ -31,7 +31,7 @@ Conversation display follows DSH's independent presentation settings:
   prose. Expanding restores it. Errors, approvals, questions and unfinished calls
   remain visible. No setting changes stored messages, exports or model input.
 
-The browser stores these four preferences under
+The browser stores these preferences under
 `mastra:chat-preferences:v1:<account-id>`. Account switches remount the preference
 scope; unconnected Studio uses `local`. Other tabs synchronize via storage events.
 These preferences survive reloads in the same browser; they do not synchronize
@@ -39,3 +39,23 @@ between devices. Unavailable storage falls back to the current page's memory.
 
 The DSH reference is `packages/client/ui-chat/src/client/presentation-policy.ts`,
 `transcript-view.ts`, and `ui-theme/src/theme-settings.ts` in deepseek-harness.
+
+Busy-send behavior follows DSH's `submission-policy.ts`: Queue message is the
+initial choice. During a run, Enter and the send button use that choice;
+Cmd/Ctrl+Enter uses the opposite (Queue message / Steer agent). Shift+Enter and
+IME composition retain their editing behavior. The empty busy composer keeps
+its Stop button. This requires the thread-signals transport; older servers that
+only support a single response stream retain Stop until the current response
+finishes, rather than silently interrupting it.
+
+Queue uses the server's `queue-message` admission to start a subsequent run;
+Steer uses `send-message` to deliver new instructions to the active run. Queued
+messages appear as pending turns through the thread subscription and survive
+navigation while the server remains running. They are not a browser timer.
+The SDK preserves the current run identity while accepting a future queued run
+and does not cancel earlier pending submissions when another message is sent.
+
+Tool execution defaults to `requireToolApproval: false`. Explicit agent/tool
+approval rules still apply. Managed accounts use server execution defaults;
+the fetch adapter strips execution overrides from both message admission routes,
+and the server enforces thread ownership and rejects nested run configuration.
