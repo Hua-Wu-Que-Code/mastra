@@ -52,6 +52,13 @@ export interface SendContextValue {
   setModelContext?: (sourceId: string, context: string | undefined) => void;
 }
 
+export type ChatQueueAction = 'remove' | 'steer' | 'move-up' | 'move-down';
+
+export interface QueueContextValue {
+  messages: MastraDBMessage[];
+  update: (id: string, action: ChatQueueAction) => Promise<void>;
+}
+
 export interface TasksContextValue {
   tasks: TaskItem[];
 }
@@ -65,6 +72,9 @@ export interface AgentContextValue {
 // NOTE: Tool/network approvals are NOT exposed here. They live in a separate
 // slice (`./tool-call-context`) for the same churn reasons, and the badge
 // approval buttons read it via `useToolCall()`.
+
+export const ChatQueueContext = createContext<QueueContextValue>({ messages: [], update: async () => {} });
+export const useChatQueue = (): QueueContextValue => useContext(ChatQueueContext);
 
 export const ChatMessagesContext = createContext<MessagesContextValue>({ messages: [] });
 export const ChatRunningContext = createContext<RunningContextValue>({

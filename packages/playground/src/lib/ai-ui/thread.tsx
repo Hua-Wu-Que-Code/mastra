@@ -53,6 +53,7 @@ import { AttachFileMenu } from './attachments/attach-file-menu';
 import { ComposerAttachments as ChatComposerAttachments } from './attachments/attachment';
 import { ComposerAttachmentsProvider, useComposerAttachments } from './attachments/composer-attachments';
 import { ComposerFileDrop } from './attachments/composer-file-drop';
+import { QueuedMessages } from './chat/queued-messages';
 import { BracketOverlay } from './components/bracket-overlay';
 import { useComposerAutofocus } from './hooks/use-composer-autofocus';
 import { SuggestedPromptList } from './suggested-prompt-list';
@@ -459,6 +460,7 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
           {studioT('Restoring draft…')}
         </Txt>
       )}
+      <QueuedMessages />
       <ComposerFileDrop disabled={!canExecuteAgent || draftStatus?.restoring}>
         <Composer
           className="relative"

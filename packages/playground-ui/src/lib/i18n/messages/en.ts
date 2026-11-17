@@ -4442,4 +4442,12 @@ export const en = {
     'While the agent is running, Enter and Send use this behavior; Cmd/Ctrl+Enter uses the other.',
   'Queue message': 'Queue message',
   'Steer agent': 'Steer agent',
+  'Queued messages': 'Queued messages',
+  'Toggle queued messages': 'Toggle queued messages',
+  'Move queued message up': 'Move queued message up',
+  'Move queued message down': 'Move queued message down',
+  'Remove queued message': 'Remove queued message',
+  Steer: 'Steer',
+  'Could not update the queue. Try again.': 'Could not update the queue. Try again.',
+  Attachment: 'Attachment',
 } as const;

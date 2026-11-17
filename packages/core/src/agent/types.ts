@@ -338,6 +338,18 @@ export type CancelQueuedAgentMessagesOptions =
   /** Cancel only the calling Agent's queued messages in this owner group. */
   | { resourceId: string; threadId: string; queueOwnerId: string; signalIds?: never };
 
+/** Edit a follow-up before execution begins. */
+export interface UpdateQueuedAgentMessageOptions {
+  resourceId: string;
+  threadId: string;
+  signalId: string;
+  action: 'move-up' | 'move-down' | 'steer';
+}
+
+export interface UpdateQueuedAgentMessageResult {
+  updated: boolean;
+}
+
 export interface CancelQueuedAgentMessagesResult {
   cancelledSignalIds: string[];
 }

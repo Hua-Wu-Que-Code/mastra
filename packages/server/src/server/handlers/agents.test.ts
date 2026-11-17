@@ -63,6 +63,7 @@ import {
   ABORT_AGENT_THREAD_ROUTE,
   ABORT_AGENT_RUN_ROUTE,
   CANCEL_AGENT_PENDING_SIGNALS_ROUTE,
+  UPDATE_AGENT_QUEUED_MESSAGE_ROUTE,
   SUBSCRIBE_AGENT_THREAD_ROUTE,
   OBSERVE_AGENT_STREAM_ROUTE,
   REORDER_AGENT_MODEL_LIST_ROUTE,
@@ -5093,6 +5094,46 @@ describe('Agent Routes Authorization', () => {
         threadId: 'cancel-owned',
         signalIds: ['first', 'missing', 'first'],
       });
+    });
+
+    it('edits queue entries in the authenticated scope', async () => {
+      await mockMemory.createThread({ threadId: 'queue-owned', resourceId: 'user-a', title: 'Owned' });
+      const update = vi.spyOn(mockAgent, 'updateQueuedMessage').mockResolvedValue({ updated: true });
+      const result = await UPDATE_AGENT_QUEUED_MESSAGE_ROUTE.handler({
+        mastra,
+        agentId: 'test-agent',
+        abortSignal: new AbortController().signal,
+        requestContext: createContextWithReservedKeys({ resourceId: 'user-a', threadId: 'queue-owned' }),
+        resourceId: 'ignored',
+        threadId: 'ignored',
+        signalId: 'second',
+        action: 'move-up',
+      });
+      expect(result).toEqual({ updated: true });
+      expect(update).toHaveBeenCalledWith({
+        resourceId: 'user-a',
+        threadId: 'queue-owned',
+        signalId: 'second',
+        action: 'move-up',
+      });
+    });
+
+    it('denies editing another user queue before any mutation', async () => {
+      await mockMemory.createThread({ threadId: 'queue-forbidden', resourceId: 'user-b', title: 'Other' });
+      const update = vi.spyOn(mockAgent, 'updateQueuedMessage');
+      await expect(
+        UPDATE_AGENT_QUEUED_MESSAGE_ROUTE.handler({
+          mastra,
+          agentId: 'test-agent',
+          abortSignal: new AbortController().signal,
+          requestContext: createContextWithReservedKeys({ resourceId: 'user-a' }),
+          resourceId: 'user-b',
+          threadId: 'queue-forbidden',
+          signalId: 'second',
+          action: 'steer',
+        }),
+      ).rejects.toThrow(new HTTPException(403, { message: 'Access denied: thread belongs to a different resource' }));
+      expect(update).not.toHaveBeenCalled();
     });
 
     it('rejects cancellation on a thread belonging to another resource without mutating the queue', async () => {

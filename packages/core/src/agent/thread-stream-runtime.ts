@@ -64,6 +64,8 @@ import type {
   DurableAgentLike,
   CancelQueuedAgentMessagesOptions,
   CancelQueuedAgentMessagesResult,
+  UpdateQueuedAgentMessageOptions,
+  UpdateQueuedAgentMessageResult,
   AgentThreadEventListener,
   SubscribeAgentThreadEventsOptions,
   QueueAgentMessageOptions,
@@ -920,6 +922,14 @@ type AgentThreadStreamRuntimeEvent =
   | { type: 'run-discarded'; runId: string; streamId: string }
   // Without a streamId the sender found the run through the thread lease, not a stream it watches.
   | { type: 'run-abort-requested'; runId: string; streamId?: string; clearPendingSignals?: boolean }
+  | {
+      type: 'queued-message-update';
+      agentId: string;
+      target: UpdateQueuedAgentMessageOptions;
+      requestId: string;
+      replyTopic: string;
+      expiresAt: number;
+    }
   | { type: 'signals-cancelled'; signalIds: string[] }
   | { type: 'user-message-presentation'; chunk: UserMessagePendingChunk | UserMessageCancelledChunk }
   | { type: 'user-message-delivered'; signalId: string }
@@ -2186,10 +2196,24 @@ export class AgentThreadStreamRuntime {
     const topic = this.#threadTopic(key);
     let active = true;
     let tail = Promise.resolve();
+    const queueUpdates = createRecentRequests<boolean>();
     const handleEvent = async (event: Parameters<EventCallback>[0]) => {
       if (!active) return;
       const data = event.data as AgentThreadStreamRuntimeEvent | undefined;
-      if (data?.type === 'signal-enqueued') {
+      if (data?.type === 'queued-message-update') {
+        if (Date.now() > data.expiresAt) return;
+        let updated = queueUpdates.get(data.requestId);
+        if (updated === undefined) {
+          updated = await this.#updateLocalQueuedMessage(state, key, data.agentId, data.target, pubsub);
+          if (!updated) return;
+          queueUpdates.set(data.requestId, updated);
+        }
+        await resolvedPubSub.publish(data.replyTopic, {
+          type: 'queued-message-updated',
+          runId: data.requestId,
+          data: { updated },
+        });
+      } else if (data?.type === 'signal-enqueued') {
         if (
           (data.sourceId === this.#id && this.#isLocalSignalEcho(state, key, data.signal.id, data.runId)) ||
           subscription.admittedSignalIds.has(data.signal.id)
@@ -2326,6 +2350,7 @@ export class AgentThreadStreamRuntime {
       const awaitingForwards = state.forwardedIdleSignalsByThread.has(key);
       if (
         type !== 'signal-enqueued' &&
+        type !== 'queued-message-update' &&
         type !== 'signals-cancelled' &&
         type !== 'run-abort-requested' &&
         type !== 'run-registered' &&
@@ -4686,6 +4711,7 @@ export class AgentThreadStreamRuntime {
     runId: string,
     signal: CreatedAgentSignal,
     status: 'pending' | 'queued',
+    queuePosition?: number,
   ): UserMessagePendingChunk | undefined {
     if (signal.type !== 'user' || signal.transient) return;
     const { data } = signal.toDataPart();
@@ -4694,7 +4720,10 @@ export class AgentThreadStreamRuntime {
       runId,
       from: ChunkFrom.AGENT,
       transient: true,
-      data: { ...data, metadata: { ...data.metadata, status } },
+      data: {
+        ...data,
+        metadata: { ...data.metadata, status, ...(queuePosition === undefined ? {} : { queuePosition }) },
+      },
     };
   }
 
@@ -7493,8 +7522,8 @@ export class AgentThreadStreamRuntime {
         if (chunk) enqueuePresentation(chunk);
       }
     }
-    for (const pending of state.pendingIdleSignalsByThread.get(key) ?? []) {
-      const chunk = this.#pendingUserMessageChunk(currentRunId ?? pending.runId, pending.signal, 'queued');
+    for (const [position, pending] of (state.pendingIdleSignalsByThread.get(key) ?? []).entries()) {
+      const chunk = this.#pendingUserMessageChunk(currentRunId ?? pending.runId, pending.signal, 'queued', position);
       if (chunk) enqueuePresentation(chunk);
     }
     // An aborted run stays active until it terminalizes, but its lifecycle already
@@ -7752,6 +7781,106 @@ export class AgentThreadStreamRuntime {
     };
   }
 
+  #publishIdleQueue(state: AgentThreadRuntimeState, pubsub: PubSub | undefined, key: string) {
+    const runId = state.activeThreadRunIds.get(key);
+    for (const [position, pending] of (state.pendingIdleSignalsByThread.get(key) ?? []).entries()) {
+      const chunk = this.#pendingUserMessageChunk(runId ?? pending.runId, pending.signal, 'queued', position);
+      if (chunk) this.#publish(pubsub, key, { type: 'user-message-presentation', chunk });
+    }
+  }
+
+  async #updateLocalQueuedMessage(
+    state: AgentThreadRuntimeState,
+    key: string,
+    agentId: string,
+    target: UpdateQueuedAgentMessageOptions,
+    pubsub?: PubSub,
+  ): Promise<boolean> {
+    const queue = state.pendingIdleSignalsByThread.get(key);
+    const index =
+      queue?.findIndex(pending => pending.signal.id === target.signalId && pending.agent.id === agentId) ?? -1;
+    if (!queue || index < 0) return false;
+    const pending = queue[index]!;
+    if (target.action === 'steer') {
+      // Take it before awaiting admission so a concurrent drain cannot deliver it twice.
+      queue.splice(index, 1);
+      const result = this.#sendSignal(
+        pending.agent,
+        pending.signal,
+        {
+          resourceId: pending.resourceId,
+          threadId: pending.threadId,
+          ifActive: { behavior: 'deliver' },
+          ifIdle: { behavior: 'wake', streamOptions: pending.streamOptions },
+        },
+        pubsub,
+        false,
+      );
+      try {
+        const accepted = await result.accepted;
+        if (accepted.action === 'blocked') throw new Error('Thread cannot accept the queued steer');
+      } catch (error) {
+        const remaining = state.pendingIdleSignalsByThread.get(key) ?? [];
+        remaining.splice(Math.min(index, remaining.length), 0, pending);
+        state.pendingIdleSignalsByThread.set(key, remaining);
+        this.#publishIdleQueue(state, pubsub, key);
+        throw error;
+      }
+    } else {
+      const next = index + (target.action === 'move-up' ? -1 : 1);
+      if (next < 0 || next >= queue.length) return false;
+      [queue[index], queue[next]] = [queue[next]!, pending];
+    }
+    this.#publishIdleQueue(state, pubsub, key);
+    this.#notifyThreadEvents(state);
+    return true;
+  }
+
+  async updateQueuedMessage(
+    agent: Agent<any, any, any, any>,
+    target: UpdateQueuedAgentMessageOptions,
+    pubsub?: PubSub,
+  ): Promise<UpdateQueuedAgentMessageResult> {
+    const resolved = this.#getPubSub(pubsub);
+    const state = this.#getState(resolved);
+    const key = this.#threadKey(target.resourceId, target.threadId);
+    if (await this.#updateLocalQueuedMessage(state, key, agent.id, target, resolved)) return { updated: true };
+    // A different server may hold the queue. Wait for its acknowledgement.
+    const requestId = globalThis.crypto.randomUUID();
+    const replyTopic = `${this.#threadTopic(key)}.queue-update.${requestId}`;
+    const expiresAt = Date.now() + 1000;
+    return new Promise<UpdateQueuedAgentMessageResult>((resolve, reject) => {
+      let settled = false;
+      const finish = (updated: boolean, error?: unknown) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        releaseReplyTopic(resolved, replyTopic, onReply);
+        if (error) reject(error);
+        else resolve({ updated });
+      };
+      const onReply: EventCallback = withAck(event => {
+        const data: unknown = event.data;
+        if (data && typeof data === 'object' && 'updated' in data && data.updated === true) finish(true);
+      });
+      const timer = setTimeout(() => finish(false), Math.max(0, expiresAt - Date.now()));
+      void resolved
+        .subscribe(replyTopic, onReply)
+        .then(() => {
+          if (settled) {
+            releaseReplyTopic(resolved, replyTopic, onReply);
+            return;
+          }
+          return resolved.publish(this.#threadTopic(key), {
+            type: 'queued-message-update',
+            runId: requestId,
+            data: { type: 'queued-message-update', agentId: agent.id, target, requestId, replyTopic, expiresAt },
+          });
+        })
+        .catch(error => finish(false, error));
+    });
+  }
+
   cancelQueuedMessages(
     agent: Agent<any, any, any, any>,
     target: CancelQueuedAgentMessagesOptions,
@@ -7968,7 +8097,7 @@ export class AgentThreadStreamRuntime {
       });
       state.pendingIdleSignalsByThread.set(key, idleQueue);
       const control = this.#ensureThreadControlSubscription(state, pubsub, key);
-      this.#publishPendingUserMessage(pubsub, key, runId ?? queuedRunId, queuedSignal, 'queued');
+      this.#publishIdleQueue(state, pubsub, key);
       this.#notifyThreadEvents(state);
       if (activeRecord) {
         this.#watchThreadRunCompletion(state, pubsub, key, activeRecord);

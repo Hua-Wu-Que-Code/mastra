@@ -63,6 +63,8 @@ export type CompletionResult = {
 export const CLIENT_MESSAGE_ID_KEY = 'clientMessageId';
 
 export type MastraDBMessageMetadata = {
+  queued?: boolean;
+  queuePosition?: number;
   /** Which run mode produced this message. */
   mode?: 'generate' | 'stream' | 'network';
   /** Execution that produced or resumed this message; not inferred from history order. */

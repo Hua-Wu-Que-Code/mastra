@@ -4373,5 +4373,13 @@ export const zh = {
   'While the agent is running, Enter and Send use this behavior; Cmd/Ctrl+Enter uses the other.':
     '智能体运行时 Enter 键和发送按钮的行为；Cmd/Ctrl+Enter 使用另一行为',
   'Queue message': '排队发送',
-  'Steer agent': '插话发送',
+  'Steer agent': '引导',
+  'Queued messages': '待发送消息',
+  'Toggle queued messages': '展开或收起待发送消息',
+  'Move queued message up': '上移排队消息',
+  'Move queued message down': '下移排队消息',
+  'Remove queued message': '删除排队消息',
+  Steer: '引导',
+  'Could not update the queue. Try again.': '更新队列失败，请重试。',
+  Attachment: '附件',
 } as const satisfies Record<keyof typeof en, string>;

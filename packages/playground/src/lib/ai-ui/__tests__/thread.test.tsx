@@ -17,7 +17,14 @@ import { ChatProvider } from '../chat/chat-provider';
 import { Thread } from '../thread';
 import { emptyChannelPlatforms, emptyMcpServers, memoryDisabled, memoryEnabled, v2Agent } from './fixtures/agent';
 import { attachmentMessages } from './fixtures/attachment-messages';
-import { abortedSignalRun, acceptedSignalMessage, signalRunStart } from './fixtures/signal-run';
+import {
+  abortedSignalRun,
+  acceptedSignalMessage,
+  signalRunStart,
+  queuedUserMessage,
+  cancelledUserMessage,
+  steeringUserMessage,
+} from './fixtures/signal-run';
 import { WorkingMemoryProvider } from '@/domains/agents/context/agent-working-memory-context';
 import { BrowserSessionProvider } from '@/domains/agents/context/browser-session-provider';
 import { ThreadInputProvider } from '@/domains/conversation';
@@ -1312,6 +1319,99 @@ describe('Thread', () => {
       fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
       await waitFor(() => expect(queuedMessages.join()).toContain('Queue with shortcut'));
       expect(abortRequests).toBe(0);
+    });
+
+    it('shows busy input in the queue dock instead of the transcript', async () => {
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      fireEvent.change(textarea, { target: { value: 'Review the next chapter' } });
+      fireEvent.keyDown(textarea, { key: 'Enter' });
+      await waitFor(() => expect(queuedMessages).toHaveLength(1));
+      const body: unknown = JSON.parse(queuedMessages[0]);
+      const message = isRecord(body) && isRecord(body.message) ? body.message : undefined;
+      const metadata = message && isRecord(message.metadata) ? message.metadata : undefined;
+      const clientId = typeof metadata?.clientMessageId === 'string' ? metadata.clientMessageId : undefined;
+      await act(async () =>
+        subscription?.enqueue(
+          new TextEncoder().encode(sseChunk(queuedUserMessage('queued-1', 'Review the next chapter', 0, clientId))),
+        ),
+      );
+      const dock = await screen.findByRole('region', { name: 'Queued messages' });
+      expect(within(dock).getByText('Review the next chapter')).toBeDefined();
+      expect(screen.getAllByText('Review the next chapter')).toHaveLength(1);
+      expect(within(dock).getByRole('button', { name: 'Remove queued message' })).toBeDefined();
+      expect(within(dock).getByRole('button', { name: 'Steer agent' })).toBeDefined();
+    });
+
+    it('removes an admitted queue item through the server cancellation route', async () => {
+      const cancellations: unknown[] = [];
+      server.use(
+        http.post(`${BASE_URL}/api/agents/:agentId/threads/signals/cancel`, async ({ request }) => {
+          cancellations.push(await request.json());
+          subscription?.enqueue(new TextEncoder().encode(sseChunk(cancelledUserMessage('queued-delete'))));
+          return HttpResponse.json({ cancelledSignalIds: ['queued-delete'] });
+        }),
+      );
+      await act(async () =>
+        subscription?.enqueue(
+          new TextEncoder().encode(sseChunk(queuedUserMessage('queued-delete', 'Delete this queued task', 0))),
+        ),
+      );
+      const dock = await screen.findByRole('region', { name: 'Queued messages' });
+      fireEvent.click(within(dock).getByRole('button', { name: 'Remove queued message' }));
+      await waitFor(() => expect(screen.queryByRole('region', { name: 'Queued messages' })).toBeNull());
+      expect(cancellations).toEqual([{ resourceId: 'agent-1', threadId: 'thread-1', signalIds: ['queued-delete'] }]);
+    });
+
+    it('shows the server order after moving an admitted queue item', async () => {
+      const updates: unknown[] = [];
+      server.use(
+        http.post(`${BASE_URL}/api/agents/:agentId/threads/queue/update`, async ({ request }) => {
+          updates.push(await request.json());
+          subscription?.enqueue(new TextEncoder().encode(sseChunk(queuedUserMessage('queued-b', 'Second task', 0))));
+          subscription?.enqueue(new TextEncoder().encode(sseChunk(queuedUserMessage('queued-a', 'First task', 1))));
+          return HttpResponse.json({ updated: true });
+        }),
+      );
+      await act(async () => {
+        subscription?.enqueue(new TextEncoder().encode(sseChunk(queuedUserMessage('queued-a', 'First task', 0))));
+        subscription?.enqueue(new TextEncoder().encode(sseChunk(queuedUserMessage('queued-b', 'Second task', 1))));
+      });
+      const dock = await screen.findByRole('region', { name: 'Queued messages' });
+      const rows = within(dock).getAllByRole('listitem');
+      fireEvent.click(within(rows[1]).getByRole('button', { name: 'Move queued message up' }));
+      await waitFor(() => expect(within(dock).getAllByRole('listitem')[0].textContent).toContain('Second task'));
+      expect(updates).toEqual([
+        { resourceId: 'agent-1', threadId: 'thread-1', signalId: 'queued-b', action: 'move-up' },
+      ]);
+    });
+
+    it('steers an admitted item without resending or cancelling it', async () => {
+      const updates: unknown[] = [];
+      server.use(
+        http.post(`${BASE_URL}/api/agents/:agentId/threads/queue/update`, async ({ request }) => {
+          updates.push(await request.json());
+          subscription?.enqueue(
+            new TextEncoder().encode(sseChunk(steeringUserMessage('queued-steer', 'Steer with this task'))),
+          );
+          return HttpResponse.json({ updated: true });
+        }),
+      );
+      await act(async () =>
+        subscription?.enqueue(
+          new TextEncoder().encode(sseChunk(queuedUserMessage('queued-steer', 'Steer with this task', 0))),
+        ),
+      );
+      const dock = await screen.findByRole('region', { name: 'Queued messages' });
+      fireEvent.click(within(dock).getByRole('button', { name: 'Steer agent' }));
+      await waitFor(() =>
+        expect(updates).toEqual([
+          { resourceId: 'agent-1', threadId: 'thread-1', signalId: 'queued-steer', action: 'steer' },
+        ]),
+      );
+      expect(sentMessages).toHaveLength(0);
+      expect(abortRequests).toBe(0);
+      await waitFor(() => expect(screen.queryByRole('region', { name: 'Queued messages' })).toBeNull());
+      expect(screen.getAllByText('Steer with this task')).toHaveLength(1);
     });
 
     it('keeps both queued messages when the first acceptance is slow', async () => {

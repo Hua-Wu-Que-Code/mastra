@@ -1568,6 +1568,9 @@ export const useChat = ({
         ...dbUserMessage.content.metadata,
         mode: 'stream',
         status: 'pending',
+        ...('deliveryMode' in args && args.deliveryMode === 'queue' && (isRunning || isAwaitingToolApproval)
+          ? { queued: true }
+          : {}),
         [CLIENT_MESSAGE_ID_KEY]: clientMessageId,
       };
       const pendingMessage = { ...dbUserMessage, id: clientSetId, content: { ...dbUserMessage.content, metadata } };

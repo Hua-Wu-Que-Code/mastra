@@ -81,6 +81,8 @@ import {
   abortAgentThreadBodySchema,
   abortAgentThreadResponseSchema,
   cancelPendingAgentSignalsBodySchema,
+  updateQueuedAgentMessageBodySchema,
+  updateQueuedAgentMessageResponseSchema,
   cancelPendingAgentSignalsResponseSchema,
   streamUntilIdleBodySchema,
   resumeStreamBodySchema,
@@ -680,7 +682,8 @@ export async function getSerializedAgentTools(
 
         const outputSchema = schemaToJsonSchema(
           resolveLazySchema('outputSchema' in tool ? tool.outputSchema : undefined) as
-            PublicSchema<unknown> | undefined,
+            | PublicSchema<unknown>
+            | undefined,
         );
         if (outputSchema !== undefined) {
           outputSchemaForReturn = stringify(outputSchema);
@@ -688,7 +691,8 @@ export async function getSerializedAgentTools(
 
         const requestContextSchema = schemaToJsonSchema(
           resolveLazySchema('requestContextSchema' in tool ? tool.requestContextSchema : undefined) as
-            PublicSchema<unknown> | undefined,
+            | PublicSchema<unknown>
+            | undefined,
         );
         if (requestContextSchema !== undefined) {
           requestContextSchemaForReturn = stringify(requestContextSchema);
@@ -2446,7 +2450,8 @@ async function handleAgentMessageRoute({
   invoke: (agent: Agent, target: SendAgentSignalOptions) => SendAgentSignalResult;
 }) {
   const idleStreamOptions = ifIdle?.streamOptions as
-    (Record<string, unknown> & { requestContext?: Record<string, unknown>; versions?: VersionOverrides }) | undefined;
+    | (Record<string, unknown> & { requestContext?: Record<string, unknown>; versions?: VersionOverrides })
+    | undefined;
   const bodyRequestContext = idleStreamOptions?.requestContext;
   const normalizedIdleStreamOptions = normalizePublicExecutionOptions(idleStreamOptions, serverRequestContext);
   const versionOptions = extractVersionOptions(serverRequestContext, bodyRequestContext);
@@ -2840,6 +2845,51 @@ export const ABORT_AGENT_THREAD_ROUTE = createRoute({
       return { aborted };
     } catch (error) {
       return handleError(error, 'error aborting agent thread');
+    }
+  },
+});
+
+export const UPDATE_AGENT_QUEUED_MESSAGE_ROUTE = createRoute({
+  method: 'POST',
+  path: '/agents/:agentId/threads/queue/update',
+  responseType: 'json' as const,
+  pathParamSchema: agentIdPathParams,
+  bodySchema: updateQueuedAgentMessageBodySchema,
+  responseSchema: updateQueuedAgentMessageResponseSchema,
+  summary: 'Update a queued message',
+  description: 'Move a pending follow-up or steer the active agent with it before execution starts',
+  tags: ['Agents', 'Streaming'],
+  requiresAuth: true,
+  requiresPermission: 'agents:execute',
+  handler: async ({ mastra, agentId, resourceId, threadId, signalId, action, requestContext }) => {
+    try {
+      const agent = await getAgentFromSystem({ mastra, agentId, requestContext });
+      if (typeof agent.updateQueuedMessage !== 'function') {
+        throw new HTTPException(501, { message: 'Queue editing requires a newer @mastra/core version' });
+      }
+      const effectiveResourceId = getEffectiveResourceId(requestContext, resourceId);
+      const effectiveThreadId = getEffectiveThreadId(requestContext, threadId);
+      if (!effectiveResourceId || !effectiveThreadId) {
+        throw new HTTPException(400, { message: 'resourceId and threadId are required' });
+      }
+      const memory = await agent.getMemory({ requestContext });
+      const thread = await memory?.getThreadById({ threadId: effectiveThreadId });
+      await enforceThreadAccess({
+        mastra,
+        requestContext,
+        threadId: effectiveThreadId,
+        thread,
+        effectiveResourceId,
+        permission: MastraFGAPermissions.MEMORY_WRITE,
+      });
+      return await agent.updateQueuedMessage({
+        resourceId: effectiveResourceId,
+        threadId: effectiveThreadId,
+        signalId,
+        action,
+      });
+    } catch (error) {
+      return handleError(error, 'error updating queued message');
     }
   },
 });

@@ -295,6 +295,25 @@ export const API_ROUTE_METADATA = {
       "listProperty": "cancelledSignalIds"
     }
   },
+  "POST /agents/:agentId/threads/queue/update": {
+    "method": "POST",
+    "path": "/agents/:agentId/threads/queue/update",
+    "pathParams": [
+      "agentId"
+    ],
+    "queryParams": [],
+    "bodyParams": [
+      "action",
+      "resourceId",
+      "signalId",
+      "threadId"
+    ],
+    "hasQuery": false,
+    "hasBody": true,
+    "responseShape": {
+      "kind": "single"
+    }
+  },
   "POST /agents/:agentId/tools/:toolId/execute": {
     "method": "POST",
     "path": "/agents/:agentId/tools/:toolId/execute",

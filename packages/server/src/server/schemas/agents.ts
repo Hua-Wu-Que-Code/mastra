@@ -820,6 +820,14 @@ export const cancelPendingAgentSignalsBodySchema = agentThreadBodySchema.extend(
   signalIds: z.array(z.string().min(1)).min(1).max(1000),
 });
 
+export const updateQueuedAgentMessageBodySchema = agentThreadBodySchema.extend({
+  threadId: z.string().min(1),
+  signalId: z.string().min(1),
+  action: z.enum(['move-up', 'move-down', 'steer']),
+});
+
+export const updateQueuedAgentMessageResponseSchema = z.object({ updated: z.boolean() });
+
 export const cancelPendingAgentSignalsResponseSchema = z.object({
   cancelledSignalIds: z.array(z.string()),
 });

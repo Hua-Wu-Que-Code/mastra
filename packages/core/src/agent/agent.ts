@@ -283,6 +283,8 @@ import type {
   DiscoverAgentThreadPeersOptions,
   CancelQueuedAgentMessagesOptions,
   CancelQueuedAgentMessagesResult,
+  UpdateQueuedAgentMessageOptions,
+  UpdateQueuedAgentMessageResult,
   DurableAgentLike,
   AgentThreadEventListener,
   SubscribeAgentThreadEventsOptions,
@@ -10755,6 +10757,11 @@ export class Agent<
       target,
       this.getPubSub(),
     );
+  }
+
+  /** Move a queued follow-up, or deliver it to the active run as a steer. */
+  updateQueuedMessage(target: UpdateQueuedAgentMessageOptions): Promise<UpdateQueuedAgentMessageResult> {
+    return agentThreadStreamRuntime.updateQueuedMessage(this, target, this.getPubSub());
   }
 
   cancelQueuedMessages(target: CancelQueuedAgentMessagesOptions): CancelQueuedAgentMessagesResult {

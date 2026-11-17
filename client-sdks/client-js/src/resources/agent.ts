@@ -1096,6 +1096,16 @@ export class Agent extends BaseResource {
     });
   }
 
+  /** Move a pending follow-up or deliver it as a steer. Already consumed messages return updated: false. */
+  updateQueuedMessage(params: {
+    resourceId?: string;
+    threadId: string;
+    signalId: string;
+    action: 'move-up' | 'move-down' | 'steer';
+  }): Promise<{ updated: boolean }> {
+    return this.request(`/agents/${this.agentId}/threads/queue/update`, { method: 'POST', body: params });
+  }
+
   /** Cancels pending thread signals and propagates requested IDs through shared PubSub. */
   cancelQueuedMessages(params: CancelQueuedAgentMessagesParams): Promise<CancelQueuedAgentMessagesResponse> {
     const { resourceId, threadId, signalIds } = params;

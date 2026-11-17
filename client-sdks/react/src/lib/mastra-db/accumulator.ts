@@ -150,6 +150,7 @@ const clearPendingStatus = (message: MastraDBMessage): MastraDBMessage => {
   const {
     status: _status,
     queued: _queued,
+    queuePosition: _queuePosition,
     [CLIENT_MESSAGE_ID_KEY]: _clientMessageId,
     ...rest
   } = message.content.metadata ?? {};
@@ -162,7 +163,7 @@ const clearPendingStatus = (message: MastraDBMessage): MastraDBMessage => {
 // React unmount/remount and the resulting layout shift. `clientMessageId` is
 // still stripped from persisted threads by `resolveInitialMessages`.
 const clearPendingStatusKeepClientId = (message: MastraDBMessage): MastraDBMessage => {
-  const { status: _status, queued: _queued, ...rest } = message.content.metadata ?? {};
+  const { status: _status, queued: _queued, queuePosition: _queuePosition, ...rest } = message.content.metadata ?? {};
   return withMetadata(message, rest);
 };
 
@@ -603,11 +604,15 @@ export const accumulateChunk = ({ chunk, conversation, metadata }: AccumulateChu
     return count;
   })();
   if (!isQueuedChunk && queuedTailLength > 0) {
-    // The echo of a queued follow-up (its run started) settles it: it leaves the
-    // queue and is appended as a delivered message below the finished run output.
-    const echoedId = isDataChunk(chunk) && chunk.type === 'data-user-message' ? (chunk as any).data?.id : undefined;
+    // Consumption or steering moves the item out of the queued tail. Keep only
+    // its new presentation so a pending steer cannot leave a stale queue copy.
+    const transitioningId = isUserMessagePendingChunk(chunk)
+      ? chunk.data.id
+      : isDataChunk(chunk) && chunk.type === 'data-user-message'
+        ? (chunk as any).data?.id
+        : undefined;
     const tailStart = result.length - queuedTailLength;
-    const queuedTail = result.slice(tailStart).filter(message => message.id !== echoedId);
+    const queuedTail = result.slice(tailStart).filter(message => message.id !== transitioningId);
     // Queued bubbles that are not at the tail (the user sent something after them) stay where they are.
     return [...accumulateChunk({ chunk, conversation: result.slice(0, tailStart), metadata }), ...queuedTail];
   }
@@ -631,7 +636,10 @@ export const accumulateChunk = ({ chunk, conversation, metadata }: AccumulateChu
                 ...message.content,
                 metadata: {
                   ...message.content.metadata,
-                  ...(signalMetadata.status === 'queued' ? { queued: true } : {}),
+                  queued: signalMetadata.status === 'queued',
+                  ...(typeof signalMetadata.queuePosition === 'number'
+                    ? { queuePosition: signalMetadata.queuePosition }
+                    : {}),
                 },
               },
             }
@@ -642,7 +650,8 @@ export const accumulateChunk = ({ chunk, conversation, metadata }: AccumulateChu
       ...metadata,
       status: 'pending',
       ...(typeof clientId === 'string' ? { [CLIENT_MESSAGE_ID_KEY]: clientId } : {}),
-      ...(signalMetadata.status === 'queued' ? { queued: true } : {}),
+      queued: signalMetadata.status === 'queued',
+      ...(typeof signalMetadata.queuePosition === 'number' ? { queuePosition: signalMetadata.queuePosition } : {}),
     });
     // Presentation must not close the active assistant or steal its tool results.
     return [

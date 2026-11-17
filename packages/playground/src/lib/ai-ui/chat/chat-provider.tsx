@@ -3,12 +3,14 @@ import { RequestContext } from '@mastra/core/di';
 import {
   ChatAgentContext,
   ChatMessagesContext,
+  ChatQueueContext,
   ChatRunningContext,
   ChatSendContext,
   ChatTasksContext,
 } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import type {
   AgentContextValue,
+  ChatQueueAction,
   MessagesContextValue,
   RunningContextValue,
   SendContextValue,
@@ -326,9 +328,10 @@ export function ChatProvider({
 
   const renderMessages = useMemo<MastraDBMessage[]>(
     () =>
-      [...messages.filter(msg => msg.content?.metadata?.status !== 'error'), ...streamErrors].map(msg =>
-        convertOmPartsInMastraMessage(msg, globalOmParts),
-      ),
+      [
+        ...messages.filter(msg => msg.content?.metadata?.status !== 'error' && msg.content?.metadata?.queued !== true),
+        ...streamErrors,
+      ].map(msg => convertOmPartsInMastraMessage(msg, globalOmParts)),
     [messages, streamErrors, globalOmParts],
   );
 
@@ -340,6 +343,25 @@ export function ChatProvider({
     threadId,
     threadSignalsUnsupported,
   });
+
+  const queuedMessages = messages
+    .filter(message => message.role === 'user' && message.content.metadata?.queued === true)
+    .sort((a, b) => {
+      const left = a.content.metadata?.queuePosition;
+      const right = b.content.metadata?.queuePosition;
+      return (typeof left === 'number' ? left : Infinity) - (typeof right === 'number' ? right : Infinity);
+    });
+  const updateQueuedMessage = async (signalId: string, action: ChatQueueAction) => {
+    if (!threadId || signalId.startsWith('client-set-')) return;
+    const agent = baseClient.getAgent(agentId);
+    const target = { resourceId: agentId, threadId, signalId };
+    if (action === 'remove') {
+      await agent.cancelQueuedMessages({ resourceId: agentId, threadId, signalIds: [signalId] });
+    } else {
+      await agent.updateQueuedMessage({ ...target, action });
+    }
+    // The subscription owns convergence. A race with consumption must never remove a sent turn.
+  };
 
   const messagesValue = useMemo<MessagesContextValue>(() => ({ messages: renderMessages }), [renderMessages]);
   const runningValue = useMemo<RunningContextValue>(
@@ -356,25 +378,27 @@ export function ChatProvider({
   return (
     <ChatAgentContext.Provider value={agentValue}>
       <ChatRunningContext.Provider value={runningValue}>
-        <ChatMessagesContext.Provider value={messagesValue}>
-          <ChatTasksContext.Provider value={tasksValue}>
-            <ChatSendContext.Provider value={sendValue}>
-              <ToolCallProvider
-                approveToolcall={approveToolCall}
-                declineToolcall={declineToolCall}
-                approveToolcallGenerate={approveToolCallGenerate}
-                declineToolcallGenerate={declineToolCallGenerate}
-                approveNetworkToolcall={approveNetworkToolCall}
-                declineNetworkToolcall={declineNetworkToolCall}
-                isRunning={isRunningStream}
-                toolCallApprovals={toolCallApprovals}
-                networkToolCallApprovals={networkToolCallApprovals}
-              >
-                {children}
-              </ToolCallProvider>
-            </ChatSendContext.Provider>
-          </ChatTasksContext.Provider>
-        </ChatMessagesContext.Provider>
+        <ChatQueueContext.Provider value={{ messages: queuedMessages, update: updateQueuedMessage }}>
+          <ChatMessagesContext.Provider value={messagesValue}>
+            <ChatTasksContext.Provider value={tasksValue}>
+              <ChatSendContext.Provider value={sendValue}>
+                <ToolCallProvider
+                  approveToolcall={approveToolCall}
+                  declineToolcall={declineToolCall}
+                  approveToolcallGenerate={approveToolCallGenerate}
+                  declineToolcallGenerate={declineToolCallGenerate}
+                  approveNetworkToolcall={approveNetworkToolCall}
+                  declineNetworkToolcall={declineNetworkToolCall}
+                  isRunning={isRunningStream}
+                  toolCallApprovals={toolCallApprovals}
+                  networkToolCallApprovals={networkToolCallApprovals}
+                >
+                  {children}
+                </ToolCallProvider>
+              </ChatSendContext.Provider>
+            </ChatTasksContext.Provider>
+          </ChatMessagesContext.Provider>
+        </ChatQueueContext.Provider>
       </ChatRunningContext.Provider>
     </ChatAgentContext.Provider>
   );
