@@ -499,10 +499,13 @@ export function MessageScrollerProvider({
 
   React.useEffect(() => {
     if (!viewportElement || typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(syncAfterScroll);
+    const observer = new ResizeObserver(notifyContentResize);
     observer.observe(viewportElement);
+    // A live turn reserves min-height under its messages. A streaming row can grow
+    // behind the dock without resizing the outer content, so watch the rows too.
+    for (const [, item] of itemsRegistry) observer.observe(item.element);
     return () => observer.disconnect();
-  }, [syncAfterScroll, viewportElement]);
+  }, [itemsRegistry, itemsVersion, notifyContentResize, viewportElement]);
 
   React.useLayoutEffect(() => {
     updateScrollable();

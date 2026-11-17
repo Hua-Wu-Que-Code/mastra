@@ -1243,6 +1243,41 @@ const stubTurnLayout = (viewport: HTMLElement, layout: TurnLayout) => {
   });
 };
 
+describe('MessageScroller with reserved turn room', () => {
+  it.each([false, true])(
+    'follows reply growth inside unchanged turn room unless the reader scrolled up: %s',
+    async scrolledUp => {
+      vi.stubGlobal('ResizeObserver', MockResizeObserver);
+      const { rerender } = render(<HistoryHarness autoScroll messageIds={['question']} />);
+      const viewport = screen.getByTestId('history-viewport');
+      installScrollTo(viewport);
+      const layout: TurnLayout = {
+        rows: { question: { top: 600, height: 60 }, reply: { top: 684, height: 60 } },
+        contentHeight: 1200,
+      };
+      stubTurnLayout(viewport, layout);
+      scrollReaderTo(viewport, { scrollHeight: 1400, clientHeight: 400, scrollTop: 600 });
+      rerender(<HistoryHarness autoScroll messageIds={['question']} replyIds={['reply']} />);
+      await act(async () => {});
+      if (scrolledUp) scrollReaderTo(viewport, { scrollHeight: 1400, clientHeight: 400, scrollTop: 300 });
+      const scrollTo = installScrollTo(viewport);
+
+      // The answer grows past the composer while still inside the turn's min-height:
+      // neither the outer content nor scrollHeight changes, so only the row resizes.
+      layout.rows.reply = { top: 684, height: 160 };
+      const reply = getItem('reply');
+      await act(async () => {
+        for (const observer of MockResizeObserver.instances) {
+          if (observer.observed.has(reply)) observer.trigger([{ target: reply }]);
+        }
+      });
+
+      if (scrolledUp) expect(scrollTo).not.toHaveBeenCalled();
+      else expect(scrollTo).toHaveBeenLastCalledWith({ top: 644, behavior: 'auto' });
+    },
+  );
+});
+
 // The composer docks 100px under the content, so the last drawn row rests at the end of
 // the view at its bottom + 100 - 400, short of the end of the box.
 describe('MessageScroller with a folded last row', () => {
