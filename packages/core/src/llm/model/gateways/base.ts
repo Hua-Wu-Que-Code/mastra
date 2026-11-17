@@ -55,7 +55,17 @@ export interface ProviderConfig {
   modelReleaseDates?: Record<string, string>;
   /** Product names and selectable reasoning levels supplied by a custom gateway's catalog. */
   modelNames?: Record<string, string>;
-  modelReasoning?: Record<string, { defaultLevel: string; levels: string[] }>;
+  modelReasoning?: Record<
+    string,
+    {
+      defaultLevel: string;
+      levels: string[];
+      /** Gateway-declared input capacities keyed by reasoning level; absent levels are unknown. */
+      contextWindows?: Record<string, number>;
+    }
+  >;
+  /** Gateway-declared input context capacities in tokens, keyed by model ID. */
+  modelContextWindows?: Record<string, number>;
   docUrl?: string; // Optional documentation URL
   gateway: string;
   npm?: string; // NPM package name from models.dev (e.g., "@ai-sdk/anthropic")
@@ -81,7 +91,9 @@ export type StructuredOutputCapabilities = Record<string, string[]>;
 
 /** A reasoning control a model accepts, as published by models.dev `reasoning_options`. */
 export type ModelReasoningOption =
-  { type: 'effort'; values: string[] } | { type: 'budget_tokens'; min?: number; max?: number } | { type: 'toggle' };
+  | { type: 'effort'; values: string[] }
+  | { type: 'budget_tokens'; min?: number; max?: number }
+  | { type: 'toggle' };
 
 /** Provider ID → model ID → the reasoning controls that model accepts. */
 export type ReasoningCapabilities = Record<string, Record<string, ModelReasoningOption[]>>;

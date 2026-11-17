@@ -20,14 +20,21 @@ export function WorkDetailsBlock({ parts, children }: { parts: MessageFactoryPar
     Boolean(activeTool) || parts.some(part => part.type === 'reasoning' && getReasoningContent(part)?.streaming);
   const live = fields && presentTool(fields.toolName, fields.input);
   const detail = presentation.showLiveDetail && live ? live.description || live.detail : undefined;
-  const label = t('Work details: {count} steps', { count: parts.length });
+  const label =
+    tools.length === 0
+      ? running
+        ? t('Analyzing…')
+        : t('Analysis completed')
+      : running
+        ? t('Executing tools…')
+        : t('Tools completed: {count}', { count: tools.length });
   return (
     <ActivityItem
       icon={<IconArrowsHide aria-hidden />}
       label={label}
       detail={detail}
       status={running ? 'running' : 'idle'}
-      aria-label={label}
+      aria-label={t('Work details: {count} steps', { count: parts.length })}
     >
       {children}
     </ActivityItem>

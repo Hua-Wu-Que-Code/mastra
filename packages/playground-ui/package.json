@@ -15,7 +15,8 @@
     "fonts",
     "theme",
     "oxlint",
-    "CENTRAL-ICONS-LICENSE.md"
+    "CENTRAL-ICONS-LICENSE.md",
+    "notices"
   ],
   "exports": {
     "./style.css": "./dist/style.css",

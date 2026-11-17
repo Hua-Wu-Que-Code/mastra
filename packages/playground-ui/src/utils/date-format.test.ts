@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatMoment, formatShortDate, formatTimestampPrecise, toDate } from './date-format';
+import {
+  formatDate,
+  formatMessageClock,
+  formatMoment,
+  formatShortDate,
+  formatTimestampPrecise,
+  toDate,
+} from './date-format';
 
 const NOW = new Date('2026-09-24T18:00:00.000Z');
 const TODAY = new Date('2026-09-24T14:32:00.000Z');
@@ -179,5 +186,27 @@ describe('formatMoment', () => {
     ['in another year', at(11, 31, 2025), 'Dec 31, 2025 at 10:44:44 PM'],
   ])('names a moment %s by its day and clock', (_, time, expected) => {
     expect(formatMoment(time, { now, locale: 'en-US' })?.replace(/\u202f/g, ' ')).toBe(expected);
+  });
+});
+
+describe('chat message clocks', () => {
+  it('uses the requested timezone to decide whether a date is today', () => {
+    expect(
+      formatMessageClock('2026-01-01T07:00:00Z', {
+        now: new Date('2026-01-01T07:30:00Z'),
+        locale: 'en-US',
+        timeZone: 'America/Los_Angeles',
+      }),
+    ).toBe('23:00');
+    expect(
+      formatMessageClock('2026-01-01T07:00:00Z', {
+        now: new Date('2026-01-01T08:30:00Z'),
+        locale: 'en-US',
+        timeZone: 'America/Los_Angeles',
+      }),
+    ).toBe('Dec 31, 2025, 23:00');
+  });
+  it('omits invalid dates', () => {
+    expect(formatMessageClock('invalid')).toBeUndefined();
   });
 });

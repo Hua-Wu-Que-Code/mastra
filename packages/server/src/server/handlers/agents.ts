@@ -2111,6 +2111,7 @@ export async function buildProvidersList(mastra: Context['mastra']): Promise<Pro
       modelReleaseDates: provider.modelReleaseDates,
       modelNames: provider.modelNames,
       modelReasoning: provider.modelReasoning,
+      modelContextWindows: provider.modelContextWindows,
     };
   });
 }

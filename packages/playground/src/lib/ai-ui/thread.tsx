@@ -30,6 +30,7 @@ import {
 import type { ThreadRailTurn } from '@mastra/playground-ui/components/ThreadRail';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import {
+  ChatMetricsProvider,
   SaveFullConversationAction,
   useChatPreferences,
   WorkDetails,
@@ -53,6 +54,8 @@ import { AttachFileMenu } from './attachments/attach-file-menu';
 import { ComposerAttachments as ChatComposerAttachments } from './attachments/attachment';
 import { ComposerAttachmentsProvider, useComposerAttachments } from './attachments/composer-attachments';
 import { ComposerFileDrop } from './attachments/composer-file-drop';
+import { BranchMessageAction } from './chat/branch-message-action';
+import { ConversationStats } from './chat/conversation-stats';
 import { QueuedMessages } from './chat/queued-messages';
 import { BracketOverlay } from './components/bracket-overlay';
 import { useComposerAutofocus } from './hooks/use-composer-autofocus';
@@ -242,6 +245,7 @@ const ThreadContent = ({
                     {turnGroups.map((group, index) => {
                       const isLiveTurn = index === turnGroups.length - 1;
                       const firstAssistantIndex = group.entries.findIndex(entry => entry.role === 'assistant');
+                      const lastAssistant = [...group.entries].reverse().find(entry => entry.role === 'assistant');
                       // The first turn opens at the top already; room under it would only add empty scroll.
                       const holdsRoom = isLiveTurn && isRunning && group.opensTurn && index > 0;
                       return (
@@ -267,6 +271,21 @@ const ThreadContent = ({
                                     isSpeaking={isSpeaking}
                                     onReadAloud={readAloud}
                                     onStopSpeaking={stopSpeaking}
+                                    footer={
+                                      agentId &&
+                                      threadId &&
+                                      threadId !== 'new' &&
+                                      message.role === 'assistant' &&
+                                      message.id === lastAssistant?.id &&
+                                      !(isLiveTurn && isRunning) ? (
+                                        <BranchMessageAction
+                                          agentId={agentId}
+                                          threadId={threadId}
+                                          messageId={message.id}
+                                          messages={group.entries}
+                                        />
+                                      ) : undefined
+                                    }
                                   />
                                 </MessageScrollerItem>
                               </Fragment>
@@ -309,6 +328,7 @@ const ThreadContent = ({
                     runOptionsSlot={runOptionsSlot}
                   />
                 </div>
+                {!landingShown && <ConversationStats />}
                 {landingShown ? <SuggestedPromptList prompts={suggestedPrompts ?? EMPTY_SUGGESTED_PROMPTS} /> : null}
               </ChatShell.Column>
             </ChatShell.Dock>
@@ -319,11 +339,17 @@ const ThreadContent = ({
   );
 };
 
-export const Thread = (props: ThreadProps) => (
-  <ChatAnnotationsProvider>
-    <ThreadContent {...props} />
-  </ChatAnnotationsProvider>
-);
+export const Thread = (props: ThreadProps) => {
+  const messages = useChatMessages();
+  const { isRunning } = useChatRunning();
+  return (
+    <ChatMetricsProvider messages={messages} running={isRunning} agentId={props.agentId} threadId={props.threadId}>
+      <ChatAnnotationsProvider>
+        <ThreadContent {...props} />
+      </ChatAnnotationsProvider>
+    </ChatMetricsProvider>
+  );
+};
 
 const ThreadWelcome = () => {
   useLocale();

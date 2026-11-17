@@ -14,3 +14,6 @@ export { useDatasetSaveContext } from './context/dataset-save-context-value';
 export type { DatasetSaveContextValue } from './context/dataset-save-context-value';
 export * from './messages/dataset-save-action';
 export * from './messages/assistant-message-actions';
+
+export { ChatMetricsProvider } from './metrics/chat-metrics-provider';
+export { ChatSessionStats } from './metrics/chat-session-stats';

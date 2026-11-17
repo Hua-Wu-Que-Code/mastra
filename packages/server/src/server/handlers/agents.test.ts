@@ -395,7 +395,14 @@ describe('getProvidersHandler', () => {
           name: 'Custom LLM',
           models: ['custom-model-1', 'custom-model-2'],
           modelNames: { 'custom-model-1': 'Product One' },
-          modelReasoning: { 'custom-model-1': { defaultLevel: 'off', levels: ['off', 'high'] } },
+          modelReasoning: {
+            'custom-model-1': {
+              defaultLevel: 'off',
+              levels: ['off', 'high'],
+              contextWindows: { off: 131072, high: 1048576 },
+            },
+          },
+          modelContextWindows: { 'custom-model-1': 131072 },
           apiKeyEnvVar: 'CUSTOM_LLM_API_KEY',
           gateway: 'test-gateway',
         },
@@ -428,8 +435,13 @@ describe('getProvidersHandler', () => {
     expect(customProvider).toBeDefined();
     expect(customProvider?.name).toBe('Custom LLM');
     expect(customProvider?.modelNames).toEqual({ 'custom-model-1': 'Product One' });
+    expect(customProvider?.modelContextWindows).toEqual({ 'custom-model-1': 131072 });
     expect(customProvider?.modelReasoning).toEqual({
-      'custom-model-1': { defaultLevel: 'off', levels: ['off', 'high'] },
+      'custom-model-1': {
+        defaultLevel: 'off',
+        levels: ['off', 'high'],
+        contextWindows: { off: 131072, high: 1048576 },
+      },
     });
   });
 

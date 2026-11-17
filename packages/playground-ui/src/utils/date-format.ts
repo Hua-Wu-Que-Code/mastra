@@ -187,3 +187,21 @@ export function formatTimestampPrecise(
   const date = toDate(value);
   return date ? getFormatter(withDate ? 'precise' : 'timePrecise', locale).format(date) : undefined;
 }
+
+/** DSH's date-aware message clock: today uses HH:mm, older days include their date. */
+export function formatMessageClock(value: DateInput, { now, locale = getIntlLocale(), timeZone }: FormatOptions = {}) {
+  const date = toDate(value);
+  if (!date) return undefined;
+  const reference = new Date(now ?? Date.now());
+  const year = new Intl.DateTimeFormat('en', { year: 'numeric', timeZone });
+  const sameYear = year.format(date) === year.format(reference);
+  const sameDay = calendarDay(date, timeZone) === calendarDay(reference, timeZone);
+  return new Intl.DateTimeFormat(locale, {
+    timeZone,
+    ...(!sameDay && { month: 'short', day: 'numeric' }),
+    ...(!sameYear && { year: 'numeric' }),
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(date);
+}

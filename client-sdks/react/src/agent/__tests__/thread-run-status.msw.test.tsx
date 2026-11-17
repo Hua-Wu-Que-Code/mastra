@@ -7,6 +7,51 @@ import { renderHookWithProviders, TEST_BASE_URL } from '../../test/render';
 import { useChat } from '../hooks';
 
 describe('useChat thread outcomes (COR-1500)', () => {
+  it('keeps late trace identity on its own streamed assistant', async () => {
+    let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
+    server.use(
+      http.post(
+        `${TEST_BASE_URL}/api/agents/agent-1/threads/subscribe`,
+        () =>
+          new HttpResponse(
+            new ReadableStream<Uint8Array>({
+              start(value) {
+                controller = value;
+              },
+            }),
+            { headers: { 'content-type': 'text/event-stream' } },
+          ),
+      ),
+    );
+    const { result, unmount } = renderHookWithProviders(() =>
+      useChat({ agentId: 'agent-1', resourceId: 'resource-1', threadId: 'thread-1', enableThreadSignals: true }),
+    );
+    const emit = async (chunk: unknown) => {
+      await act(async () => {
+        controller?.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\n`));
+      });
+    };
+    try {
+      await waitFor(() => expect(controller).toBeDefined());
+      await emit({ type: 'start', runId: 'trace-run', from: 'AGENT', payload: { messageId: 'traced-answer' } });
+      await emit({ type: 'text-start', runId: 'trace-run', from: 'AGENT', payload: { id: 'text-1' } });
+      await emit({
+        type: 'text-delta',
+        runId: 'trace-run',
+        from: 'AGENT',
+        payload: { id: 'text-1', text: 'A real streamed reply' },
+      });
+      await emit({ type: 'finish', runId: 'trace-run', traceId: 'durable-trace', from: 'AGENT', payload: {} });
+      await waitFor(() =>
+        expect(result.current.messages.find(message => message.id === 'traced-answer')?.content.metadata).toMatchObject(
+          { runId: 'trace-run', traceId: 'durable-trace' },
+        ),
+      );
+    } finally {
+      unmount();
+      controller?.close();
+    }
+  });
   it.each(
     (['history', 'send-message', 'status-before-response', 'prior-run-finishes'] as const).flatMap(identitySource =>
       (['success', 'failed', 'aborted', 'suspended'] as const).map(status => ({ identitySource, status })),

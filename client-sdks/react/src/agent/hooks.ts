@@ -542,7 +542,7 @@ export const useChat = ({
       if (isTerminal && liveRunId.current && chunk.runId !== liveRunId.current) return;
       const runId = 'runId' in chunk && typeof chunk.runId === 'string' ? chunk.runId : undefined;
       setMessages(prev => {
-        const metadata = { mode: 'stream' as const, runId };
+        const metadata = { mode: 'stream' as const, runId, ...(chunk.traceId ? { traceId: chunk.traceId } : {}) };
         const next = accumulateChunk({ chunk, conversation: prev, metadata });
         // A resumed response can already exist in history; explicit framing
         // establishes ownership even when the accumulator deduplicates it.
@@ -550,6 +550,20 @@ export const useChat = ({
           return next.map(message =>
             message.id === chunk.payload.messageId && message.role === 'assistant'
               ? { ...message, content: { ...message.content, metadata: { ...message.content.metadata, ...metadata } } }
+              : message,
+          );
+        }
+        // Some transports attach the trace only after the first frame. Update
+        // this run's assistants in place without tagging user/other-run messages.
+        if (chunk.traceId && runId) {
+          return next.map(message =>
+            message.role === 'assistant' &&
+            message.content.metadata?.runId === runId &&
+            message.content.metadata.traceId !== chunk.traceId
+              ? {
+                  ...message,
+                  content: { ...message.content, metadata: { ...message.content.metadata, traceId: chunk.traceId } },
+                }
               : message,
           );
         }

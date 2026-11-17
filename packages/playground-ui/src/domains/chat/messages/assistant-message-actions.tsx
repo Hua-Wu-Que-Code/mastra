@@ -21,6 +21,7 @@ export function AssistantMessageActions({
   useLocale();
   return (
     <>
+      <MessageCopyButton text={text} />
       {modelMetadata && (
         <MessageMetadata>
           <ProviderLogo providerId={modelMetadata.modelProvider} size={14} />
@@ -51,7 +52,6 @@ export function AssistantMessageActions({
             <IconVoiceSimple />
           </Button>
         ))}
-      <MessageCopyButton text={text} />
     </>
   );
 }

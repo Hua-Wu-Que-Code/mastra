@@ -6,6 +6,7 @@ import { memo, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { MessageAttachments } from '../attachments/message-attachments';
 import { splitMessageAttachments } from '../attachments/split-message-attachments';
+import { TurnUsage } from '../metrics/turn-usage';
 import { chatContentStyle } from '../preferences/chat-content-style';
 import { useChatPreferences } from '../preferences/chat-preferences-context';
 import { presentedParts, workBlocks } from '../preferences/work-details';
@@ -40,7 +41,7 @@ import { collectToolGroups } from '@/domains/chat/tools/tool-groups';
 import { useRevealedParts } from '@/ds/components/ai/message-reveal';
 import { ToolCallGroup } from '@/ds/components/ai/tool-call';
 import { Arriving } from '@/ds/components/Arrival';
-import { Message, MessageActions, MessageCopyButton } from '@/ds/components/Message';
+import { Message, MessageActions, MessageCopyButton, MessageTimestamp } from '@/ds/components/Message';
 import { Notice } from '@/ds/components/Notice';
 import { Txt } from '@/ds/components/Txt';
 import { t as studioT, useLocale } from '@/lib/i18n';
@@ -320,7 +321,8 @@ export const MessageRow = memo(function MessageRow({
         pending={isPending}
         attachments={attachments.length > 0 && <MessageAttachments parts={attachments} />}
         footer={
-          <MessageActions>
+          <MessageActions visibility="always" className="flex-row! gap-1.5">
+            {!isPending && <MessageTimestamp value={message.createdAt} format="clock" />}
             {canCopy && <MessageCopyButton text={text} />}
             <DatasetSaveAction messageText={text} />
             {footer}
@@ -335,6 +337,8 @@ export const MessageRow = memo(function MessageRow({
   }
 
   const showActionBar = hasVisibleAssistantText(shownMessage, metadata);
+  const completedAt = workDetails?.metrics?.at(-1)?.endedAt;
+  const timestamp = completedAt !== undefined ? new Date(completedAt) : message.createdAt;
   const hiddenWork = shownParts.every(part => part.type === 'step-start');
 
   return (
@@ -355,13 +359,20 @@ export const MessageRow = memo(function MessageRow({
             {showActionBar && (
               <AssistantMessageActions
                 text={getTextFromParts(shownMessage)}
-                modelMetadata={modelMetadata}
+                modelMetadata={workDetails ? undefined : modelMetadata}
                 isSpeaking={isSpeaking}
                 onReadAloud={onReadAloud}
                 onStopSpeaking={onStopSpeaking}
               />
             )}
-            {footer && <MessageActions>{footer}</MessageActions>}
+            {workDetails?.lastAssistantId === message.id && !isRunning && (
+              <>
+                {footer}
+                <TurnUsage models={workDetails.metrics?.flatMap(metric => metric.models) ?? []} />
+                <MessageTimestamp value={timestamp} format="clock" />
+              </>
+            )}
+            {!workDetails && footer && <MessageActions>{footer}</MessageActions>}
           </MessageActions>
         )
       }

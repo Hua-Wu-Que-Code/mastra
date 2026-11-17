@@ -1,9 +1,21 @@
-import { CopyButton } from '../CopyButton';
-import { t as studioT, useLocale } from '@/lib/i18n';
+import { Button } from '../Button';
+import { IconCheckmark2Medium } from '@/ds/icons/central/IconCheckmark2Medium';
+import { DshCopy } from '@/ds/icons/dsh/DshCopy';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { t, useLocale } from '@/lib/i18n';
 
 export function MessageCopyButton({ text }: { text: string }) {
   useLocale();
+  const { isCopied, handleCopy } = useCopyToClipboard({ text, showToast: false });
   return (
-    <CopyButton content={text} size="icon-sm" variant="ghost" tooltip={studioT('Copy message')} showToast={false} />
+    <Button
+      type="button"
+      size="icon-sm"
+      variant="ghost"
+      onClick={handleCopy}
+      aria-label={isCopied ? t('Copied!') : t('Copy message')}
+    >
+      {isCopied ? <IconCheckmark2Medium /> : <DshCopy />}
+    </Button>
   );
 }

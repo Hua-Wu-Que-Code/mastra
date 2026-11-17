@@ -2,6 +2,7 @@ import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import type { MessageFactoryPart } from '@mastra/react/ui';
 import { messageTextKind } from '../messages/renderers/message-text-kind';
 import { isToolPart, readToolPart } from '../messages/renderers/tool-part';
+import type { RunMetrics } from '../metrics/chat-metrics';
 import { isSettledState } from '../tools/tool-card-kind';
 import type { ToolCardContext } from '../tools/tool-card-kind';
 import { foldsIntoGroup } from '../tools/tool-groups';
@@ -41,6 +42,8 @@ export function finalReply(messages: MastraDBMessage[]) {
 
 export interface WorkDetailsPresentation {
   collapsed: boolean;
+  metrics?: RunMetrics[];
+  lastAssistantId?: string;
   groupTools: boolean;
   showReasoningPreview: boolean;
   showLiveDetail: boolean;

@@ -2,7 +2,7 @@ import { MastraClient } from '@mastra/client-js';
 import type { ListMemoryThreadMessagesResponse, StreamParams } from '@mastra/client-js';
 import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import type { TaskItem } from '@mastra/core/signals';
-import { ChatPreferencesProvider } from '@mastra/playground-ui/domains/chat';
+import { ChatMetricsProvider, ChatSessionStats, ChatPreferencesProvider } from '@mastra/playground-ui/domains/chat';
 import { createChatPreferencesStore } from '@mastra/playground-ui/domains/chat/preferences/chat-preferences';
 import { locale } from '@mastra/playground-ui/lib/i18n';
 import { MastraReactProvider } from '@mastra/react';
@@ -14,9 +14,19 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ChatProvider } from '../chat/chat-provider';
+import { ConversationStats } from '../chat/conversation-stats';
 import { Thread } from '../thread';
 import { emptyChannelPlatforms, emptyMcpServers, memoryDisabled, memoryEnabled, v2Agent } from './fixtures/agent';
 import { attachmentMessages } from './fixtures/attachment-messages';
+import {
+  measuredConversation,
+  measuredTrace,
+  measuredProviders,
+  olderTrace,
+  tracePage,
+  branchPages,
+  branchedThread,
+} from './fixtures/conversation-metrics';
 import {
   abortedSignalRun,
   acceptedSignalMessage,
@@ -25,8 +35,10 @@ import {
   cancelledUserMessage,
   steeringUserMessage,
 } from './fixtures/signal-run';
+import { useAgentSettings } from '@/domains/agents/context/agent-context';
 import { WorkingMemoryProvider } from '@/domains/agents/context/agent-working-memory-context';
 import { BrowserSessionProvider } from '@/domains/agents/context/browser-session-provider';
+import { ThreadPreferencesProvider } from '@/domains/agents/context/thread-preferences-provider';
 import { ThreadInputProvider } from '@/domains/conversation';
 import { server } from '@/test/msw-server';
 
@@ -37,6 +49,25 @@ declare global {
 }
 
 const BASE_URL = 'http://localhost:4111';
+
+function SelectUnknownCapacity() {
+  const { settings, setSettings } = useAgentSettings();
+  return (
+    <button
+      onClick={() =>
+        setSettings({
+          ...settings,
+          modelSettings: {
+            ...settings?.modelSettings,
+            providerOptions: { altflow: { reasoningLevel: 'max' } },
+          },
+        })
+      }
+    >
+      Select max
+    </button>
+  );
+}
 
 type CapturedBody = Record<string, unknown>;
 
@@ -80,6 +111,7 @@ const baseHandlers = () => [
   http.get(`${BASE_URL}/api/memory/threads/:threadId/messages`, () => HttpResponse.json({ messages: [] })),
   http.get(`${BASE_URL}/api/memory/observational-memory`, () => HttpResponse.json({ record: null })),
   http.get(`${BASE_URL}/api/agents/providers`, () => HttpResponse.json({ providers: [] })),
+  http.get(`${BASE_URL}/api/observability/traces`, () => HttpResponse.json({ spans: [] })),
   http.get(`${BASE_URL}/api/agents/:agentId/voice/speakers`, () => HttpResponse.json([])),
   http.get(`${BASE_URL}/api/agents/:agentId`, () => HttpResponse.json(v2Agent)),
   http.get(`${BASE_URL}/api/editor/builder/settings`, () =>
@@ -689,7 +721,7 @@ describe('Thread', () => {
     });
   });
 
-  it('shows assistant model attribution when model-list metadata is available', async () => {
+  it('keeps model attribution inside the usage card in the DSH message layout', async () => {
     server.use(...baseHandlers());
 
     await act(async () => {
@@ -701,7 +733,7 @@ describe('Thread', () => {
     });
 
     expect(screen.getByText('model-list answer')).toBeTruthy();
-    expect(screen.getByText('openai/gpt-4o-mini')).toBeTruthy();
+    expect(screen.queryByText('openai/gpt-4o-mini')).toBeNull();
   });
 
   it('hides assistant model attribution outside model-list mode', async () => {
@@ -996,12 +1028,11 @@ describe('Thread', () => {
         }),
       );
       const read = FileReader.prototype.readAsArrayBuffer;
-      const probe = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (
-        this: FileReader,
-        blob,
-      ) {
-        void pending.then(() => read.call(this, blob));
-      });
+      const probe = vi
+        .spyOn(FileReader.prototype, 'readAsArrayBuffer')
+        .mockImplementation(function (this: FileReader, blob) {
+          void pending.then(() => read.call(this, blob));
+        });
       try {
         await act(async () => {
           renderThread([]);
@@ -2041,6 +2072,137 @@ describe('Thread signal-path user-message reconciliation', () => {
     await act(async () => {
       subscribeController?.close();
       await new Promise(resolve => setTimeout(resolve, 10));
+    });
+  });
+});
+
+describe('Conversation process and accounting', () => {
+  describe('when two assistant messages share a completed trace', () => {
+    beforeEach(() => {
+      server.use(
+        ...baseHandlers(),
+        http.get(`${BASE_URL}/api/observability/traces/measured-run`, () => HttpResponse.json(measuredTrace)),
+      );
+    });
+    it('shows the actual turn duration and lets the reader expand its reasoning', async () => {
+      renderThread(measuredConversation);
+      expect(await screen.findByText('Completed, took 3s')).toBeDefined();
+      fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Analysis completed' }));
+      fireEvent.click(screen.getByRole('button', { name: /^Reasoning/ }));
+      expect(screen.getByRole('button', { name: /^Reasoning/ }).getAttribute('aria-expanded')).toBe('true');
+      expect(screen.getAllByText('Compare the available tools.').length).toBeGreaterThan(0);
+    });
+    it('shows a single turn total and the provider breakdown without double counting spans', async () => {
+      renderThread(measuredConversation);
+      const usage = await screen.findByRole('button', { name: 'Turn usage' });
+      fireEvent.click(usage);
+      expect(await screen.findByText('39,555 tok')).toBeDefined();
+      expect(screen.getByText('altflow/qwen3.8-flash')).toBeDefined();
+      expect(screen.getByText('7,422 tok')).toBeDefined();
+      expect(screen.getByText('32,000 tok')).toBeDefined();
+      expect(screen.getByText('133 tok')).toBeDefined();
+      expect(screen.getByText('33 tok')).toBeDefined();
+    });
+    it('opens session timings and token accounting from the dock', async () => {
+      renderThread(measuredConversation);
+      fireEvent.click(await screen.findByRole('button', { name: 'Execution statistics' }));
+      expect(await screen.findByText('Model time')).toBeDefined();
+      expect(screen.getByText('Average time to first token (TTFT)')).toBeDefined();
+      expect(screen.getByText('Output speed (TPS)')).toBeDefined();
+      fireEvent.click(screen.getByRole('button', { name: 'Token usage' }));
+      expect(await screen.findByText('39,555 tok')).toBeDefined();
+      expect(screen.getByText('81%')).toBeDefined();
+      expect(screen.getByText('7,422 tok')).toBeDefined();
+    });
+    it('opens the DSH context ring with exact request usage and model limits', async () => {
+      render(
+        <Wrapper>
+          <ChatMetricsProvider messages={measuredConversation} running={false}>
+            <ChatSessionStats contextWindow={131072} route="altflow/qwen3.8-flash" />
+          </ChatMetricsProvider>
+        </Wrapper>,
+      );
+      fireEvent.click(await screen.findByRole('button', { name: 'Context usage' }));
+      expect(await screen.findByText('Context used 30%')).toBeDefined();
+      expect(screen.getByRole('meter').getAttribute('aria-valuenow')).toBe('30');
+      expect(screen.getByText('39,422 tok')).toBeDefined();
+      expect(screen.getByText('131,072 tok')).toBeDefined();
+      expect(screen.queryByText('System prompt')).toBeNull();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByRole('meter')).toBeNull());
+    });
+    it('uses the selected reasoning route limit and hides unknown route capacities', async () => {
+      server.use(http.get(`${BASE_URL}/api/agents/providers`, () => HttpResponse.json(measuredProviders)));
+      localStorage.setItem(
+        'mastra-thread-preferences-["display-agent","display-thread"]',
+        JSON.stringify({
+          modelSettings: { providerOptions: { altflow: { reasoningLevel: 'high' } } },
+        }),
+      );
+      render(
+        <Wrapper>
+          <ThreadPreferencesProvider
+            agentId="display-agent"
+            threadId="display-thread"
+            defaultProvider="altflow"
+            defaultModel="qwen3.8-flash"
+          >
+            <ChatMetricsProvider messages={measuredConversation} running={false}>
+              <ConversationStats />
+              <SelectUnknownCapacity />
+            </ChatMetricsProvider>
+          </ThreadPreferencesProvider>
+        </Wrapper>,
+      );
+      fireEvent.click(await screen.findByRole('button', { name: 'Context usage' }));
+      expect(await screen.findByText('1,048,576 tok')).toBeDefined();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      fireEvent.click(screen.getByRole('button', { name: 'Select max' }));
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Context usage' })).toBeNull());
+    });
+    it('includes older trace pages even when their messages are not loaded', async () => {
+      server.use(
+        http.get(`${BASE_URL}/api/observability/traces`, ({ request }) =>
+          HttpResponse.json(tracePage(Number(new URL(request.url).searchParams.get('page') ?? 0))),
+        ),
+        http.get(`${BASE_URL}/api/observability/traces/older-run`, () => HttpResponse.json(olderTrace)),
+      );
+      renderThread(measuredConversation);
+      await screen.findByText('2 turns 2 steps · 67 tok/s');
+      fireEvent.click(screen.getByRole('button', { name: 'Token usage' }));
+      expect(await screen.findByText('79,110 tok')).toBeDefined();
+    });
+    it('identifies partial statistics when history access fails', async () => {
+      server.use(http.get(`${BASE_URL}/api/observability/traces`, () => new HttpResponse(null, { status: 403 })));
+      renderThread(measuredConversation);
+      fireEvent.click(await screen.findByRole('button', { name: 'Token usage' }));
+      expect(await screen.findByText('Statistics include only available records.')).toBeDefined();
+    });
+    it('branches across history pages through the selected reply and excludes later messages', async () => {
+      const clone = vi.fn();
+      server.use(
+        http.get(`${BASE_URL}/api/memory/threads/:threadId/messages`, ({ request }) =>
+          HttpResponse.json(branchPages[Number(new URL(request.url).searchParams.get('page') ?? 0)]),
+        ),
+        http.post(`${BASE_URL}/api/memory/threads/:threadId/clone`, async ({ request }) => {
+          clone(await request.json());
+          return HttpResponse.json(branchedThread);
+        }),
+      );
+      renderThread(measuredConversation);
+      fireEvent.click(await screen.findByRole('button', { name: 'Branch conversation' }));
+      await waitFor(() =>
+        expect(clone).toHaveBeenCalledWith({
+          options: { messageFilter: { messageIds: ['question', 'analysis', 'answer'] } },
+        }),
+      );
+    });
+    it('keeps timestamps and copy controls visible on user messages', async () => {
+      const { container } = renderThread(measuredConversation);
+      const user = container.querySelector('[data-from="user"]');
+      expect(user?.querySelector('time')?.getAttribute('datetime')).toBe('2026-11-16T07:54:00.000Z');
+      expect(user?.querySelector('button[aria-label="Copy message"]')).toBeTruthy();
     });
   });
 });
