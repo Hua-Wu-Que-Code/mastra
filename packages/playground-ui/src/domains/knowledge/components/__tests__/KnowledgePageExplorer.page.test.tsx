@@ -219,7 +219,7 @@ describe('KnowledgePageExplorer page view', () => {
       renderWithProviders(<Host initial="refund" initialView="page" />);
       const view = within(pageView());
       await userEvent.hover(view.getByTestId('knowledge-page-title'));
-      expect((await screen.findByRole('tooltip')).textContent).toBe('org:acme#policies/refund');
+      expect(screen.queryByRole('tooltip')).toBeNull();
       await userEvent.unhover(view.getByTestId('knowledge-page-title'));
       const details = within(view.getByRole('region', { name: 'Details' }));
       const terms = details.getAllByRole('term').map(term => term.textContent);

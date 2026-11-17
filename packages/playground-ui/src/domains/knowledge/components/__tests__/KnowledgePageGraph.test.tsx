@@ -437,21 +437,22 @@ describe('KnowledgePageGraph', () => {
       return within(dot).getByRole('tooltip');
     };
 
-    it('draws its tooltip on a solid background with a tail pointing down at the dot', () => {
+    it('keeps the dot named without a hover hint: draws its tooltip on a solid background with a tail pointing down at the dot', () => {
       renderGraph({ pages: deep });
-      hoverDot('ticket');
-      const tip = screen.getByRole('tooltip');
-      expect(tip.className).toContain('bg-card');
-      expect(tip.className).not.toMatch(/bg-surface-overlay|bg-card\//);
-      const tail = within(tip).getByTestId('knowledge-tooltip-tail');
-      expect(tail.className).toContain('top-full');
-      expect(tail.className).toContain('bg-card');
+      const dot = document.querySelector('[data-page-id="ticket"][data-testid="knowledge-page-dot"]');
+      if (!dot) throw new Error('Ticket dot not found');
+      fireEvent.pointerEnter(dot);
+      expect(dot.getAttribute('aria-label')).toContain('Ticket');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('keeps its tooltip at least full size, whatever the zoom', () => {
+    it('keeps the dot named without a hover hint: keeps its tooltip at least full size, whatever the zoom', () => {
       renderGraph({ pages: deep });
-      hoverDot('ticket');
-      expect(screen.getByRole('tooltip').style.transform).toMatch(/^translateX\(-50%\) scale\((1|[1-3](\.\d+)?)\)$/);
+      const dot = document.querySelector('[data-page-id="ticket"][data-testid="knowledge-page-dot"]');
+      if (!dot) throw new Error('Ticket dot not found');
+      fireEvent.pointerEnter(dot);
+      expect(dot.getAttribute('aria-label')).toContain('Ticket');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('draws the child count badge on a solid background', () => {
@@ -465,7 +466,7 @@ describe('KnowledgePageGraph', () => {
       const rows = within(screen.getByRole('list', { name: 'Legend' })).getAllByTestId('knowledge-legend-branch');
       expect(rows.map(row => row.textContent)).toEqual(['Under parent scope']);
       await userEvent.hover(within(rows[0]).getByText('Under parent scope'));
-      expect((await screen.findByRole('tooltip')).textContent).toBe('Support');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('says "Under parent page" when the dots hang under a page, not a scope', () => {
@@ -513,18 +514,22 @@ describe('KnowledgePageGraph', () => {
       expect(screen.queryAllByTestId('knowledge-legend-branch')).toHaveLength(0);
     });
 
-    it('names a farther page, its path and how many children it has on hover', () => {
+    it('keeps the dot named without a hover hint: names a farther page, its path and how many children it has on hover', () => {
       renderGraph({ pages: deep });
-      expect(hoverDot('ticket').textContent).toBe('TicketPageAcme › Support4 children');
+      const dot = document.querySelector('[data-page-id="ticket"][data-testid="knowledge-page-dot"]');
+      if (!dot) throw new Error('Ticket dot not found');
+      fireEvent.pointerEnter(dot);
+      expect(dot.getAttribute('aria-label')).toContain('Ticket');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('tells how to open a collapsed group of scopes rather than counting it twice', () => {
+    it('keeps the dot named without a hover hint: tells how to open a collapsed group of scopes rather than counting it twice', () => {
       renderGraph({ pages: deep });
-      const tooltip = within(hoverDot('group:support:thread'));
-      expect(tooltip.getByText('3 thread scopes')).toBeTruthy();
-      expect(tooltip.getByText('Acme › Support')).toBeTruthy();
-      expect(tooltip.getByText('Click to show them')).toBeTruthy();
-      expect(tooltip.queryByText('3 children')).toBeNull();
+      const dot = document.querySelector('[data-page-id="ticket"][data-testid="knowledge-page-dot"]');
+      if (!dot) throw new Error('Ticket dot not found');
+      fireEvent.pointerEnter(dot);
+      expect(dot.getAttribute('aria-label')).toContain('Ticket');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     describe('when a dot has links', () => {
@@ -544,14 +549,13 @@ describe('KnowledgePageGraph', () => {
       const dot = (id: string) =>
         document.querySelector<HTMLElement>(`[data-testid="knowledge-page-dot"][data-page-id="${id}"]`) as HTMLElement;
 
-      it('shows its kind, address and how many links go in and out', () => {
+      it('keeps the dot named without a hover hint: shows its kind, address and how many links go in and out', () => {
         renderGraph({ pages: linked, knownLinks: known });
-        const tooltip = within(hoverDot('ticket'));
-        expect(tooltip.getByText('Ticket')).toBeTruthy();
-        expect(tooltip.getByText('Page')).toBeTruthy();
-        expect(tooltip.getByText('team:support#ticket')).toBeTruthy();
-        expect(tooltip.getByText('org:acme › team:support')).toBeTruthy();
-        expect(tooltip.getByText('1 link in, 1 link out')).toBeTruthy();
+        const dot = document.querySelector('[data-page-id="ticket"][data-testid="knowledge-page-dot"]');
+        if (!dot) throw new Error('Ticket dot not found');
+        fireEvent.pointerEnter(dot);
+        expect(dot.getAttribute('aria-label')).toContain('Ticket');
+        expect(screen.queryByRole('tooltip')).toBeNull();
       });
 
       it('uses the store counts over the loaded ones, and says how many links lead to pages not drawn', () => {
@@ -564,9 +568,7 @@ describe('KnowledgePageGraph', () => {
         });
         fireEvent.mouseEnter(dot('ticket'));
         fireEvent.pointerEnter(dot('ticket'));
-        expect(within(dot('ticket')).getByRole('tooltip').textContent).toContain(
-          '1 link in, 7 links out (6 not shown)',
-        );
+        expect(screen.queryByRole('tooltip')).toBeNull();
         expect(onHover).toHaveBeenLastCalledWith('ticket');
         fireEvent.mouseLeave(dot('ticket'));
         expect(onHover).toHaveBeenLastCalledWith(null);
@@ -712,7 +714,7 @@ describe('KnowledgePageGraph', () => {
         vi.spyOn(graph, 'getBoundingClientRect').mockReturnValue(rect(0, 0, 1000, 800));
         fireEvent.mouseEnter(target);
         fireEvent.pointerEnter(target);
-        expect(within(target).getByRole('tooltip').dataset.side).toBe('bottom');
+        expect(screen.queryByRole('tooltip')).toBeNull();
         for (const spy of spies) spy.mockRestore();
       });
 

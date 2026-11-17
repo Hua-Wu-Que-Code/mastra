@@ -46,7 +46,7 @@ function EntityIndexCompactCard({
       <CardContent density="compact" className="pointer-events-none relative grid h-full min-w-0 gap-3">
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="min-w-0">
-            <CardTitle title={entity.entityId} className="overflow-clip text-ellipsis whitespace-nowrap">
+            <CardTitle aria-label={entity.entityId} className="overflow-clip text-ellipsis whitespace-nowrap">
               {entity.entityId}
             </CardTitle>
             <CardDescription>{entity.entityType}</CardDescription>
@@ -64,7 +64,7 @@ function EntityIndexCompactCard({
           </div>
           <div>
             <dt className={textStyle({ tone: 'muted', variant: 'meta' })}>{studioT('Updated')}</dt>
-            <dd title={entity.updatedAt} className={textStyle({ tone: 'ink', variant: 'caption' })}>
+            <dd aria-label={entity.updatedAt} className={textStyle({ tone: 'ink', variant: 'caption' })}>
               {metadata.updatedAt}
             </dd>
           </div>

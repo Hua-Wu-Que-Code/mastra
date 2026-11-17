@@ -78,7 +78,7 @@ describe('ComposerAnnotations', () => {
       await annotate(SECOND, 'Soft rows'.length);
       fireEvent.click(screen.getByRole('button', { name: '1 annotation' }));
 
-      fireEvent.click(await screen.findByTitle('Show in chat'));
+      fireEvent.click(await screen.findByLabelText('Show in chat'));
 
       expect(scrolled).toEqual([screen.getByText(SECOND)]);
     });

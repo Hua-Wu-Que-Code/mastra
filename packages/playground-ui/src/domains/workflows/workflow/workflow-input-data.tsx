@@ -42,9 +42,7 @@ export interface WorkflowInputDataProps {
 }
 
 type InputDraft =
-  | { type: 'json'; value: string }
-  | { type: 'form'; value: unknown }
-  | { type: 'simple'; value: ProcessorDraft };
+  { type: 'json'; value: string } | { type: 'form'; value: unknown } | { type: 'simple'; value: ProcessorDraft };
 
 const defaultSubmitIcon = (
   <Icon>

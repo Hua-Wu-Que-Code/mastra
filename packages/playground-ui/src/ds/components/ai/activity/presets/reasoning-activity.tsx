@@ -9,9 +9,10 @@ const ThinkingGlyph = agentGlyph('thinking');
 
 export interface ReasoningActivityProps extends ReasoningContent {
   defaultOpen?: boolean;
+  showPreview?: boolean;
 }
 
-export function ReasoningActivity({ defaultOpen = true, ...content }: ReasoningActivityProps) {
+export function ReasoningActivity({ defaultOpen = true, showPreview = false, ...content }: ReasoningActivityProps) {
   useLocale();
   if (!hasVisibleReasoning(content)) return null;
 
@@ -19,6 +20,7 @@ export function ReasoningActivity({ defaultOpen = true, ...content }: ReasoningA
     <ActivityItem
       icon={<ThinkingGlyph aria-hidden />}
       label={studioT('Reasoning')}
+      detail={showPreview && !content.streaming ? content.text?.trim().split('\n')[0] : undefined}
       status={content.streaming ? 'running' : 'idle'}
       defaultOpen={defaultOpen}
       aria-label={studioT('Reasoning')}

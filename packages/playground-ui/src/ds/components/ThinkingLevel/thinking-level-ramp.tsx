@@ -153,7 +153,7 @@ export function ThinkingLevelRamp<T extends string>({
         </Txt>
         <div className="flex min-w-0 items-baseline gap-2">
           {disabled && unavailableReason ? (
-            <Txt as="span" variant="caption" tone="muted" className="truncate" title={unavailableReason}>
+            <Txt aria-label={unavailableReason} as="span" variant="caption" tone="muted" className="truncate">
               {unavailableReason}
             </Txt>
           ) : null}

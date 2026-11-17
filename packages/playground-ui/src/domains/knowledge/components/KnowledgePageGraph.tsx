@@ -10,10 +10,9 @@ import {
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
-  useStore,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { fitWords } from '../lib/circleText';
@@ -47,8 +46,6 @@ import { pagePath, pageRef, scopeTitle } from '../lib/pageAddress';
 import type { PageFlowEdge, PageFlowNode } from '../lib/pageGraph';
 import { KNOWLEDGE_PAGE_SIZE, grantGraph, pageGraphEdges, pageNeighbourIds, toPageFlow } from '../lib/pageGraph';
 import { childCountLabel } from '../lib/pageTree';
-import { chooseTooltipSide } from '../lib/tooltipSide';
-import type { Box, TooltipPlacementInput, TooltipSide } from '../lib/tooltipSide';
 import { prefersMotion, useLeavingNodes } from '../lib/useLeavingNodes';
 import type { KnowledgePageEdge, KnowledgePagePayload, KnowledgeScopeGrantPayload } from '../pageTypes';
 import { KnowledgePageCard } from './KnowledgePageCard';
@@ -170,64 +167,6 @@ const LOADING_HINT_DELAY_MS = 150;
 /** How long it holds the old layout for pages that never arrive before drawing what it has. */
 const LOADING_RELEASE_MS = 4000;
 
-/** Most a tooltip is enlarged to offset a zoomed-out graph. */
-const TOOLTIP_MAX_SCALE = 3;
-
-/** Screen-space box of an element. */
-function boxOf(el: Element): Box {
-  const { left, top, right, bottom } = el.getBoundingClientRect();
-  return { left, top, right, bottom };
-}
-
-/** The highlighted lines of the graph as screen-space segments, where the browser can measure them. */
-function drawnLines(root: Element): TooltipPlacementInput['lines'] {
-  const lines: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }> = [];
-  for (const path of root.querySelectorAll<SVGPathElement>('.react-flow__edge-path')) {
-    if (typeof path.getTotalLength !== 'function' || typeof path.getScreenCTM !== 'function') continue;
-    const matrix = path.getScreenCTM();
-    if (!matrix) continue;
-    const length = path.getTotalLength();
-    const start = path.getPointAtLength(0);
-    const end = path.getPointAtLength(length);
-    lines.push({
-      from: {
-        x: matrix.a * start.x + matrix.c * start.y + matrix.e,
-        y: matrix.b * start.x + matrix.d * start.y + matrix.f,
-      },
-      to: { x: matrix.a * end.x + matrix.c * end.y + matrix.e, y: matrix.b * end.x + matrix.d * end.y + matrix.f },
-    });
-  }
-  return lines;
-}
-
-/** Where a tooltip sits against its dot, and which way it grows from it. */
-const TOOLTIP_PLACEMENT: Record<TooltipSide, { tip: string; transform: string; origin: string; tail: string }> = {
-  top: {
-    tip: 'bottom-full left-1/2 mb-2',
-    transform: 'translateX(-50%)',
-    origin: 'bottom center',
-    tail: 'top-full left-1/2 -translate-x-1/2 -translate-y-1/2 border-r border-b',
-  },
-  bottom: {
-    tip: 'top-full left-1/2 mt-2',
-    transform: 'translateX(-50%)',
-    origin: 'top center',
-    tail: 'bottom-full left-1/2 -translate-x-1/2 translate-y-1/2 border-l border-t',
-  },
-  right: {
-    tip: 'left-full top-1/2 ml-2',
-    transform: 'translateY(-50%)',
-    origin: 'center left',
-    tail: 'right-full top-1/2 translate-x-1/2 -translate-y-1/2 border-l border-b',
-  },
-  left: {
-    tip: 'right-full top-1/2 mr-2',
-    transform: 'translateY(-50%)',
-    origin: 'center right',
-    tail: 'left-full top-1/2 -translate-x-1/2 -translate-y-1/2 border-r border-t',
-  },
-};
-
 /** The mark on a circle for a page that sits above others: layers for a scope, an up arrow for an ancestor page. */
 function LevelIcon({ level }: { level: GraphLevel }) {
   const Icon = level === 'scope' ? IconLayersTwo : IconArrowWallUp;
@@ -240,72 +179,25 @@ function LevelIcon({ level }: { level: GraphLevel }) {
   );
 }
 
-/** A page far from the focus: a small coloured dot that names itself on hover. */
+/** A page far from the focus, with an accessible name and a larger pointer target. */
 function DotNode({ data }: { data: PageNodeData }) {
-  const { page, size, color, path, ref, links, notShown } = data;
-  const [hover, setHover] = useState(false);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const tipRef = useRef<HTMLDivElement>(null);
-  const [side, setSide] = useState<TooltipSide>('top');
-  // The graph is often zoomed far out; the tooltip is scaled back up so it stays as readable as the page.
-  const zoom = useStore(state => state.transform[2]);
-  const tipScale = Math.min(Math.max(1 / zoom, 1), TOOLTIP_MAX_SCALE);
+  const { page, size, color, path, links, notShown } = data;
   const standIn = isChildPlaceholder(page);
   const group = isScopeGroup(page);
   // A group's count is already in its name; what it needs to say is how to see its members.
   const hint = standIn ? 'Hover or click to load them' : group ? 'Click to show them' : null;
   const children =
     !hint && page.childCount ? `${childCountLabel(page)} ${page.childCount === 1 ? 'child' : 'children'}` : null;
-  const kind = page.isScope ? (page.displayLabel ?? 'Scope') : 'Page';
   const linkText = links && (links.in > 0 || links.out > 0) ? linkCountsText(links, notShown) : null;
   const label = [page.name, hint ?? path, children, linkText].filter(Boolean).join(', ');
-  // Pick the side that covers the least: not another page or dot, not the highlighted lines, not the legend or Back.
-  useLayoutEffect(() => {
-    const dot = dotRef.current;
-    const tip = tipRef.current;
-    const graph = dot?.closest('.knowledge-graph');
-    if (!hover || !dot || !tip || !graph) return;
-    const dotBox = boxOf(dot);
-    const tipBox = boxOf(tip);
-    const scaledWidth = tip.offsetWidth * tipScale;
-    const scaledHeight = tip.offsetHeight * tipScale;
-    if (!scaledWidth || !scaledHeight) return;
-    const obstacles = [
-      ...graph.querySelectorAll('[data-testid="knowledge-page-node"], [data-testid="knowledge-page-dot"]'),
-      ...(graph.parentElement ?? graph).querySelectorAll(
-        '[aria-label="Legend"], [data-testid="knowledge-graph-back"], [data-knowledge-graph-zoom]',
-      ),
-    ]
-      .map(boxOf)
-      .filter(
-        box =>
-          box.right > box.left &&
-          !(box.left === tipBox.left && box.top === tipBox.top) &&
-          !(box.left === dotBox.left && box.top === dotBox.top),
-      );
-    setSide(
-      chooseTooltipSide({
-        dot: dotBox,
-        tip: { width: scaledWidth, height: scaledHeight },
-        gap: 8,
-        bounds: boxOf(graph),
-        obstacles,
-        lines: drawnLines(graph),
-      }),
-    );
-  }, [hover, tipScale]);
-  const placement = TOOLTIP_PLACEMENT[side];
   return (
     <div
-      ref={dotRef}
       data-testid="knowledge-page-dot"
       data-page-id={page.id}
       data-page-type={standIn ? 'stand-in' : group ? 'group' : page.isScope ? 'scope' : 'page'}
       aria-label={label}
       className="relative cursor-pointer transition-opacity"
       style={{ width: size, height: size, opacity: standIn ? 0.5 : undefined }}
-      onPointerEnter={() => setHover(true)}
-      onPointerLeave={() => setHover(false)}
     >
       {/* A larger target than the dot itself, so a small dot is easy to hit; it is part of the dot, so hover and click land here too. */}
       <span
@@ -334,44 +226,6 @@ function DotNode({ data }: { data: PageNodeData }) {
           </Txt>
         ) : null}
       </div>
-      {hover ? (
-        <div
-          role="tooltip"
-          ref={tipRef}
-          data-side={side}
-          className={`pointer-events-none absolute ${placement.tip} flex w-max max-w-72 flex-col rounded-md border border-border bg-card px-2 py-1 shadow-overlay`}
-          style={{ transform: `${placement.transform} scale(${tipScale})`, transformOrigin: placement.origin }}
-        >
-          <span
-            data-testid="knowledge-tooltip-tail"
-            aria-hidden
-            className={`absolute size-2 rotate-45 border-border bg-card ${placement.tail}`}
-          />
-          {hint ? (
-            <>
-              <Txt as="span" variant="label" tone="ink">
-                {page.name}
-              </Txt>
-              <Txt as="span" variant="meta" tone="muted">
-                <Metadata>
-                  {group && <Metadata.Item>{path}</Metadata.Item>}
-                  <Metadata.Item>{hint}</Metadata.Item>
-                </Metadata>
-              </Txt>
-            </>
-          ) : (
-            <KnowledgePageCard
-              name={page.name}
-              kind={kind}
-              pageRef={ref}
-              path={path}
-              childCount={page.childCount ? childCountLabel(page) : undefined}
-              links={links}
-              notShown={notShown}
-            />
-          )}
-        </div>
-      ) : null}
       <Handle type="target" position={Position.Top} className="!invisible" />
       <Handle type="source" position={Position.Bottom} className="!invisible" />
     </div>
@@ -389,12 +243,12 @@ function PageNodeComponent({ data }: NodeProps<PageFlowNode & { data: PageNodeDa
   if (data.form === 'dot') return <DotNode data={data} />;
   const { page, size, selected, pinned, badge } = data;
   const group = isScopeGroup(page);
-  const kind = page.isScope ? (page.displayLabel ?? 'Scope') : 'Page';
   const placeholder = isPlaceholder(page);
   const rest = isRestCircle(page);
   // A smaller circle gets smaller type and fewer lines, and the text keeps to the width of the circle's middle.
   const compact = size < COMPACT_CIRCLE_SIZE;
   const fit = Math.max(4, Math.floor((size * CIRCLE_TEXT_SHARE) / (compact ? 6.5 : 7.5)));
+  const kind = page.isScope ? (page.displayLabel ?? 'Scope') : 'Page';
   const tip = circleTooltip(data, kind);
   return (
     <div
@@ -588,9 +442,7 @@ function RimEdgeComponent({ id, data, style, markerEnd }: EdgeProps<Edge<RimEdge
           data-testid="knowledge-grant-edge"
           data-role={data.role}
           aria-label={studioT('Grants {value0}', { value0: data.role })}
-        >
-          <title>{studioT('Grants {value0}', { value0: data.role })}</title>
-        </path>
+        />
       ) : null}
     </>
   );
@@ -862,7 +714,7 @@ function GraphLegend({
               <polygon points="11,1 16,4 11,7" fill={GRANT_EDGE_COLOR} />
             </svg>
             <Txt as="span" variant="meta" tone="muted">
-              {studioT('Grants access (hover for role)')}
+              {studioT('Grants access')}
             </Txt>
           </li>
         ) : null}

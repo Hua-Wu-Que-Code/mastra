@@ -38,11 +38,11 @@ describe('LogDataPanel', () => {
 
       const metadata = within(screen.getByRole('list'));
       const timestamp = metadata.getByLabelText('Sep 24, 2026, 9:40:48.289 AM');
-      expect(timestamp.tabIndex).toBe(0);
+      expect(timestamp.tabIndex).toBe(-1);
 
       fireEvent.focus(timestamp);
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe('Sep 24, 2026, 9:40:48.289 AM');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('renders the message in a "Message" code section', () => {

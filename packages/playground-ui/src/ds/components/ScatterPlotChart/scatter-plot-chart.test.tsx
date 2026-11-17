@@ -61,47 +61,17 @@ describe('ScatterPlotChart', () => {
 });
 
 describe('ScatterPlotChartTooltip', () => {
-  it('formats the active point tooltip with supplied formatters', () => {
-    const point = { id: 'trace-a', duration: 120, cost: 0.4 };
-
-    render(
-      <ScatterPlotChartTooltip
-        active
-        payload={[{ payload: point }]}
-        xKey="duration"
-        yKey="cost"
-        nameKey="id"
-        formatX={value => `${value}ms`}
-        formatY={value => `$${value}`}
-      />,
-    );
-
-    expect(screen.getByText('trace-a')).not.toBeNull();
-    expect(screen.getByText('120ms')).not.toBeNull();
-    expect(screen.getByText('$0.4')).not.toBeNull();
-  });
-
-  it('returns nothing when inactive', () => {
-    const { container } = render(<ScatterPlotChartTooltip xKey="duration" yKey="cost" />);
-
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('supports custom tooltip labels', () => {
-    const formatTooltipLabel = vi.fn(() => 'Trace summary');
-    const point = { id: 'trace-a', duration: 120, cost: 0.4 };
-
-    render(
-      <ScatterPlotChartTooltip
-        active
-        payload={[{ payload: point }]}
-        xKey="duration"
-        yKey="cost"
-        formatTooltipLabel={formatTooltipLabel}
-      />,
-    );
-
-    expect(formatTooltipLabel).toHaveBeenCalledWith(point);
-    expect(screen.getByText('Trace summary')).not.toBeNull();
+  describe('when a point is active', () => {
+    it('renders no hover hint', () => {
+      const { container } = render(
+        <ScatterPlotChartTooltip
+          active
+          payload={[{ payload: { id: 'trace-a', duration: 120, cost: 0.4 } }]}
+          xKey="duration"
+          yKey="cost"
+        />,
+      );
+      expect(container.firstChild).toBeNull();
+    });
   });
 });

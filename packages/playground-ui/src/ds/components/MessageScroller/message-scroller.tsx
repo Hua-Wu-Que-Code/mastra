@@ -22,6 +22,7 @@ import type {
   MessageScrollerScrollable,
 } from './message-scroller-context';
 
+import {
   VISIBILITY_EPSILON,
   getCurrentAnchorId,
   getFollowTarget,

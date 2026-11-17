@@ -1,5 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { chartYTickCount, edgeDateLabels, labelWidth, niceYTicks, pickTimeTicks } from './chart-axes';
+import { locale } from '@/lib/i18n';
+
+afterEach(() => locale.adopt('en'));
+
+describe('edgeDateLabels localization', () => {
+  describe('when the interface is Chinese', () => {
+    it('uses Chinese month labels for a rolling range', () => {
+      locale.adopt('zh');
+      const first = new Date(2026, 10, 16, 14).getTime();
+      const ticks = [first, first + 3_600_000, first + 24 * 3_600_000];
+      expect([...edgeDateLabels(ticks, 'edges').values()]).toEqual(['11月16日', '11月17日']);
+    });
+  });
+});
 
 const HOUR = 3_600_000;
 const start = new Date(2026, 9, 5, 14).getTime();

@@ -2,7 +2,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { HttpResponse } from 'msw';
 import type { ReactElement } from 'react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { PropertyFilterToken } from '../../../../ds/components/PropertyFilter/types';
 import { MetricsProvider } from '../../hooks/use-metrics';
 import { DistinctIdsCard } from '../distinct-ids-card';
@@ -17,7 +17,10 @@ import {
 } from './fixtures/trace-aggregate';
 import { seedMetrics, serveCapabilities, serveTraceAggregate } from './metrics-msw';
 import type { TraceAggregateRequest } from './metrics-msw';
+import { locale } from '@/lib/i18n';
 import { renderWithProviders } from '@/test/render';
+
+afterEach(() => locale.adopt('en'));
 
 const ERROR = "Couldn't load this data. Try again in a moment.";
 const MEASURES = [
@@ -84,6 +87,17 @@ beforeEach(() => {
 
 describe('when the server answers aggregateTraces()', () => {
   beforeEach(() => serveCapabilities(traceAggregateCapabilities));
+
+  describe('when the interface is Chinese', () => {
+    it('translates the card title and legend', async () => {
+      locale.adopt('zh');
+      serveCard();
+      render(<DistinctIdsCard />);
+      expect(await screen.findByText('资源与对话')).toBeDefined();
+      expect(await screen.findByText('资源', LEGEND)).toBeDefined();
+      expect(screen.getByText('对话', LEGEND)).toBeDefined();
+    });
+  });
 
   it('labels each id in the legend, without its range total', async () => {
     serveCard();

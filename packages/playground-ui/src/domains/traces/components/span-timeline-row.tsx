@@ -112,11 +112,12 @@ export function SpanTimelineRow({ ctx }: SpanTimelineRowProps) {
             )}
           >
             <Txt
+              aria-label={span.matchedInPayloadOnly ? studioT('Matches your search in this span’s details') : undefined}
               as="span"
               variant="body-sm"
               data-highlight={span.matchedInPayloadOnly ? undefined : ''}
               data-highlight-indirect={span.matchedInPayloadOnly ? '' : undefined}
-              title={span.matchedInPayloadOnly ? studioT('Matches your search in this span’s details') : undefined}
+
               className="min-w-0 truncate font-[450]"
             >
               {kind ? <SegmentedName parts={[kind, value]} /> : span.name}
@@ -124,7 +125,7 @@ export function SpanTimelineRow({ ctx }: SpanTimelineRowProps) {
           </button>
 
           {span.signalLabel && (
-            <Badge size="xs" title={span.signalLabel} className="mr-1 max-w-1/2 min-w-0 shrink">
+            <Badge aria-label={span.signalLabel} size="xs" className="mr-1 max-w-1/2 min-w-0 shrink">
               <span className="truncate">{span.signalLabel}</span>
             </Badge>
           )}
@@ -154,7 +155,7 @@ export function SpanTimelineRow({ ctx }: SpanTimelineRowProps) {
       </div>
 
       <HoverCard>
-        <HoverCardTrigger render={<div />} className={cn('flex min-w-0 cursor-help', TIMELINE_TRACK_PADDING)}>
+        <HoverCardTrigger render={<div />} className={cn('flex min-w-0 cursor-default', TIMELINE_TRACK_PADDING)}>
           <div className="relative flex-1">
             <TimelineGridlines />
             <div

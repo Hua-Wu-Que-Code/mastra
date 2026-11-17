@@ -1,4 +1,3 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { Icon } from '@/ds/icons/Icon';
 import { controlSizeClasses } from '@/ds/primitives/control-size';
 import { controlStateColorTransition, transitions } from '@/ds/primitives/transitions';
@@ -21,7 +20,7 @@ export interface DataPanelMetaProps extends Omit<React.HTMLAttributes<HTMLElemen
   to?: string;
   /** Prefix icon (bare SVG). */
   icon?: React.ReactNode;
-  /** Shown on hover/focus; for a static (non-link) meta a string tooltip also becomes the accessible name. */
+  /** Accessible name for static metadata; hover hints are disabled. */
   tooltip?: React.ReactNode;
   children: React.ReactNode;
   'data-testid'?: string;
@@ -31,11 +30,9 @@ export function DataPanelMeta({ as, icon, tooltip, children, className, ...props
   const Root = as ?? 'span';
   const isInteractive = Boolean(as || props.href || props.to || props.onClick);
 
-  const hasTooltip = tooltip != null;
   const root = (
     <Root
       aria-label={!isInteractive && typeof tooltip === 'string' ? tooltip : undefined}
-      tabIndex={!isInteractive && hasTooltip ? 0 : undefined}
       className={cn(
         // Same box as a `size="sm"` ghost `Button` (e.g. `TraceIdButton`), so pills line up
         // with the heading and the trace ID on the same header row.
@@ -44,7 +41,7 @@ export function DataPanelMeta({ as, icon, tooltip, children, className, ...props
         controlStateColorTransition,
         isInteractive
           ? cn(quietTextHover, 'cursor-pointer hover:bg-fill-subtle active:bg-fill')
-          : cn('text-muted-foreground', hasTooltip && 'cursor-help'),
+          : 'text-muted-foreground',
         className,
       )}
       {...props}
@@ -58,16 +55,5 @@ export function DataPanelMeta({ as, icon, tooltip, children, className, ...props
     </Root>
   );
 
-  return (
-    <li className="group flex h-control-sm min-w-0 shrink-0 items-center">
-      {!hasTooltip ? (
-        root
-      ) : (
-        <Tooltip>
-          <TooltipTrigger render={root} />
-          <TooltipContent>{tooltip}</TooltipContent>
-        </Tooltip>
-      )}
-    </li>
-  );
+  return <li className="group flex h-control-sm min-w-0 shrink-0 items-center">{root}</li>;
 }

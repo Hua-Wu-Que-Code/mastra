@@ -15,10 +15,8 @@ import type {
   SankeyLabelWidths,
 } from './sankey-chart-utils';
 import { useSankeyRenderContext } from './sankey-context';
-import { SankeyPortalTooltip } from './sankey-portal-tooltip';
 import { useSankeyChartMeasurements } from './use-sankey-chart-measurements';
 import { useSankeyGeometryTransition } from './use-sankey-geometry-transition';
-import { useSankeyHoverTooltip } from './use-sankey-hover-tooltip';
 import { CHART_LABEL_FONT_SIZE, CHART_TICK_FONT_SIZE, Colors } from '@/ds/tokens';
 
 import { t as studioT, useLocale } from '@/lib/i18n';
@@ -262,7 +260,6 @@ function SankeyNode({
   const visibleColumnLabel = columnLabel
     ? truncateSankeyLabel(columnLabel, { fontSize: COLUMN_LABEL_FONT_SIZE, maxWidth: nodeLabelWidth })
     : undefined;
-  const tooltip = useSankeyHoverTooltip(description !== undefined);
   const numericValue = nodeValue ?? (typeof payload.value === 'number' ? payload.value : Number(payload.value));
   const value = Number.isFinite(numericValue) ? String(numericValue) : '';
   const percentage =
@@ -280,7 +277,6 @@ function SankeyNode({
 
   return (
     <>
-      {/* Rendered outside the interactive group so hovering the header never opens a theme tooltip. */}
       {showColumnLabel && visibleColumnLabel && columnLabel ? (
         <SankeyColumnHeader
           x={labelX}
@@ -292,33 +288,27 @@ function SankeyNode({
         />
       ) : null}
       <g
-        aria-describedby={description ? tooltip.id : undefined}
+        aria-description={description}
         aria-label={`${accessibleLabel}: ${value} ${numericValue === 1 ? 'trace' : 'traces'} (${percentage}%)`}
         className="outline-hidden focus-visible:[&>rect]:stroke-foreground focus-visible:[&>rect]:stroke-2"
         onClick={clickable ? onSelect : undefined}
         onKeyDown={clickable ? handleKeyDown : undefined}
         role={clickable ? 'button' : undefined}
-        onFocus={event => {
+        onFocus={() => {
           onFocusChange(name);
-          tooltip.showOnFocus(event.currentTarget);
         }}
         onBlur={() => {
           onFocusChange(undefined);
-          tooltip.hideOnBlur();
         }}
-        onMouseEnter={event => {
+        onMouseEnter={() => {
           onHoverChange(name);
-          tooltip.showOnHover(event.currentTarget);
         }}
         onMouseLeave={() => {
           onHoverChange(undefined);
-          tooltip.hideOnLeave();
         }}
         style={{ cursor: clickable ? 'pointer' : undefined }}
         tabIndex={0}
       >
-        {/* The custom tooltip covers described nodes; a native title there would stack a second popup. */}
-        {description ? null : <title>{displayLabel}</title>}
         <rect x={x} y={visibleY} width={width} height={visibleHeight} rx={3} fill={color ?? nodeFill} />
         <text
           x={labelX}
@@ -334,22 +324,12 @@ function SankeyNode({
           {value} ({percentage}%)
         </text>
       </g>
-      {description ? (
-        <SankeyPortalTooltip
-          id={tooltip.id}
-          title={visibleDisplayLabel}
-          description={description}
-          position={tooltip.position}
-          visible={tooltip.isVisible}
-        />
-      ) : null}
     </>
   );
 }
 
 /**
- * Column header text. Inert for node tooltips, but when the caller supplies a
- * column description it opens its own portal tooltip on hover or focus.
+ * Column header text with a full accessible name and optional description.
  */
 function SankeyColumnHeader({
   x,
@@ -366,13 +346,11 @@ function SankeyColumnHeader({
   fullLabel: string;
   description?: string;
 }) {
-  const tooltip = useSankeyHoverTooltip(description !== undefined);
-
   return (
     <>
       <text
-        aria-describedby={description ? tooltip.id : undefined}
-        aria-label={description ? fullLabel : undefined}
+        aria-description={description}
+        aria-label={fullLabel}
         role={description ? 'img' : undefined}
         x={x}
         y={18}
@@ -381,24 +359,9 @@ function SankeyColumnHeader({
         fontSize={COLUMN_LABEL_FONT_SIZE}
         fontWeight={600}
         tabIndex={description ? 0 : undefined}
-        onMouseEnter={description ? event => tooltip.showOnHover(event.currentTarget) : undefined}
-        onMouseLeave={description ? tooltip.hideOnLeave : undefined}
-        onFocus={description ? event => tooltip.showOnFocus(event.currentTarget) : undefined}
-        onBlur={description ? tooltip.hideOnBlur : undefined}
       >
-        {/* The custom tooltip already names the column; a native title would stack a second popup. */}
-        {label === fullLabel || description ? null : <title>{fullLabel}</title>}
         {label}
       </text>
-      {description ? (
-        <SankeyPortalTooltip
-          id={tooltip.id}
-          title={fullLabel}
-          description={description}
-          position={tooltip.position}
-          visible={tooltip.isVisible}
-        />
-      ) : null}
     </>
   );
 }

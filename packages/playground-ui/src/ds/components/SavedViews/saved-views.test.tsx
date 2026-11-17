@@ -264,7 +264,7 @@ describe('SavedViews', () => {
     fireEvent.click(tab('All'));
     fireEvent.mouseEnter(tab('Errors'));
     fireEvent.mouseMove(tab('Errors'));
-    expect(await screen.findByText('Status', undefined, { timeout: 2000 })).toBeTruthy();
+    expect(screen.queryByText('Status')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Edit view' })).toBeNull();
 
     fireEvent.click(tab('Errors'));

@@ -21,7 +21,7 @@ export function ExperimentsComparableLegend({ dataset }: ExperimentsComparableLe
       {dataset ? (
         <>
           {studioT('Comparable experiments share dataset')}{' '}
-          <Txt as="span" variant="body-sm" tone="ink" title={dataset.id}>
+          <Txt aria-label={dataset.id} as="span" variant="body-sm" tone="ink">
             {dataset.name}
           </Txt>
         </>

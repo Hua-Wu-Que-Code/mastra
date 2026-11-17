@@ -167,7 +167,6 @@ export function SortableSignalHeaders({
                                 'absolute top-1/2 ml-0.5 -translate-y-1/2 cursor-grab rounded-sm p-1 active:cursor-grabbing aria-disabled:cursor-wait aria-disabled:opacity-50',
                               )}
                               style={{ left: '100%' }}
-                              title={studioT('Drag to reorder the {value0} column', { value0: label })}
                             >
                               <IconDotGrid2x3 aria-hidden="true" className="size-icon-sm" />
                             </div>

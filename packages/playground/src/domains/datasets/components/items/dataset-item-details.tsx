@@ -91,7 +91,7 @@ function metadataMetrics(item: DatasetItem): ComparisonMetric[] {
       },
       value: (
         <span className="flex items-center gap-1.5">
-          <span className="font-mono" title={item.id}>
+          <span aria-label={item.id} className="font-mono">
             {getShortId(item.id)}
           </span>
           <CopyButton content={item.id} tooltip={studioT('Copy item ID to clipboard')} variant="link" />

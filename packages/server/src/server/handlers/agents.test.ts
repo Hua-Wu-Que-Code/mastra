@@ -393,6 +393,8 @@ describe('getProvidersHandler', () => {
         'custom-llm': {
           name: 'Custom LLM',
           models: ['custom-model-1', 'custom-model-2'],
+          modelNames: { 'custom-model-1': 'Product One' },
+          modelReasoning: { 'custom-model-1': { defaultLevel: 'off', levels: ['off', 'high'] } },
           apiKeyEnvVar: 'CUSTOM_LLM_API_KEY',
           gateway: 'test-gateway',
         },
@@ -424,6 +426,10 @@ describe('getProvidersHandler', () => {
     const customProvider = result.providers.find(p => p.id === 'test-gateway/custom-llm');
     expect(customProvider).toBeDefined();
     expect(customProvider?.name).toBe('Custom LLM');
+    expect(customProvider?.modelNames).toEqual({ 'custom-model-1': 'Product One' });
+    expect(customProvider?.modelReasoning).toEqual({
+      'custom-model-1': { defaultLevel: 'off', levels: ['off', 'high'] },
+    });
   });
 
   describe('Mastra gateway listing', () => {

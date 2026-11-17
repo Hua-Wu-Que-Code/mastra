@@ -1,5 +1,23 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bucketGrid, bucketPlan, bucketStart, bucketWindow, gridIndex, nextBucket } from './metrics-buckets';
+import { locale } from '@/lib/i18n';
+
+afterEach(() => locale.adopt('en'));
+
+describe('bucketGrid localization', () => {
+  describe('when the interface is Chinese', () => {
+    it('formats hourly and daily axis labels and tooltip headings in Chinese', () => {
+      locale.adopt('zh');
+      const hourly = bucketGrid(ago(DAY), NOW, 1)[0];
+      expect(hourly?.label).toBe('15时');
+      expect(hourly?.edgeLabel).toContain('10月5日');
+      expect(hourly?.time).not.toMatch(/Oct|AM|PM/);
+      const daily = bucketGrid(ago(30 * DAY), NOW, 24).at(-1);
+      expect(daily?.label).toBe('10月6日');
+      expect(daily?.time).toContain('周二');
+    });
+  });
+});
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;

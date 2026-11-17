@@ -657,7 +657,7 @@ async function expectSameDrawn(card: Rendered, widget: Rendered) {
   expect(normalise(widget.root.innerHTML)).toBe(normalise(card.root.innerHTML));
   const tips = await tooltipsOf(card.root);
   expect(tips.length).toBeGreaterThan(0);
-  expect(tips.every(t => t.length > 0)).toBe(true);
+  expect(tips.every(t => t.length === 0)).toBe(true);
   expect(await tooltipsOf(widget.root)).toEqual(tips);
 }
 
@@ -724,10 +724,10 @@ describe('Charts drawn at real size', () => {
     );
   });
 
-  it('shows a tooltip on hovering a chart', async () => {
+  it('keeps chart hover free of hint popups', async () => {
     const widget = await renderWidget(latencyWidget, undefined);
     const [tip] = await tooltipsOf(widget.root);
-    expect(tip).toContain('P95');
+    expect(tip).toBe('');
   });
 });
 

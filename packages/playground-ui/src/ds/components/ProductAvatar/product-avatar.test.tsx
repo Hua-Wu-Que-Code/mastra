@@ -52,7 +52,7 @@ describe('ProductAvatar', () => {
     expect(screen.getByRole('img', { name: 'Studio' }).classList.contains('size-avatar-inline')).toBe(true);
   });
 
-  it('opens a tooltip on hover inside a group', async () => {
+  it('does not open a hover hint inside a group', async () => {
     render(
       <TooltipProvider delay={0}>
         <Avatar.Group size="md">
@@ -72,6 +72,6 @@ describe('ProductAvatar', () => {
     fireEvent.pointerEnter(avatar);
     fireEvent.mouseEnter(avatar);
     fireEvent.mouseMove(avatar);
-    expect((await screen.findByRole('tooltip')).textContent).toBe('Observability project');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });

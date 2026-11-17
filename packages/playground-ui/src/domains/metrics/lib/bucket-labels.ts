@@ -1,3 +1,5 @@
+import { getIntlLocale } from '@/lib/i18n';
+
 /** Axis and tooltip labels for chart buckets, shared by the Metrics and Requests charts. */
 
 const HOUR = 3_600_000;
@@ -17,24 +19,34 @@ export type BucketLabels = {
   time: string;
 };
 
-const fmtDay = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-const fmtHour = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric' });
+const fmtDay = (d: Date) => d.toLocaleDateString(getIntlLocale(), { month: 'short', day: 'numeric' });
+const fmtHour = (d: Date) => d.toLocaleTimeString(getIntlLocale(), { hour: 'numeric' });
 
 export function bucketLabels(ts: number, stepHours: number, multiDay: boolean): BucketLabels {
   const d = new Date(ts);
   // Daily buckets are UTC days (see `bucketStart`), so they're named by their UTC date.
   if (stepHours >= 24) {
-    const day = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    const day = d.toLocaleDateString(getIntlLocale(), { month: 'short', day: 'numeric', timeZone: 'UTC' });
     return {
       ts,
       label: day,
       edgeLabel: day,
-      time: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
+      time: d.toLocaleDateString(getIntlLocale(), {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC',
+      }),
     };
   }
-  const time = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric' });
-  const edgeLabel = `${fmtDay(d)}, ${fmtHour(d)}`;
+  const time = d.toLocaleString(getIntlLocale(), { month: 'short', day: 'numeric', hour: 'numeric' });
+  const edgeLabel = time;
   if (!multiDay) return { ts, label: fmtHour(d), edgeLabel, time };
   // Over several days the axis labels midnights with the day alone, other ticks with the hour.
   return { ts, label: d.getHours() === 0 ? fmtDay(d) : edgeLabel, edgeLabel, time };
+}
+
+/** Reformat cached chart buckets when the interface language changes. */
+export function localizeBuckets<T extends BucketLabels>(buckets: T[], stepHours: number, multiDay: boolean): T[] {
+  return buckets.map(bucket => ({ ...bucket, ...bucketLabels(bucket.ts, stepHours, multiDay) }));
 }

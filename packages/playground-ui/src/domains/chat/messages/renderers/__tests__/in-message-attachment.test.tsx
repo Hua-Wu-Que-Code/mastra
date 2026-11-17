@@ -19,7 +19,7 @@ describe('InMessageAttachment', () => {
     it('renders a chip titled with the file name and no preview button', () => {
       const { container } = render(<InMessageAttachment type="file" name="clip.mp4" contentType="video/mp4" />);
 
-      expect(container.querySelector('[title="clip.mp4"]')).not.toBeNull();
+      expect(container.querySelector('[aria-label="clip.mp4"]')).not.toBeNull();
       expect(screen.getByText('MP4')).toBeTruthy();
       expect(container.querySelector('button')).toBeNull();
     });
@@ -27,13 +27,13 @@ describe('InMessageAttachment', () => {
     it('uses the URL filename as a readable label when there is no name', () => {
       const { container } = render(<InMessageAttachment type="file" src="https://example.com/a.bin" />);
 
-      expect(container.querySelector('a[title="a.bin"]')?.getAttribute('href')).toBe('https://example.com/a.bin');
+      expect(screen.getByRole('link', { name: 'Open a.bin' })?.getAttribute('href')).toBe('https://example.com/a.bin');
     });
 
     it('falls back to "File" when neither name, src nor data is provided', () => {
       const { container } = render(<InMessageAttachment type="file" />);
 
-      expect(container.querySelector('[title="File"]')).not.toBeNull();
+      expect(container.querySelector('[aria-label="File"]')).not.toBeNull();
     });
   });
 
@@ -74,6 +74,6 @@ describe('InMessageAttachment', () => {
   it('titles the wrapper with the attachment name', () => {
     const { container } = render(<InMessageAttachment type="image" src="x.png" name="x.png" />);
 
-    expect(container.firstElementChild?.getAttribute('title')).toBe('x.png');
+    expect(container.firstElementChild?.getAttribute('aria-label')).toBe('Preview x.png');
   });
 });

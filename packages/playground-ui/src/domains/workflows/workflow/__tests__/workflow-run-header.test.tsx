@@ -20,7 +20,7 @@ describe('Workflow run header', () => {
   describe('when a completed run has zero-duration timestamps', () => {
     it('shows the recorded zero rather than treating the end timestamp as absent', () => {
       render(<RunWorkflowHeader runId="completed" status="success" result={completed} />);
-      expect(screen.getByTitle('Run duration').textContent).toBe('0ms');
+      expect(screen.getByLabelText('Run duration').textContent).toBe('0ms');
     });
   });
 
@@ -39,7 +39,7 @@ describe('Workflow run header', () => {
           }}
         />,
       );
-      expect(screen.getByTitle('Run duration').textContent).toBe('0ms');
+      expect(screen.getByLabelText('Run duration').textContent).toBe('0ms');
     });
   });
 
@@ -53,16 +53,16 @@ describe('Workflow run header', () => {
         steps: { work: { status: 'running', payload: {}, startedAt: 0 } },
       };
       const view = render(<RunWorkflowHeader runId="run" status="paused" result={active} />);
-      expect(screen.queryByTitle('Run duration')).toBeNull();
+      expect(screen.queryByLabelText('Run duration')).toBeNull();
       act(() => vi.setSystemTime(5_000));
       view.rerender(<RunWorkflowHeader runId="run" status="running" result={active} />);
       act(() => vi.advanceTimersByTime(100));
-      expect(screen.getByTitle('Run duration').textContent).toBe('5.1s');
+      expect(screen.getByLabelText('Run duration').textContent).toBe('5.1s');
       act(() => vi.advanceTimersByTime(900));
-      expect(screen.getByTitle('Run duration').textContent).toBe('6s');
+      expect(screen.getByLabelText('Run duration').textContent).toBe('6s');
       view.rerender(<RunWorkflowHeader runId="run" status="success" result={completed} />);
       act(() => vi.advanceTimersByTime(5_000));
-      expect(screen.getByTitle('Run duration').textContent).toBe('0ms');
+      expect(screen.getByLabelText('Run duration').textContent).toBe('0ms');
     });
   });
 
@@ -82,8 +82,8 @@ describe('Workflow run header', () => {
       render(<RunWorkflowHeader runId="run" status="suspended" result={suspended} />);
 
       act(() => vi.advanceTimersByTime(600_000));
-      expect(screen.getByTitle('Run duration').textContent).toBe('22ms');
-      expect(screen.getByTitle('Waiting for input').textContent).toBe('10m');
+      expect(screen.getByLabelText('Run duration').textContent).toBe('22ms');
+      expect(screen.getByLabelText('Waiting for input').textContent).toBe('10m');
     });
 
     it('keeps counting a sleeping run, which waits on the clock and not on a person', () => {
@@ -102,8 +102,8 @@ describe('Workflow run header', () => {
       );
 
       act(() => vi.advanceTimersByTime(3_000));
-      expect(screen.getByTitle('Run duration').textContent).toBe('4s');
-      expect(screen.queryByTitle('Waiting for input')).toBeNull();
+      expect(screen.getByLabelText('Run duration').textContent).toBe('4s');
+      expect(screen.queryByLabelText('Waiting for input')).toBeNull();
     });
   });
 
@@ -130,9 +130,9 @@ describe('Workflow run header', () => {
         />,
       );
 
-      const duration = screen.getByTitle('Run duration, including time spent suspended');
+      const duration = screen.getByLabelText('Run duration, including time spent suspended');
       expect(duration.textContent).toBe('5m');
-      expect(screen.queryByTitle('Run duration')).toBeNull();
+      expect(screen.queryByLabelText('Run duration')).toBeNull();
     });
   });
 });

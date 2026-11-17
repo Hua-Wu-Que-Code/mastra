@@ -233,7 +233,7 @@ describe('Meter label slot', () => {
     const label = 'Compute usage for production and preview environments across all projects';
     render(<Meter label={label} value={112} max={100} aria-label={label} />);
 
-    expect(screen.getByTitle(label).textContent).toBe(label);
+    expect(screen.getByText(label).textContent).toBe(label);
     expect(screen.getByRole('meter', { name: label })).toBeDefined();
   });
 

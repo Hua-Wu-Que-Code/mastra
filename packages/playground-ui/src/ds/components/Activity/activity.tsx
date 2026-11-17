@@ -56,7 +56,7 @@ export function ActivityWick({
       data-live-session-indicator={status}
       role="status"
       aria-label={label ?? STATUS_TITLE[status]}
-      title={STATUS_TITLE[status]}
+
       className={cn('session-wick', `session-${status}`, className)}
     />
   );

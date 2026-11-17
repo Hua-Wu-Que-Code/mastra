@@ -51,7 +51,7 @@ export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnota
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <button
                       type="button"
-                      title={studioT('Show in chat')}
+                      aria-label={studioT('Show in chat')}
                       className={cn(
                         'line-clamp-3 cursor-pointer rounded-xs text-left text-body-sm whitespace-pre-line text-muted-foreground hover:text-foreground',
                         focusRing,

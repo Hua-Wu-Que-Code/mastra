@@ -1604,8 +1604,7 @@ export function KnowledgePageExplorer({
                           <DataPanel.CloseButton
                             icon="x"
                             label={studioT('Close page details')}
-                            tooltip={studioT('Close')}
-                            onClick={() => {
+                                                        onClick={() => {
                               focusViewTab();
                               onSelect(null);
                             }}
@@ -1644,8 +1643,7 @@ export function KnowledgePageExplorer({
                         <DataPanel.CloseButton
                           icon="x"
                           label={studioT('Close page')}
-                          tooltip={studioT('Close')}
-                          onClick={() => {
+                                                    onClick={() => {
                             focusViewTab();
                             onViewChange('graph');
                           }}

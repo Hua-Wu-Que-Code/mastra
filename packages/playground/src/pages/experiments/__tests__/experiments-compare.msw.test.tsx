@@ -99,10 +99,10 @@ function getCompareButton() {
   return screen.getByRole('button', { name: /^compare$/i });
 }
 
-/** The disabled Compare button sits in a focusable wrapper that owns the tooltip. */
-async function getCompareTooltip() {
+/** Disabled comparison still never displays a hover hint. */
+async function expectNoCompareHint() {
   fireEvent.focus(getCompareButton().parentElement!);
-  return (await screen.findByRole('tooltip')).textContent;
+  expect(screen.queryByRole('tooltip')).toBeNull();
 }
 
 function getSelectionCount(count: number) {
@@ -164,7 +164,7 @@ describe('Experiments page — selection and compare', () => {
       await renderLoadedPage();
 
       expect(getCompareButton().hasAttribute('disabled')).toBe(true);
-      expect(await getCompareTooltip()).toBe('Select at least two experiments to compare');
+      await expectNoCompareHint();
     });
 
     it('offers New experiment without a Reset button', async () => {
@@ -200,7 +200,7 @@ describe('Experiments page — selection and compare', () => {
       select('exp-a');
 
       expect(getCompareButton().hasAttribute('disabled')).toBe(true);
-      expect(await getCompareTooltip()).toBe('Select at least two experiments to compare');
+      await expectNoCompareHint();
     });
 
     it('disables the checkboxes of experiments from other datasets', async () => {
@@ -292,7 +292,7 @@ describe('Experiments page — selection and compare', () => {
       fireEvent.click(getSelectionCount(2));
 
       expect(getCompareButton().hasAttribute('disabled')).toBe(true);
-      expect(await getCompareTooltip()).toBe('Select at least two experiments to compare');
+      await expectNoCompareHint();
     });
   });
 

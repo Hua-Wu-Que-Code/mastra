@@ -141,11 +141,7 @@ describe('ThreadsExplorerBody', () => {
       expect(within(supportRow).getByText('7')).toBeTruthy();
 
       fireEvent.focus(screen.getByRole('button', { name: 'Messages' }));
-      expect(
-        await screen.findByText(
-          'Messages sent in this thread, counting the whole thread, not just the selected time range',
-        ),
-      ).toBeTruthy();
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

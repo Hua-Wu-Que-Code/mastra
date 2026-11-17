@@ -171,16 +171,17 @@ function WorkflowRow({
             {row.depth > 0 ? <TreeConnector guides={row.guides} isLastChild={row.isLastChild} /> : null}
             <span className="truncate">{name}</span>
             {wf.origin === 'dynamic' ? (
-              <Badge size="xs" variant="blue" title={studioT('Registered via the dynamic-workflows API')}>
+              <Badge aria-label={studioT('Registered via the dynamic-workflows API')} size="xs" variant="blue">
                 {studioT('Dynamic')}
               </Badge>
             ) : null}
             {hasNested ? (
               <Txt
+                aria-label={studioT('Nested workflows: {value0}', { value0: nestedIds.join(', ') })}
                 as="span"
                 variant="body-sm"
                 tone="muted"
-                title={studioT('Nested workflows: {value0}', { value0: nestedIds.join(', ') })}
+
                 className="inline-flex shrink-0 items-center gap-1"
               >
                 <WorkflowIcon aria-hidden className="size-icon-sm" />

@@ -287,7 +287,7 @@ function EditLayoutWrapper() {
               variant="primary"
               size="sm"
               disabled={!canOpenPr || isSavingDraft || isSubmitting}
-              title={openPrTitle}
+              aria-label={openPrTitle}
               onClick={() => {
                 if (!mastraPlatformApiEndpoint || !mastraPlatformProjectId) return;
                 void handleOpenPr({

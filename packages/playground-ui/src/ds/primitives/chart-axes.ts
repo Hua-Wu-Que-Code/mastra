@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { CHART_AXIS_FONT_SIZE, CHART_MARGIN, X_AXIS_HEIGHT } from './chart-layout';
+import { getIntlLocale } from '@/lib/i18n';
 
 /** Horizontal rulers: short dashes on the border color at half strength. */
 export const CHART_GRID_PROPS = {
@@ -194,7 +195,7 @@ function isFiniteNumber(value: number | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
-const fmtDay = (ts: number) => new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const fmtDay = (ts: number) => new Date(ts).toLocaleDateString(getIntlLocale(), { month: 'short', day: 'numeric' });
 
 /**
  * Date-only labels for the two ends of an `edges` axis when the hour on them says nothing: buckets

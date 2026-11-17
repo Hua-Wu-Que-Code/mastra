@@ -18,8 +18,8 @@ describe('ToolCallTime', () => {
       const times = container.querySelectorAll('time');
       expect(times[0].textContent).toBe('2:32:05 PM');
       expect(times[1].textContent).toBe('2:32:58 PM');
-      expect(times[0].title).toContain('2:32:05 PM');
-      expect(times[1].title).toContain('2:32:58 PM');
+      expect(times[0].getAttribute('aria-label')).toContain('2:32:05 PM');
+      expect(times[1].getAttribute('aria-label')).toContain('2:32:58 PM');
     });
   });
 
@@ -33,6 +33,6 @@ describe('ToolCallTime', () => {
     const time = container.querySelector('time');
     expect(time?.getAttribute('datetime')).toBe('1970-01-01T00:00:00.000Z');
     expect(time?.textContent).toBeTruthy();
-    expect(time?.title).toBeTruthy();
+    expect(time?.getAttribute('aria-label')).toBeTruthy();
   });
 });

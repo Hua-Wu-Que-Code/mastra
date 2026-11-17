@@ -139,7 +139,7 @@ describe('voice call', () => {
       await renderHarness();
       screen.getByRole('button', { name: 'Start voice call' }).focus();
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe('Configure @mastra/livekit to start voice calls.');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('does not request connection details', async () => {

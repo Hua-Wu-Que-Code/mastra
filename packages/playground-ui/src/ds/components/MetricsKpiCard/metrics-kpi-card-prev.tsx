@@ -13,10 +13,11 @@ export function MetricsKpiCardPrev({ value, className }: { value: string; classN
   useLocale();
   return (
     <Txt
+      aria-label={studioT('vs {value0}', { value0: value })}
       as="span"
       variant="body-sm"
       tone="muted"
-      title={studioT('vs {value0}', { value0: value })}
+
       // The value row keeps its children from shrinking; the prior value is the one part that
       // may give way in a narrow card, truncating with the full text in the title.
       className={cn('ml-auto min-w-0 shrink! truncate tabular-nums', className)}

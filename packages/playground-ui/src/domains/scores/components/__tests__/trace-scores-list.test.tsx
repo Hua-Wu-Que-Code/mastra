@@ -97,7 +97,7 @@ describe('TraceScoresList', () => {
     expect(within(withoutReason).queryByRole('button')).toBeNull();
 
     await userEvent.hover(within(withReason).getByRole('button', { name: 'Show Answer relevancy reason' }));
-    expect(await screen.findByText('on topic')).toBeTruthy();
+    expect(screen.queryByText('on topic')).toBeNull();
   });
 
   it('says there is nothing yet when the span has no scores', async () => {

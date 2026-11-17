@@ -12,3 +12,6 @@ export type {
   ModelPickerProvider,
   ModelPickerValue,
 } from './model-picker-types';
+
+export { ModelSettingsPicker } from './model-settings-picker';
+export type { ModelSettingsPickerProps } from './model-settings-picker';

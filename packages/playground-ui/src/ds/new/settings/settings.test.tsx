@@ -195,7 +195,7 @@ describe('Settings', () => {
   });
 
   describe('when a title has info', () => {
-    it('describes the title with it', () => {
+    it('keeps the heading plain without a hover explanation', () => {
       render(
         <SettingsGroup>
           <SettingsHeader>
@@ -205,8 +205,8 @@ describe('Settings', () => {
       );
 
       screen.getByRole('heading', { name: 'General' });
-      expect(screen.getByText('General').closest('[aria-describedby]')).toBeTruthy();
-      expect(screen.getByText('Stored in this browser.')).toBeTruthy();
+      expect(screen.getByText('General').closest('[aria-describedby]')).toBeNull();
+      expect(screen.queryByText('Stored in this browser.')).toBeNull();
     });
   });
 
@@ -248,10 +248,10 @@ describe('Settings', () => {
       expect(added).toBe(1);
     });
 
-    it('keeps a truncated title readable in full on hover', () => {
+    it('does not add a native hover title', () => {
       renderList();
 
-      expect(screen.getByText('mastra-ai').getAttribute('title')).toBe('mastra-ai');
+      expect(screen.getByText('mastra-ai').getAttribute('title')).toBeNull();
     });
 
     it('shows an empty list as its empty text and action', () => {

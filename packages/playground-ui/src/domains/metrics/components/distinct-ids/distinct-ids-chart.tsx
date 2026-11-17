@@ -14,7 +14,7 @@ import { ChartCardError } from '../chart-card-error';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import { MetricsLineChart, MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
-import { t as studioT } from '@/lib/i18n';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 /** Most apps set resource and thread ids (through memory); few set user and session ids. */
 const IDS = [
@@ -70,6 +70,7 @@ function count(row: TraceAggregateRow | undefined, id: Id) {
 
 /** Distinct ids per bucket, with range totals from a second request. */
 export function DistinctIdsChart({ scope, onTimeRangeClick }: DistinctIdsChartProps) {
+  useLocale();
   const series = useMetricsTraceAggregate({
     timeRange: scope.timeRange,
     where: scope.where,
@@ -98,7 +99,7 @@ export function DistinctIdsChart({ scope, onTimeRangeClick }: DistinctIdsChartPr
   const isLoading = series.isLoading || totals.isLoading;
 
   const layout = {
-    title: DISTINCT_IDS_TITLE,
+    title: studioT(DISTINCT_IDS_TITLE),
     // Each id's range total, marked like its line: they count different things, so no one sum.
     // With no ids set, one plain 0, like any other empty card. None while a request failed, so no
     // total sits beside the error.

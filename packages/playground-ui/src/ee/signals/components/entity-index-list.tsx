@@ -55,7 +55,7 @@ export function EntityIndexList({ entities, hasSearch, getEntityHref, LinkCompon
               <DataList.Cell className="overflow-visible">
                 <EntityIndexStatus entity={entity} />
               </DataList.Cell>
-              <DataList.Cell title={entity.updatedAt}>{metadata.updatedAt}</DataList.Cell>
+              <DataList.Cell aria-label={entity.updatedAt}>{metadata.updatedAt}</DataList.Cell>
             </>
           );
           // No signals yet means the detail page has nothing to show, so the row stays static.

@@ -80,7 +80,7 @@ export function SpanPayloadList({ items, slot, card }: { items: SpanPayloadListI
             {item.name}
             {item.description && (
               // Payload content reads in ink like the messages around it; grey is kept for the labels.
-              <Txt as="span" variant="body-sm" className="line-clamp-2" title={item.description}>
+              <Txt aria-label={item.description} as="span" variant="body-sm" className="line-clamp-2">
                 {item.description}
               </Txt>
             )}

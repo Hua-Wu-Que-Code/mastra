@@ -54,8 +54,7 @@ describe('AppSidebar shell', () => {
 
       fireEvent.focus(trigger);
 
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip.querySelector('kbd')?.textContent).toMatch(/K$/);
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

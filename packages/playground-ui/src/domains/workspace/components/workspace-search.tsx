@@ -122,7 +122,7 @@ export function WorkspaceSearchResults() {
         <li key={hit.path}>
           <button
             type="button"
-            title={hit.path}
+            aria-label={hit.path}
             onClick={() => setActiveFilePath(hit.path)}
             className={cn(
               'text-foreground',

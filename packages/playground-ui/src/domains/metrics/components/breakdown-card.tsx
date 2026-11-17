@@ -9,6 +9,7 @@ import { BreakdownProjectsFirst } from './breakdown/breakdown-projects-first';
 import { BreakdownTabBody } from './breakdown/breakdown-tab-body';
 import { ChartCard } from './chart-card';
 import { MetricsCard } from '@/ds/components/MetricsCard';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const PROJECT_TABS: BreakdownTab[] = ['projects', 'agents', 'workflows', 'tools', 'models', 'threads', 'environments'];
 const TABS: BreakdownTab[] = PROJECT_TABS.filter(t => t !== 'projects');
@@ -28,6 +29,7 @@ export type BreakdownCardProps = {
  * the strip and the Share column always show the share of runs or traces, whatever the sort.
  */
 export function BreakdownCard({ onRowClick }: BreakdownCardProps) {
+  useLocale();
   const byProject = useMetricsScope().projectLabel !== undefined;
   const traceGate = useTraceAggregateGate();
   const spanGate = useSpanAggregateGate();
@@ -36,7 +38,7 @@ export function BreakdownCard({ onRowClick }: BreakdownCardProps) {
   if (traceGate.status === 'unavailable' || spanGate.status === 'unavailable') return null;
   if (traceGate.status === 'loading' || spanGate.status === 'loading') {
     return (
-      <ChartCard title={BREAKDOWN_TITLE} bodyHeight="fit">
+      <ChartCard title={studioT(BREAKDOWN_TITLE)} bodyHeight="fit">
         <MetricsCard.Loading />
       </ChartCard>
     );

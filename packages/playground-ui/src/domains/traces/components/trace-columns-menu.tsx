@@ -182,9 +182,10 @@ export function TraceColumnsMenu({
               <DropdownMenu.Label>{studioT('Metadata columns')}</DropdownMenu.Label>
               {preferences.metadataKeys.map(key => (
                 <DropdownMenu.CheckboxItem
+                  aria-label={key}
                   key={key}
                   checked
-                  title={key}
+
                   onCheckedChange={() => onRemoveMetadataColumn(key)}
                 >
                   {key}

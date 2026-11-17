@@ -16,7 +16,7 @@ const badgeLabel = 'shrink-0 text-placeholder';
 function SignalDetail({ label, value }: { label: string; value: string }) {
   return (
     <li className="flex min-w-0">
-      <Badge variant="neutral" emphasis="subtle" size="sm" title={value}>
+      <Badge aria-label={value} variant="neutral" emphasis="subtle" size="sm">
         <span className={badgeLabel}>{label}</span>
         <span className="min-w-0 truncate">{value}</span>
       </Badge>

@@ -1,8 +1,10 @@
 import { useMastraClient } from '@mastra/react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { isMultiDay, localizeBuckets } from '../lib/bucket-labels';
 import type { BucketLabels } from '../lib/metrics-buckets';
 import { bucketGrid, bucketPlan, gridIndex, intervalHours } from '../lib/metrics-buckets';
 import { useMetricsFilters } from './use-metrics-filters';
+import { useLocale } from '@/lib/i18n';
 
 /** A scorer with results in the range, and its mean score over the range. */
 export type ScorerAverage = { scorerId: string; name: string; average: number };
@@ -22,12 +24,15 @@ const DISCOVERY_PAGE_SIZE = 100;
  * range: a scorer with no result among them is left out.
  */
 export function useMetricsScores() {
+  useLocale();
   const client = useMastraClient();
   const { filters, filterKey, timestamp } = useMetricsFilters();
   const { interval } = bucketPlan(timestamp.start, timestamp.end);
   const stepHours = intervalHours(interval);
 
+  const multiDay = isMultiDay(timestamp.start, timestamp.end);
   return useQuery({
+    select: data => ({ ...data, buckets: localizeBuckets(data.buckets, stepHours, multiDay) }),
     queryKey: ['metrics', 'scores', filterKey, interval],
     placeholderData: keepPreviousData,
     queryFn: async (): Promise<MetricsScores> => {

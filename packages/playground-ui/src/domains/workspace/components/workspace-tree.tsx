@@ -159,7 +159,7 @@ function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?
             <span
               role="img"
               aria-label={studioT('Mount: {value0}', { value0: mount.displayName ?? mount.provider })}
-              title={[mount.displayName ?? mount.provider, mount.description].filter(Boolean).join(': ')}
+
               className="flex"
             >
               <MountIcon mount={mount} />
@@ -173,14 +173,14 @@ function FolderNode({ name, path, mount, onRequestDelete }: NodeProps & { mount?
           <span
             role="img"
             aria-label={studioT('Mount error: {value0}', { value0: mount.error ?? 'unavailable' })}
-            title={mount.error}
+
             className="flex shrink-0"
           >
             <IconExclamationCircle className="size-icon-xs text-destructive-foreground" />
           </span>
         ) : null}
         {mount && isReadOnly(path) ? (
-          <span role="img" aria-label={studioT('Read-only')} title={studioT('Read-only')} className="flex shrink-0">
+          <span role="img" aria-label={studioT('Read-only')} className="flex shrink-0">
             <IconLock className="size-icon-xs text-muted-foreground" />
           </span>
         ) : null}

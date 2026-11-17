@@ -30,7 +30,7 @@ describe('UserFilePartRenderer', () => {
         };
         const { container, getByRole } = render(<UserFilePartRenderer part={part} />);
         expect(container.textContent).not.toContain(text);
-        expect(container.querySelector('[title="notes.txt"]')).not.toBeNull();
+        expect(container.querySelector('[aria-label="notes.txt"]')).not.toBeNull();
         fireEvent.click(getByRole('button'));
         expect(getByRole('dialog').textContent).toContain(text);
       },
@@ -61,7 +61,7 @@ describe('UserFilePartRenderer', () => {
     ])('shows a named file placeholder rather than binary or base64 text for %s', (mimeType, data) => {
       const part = { type: 'file' as const, mimeType, data, filename: 'leads.xls' };
       const { container } = render(<UserFilePartRenderer part={part} />);
-      expect(container.querySelector('[title="leads.xls"]')).not.toBeNull();
+      expect(container.querySelector('[aria-label="leads.xls"]')).not.toBeNull();
       expect(container.querySelector('button')).toBeNull();
       expect(container.innerHTML).not.toContain(data);
     });

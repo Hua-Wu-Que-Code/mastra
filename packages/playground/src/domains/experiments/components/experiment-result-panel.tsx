@@ -204,7 +204,7 @@ function ExperimentResultPanelBody({
       label: studioT('Item Id'),
       value: (
         <span className="flex items-center gap-1.5">
-          <span className="font-mono" title={result.itemId}>
+          <span aria-label={result.itemId} className="font-mono">
             {getShortId(result.itemId)}
           </span>
           <CopyButton content={result.itemId} tooltip={studioT('Copy item ID to clipboard')} variant="link" />

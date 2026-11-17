@@ -2,7 +2,6 @@ import { Button as BaseButton } from '@base-ui/react/button';
 import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
 import React from 'react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip/tooltip';
 import { IconChevronDownMedium } from '@/ds/icons/central/IconChevronDownMedium';
 import { Icon } from '@/ds/icons/Icon';
 import { iconSizeClasses } from '@/ds/icons/icon-size-classes';
@@ -169,8 +168,9 @@ export interface ButtonProps
   /** Leading icon, always rendered on the left of the label inside `<Icon>`. Ignored in icon-mode sizes. */
   icon?: React.ReactNode;
   iconEnd?: React.ReactNode;
+  /** Plain-text hints only supply an accessible name for icon buttons; no popup is displayed. */
   tooltip?: React.ReactNode;
-  /** Side of the trigger the tooltip opens on. Defaults to `top`. */
+  /** @deprecated Hover hints are disabled; this positioning option is ignored. */
   tooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
   /** @deprecated Pass the element through `render` instead: `render={<Link href="/x" />}`. */
   as?: React.ElementType;
@@ -312,7 +312,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(
       icon,
       iconEnd,
       tooltip,
-      tooltipPosition,
+      tooltipPosition: _tooltipPosition,
       'aria-label': ariaLabelProp,
       type,
       ...props
@@ -423,15 +423,6 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(
         {content}
       </BaseButton>
     );
-
-    if (tooltip) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>{button}</TooltipTrigger>
-          <TooltipContent side={tooltipPosition}>{tooltip}</TooltipContent>
-        </Tooltip>
-      );
-    }
 
     return button;
   },

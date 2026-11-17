@@ -99,15 +99,15 @@ export function BrowserViewPanel() {
           </Badge>
           <div className="ml-2 flex items-center gap-1">
             <Button variant="ghost" size="icon-sm" tooltip={studioT('Minimize to chat')} onClick={hide}>
-              <IconMinimize45 className="h-4 w-4" />
+              <IconMinimize45 />
             </Button>
             {currentUrl && (
               <Button variant="ghost" size="icon-sm" tooltip={studioT('Open in new tab')} onClick={handleOpenExternal}>
-                <IconSquareArrowTopRight className="h-4 w-4" />
+                <IconSquareArrowTopRight />
               </Button>
             )}
             <Button variant="ghost" size="icon-sm" tooltip={studioT('Close browser')} onClick={closeBrowser}>
-              <IconCrossMedium className="h-4 w-4" />
+              <IconCrossMedium />
             </Button>
           </div>
         </div>

@@ -91,7 +91,7 @@ describe('WorkflowsList', () => {
       const { queryClient } = renderList();
 
       const parentRow = rowFor('prd-ship-product');
-      const badge = parentRow.getByTitle('Nested workflows: prd-groom-product, prd-fix-product');
+      const badge = parentRow.getByLabelText('Nested workflows: prd-groom-product, prd-fix-product');
       expect(badge.textContent?.trim()).toBe('2');
 
       await waitForMutationsIdle(queryClient);
@@ -102,7 +102,7 @@ describe('WorkflowsList', () => {
       const { queryClient } = renderList();
 
       const leafRow = rowFor('prd-fix-product');
-      expect(leafRow.queryByTitle(/Nested workflows/)).toBeNull();
+      expect(leafRow.queryByLabelText(/Nested workflows/)).toBeNull();
       expect(leafRow.queryByRole('button')).toBeNull();
 
       await waitForMutationsIdle(queryClient);
@@ -127,7 +127,7 @@ describe('WorkflowsList', () => {
       expect(anchors).toHaveLength(2);
       for (const anchor of anchors) {
         expect(anchor.getAttribute('href')).toBe('/workflows/prdGroomProduct');
-        expect(within(anchor).getByTitle(/Nested workflows: use-case-arch/)).not.toBeNull();
+        expect(within(anchor).getByLabelText(/Nested workflows: use-case-arch/)).not.toBeNull();
       }
 
       fireEvent.click(screen.getByRole('button', { name: 'Collapse nested workflows of prd-ship-product' }));

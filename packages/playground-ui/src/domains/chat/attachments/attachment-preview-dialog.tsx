@@ -131,14 +131,14 @@ export const FileChipEntry = ({ name, url, contentType }: FileChipEntryProps) =>
 
   if (url) {
     return (
-      <a href={url} className={ctaClassName} target="_blank" rel="noreferrer noopener" title={name}>
+      <a aria-label={name} href={url} className={ctaClassName} target="_blank" rel="noreferrer noopener">
         <ComposerAttachmentEntry>{icon}</ComposerAttachmentEntry>
       </a>
     );
   }
 
   return (
-    <div className={ctaClassName} title={name}>
+    <div aria-label={name} className={ctaClassName}>
       <ComposerAttachmentEntry>{icon}</ComposerAttachmentEntry>
     </div>
   );
@@ -220,7 +220,6 @@ export const TxtEntry = ({ data, name, ...previewProps }: TxtEntryProps) => {
         className={cn(ctaClassName, 'min-w-0')}
         type="button"
         aria-label={filename ? studioT('Preview {value0}', { value0: filename }) : studioT('Preview text attachment')}
-        title={filename}
       >
         <ComposerAttachmentEntry name={filename}>
           <IconFileText className={fileTypeIconClassName} aria-hidden="true" />

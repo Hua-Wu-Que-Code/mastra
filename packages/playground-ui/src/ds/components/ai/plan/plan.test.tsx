@@ -475,7 +475,7 @@ describe('PlanPath', () => {
     const path = pathOf('docs/plans/2026-06-migration.md');
 
     expect(path?.textContent).toBe('2026-06-migration.md');
-    expect(path?.getAttribute('title')).toBe('docs/plans/2026-06-migration.md');
+    expect(path?.getAttribute('aria-label')).toBe('docs/plans/2026-06-migration.md');
   });
 
   it('reads a Windows path the same way', () => {
@@ -491,7 +491,7 @@ describe('PlanPath', () => {
   });
 
   it('falls back to the path itself when there is nothing to take from it', () => {
-    expect(pathOf('/')?.getAttribute('title')).toBe('/');
+    expect(pathOf('/')?.getAttribute('aria-label')).toBe('/');
     expect(pathOf('/')?.textContent).toBe('/');
   });
 });

@@ -1,8 +1,10 @@
 import { useMastraClient } from '@mastra/react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { isMultiDay, localizeBuckets } from '../lib/bucket-labels';
 import type { BucketLabels } from '../lib/metrics-buckets';
 import { bucketGrid, bucketPlan, gridIndex, intervalHours } from '../lib/metrics-buckets';
 import { useMetricsFilters } from './use-metrics-filters';
+import { useLocale } from '@/lib/i18n';
 
 export type LatencyEntity = 'agents' | 'workflows' | 'tools';
 
@@ -24,12 +26,15 @@ const DURATION: Record<LatencyEntity, string> = {
  * across buckets, so this keeps the API's own 1h or 1d buckets (more points than the bar charts).
  */
 export function useMetricsLatency(entity: LatencyEntity) {
+  useLocale();
   const client = useMastraClient();
   const { filters, filterKey, timestamp } = useMetricsFilters();
   const { interval } = bucketPlan(timestamp.start, timestamp.end);
   const stepHours = intervalHours(interval);
 
+  const multiDay = isMultiDay(timestamp.start, timestamp.end);
   return useQuery({
+    select: buckets => localizeBuckets(buckets, stepHours, multiDay),
     queryKey: ['metrics', 'latency-percentiles', entity, filterKey, interval],
     placeholderData: keepPreviousData,
     queryFn: async (): Promise<LatencyBucket[]> => {

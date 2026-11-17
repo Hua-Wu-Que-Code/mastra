@@ -43,14 +43,12 @@ describe('SidebarTrigger tooltip', () => {
 
     fireEvent.focus(screen.getByRole('button', { name: 'Toggle sidebar' }));
 
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip.textContent).toContain('Toggle sidebar');
-    expect(tooltip.querySelector('kbd')?.textContent).toBe('[');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
 
 describe('SidebarSearchTrigger tooltip', () => {
-  it('shows the shortcut in the tooltip instead of beside the icon', async () => {
+  it('omits the shortcut popup beside the icon', async () => {
     render(
       <TooltipProvider delay={0}>
         <SidebarSearchTrigger shortcut="⌘ K" />
@@ -62,8 +60,6 @@ describe('SidebarSearchTrigger tooltip', () => {
 
     fireEvent.focus(button);
 
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip.textContent).toContain('Search');
-    expect(tooltip.querySelector('kbd')?.textContent).toBe('⌘ K');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });

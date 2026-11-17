@@ -12,7 +12,7 @@ afterEach(() => {
 const now = Date.UTC(2026, 8, 24, 12, 0, 0);
 
 describe('RelativeTimestamp', () => {
-  it('shows time since, local, and UTC time in a tooltip on focus', async () => {
+  it('keeps the relative time without a focus popup', async () => {
     vi.useFakeTimers({ now, shouldAdvanceTime: true });
     const date = new Date(now - (3 * 60 + 12) * 1000);
     const { container } = render(<RelativeTimestamp value={date} />);
@@ -21,20 +21,10 @@ describe('RelativeTimestamp', () => {
     expect(time.querySelector('[aria-hidden]')?.textContent).toBe('3m ago');
 
     act(() => time.focus());
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip.textContent).toMatch(/3 minutes 1\d seconds ago/);
-    expect(tooltip.textContent).toContain('UTC');
-    expect(tooltip.textContent).toContain(
-      new Intl.DateTimeFormat(undefined, {
-        timeZone: 'UTC',
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-      }).format(date),
-    );
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
-  it('names the moment in the tooltip and accessible text when labeled', async () => {
+  it('keeps the labeled moment in accessible text', async () => {
     vi.useFakeTimers({ now, shouldAdvanceTime: true });
     const { container } = render(<RelativeTimestamp value={now - 12 * 3_600_000} label="Deployed" />);
     const [time] = container.getElementsByTagName('time');
@@ -43,8 +33,7 @@ describe('RelativeTimestamp', () => {
     expect(time.querySelector('.sr-only')?.textContent).toMatch(/^Deployed /);
 
     act(() => time.focus());
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip.textContent).toMatch(/^Deployed 12 hours/);
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('keeps the visible label current', () => {

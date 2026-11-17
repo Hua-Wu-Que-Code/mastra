@@ -2,11 +2,10 @@ import { PreviewCard as PreviewCardPrimitive } from '@base-ui/react/preview-card
 import type { PreviewCardPopupProps, PreviewCardPositionerProps } from '@base-ui/react/preview-card';
 import * as React from 'react';
 
-import { FLOATING_POSITION_METHOD } from '@/ds/primitives/floating';
-import { overlaySurfaceStyle } from '@/ds/primitives/raised-surface';
-import { cn } from '@/lib/utils';
-
-const HoverCard = PreviewCardPrimitive.Root;
+/** Preview links remain navigable, without hover popups or preview-loading callbacks. */
+function HoverCard(props: PreviewCardPrimitive.Root.Props) {
+  return <PreviewCardPrimitive.Root {...props} open={false} onOpenChange={undefined} />;
+}
 
 export type HoverCardTriggerProps = Omit<PreviewCardPrimitive.Trigger.Props, 'className'> & {
   className?: string;
@@ -28,67 +27,7 @@ export type HoverCardContentProps = Omit<PreviewCardPopupProps, 'className'> &
     showArrow?: boolean;
   };
 
-const HoverCardContent = React.forwardRef<HTMLDivElement, HoverCardContentProps>(
-  (
-    {
-      className,
-      children,
-      side = 'top',
-      align,
-      sideOffset = 5,
-      container,
-      showArrow = true,
-      anchor,
-      positionMethod = FLOATING_POSITION_METHOD,
-      alignOffset,
-      collisionBoundary,
-      collisionPadding,
-      sticky,
-      arrowPadding,
-      disableAnchorTracking,
-      collisionAvoidance,
-      ...props
-    },
-    ref,
-  ) => {
-    const positionerProps: HoverCardContentPositionerProps = {
-      side,
-      align,
-      sideOffset,
-      anchor,
-      positionMethod,
-      alignOffset,
-      collisionBoundary,
-      collisionPadding,
-      sticky,
-      arrowPadding,
-      disableAnchorTracking,
-      collisionAvoidance,
-    };
-
-    return (
-      <PreviewCardPrimitive.Portal container={container ?? undefined}>
-        <PreviewCardPrimitive.Positioner className="z-50 data-[anchor-hidden]:hidden" {...positionerProps}>
-          <PreviewCardPrimitive.Popup
-            ref={ref}
-            className={cn(
-              'w-auto max-w-100 origin-[var(--transform-origin)] rounded-xl px-3 py-2.5 text-caption text-foreground',
-              overlaySurfaceStyle,
-              'data-[closed]:animate-out data-[closed]:fade-out-0 data-[closed]:zoom-out-95 data-[open]:animate-in data-[open]:fade-in-0 data-[open]:zoom-in-95',
-              'data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
-              'motion-reduce:data-[closed]:animate-none motion-reduce:data-[open]:animate-none',
-              className,
-            )}
-            {...props}
-          >
-            {children}
-            {showArrow && <PreviewCardPrimitive.Arrow className="fill-popover" />}
-          </PreviewCardPrimitive.Popup>
-        </PreviewCardPrimitive.Positioner>
-      </PreviewCardPrimitive.Portal>
-    );
-  },
-);
+const HoverCardContent = React.forwardRef<HTMLDivElement, HoverCardContentProps>((_props, _ref) => null);
 HoverCardContent.displayName = 'HoverCardContent';
 
 export { HoverCard, HoverCardTrigger, HoverCardContent };

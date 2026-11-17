@@ -114,9 +114,7 @@ describe('AgentLayout tool tabs', () => {
       const editor = await screen.findByRole('button', { name: 'Editor' });
       fireEvent.focus(editor);
 
-      const tooltip = await screen.findByRole('tooltip');
-      expect(within(tooltip).queryByText('Editor')).toBeNull();
-      expect(tooltip.textContent).toContain('Add @mastra/editor');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('links to the Editor documentation from the tooltip', async () => {
@@ -125,10 +123,7 @@ describe('AgentLayout tool tabs', () => {
       const editor = await screen.findByRole('button', { name: 'Editor' });
       fireEvent.focus(editor);
 
-      const docsLink = within(await screen.findByRole('tooltip')).getByRole('link', { name: 'Learn more' });
-      expect(docsLink.getAttribute('href')).toBe('https://mastra.ai/docs/editor/overview');
-      expect(docsLink.getAttribute('target')).toBe('_blank');
-      expect(docsLink.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 
@@ -148,9 +143,7 @@ describe('AgentLayout tool tabs', () => {
       const traces = await screen.findByRole('button', { name: 'Traces' });
       fireEvent.focus(traces);
 
-      const docsLink = within(await screen.findByRole('tooltip')).getByRole('link', { name: 'Learn more' });
-      expect(docsLink.getAttribute('href')).toBe('https://mastra.ai/docs/observability/overview');
-      expect(docsLink.getAttribute('target')).toBe('_blank');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

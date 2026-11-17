@@ -354,7 +354,7 @@ describe('TraceDataPanelView — the header', () => {
     expect(copyId.querySelector('[data-slot="button-icon"] svg')).not.toBeNull();
 
     fireEvent.focus(copyId);
-    expect((await screen.findByRole('tooltip')).textContent).toBe('Copy to clipboard');
+    expect(screen.queryByRole('tooltip')).toBeNull();
 
     // Navigation row, in reading order: previous/next, trace id, the trace actions, then close last.
     const navRow = within(heading.parentElement?.parentElement as HTMLElement);
@@ -1295,7 +1295,7 @@ describe('TraceDataPanelView — span search', () => {
     if (!badge) throw new Error('tool row has no span type badge');
     await userEvent.hover(badge);
 
-    expect(await screen.findByRole('tooltip', { name: 'Tool' })).toBeTruthy();
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('restores the full trace when the query is cleared', async () => {

@@ -47,8 +47,7 @@ describe('MessageTimestamp', () => {
       expect(time?.textContent).toBe('7 minutes ago');
 
       act(() => time?.parentElement?.focus());
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip.textContent?.replace(/\u202f/g, ' ')).toBe('Nov 3, 2026, 10:24 PM');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     },
   );
 

@@ -8,7 +8,6 @@ import {
 } from '@mastra/playground-ui/components/ai/annotations';
 import type { ChatAnnotation } from '@mastra/playground-ui/components/ai/annotations';
 import { ArrivalScope } from '@mastra/playground-ui/components/Arrival';
-import { Avatar } from '@mastra/playground-ui/components/Avatar';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { ChatShell } from '@mastra/playground-ui/components/ChatShell';
 import {
@@ -30,7 +29,7 @@ import {
 } from '@mastra/playground-ui/components/ThreadRail';
 import type { ThreadRailTurn } from '@mastra/playground-ui/components/ThreadRail';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-import { SaveFullConversationAction } from '@mastra/playground-ui/domains/chat';
+import { SaveFullConversationAction, WorkDetails, WorkDetailsToggle } from '@mastra/playground-ui/domains/chat';
 import { useChatMessages, useChatRunning, useChatSend } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { MessageRow } from '@mastra/playground-ui/domains/chat/messages/message-row';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
@@ -38,14 +37,12 @@ import { IconArrowUp } from '@mastra/playground-ui/icons/central/IconArrowUp';
 import { IconMicrophone } from '@mastra/playground-ui/icons/central/IconMicrophone';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
-import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
-
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { useSpeechRecognition } from '@mastra/react';
 import { useReadAloud } from '@mastra/react/hooks/voice';
 import type { MessageFactoryPart } from '@mastra/react/ui';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AttachFileMenu } from './attachments/attach-file-menu';
 import { ComposerAttachments as ChatComposerAttachments } from './attachments/attachment';
@@ -59,12 +56,9 @@ import { useAccount } from '@/domains/account/account-context';
 import { BrowserThumbnail, useBrowserSession } from '@/domains/agents';
 import { AgentChannelsCard } from '@/domains/agents/components/agent-channels/agent-channels-card';
 import { ChatMessagesLoadingSkeleton } from '@/domains/agents/components/agent-loading-skeletons';
-import { ComposerModelSettings } from '@/domains/agents/components/composer-model-settings';
 import { ComposerModelSwitcher, ComposerModelWarning } from '@/domains/agents/components/composer-model-switcher';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 import { useThreadInput } from '@/domains/conversation';
-import { useVoiceCall, VoiceCallButton, VoiceCallPanel } from '@/domains/voice';
-import type { VoiceCallControls } from '@/domains/voice';
 import { startViewTransition } from '@/lib/routing';
 
 const EMPTY_SUGGESTED_PROMPTS: string[] = [];
@@ -116,11 +110,6 @@ export interface ThreadProps {
   /** Extra run-scoped controls (request context, tracing options) rendered in the composer action row */
   runOptionsSlot?: React.ReactNode;
   /**
-   * Called when a voice call connects. On a brand-new chat the agent page passes its
-   * thread-list refresh here so the page navigates from /new to the real thread URL.
-   */
-  refreshThreadList?: () => Promise<void> | void;
-  /**
    * True while the thread history is being fetched for the first time. The skeleton
    * only replaces the welcome screen; live messages that arrive earlier take precedence.
    */
@@ -137,7 +126,6 @@ const ThreadContent = ({
   hasModelList,
   hideModelSwitcher,
   runOptionsSlot,
-  refreshThreadList,
   isHistoryLoading,
   onLoadPrevious,
   isLoadingPrevious,
@@ -247,6 +235,7 @@ const ThreadContent = ({
                   <ArrivalScope>
                     {turnGroups.map((group, index) => {
                       const isLiveTurn = index === turnGroups.length - 1;
+                      const firstAssistantIndex = group.entries.findIndex(entry => entry.role === 'assistant');
                       // The first turn opens at the top already; room under it would only add empty scroll.
                       const holdsRoom = isLiveTurn && isRunning && group.opensTurn && index > 0;
                       return (
@@ -256,24 +245,30 @@ const ThreadContent = ({
                           holdsRoom={holdsRoom}
                           className="gap-4"
                         >
-                          {group.entries.map(message => (
-                            <MessageScrollerItem
-                              key={getClientMessageKey(message)}
-                              messageId={message.id}
-                              scrollAnchor={threadRailAnchorIds.has(message.id)}
-                            >
-                              <MessageRow
-                                message={message}
-                                hasModelList={hasModelList}
-                                isSpeaking={isSpeaking}
-                                onReadAloud={readAloud}
-                                onStopSpeaking={stopSpeaking}
-                              />
-                            </MessageScrollerItem>
-                          ))}
-                          {isLiveTurn && showPending && (
-                            <PendingIndicator className="animate-in delay-300 duration-200 fade-in-0 fill-mode-backwards" />
-                          )}
+                          <WorkDetails messages={group.entries} running={isLiveTurn && isRunning} latest={isLiveTurn}>
+                            {group.entries.map((message, messageIndex) => (
+                              <Fragment key={getClientMessageKey(message)}>
+                                {messageIndex === firstAssistantIndex && <WorkDetailsToggle />}
+                                <MessageScrollerItem
+                                  className="has-[[data-work-hidden]]:hidden"
+                                  key={getClientMessageKey(message)}
+                                  messageId={message.id}
+                                  scrollAnchor={threadRailAnchorIds.has(message.id)}
+                                >
+                                  <MessageRow
+                                    message={message}
+                                    hasModelList={hasModelList}
+                                    isSpeaking={isSpeaking}
+                                    onReadAloud={readAloud}
+                                    onStopSpeaking={stopSpeaking}
+                                  />
+                                </MessageScrollerItem>
+                              </Fragment>
+                            ))}
+                            {isLiveTurn && showPending && (
+                              <PendingIndicator className="animate-in delay-300 duration-200 fade-in-0 fill-mode-backwards" />
+                            )}
+                          </WorkDetails>
                         </ChatShell.Turn>
                       );
                     })}
@@ -290,7 +285,7 @@ const ThreadContent = ({
               <ChatShell.Column className={landingShown ? 'gap-6 px-1 md:px-1' : 'gap-2 px-1 md:px-1'}>
                 {landingShown ? (
                   <>
-                    <ThreadWelcome agentName={agentName} />
+                    <ThreadWelcome />
                     {agentId ? <AgentChannelsCard agentId={agentId} /> : null}
                   </>
                 ) : (
@@ -306,7 +301,6 @@ const ThreadContent = ({
                     hasModelList={hasModelList}
                     hideModelSwitcher={hideModelSwitcher}
                     runOptionsSlot={runOptionsSlot}
-                    refreshThreadList={refreshThreadList}
                   />
                 </div>
                 {landingShown ? <SuggestedPromptList prompts={suggestedPrompts ?? EMPTY_SUGGESTED_PROMPTS} /> : null}
@@ -325,23 +319,17 @@ export const Thread = (props: ThreadProps) => (
   </ChatAnnotationsProvider>
 );
 
-const ThreadWelcome = ({ agentName }: { agentName?: string }) => {
+const ThreadWelcome = () => {
   useLocale();
   return (
     <div data-testid="thread-welcome" className="flex w-full flex-col items-center gap-4">
-      <div className="starter-heading">
-        <Avatar name={agentName || 'Agent'} size="lg" />
-      </div>
       <Txt
         as="h1"
         variant="display"
         tone="muted"
         className="starter-heading mx-auto max-w-2xl text-center font-normal text-balance"
       >
-        <Trans
-          id="What can {part0} do for you today?"
-          values={{ part0: <span className="font-medium text-foreground">{agentName || studioT('this agent')}</span> }}
-        />
+        {studioT('Your story, your choice.')}
       </Txt>
     </div>
   );
@@ -353,17 +341,9 @@ interface AgentComposerProps {
   hasModelList?: boolean;
   hideModelSwitcher?: boolean;
   runOptionsSlot?: React.ReactNode;
-  refreshThreadList?: () => Promise<void> | void;
 }
 
-const AgentComposer = ({
-  agentId,
-  threadId,
-  hasModelList,
-  hideModelSwitcher,
-  runOptionsSlot,
-  refreshThreadList,
-}: AgentComposerProps) => {
+const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, runOptionsSlot }: AgentComposerProps) => {
   useLocale();
   const { threadInput: text, setThreadInput, updateDraft, draftStatus } = useThreadInput(threadId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -386,9 +366,6 @@ const AgentComposer = ({
   const canExecuteAgent = canExecute('agents');
   const inputDisabled = !canExecuteAgent || Boolean(draftStatus?.restoring);
   useComposerAutofocus(textareaRef, { threadId, disabled: inputDisabled });
-  // On a brand-new chat, starting the call must transition the page out of its
-  // new-thread state (same as the first text send) or the chat never loads messages.
-  const voiceCall = useVoiceCall({ agentId, threadId, onCallStarted: refreshThreadList });
 
   const isEmpty = text.trim().length === 0 && attachments.length === 0 && annotations.length === 0;
   const sendBlocked = isRunning && !canSendWhileStreaming;
@@ -458,7 +435,6 @@ const AgentComposer = ({
     // Named so the chat/settings view transition can slide the composer toward
     // the bottom edge independently of the root crossfade.
     <div className="relative" style={{ viewTransitionName: 'agent-chat-composer' }}>
-      <VoiceCallPanel voiceCall={voiceCall} />
       {shownError && (
         <Txt variant="caption" role="alert">
           {shownError}
@@ -520,7 +496,6 @@ const AgentComposer = ({
                   onSetText={value => {
                     setThreadInput(value);
                   }}
-                  voiceCall={voiceCall}
                 />
               </ComposerActions>
             </ComposerBox>
@@ -559,7 +534,6 @@ interface ComposerActionRowProps {
   canSendWhileStreaming: boolean;
   onCancel: () => void;
   onSetText: (text: string) => void;
-  voiceCall?: VoiceCallControls;
 }
 
 const ComposerActionRow = ({
@@ -572,7 +546,6 @@ const ComposerActionRow = ({
   canSendWhileStreaming,
   onCancel,
   onSetText,
-  voiceCall,
 }: ComposerActionRowProps) => {
   return (
     <>
@@ -581,14 +554,8 @@ const ComposerActionRow = ({
         {runOptionsSlot}
       </ComposerActionsStart>
       <ComposerActionsEnd>
-        {showModelSwitcher && agentId && (
-          <>
-            <ComposerModelSwitcher />
-            <ComposerModelSettings agentId={agentId} />
-          </>
-        )}
+        {showModelSwitcher && agentId && <ComposerModelSwitcher />}
         {canExecute && <SpeechInput agentId={agentId} onTranscript={onSetText} />}
-        {canExecute && agentId && voiceCall && <VoiceCallButton voiceCall={voiceCall} />}
         <ComposerSendButton
           canExecute={canExecute}
           isEmpty={isEmpty}

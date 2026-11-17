@@ -55,7 +55,7 @@ export function ArrayElementWrapper({ children, onRemove, index }: ArrayElementW
             <Trans id="Item {part0}" values={{ part0: index + 1 }} />
           </span>
           {summary && (
-            <span className="truncate text-foreground" title={summary}>
+            <span aria-label={summary} className="truncate text-foreground">
               {summary}
             </span>
           )}

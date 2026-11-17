@@ -15,7 +15,7 @@ import { ChartCardError } from './chart-card-error';
 import { MetricsCard } from '@/ds/components/MetricsCard';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
 import { MetricsLineChart, MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
-import { t as studioT } from '@/lib/i18n';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 const ROOT_ENTITY: Record<LatencyEntity, EntityType> = {
   agents: EntityType.AGENT,
@@ -48,11 +48,11 @@ const SERIES: MetricsLineChartSeries[] = [
   },
 ];
 
-const TITLE: Record<LatencyEntity, string> = {
+const TITLE = {
   agents: 'Agent latency',
   workflows: 'Workflow latency',
   tools: 'Tool latency',
-};
+} as const;
 
 const VIEWS = [
   { value: 'agents', label: TITLE.agents },
@@ -69,6 +69,7 @@ export type LatencyCardProps = {
 };
 
 export function LatencyCard({ onViewTraces, onTimeRangeClick }: LatencyCardProps) {
+  useLocale();
   const [entity, setEntity] = useState<LatencyEntity>('agents');
   const { data = [], isLoading, isError, isPlaceholderData } = useMetricsLatency(entity);
   const { timestamp } = useMetricsFilters();
@@ -77,8 +78,12 @@ export function LatencyCard({ onViewTraces, onTimeRangeClick }: LatencyCardProps
   const peak = Math.max(0, ...data.map(b => b.p95 ?? 0));
 
   const layout = {
-    title: TITLE[entity],
-    titleMenu: { value: entity, onValueChange: setEntity, options: VIEWS },
+    title: studioT(TITLE[entity]),
+    titleMenu: {
+      value: entity,
+      onValueChange: setEntity,
+      options: VIEWS.map(option => ({ ...option, label: studioT(option.label) })),
+    },
     actions: onViewTraces && <OpenInTracesButton onClick={() => onViewTraces(ROOT_ENTITY[entity])} />,
     toolbar: (
       <MetricsCard.Toolbar>

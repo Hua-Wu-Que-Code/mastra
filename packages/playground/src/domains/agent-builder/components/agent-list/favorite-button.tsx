@@ -50,7 +50,7 @@ export const FavoriteButton = ({
       size={size}
       aria-pressed={isFavorited}
       aria-label={signedIn ? label : disabledLabel}
-      title={signedIn ? label : disabledLabel}
+
       disabled={isDisabled}
       onClick={(event: MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();

@@ -6,6 +6,11 @@ import { memo, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { MessageAttachments } from '../attachments/message-attachments';
 import { splitMessageAttachments } from '../attachments/split-message-attachments';
+import { chatContentStyle } from '../preferences/chat-content-style';
+import { useChatPreferences } from '../preferences/chat-preferences-context';
+import { presentedParts, workBlocks } from '../preferences/work-details';
+import { WorkDetailsBlock } from '../preferences/work-details-block';
+import { useWorkDetails } from '../preferences/work-details-state';
 import { AssistantMessageActions, DatasetSaveAction } from '@/domains/chat';
 import { ChatRunningContext, useChatRunning } from '@/domains/chat/context/chat-context';
 import { AssistantTextPartRenderer } from '@/domains/chat/messages/renderers/assistant-text-part-renderer';
@@ -13,7 +18,7 @@ import { DataPartRenderer } from '@/domains/chat/messages/renderers/data-part-re
 import { messageTextKind } from '@/domains/chat/messages/renderers/message-text-kind';
 import { ReasoningPartRenderer } from '@/domains/chat/messages/renderers/reasoning-part-renderer';
 import { messageStatusRenderers } from '@/domains/chat/messages/renderers/status-renderers';
-import { readToolPart } from '@/domains/chat/messages/renderers/tool-part';
+import { readToolPart, isToolPart } from '@/domains/chat/messages/renderers/tool-part';
 import type { ToolPart } from '@/domains/chat/messages/renderers/tool-part';
 import { UserFilePartRenderer } from '@/domains/chat/messages/renderers/user-file-part-renderer';
 import { UserTextPartRenderer } from '@/domains/chat/messages/renderers/user-text-part-renderer';
@@ -147,7 +152,10 @@ export const MessageRow = memo(function MessageRow({
   className,
   ...rootProps
 }: MessageRowProps) {
-  const studioLocale = useLocale();
+  useLocale();
+  const { preferences } = useChatPreferences();
+  const workDetails = useWorkDetails();
+  const contentStyle = chatContentStyle(preferences.fontSize);
   const dbMessage = toDisplayMessage(message);
   const metadata = getMessageMetadata(message);
   const modelMetadata = hasModelList ? getModelMetadata(metadata) : undefined;
@@ -157,11 +165,22 @@ export const MessageRow = memo(function MessageRow({
   const { data: mcpAppTools } = useMcpAppTools();
   const parts = dbMessage?.content.parts ?? NO_PARTS;
   const revealed = useRevealedParts(parts, isStreaming(parts));
-  const shownParts = isProse(parts, metadata) ? revealed : parts;
-  const revealing = shownParts !== parts;
+  const pacedParts = isProse(parts, metadata) ? revealed : parts;
+  const shownParts = dbMessage
+    ? presentedParts({ ...dbMessage, content: { ...dbMessage.content, parts: pacedParts } }, workDetails, {
+        metadata,
+        mcpAppTools,
+      })
+    : NO_PARTS;
+  const revealing = pacedParts !== parts;
 
   const toolContext = useMemo<ToolCardContext>(() => ({ metadata, mcpAppTools }), [metadata, mcpAppTools]);
-  const toolGroups = useMemo(() => collectToolGroups(shownParts, toolContext), [shownParts, toolContext]);
+  const groupedParts = workDetails ? NO_PARTS : shownParts;
+  const toolGroups = useMemo(() => collectToolGroups(groupedParts, toolContext), [groupedParts, toolContext]);
+  const reasoningDefaultOpen = workDetails ? false : undefined;
+  const showReasoningPreview = workDetails?.showReasoningPreview;
+  const incompleteLabel = studioT('Incomplete');
+  const errorLabel = studioT('Error');
 
   const sharedRenderers = useMemo<MessageRenderers>(() => {
     const renderTool = (part: ToolPart) => {
@@ -171,9 +190,6 @@ export const MessageRow = memo(function MessageRow({
         const members = group.map(readToolPart);
         return (
           <>
-            {members.map(member => (
-              <ToolCallEffects key={member.toolCallId} {...member} readOnly={readOnly} />
-            ))}
             <Arriving>
               <ToolCallGroup
                 steps={members.map(member => ({
@@ -197,7 +213,7 @@ export const MessageRow = memo(function MessageRow({
                       </div>
                       {incomplete && (
                         <Txt as="span" variant="meta" className="mt-1 shrink-0">
-                          {studioT('Incomplete')}
+                          {incompleteLabel}
                         </Txt>
                       )}
                     </div>
@@ -211,7 +227,6 @@ export const MessageRow = memo(function MessageRow({
       if (toolGroups.memberKeys.has(fields.toolCallId)) return null;
       return (
         <>
-          <ToolCallEffects {...fields} readOnly={readOnly} />
           <Arriving>
             <ToolCard {...fields} metadata={metadata} dataParts={dataParts} readOnly={readOnly} />
           </Arriving>
@@ -219,7 +234,9 @@ export const MessageRow = memo(function MessageRow({
       );
     };
     return {
-      Reasoning: part => <ReasoningPartRenderer part={part} />,
+      Reasoning: part => (
+        <ReasoningPartRenderer part={part} defaultOpen={reasoningDefaultOpen} showPreview={showReasoningPreview} />
+      ),
       Data: part => (
         <Arriving>
           <DataPartRenderer part={part} />
@@ -228,12 +245,22 @@ export const MessageRow = memo(function MessageRow({
       ToolInvocation: renderTool,
       DynamicTool: renderTool,
       Error: (part: MastraErrorPart) => (
-        <Notice variant="destructive" title={part.error.name ?? studioT('Error')}>
+        <Notice variant="destructive" title={part.error.name ?? errorLabel}>
           <Notice.Message>{part.error.message}</Notice.Message>
         </Notice>
       ),
     };
-  }, [metadata, dataParts, readOnly, toolGroups, isRunning, studioLocale]);
+  }, [
+    metadata,
+    dataParts,
+    readOnly,
+    toolGroups,
+    isRunning,
+    reasoningDefaultOpen,
+    showReasoningPreview,
+    incompleteLabel,
+    errorLabel,
+  ]);
 
   const userRenderers = useMemo<MessageRenderers>(
     () => ({
@@ -253,7 +280,10 @@ export const MessageRow = memo(function MessageRow({
   );
 
   if (dbMessage === null) return null;
-  const shownMessage = revealing ? { ...dbMessage, content: { ...dbMessage.content, parts: shownParts } } : dbMessage;
+  const shownMessage =
+    shownParts !== dbMessage.content.parts
+      ? { ...dbMessage, content: { ...dbMessage.content, parts: shownParts } }
+      : dbMessage;
   const displayRole = dbMessage.role;
 
   if (displayRole === 'user') {
@@ -263,6 +293,7 @@ export const MessageRow = memo(function MessageRow({
       return (
         <Message
           {...rootProps}
+          contentStyle={contentStyle}
           from="assistant"
           className={className}
           data-message-id={message.id}
@@ -282,6 +313,7 @@ export const MessageRow = memo(function MessageRow({
     return (
       <Message
         {...rootProps}
+        contentStyle={contentStyle}
         from="user"
         className={className}
         data-message-id={message.id}
@@ -302,11 +334,18 @@ export const MessageRow = memo(function MessageRow({
     );
   }
 
-  const showActionBar = hasVisibleAssistantText(message, metadata);
+  const showActionBar = hasVisibleAssistantText(shownMessage, metadata);
+  const hiddenWork = shownParts.every(part => part.type === 'step-start');
 
   return (
     <Message
       {...rootProps}
+      contentStyle={contentStyle}
+      hidden={hiddenWork || rootProps.hidden}
+      data-work-hidden={hiddenWork || undefined}
+      data-work-details={
+        workDetails && parts.some(part => part.type === 'reasoning' || isToolPart(part)) ? '' : undefined
+      }
       from="assistant"
       className={className}
       data-message-id={message.id}
@@ -315,7 +354,7 @@ export const MessageRow = memo(function MessageRow({
           <MessageActions visibility={readOnly ? 'hover' : 'always'}>
             {showActionBar && (
               <AssistantMessageActions
-                text={getTextFromParts(message)}
+                text={getTextFromParts(shownMessage)}
                 modelMetadata={modelMetadata}
                 isSpeaking={isSpeaking}
                 onReadAloud={onReadAloud}
@@ -328,7 +367,31 @@ export const MessageRow = memo(function MessageRow({
       }
     >
       <ChatRunningContext.Provider value={{ ...running, isRunning }}>
-        <MessageFactory message={shownMessage} {...assistantRenderers} status={messageStatusRenderers} />
+        {message.content.parts.map(part => {
+          if (!isToolPart(part)) return null;
+          const fields = readToolPart(part);
+          return <ToolCallEffects key={fields.toolCallId} {...fields} readOnly={readOnly} />;
+        })}
+        {workDetails ? (
+          workBlocks(shownParts, toolContext).map(block => {
+            const factory = (
+              <MessageFactory
+                message={{ ...shownMessage, content: { ...shownMessage.content, parts: block.parts } }}
+                {...assistantRenderers}
+                status={messageStatusRenderers}
+              />
+            );
+            return block.work ? (
+              <WorkDetailsBlock key={block.key} parts={block.parts}>
+                {factory}
+              </WorkDetailsBlock>
+            ) : (
+              <div key={block.key}>{factory}</div>
+            );
+          })
+        ) : (
+          <MessageFactory message={shownMessage} {...assistantRenderers} status={messageStatusRenderers} />
+        )}
       </ChatRunningContext.Provider>
     </Message>
   );

@@ -19,6 +19,7 @@ export const preferenceModelProviders: RouteResponse<'GET /agents/providers'> = 
       envVar: 'OPENAI_API_KEY',
       connected: true,
       models: ['gpt-5-mini', 'gpt-4o-mini'],
+      modelReasoning: { 'gpt-4o-mini': { defaultLevel: 'off', levels: ['off', 'low', 'high'] } },
     },
   ],
 };

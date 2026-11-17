@@ -33,11 +33,11 @@ function ElapsedTime({ startedAt, endedAt, spansSuspension }: Omit<WorkflowClock
 
   return (
     <Txt
+      aria-label={elapsed && spansSuspension ? studioT('Includes time spent suspended waiting for input') : undefined}
       variant="meta"
       tone="muted"
       font="mono"
       className="whitespace-nowrap"
-      title={elapsed && spansSuspension ? studioT('Includes time spent suspended waiting for input') : undefined}
     >
       {elapsed === undefined ? <span aria-label={studioT('Timing unavailable')}>—</span> : elapsed}
     </Txt>

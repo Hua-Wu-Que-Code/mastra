@@ -125,12 +125,12 @@ describe('new thread landing', () => {
       expect(screen.getByTestId('left-slot')).not.toBeNull();
     });
 
-    it('renders the greeting with the agent name', async () => {
+    it('renders the story greeting', async () => {
       useHandlers([]);
       renderPage();
 
-      const heading = await screen.findByRole('heading', { name: /what can .* do for you today\?/i });
-      expect(heading.textContent).toContain(v2Agent.name);
+      const heading = await screen.findByRole('heading', { name: 'Your story, your choice.' });
+      expect(heading.textContent).toBe('Your story, your choice.');
     });
   });
 

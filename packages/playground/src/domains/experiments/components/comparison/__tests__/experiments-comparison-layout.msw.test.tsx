@@ -433,7 +433,7 @@ describe('experiments comparison table', () => {
 
       fireEvent.mouseEnter(trigger);
 
-      expect(await screen.findByText('Missing the country')).toBeTruthy();
+      expect(screen.queryByText('Missing the country')).toBeNull();
     });
   });
 
@@ -546,7 +546,7 @@ describe('experiments comparison table', () => {
       const contender = await findSummaryOf('Contender 1');
       fireEvent.focus(await within(contender).findByText('+100.0%'));
 
-      expect((await screen.findByRole('tooltip')).textContent).toContain('+$0.002');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('shows each item cost, with the contender difference against the baseline', async () => {

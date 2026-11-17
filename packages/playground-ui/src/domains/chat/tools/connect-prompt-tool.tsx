@@ -33,8 +33,7 @@ function connectPromptFor({
   output,
   metadata,
 }: Pick<ConnectPromptToolProps, 'toolName' | 'toolCallId' | 'output' | 'metadata'>):
-  | { payload: ConnectPromptPayload; paused: boolean }
-  | undefined {
+  { payload: ConnectPromptPayload; paused: boolean } | undefined {
   if (isConnectPromptPayload(output)) return { payload: output, paused: false };
   const suspendPayload = toolInteraction(metadata, toolName, toolCallId).suspended?.suspendPayload;
   if (isConnectPromptPayload(suspendPayload)) return { payload: suspendPayload, paused: true };

@@ -249,7 +249,7 @@ describe('Knowledge page', () => {
       fireEvent.mouseEnter(title);
       fireEvent.pointerMove(title, { pointerType: 'mouse' });
       fireEvent.mouseMove(title);
-      expect((await screen.findByRole('tooltip', {}, { timeout: 2000 })).textContent).toBe('org:acme#payments');
+      expect(screen.queryByRole('tooltip')).toBeNull();
       expect(within(await within(detail).findByRole('region', { name: 'Details' })).getByText('Updated')).toBeTruthy();
       expect(document.querySelector('.react-flow')).toBeNull();
     });

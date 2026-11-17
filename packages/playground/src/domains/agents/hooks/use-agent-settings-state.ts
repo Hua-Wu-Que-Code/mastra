@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useLocalStorageState } from '@mastra/playground-ui/hooks/use-local-storage-state';
+import { threadPreferencesSchema, serializeThreadPreferences } from '../context/thread-preferences';
+import { resolveChatSettings } from '../utils/chat-settings';
+export { defaultSettings } from '../utils/chat-settings';
 import type { AgentSettingsType as AgentSettings } from '@/types';
 
 export interface AgentSettingsStateProps {
@@ -6,64 +9,19 @@ export interface AgentSettingsStateProps {
   defaultSettings?: AgentSettings;
 }
 
-export const defaultSettings: AgentSettings = {
-  modelSettings: {
-    maxRetries: 2,
-    maxSteps: 15,
-    chatWithGenerateLegacy: false,
-    chatWithGenerate: false,
-    chatWithLegacyStream: false,
-  },
-};
-
-export function useAgentSettingsState({ agentId, defaultSettings: defaultSettingsProp }: AgentSettingsStateProps) {
-  const [settings, setSettingsState] = useState<AgentSettings | undefined>(defaultSettingsProp);
-
-  const LOCAL_STORAGE_KEY = `mastra-agent-store-${agentId}`;
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      const parsed = stored ? JSON.parse(stored) : {};
-
-      // Merge order: fallback defaults < localStorage < agent code defaults
-      // Agent code defaults win so developers can iterate on their defaults
-      const mergedSettings = {
-        ...parsed,
-        modelSettings: {
-          ...defaultSettings.modelSettings,
-          ...(parsed?.modelSettings ?? {}),
-          ...(defaultSettingsProp?.modelSettings ?? {}), // Code defaults win
-        },
-      };
-      setSettingsState(mergedSettings);
-    } catch {
-      // ignore
-    }
-  }, [LOCAL_STORAGE_KEY, defaultSettingsProp]);
-
-  const setSettings = (settingsValue: AgentSettings) => {
-    setSettingsState(prev => ({ ...prev, ...settingsValue }));
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...settingsValue, agentId }));
-  };
-
-  const resetAll = () => {
-    // Reset to agent defaults (if any), with fallback defaults as base
-    const resetSettings = {
-      modelSettings: {
-        ...defaultSettings.modelSettings,
-        ...(defaultSettingsProp?.modelSettings ?? {}),
-      },
-    };
-    setSettingsState(resetSettings);
-
-    // Clear localStorage so code defaults take precedence on next load
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-  };
-
+export function useAgentSettingsState({ agentId, defaultSettings }: AgentSettingsStateProps) {
+  const [preferences, setPreferences] = useLocalStorageState({
+    initialKey: `mastra-agent-store-${agentId}`,
+    defaultValue: {},
+    schema: threadPreferencesSchema,
+    serialize: serializeThreadPreferences,
+  });
   return {
-    settings,
-    setSettings,
-    resetAll,
+    settings: resolveChatSettings(
+      defaultSettings,
+      preferences.modelSettings ? { modelSettings: preferences.modelSettings } : undefined,
+    ),
+    setSettings: (settings: AgentSettings) => setPreferences({ modelSettings: settings.modelSettings }),
+    resetAll: () => setPreferences({}),
   };
 }

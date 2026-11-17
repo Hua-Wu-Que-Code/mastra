@@ -40,7 +40,7 @@ const PAGE_SIZE = 10;
 const DEFAULT_SORT: MetricsTableSort = { column: 'count', direction: 'desc' };
 
 /** The first column's header: what each row is. */
-const NAME_HEADER: Record<BreakdownTab, string> = {
+const NAME_HEADER = {
   projects: 'Project',
   agents: 'Agent',
   workflows: 'Workflow',
@@ -48,9 +48,9 @@ const NAME_HEADER: Record<BreakdownTab, string> = {
   models: 'Model',
   threads: 'Thread',
   environments: 'Environment',
-};
+} as const;
 
-const EMPTY: Record<BreakdownTab, string> = {
+const EMPTY = {
   projects: 'No traces in this range.',
   agents: 'No agent runs in this range.',
   workflows: 'No workflow runs in this range.',
@@ -58,7 +58,7 @@ const EMPTY: Record<BreakdownTab, string> = {
   models: 'No model usage in this range.',
   threads: 'No traces with a thread in this range.',
   environments: 'No traces in this range.',
-};
+} as const;
 
 export type BreakdownTableProps = BreakdownFrameProps & {
   tab: BreakdownTab;
@@ -152,7 +152,7 @@ export function BreakdownTable({
 
   const nameColumn: MetricsTableColumn<BreakdownRow> = {
     id: 'name',
-    header: NAME_HEADER[tab],
+    header: studioT(NAME_HEADER[tab]),
     width: 'minmax(12rem,3fr)',
     cell: row => <BreakdownRowName tab={tab} row={row} />,
   };
@@ -243,7 +243,7 @@ export function BreakdownTable({
       <ChartArea>
         <MetricsTable
           key={tab}
-          aria-label={studioT('{value0} breakdown', { value0: NAME_HEADER[tab] })}
+          aria-label={studioT('{value0} breakdown', { value0: studioT(NAME_HEADER[tab]) })}
           columns={columns}
           rows={rows}
           getRowKey={row => row.key}
@@ -253,7 +253,7 @@ export function BreakdownTable({
           onRowClick={frame.onRowClick && (row => frame.onRowClick?.(drilldownFor(tab, row)))}
           pageSize={PAGE_SIZE}
           isLoading={isLoading}
-          empty={EMPTY[tab]}
+          empty={studioT(EMPTY[tab])}
         />
         {!isLoading && truncated && (
           <Txt variant="caption" tone="muted" className="pt-2">

@@ -2,6 +2,7 @@ import type { AgentSettingsType, ModelSettings } from '@/types';
 
 type AgentDefaultOptions = {
   maxSteps?: number;
+  requireToolApproval?: boolean;
   // Code-defined defaults share the UI `ModelSettings` shape, except the model
   // size is the AI SDK v5 `maxOutputTokens` (mapped to `maxTokens` below).
   modelSettings?: Partial<ModelSettings> & { maxOutputTokens?: number };
@@ -26,6 +27,9 @@ function parseAgentDefaultOptions(value: unknown): AgentDefaultOptions {
 
   if (typeof value.maxSteps === 'number') {
     result.maxSteps = value.maxSteps;
+  }
+  if (typeof value.requireToolApproval === 'boolean') {
+    result.requireToolApproval = value.requireToolApproval;
   }
   if (isRecord(value.modelSettings)) {
     result.modelSettings = value.modelSettings as AgentDefaultOptions['modelSettings'];
@@ -58,6 +62,9 @@ export function buildAgentDefaultSettings(agent: { defaultOptions?: unknown } | 
       // Only include properties if they have actual values (to not override fallback defaults)
       ...(maxOutputTokens !== undefined && { maxTokens: maxOutputTokens }),
       ...(agentDefaultOptions.maxSteps !== undefined && { maxSteps: agentDefaultOptions.maxSteps }),
+      ...(agentDefaultOptions.requireToolApproval !== undefined && {
+        requireToolApproval: agentDefaultOptions.requireToolApproval,
+      }),
       ...(agentDefaultOptions.providerOptions !== undefined && {
         providerOptions: agentDefaultOptions.providerOptions,
       }),

@@ -43,17 +43,8 @@ const renderIcon = () =>
     { router: { initialEntries: [`/experiments/${base.id}`] } },
   );
 
-/** The icon only names its state through the tooltip, so focus the trigger to read it. */
-const statusLabel = async (label: string) => {
-  const trigger = await waitFor(() => {
-    const el = document.querySelector('[tabindex="0"]');
-    if (!el) throw new Error('status icon not rendered');
-    return el;
-  });
-  fireEvent.blur(trigger);
-  fireEvent.focus(trigger);
-  return screen.findByText(label);
-};
+/** Status remains accessible without a hover popup. */
+const statusLabel = (label: string) => screen.findByRole('img', { name: label });
 
 const advancePoll = () =>
   act(async () => {

@@ -62,7 +62,7 @@ function TagsCell({ tags: rawTags }: { tags: DatasetRecord['tags'] }) {
   return (
     <DataList.Cell>
       {tags.length > 0 ? (
-        <div className="flex max-w-48 items-center gap-1 overflow-hidden" title={tags.join(', ')}>
+        <div aria-label={tags.join(', ')} className="flex max-w-48 items-center gap-1 overflow-hidden">
           {tags.slice(0, 2).map(tag => (
             <ComputedTag key={tag} value={tag} className="shrink-0" />
           ))}

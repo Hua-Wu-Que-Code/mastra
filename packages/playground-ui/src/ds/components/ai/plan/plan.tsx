@@ -172,12 +172,13 @@ const getFileName = (path: string) => {
 export function PlanPath({ children, className, ...props }: PlanPathProps) {
   return (
     <Txt
+      aria-label={children}
       {...props}
       as="p"
       variant="meta"
       tone="muted"
       font="mono"
-      title={children}
+
       className={cn('max-w-full truncate overflow-hidden', className)}
     >
       {getFileName(children)}

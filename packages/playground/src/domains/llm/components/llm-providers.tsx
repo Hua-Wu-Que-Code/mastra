@@ -58,10 +58,10 @@ export const LLMProviders = ({
         <div className="relative shrink-0">
           <ProviderLogo providerId={provider.id} size={16} />
           <div
+            aria-label={provider.connected ? studioT('Connected') : studioT('Not connected')}
             className={`absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ${
               provider.connected ? 'bg-success-indicator' : 'bg-destructive-indicator'
             }`}
-            title={provider.connected ? studioT('Connected') : studioT('Not connected')}
           />
         </div>
       ),

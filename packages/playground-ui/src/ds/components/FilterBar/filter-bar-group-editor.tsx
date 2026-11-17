@@ -37,7 +37,7 @@ export function FilterBarLogicToggle({ groupId, logic, className }: FilterBarLog
       data-slot="filter-bar-logic"
       data-logic={logic}
       aria-label={studioT('Joined with {value0}, switch to {value1}', { value0: logic, value1: next })}
-      title={studioT('Switch to {value0}', { value0: next })}
+
       className={cn(
         connectorClass,
         'filter-bar-logic cursor-pointer border border-border bg-fill-subtle outline-none',

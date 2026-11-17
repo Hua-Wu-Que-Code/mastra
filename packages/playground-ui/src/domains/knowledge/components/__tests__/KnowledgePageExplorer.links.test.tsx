@@ -115,7 +115,7 @@ describe('KnowledgePageExplorer body links', () => {
       renderWithProviders(<Host initial="overview" initialView="page" />);
       const link = body().getByRole('button', { name: 'Suspend and resume' });
       act(() => link.focus());
-      expect((await screen.findByRole('tooltip')).textContent).toBe('docs:mastra#workflows/suspend-and-resume');
+      expect(screen.queryByRole('tooltip')).toBeNull();
       fireEvent.click(link);
       expect(screen.getByTestId('selected').textContent).toBe('suspend');
     });
@@ -152,7 +152,7 @@ describe('KnowledgePageExplorer body links', () => {
       expect(notes.queryByText('docs:mastra#workflows/suspend-and-resume')).toBeNull();
       const link = notes.getByRole('button', { name: 'Suspend and resume' });
       act(() => link.focus());
-      expect((await screen.findByRole('tooltip')).textContent).toBe('docs:mastra#workflows/suspend-and-resume');
+      expect(screen.queryByRole('tooltip')).toBeNull();
       fireEvent.click(link);
       expect(screen.getByTestId('selected').textContent).toBe('suspend');
     });
@@ -188,7 +188,7 @@ describe('KnowledgePageExplorer body links', () => {
       expect(ref.closest('p')?.className).toContain('wrap-anywhere');
       const stamp = within(notes.getByLabelText('Stamped to')).getByText(scope);
       expect(stamp.className).toContain('truncate');
-      expect(stamp.parentElement?.getAttribute('title')).toBe(scope);
+      expect(stamp.parentElement?.getAttribute('aria-label')).toBe(scope);
     });
 
     it('lets a linked page name wrap inside the note', () => {

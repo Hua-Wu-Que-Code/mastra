@@ -2,6 +2,7 @@ import { MastraClient } from '@mastra/client-js';
 import type { ListMemoryThreadMessagesResponse, StreamParams } from '@mastra/client-js';
 import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import type { TaskItem } from '@mastra/core/signals';
+import { locale } from '@mastra/playground-ui/lib/i18n';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -229,6 +230,7 @@ const uninstallFakeSpeechRecognition = () => {
 afterEach(() => {
   delete window.MASTRA_AGENT_SIGNALS;
   cleanup();
+  locale.adopt('en');
 });
 
 describe('Thread', () => {
@@ -312,22 +314,23 @@ describe('Thread', () => {
 
       expect(screen.getByTestId('thread-welcome')).toBeTruthy();
       expect(screen.getByRole('textbox')).toBeTruthy();
+      expect(screen.queryByRole('button', { name: 'Start voice call' })).toBeNull();
+      expect(screen.getByRole('button', { name: 'Start dictation' })).toBeTruthy();
     });
 
-    it('renders the greeting with the agent name and the composer inside the landing column', async () => {
+    it.each([
+      { language: 'en', slogan: 'Your story, your choice.' },
+      { language: 'zh', slogan: '故事本该由你决定。' },
+    ] as const)('renders the $language slogan and composer in the landing column', async ({ language, slogan }) => {
       server.use(...baseHandlers());
+      locale.adopt(language);
 
       await act(async () => {
         renderThread([]);
       });
 
-      const heading = screen.getByRole('heading', { name: /what can .* do for you today\?/i });
-      expect(heading.textContent).toContain('Helper');
-      // Emphasis contract: only the agent name is high-contrast; the surrounding copy is muted and regular weight.
-      expect(heading.classList.contains('font-normal')).toBe(true);
-      const name = screen.getByText('Helper');
-      expect(name.classList.contains('font-medium')).toBe(true);
-      expect(name.classList.contains('text-foreground')).toBe(true);
+      const heading = screen.getByRole('heading', { name: slogan });
+      expect(screen.getByTestId('thread-welcome').textContent).toBe(slogan);
       const landing = screen.getByTestId('thread-landing');
       expect(landing.contains(heading)).toBe(true);
       expect(landing.contains(screen.getByRole('textbox'))).toBe(true);
@@ -934,11 +937,12 @@ describe('Thread', () => {
         }),
       );
       const read = FileReader.prototype.readAsArrayBuffer;
-      const probe = vi
-        .spyOn(FileReader.prototype, 'readAsArrayBuffer')
-        .mockImplementation(function (this: FileReader, blob) {
-          void pending.then(() => read.call(this, blob));
-        });
+      const probe = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (
+        this: FileReader,
+        blob,
+      ) {
+        void pending.then(() => read.call(this, blob));
+      });
       try {
         await act(async () => {
           renderThread([]);

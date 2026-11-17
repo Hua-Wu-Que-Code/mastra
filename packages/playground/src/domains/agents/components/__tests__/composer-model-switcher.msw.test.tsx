@@ -8,7 +8,8 @@ import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { PlaygroundModelProvider } from '../../context/playground-model-context';
+import { useAgentSettings } from '../../context/agent-context';
+import { ThreadPreferencesProvider } from '../../context/thread-preferences-provider';
 import { ComposerModelSwitcher } from '../composer-model-switcher';
 import { gatewayProviders, openAiProviders } from './fixtures/composer-model-switcher';
 import { server } from '@/test/msw-server';
@@ -41,6 +42,11 @@ const mockProviderRequests = (
   );
 };
 
+function SettingsProbe() {
+  const { settings } = useAgentSettings();
+  return <output data-testid="settings">{JSON.stringify(settings)}</output>;
+}
+
 const renderSwitcher = (agentModel?: { provider: string; model: string }) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -51,9 +57,15 @@ const renderSwitcher = (agentModel?: { provider: string; model: string }) => {
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
           <TooltipProvider>
-            <PlaygroundModelProvider defaultProvider={agentModel?.provider} defaultModel={agentModel?.model}>
+            <ThreadPreferencesProvider
+              agentId="test-agent"
+              threadId="test-thread"
+              defaultProvider={agentModel?.provider ?? ''}
+              defaultModel={agentModel?.model ?? ''}
+            >
               <ComposerModelSwitcher />
-            </PlaygroundModelProvider>
+              <SettingsProbe />
+            </ThreadPreferencesProvider>
           </TooltipProvider>
         </MemoryRouter>
       </QueryClientProvider>
@@ -61,7 +73,10 @@ const renderSwitcher = (agentModel?: { provider: string; model: string }) => {
   );
 };
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
 
 describe('ComposerModelSwitcher', () => {
   describe('when the providers request is still in flight', () => {
@@ -85,6 +100,7 @@ describe('ComposerModelSwitcher', () => {
       mockProviderRequests(Promise.resolve(), openAiProviders);
       renderSwitcher({ provider: 'openai', model: 'gpt-4o-mini' });
       fireEvent.click(await screen.findByRole('button', { name: /Model:.*GPT-4o Mini/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       return screen.findByRole('listbox');
     };
 
@@ -107,6 +123,7 @@ describe('ComposerModelSwitcher', () => {
       await screen.findByRole('button', { name: /Model:.*GPT-5/ });
 
       fireEvent.click(screen.getByRole('button', { name: /Model:.*GPT-5/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       fireEvent.click(await screen.findByRole('option', { name: /Reset to the agent's model/ }));
 
       expect(await screen.findByRole('button', { name: /Model:.*GPT-4o Mini/ })).not.toBeNull();
@@ -117,6 +134,7 @@ describe('ComposerModelSwitcher', () => {
       mockProviderRequests(Promise.resolve(), gatewayProviders);
       renderSwitcher({ provider: 'custom', model: 'custom-small' });
       fireEvent.click(await screen.findByRole('button', { name: /Model:.*Custom Small/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       return screen.findByRole('listbox');
     };
 
@@ -133,9 +151,51 @@ describe('ComposerModelSwitcher', () => {
       await screen.findByRole('button', { name: /Model:.*Custom Large/ });
 
       fireEvent.click(screen.getByRole('button', { name: /Model:.*Custom Large/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       fireEvent.click(await screen.findByRole('option', { name: /Reset to the agent's model/ }));
 
       expect(await screen.findByRole('button', { name: /Model:.*Custom Small/ })).not.toBeNull();
     });
+  });
+});
+
+describe('when the ModelHub catalog defines reasoning levels', () => {
+  it('uses catalog names without logos and persists the selected effort, resetting it when changing models', async () => {
+    mockProviderRequests(Promise.resolve(), {
+      providers: [
+        {
+          id: 'altflow',
+          name: 'ModelHub',
+          connected: true,
+          envVar: 'TEST_KEY',
+          models: ['seed-turbo', 'deepseek'],
+          modelNames: { 'seed-turbo': '豆包 Seed 2.1 Turbo', deepseek: 'DeepSeek V4 Pro' },
+          modelReasoning: {
+            'seed-turbo': { defaultLevel: 'off', levels: ['off', 'low', 'medium', 'high'] },
+            deepseek: { defaultLevel: 'high', levels: ['high'] },
+          },
+        },
+      ],
+    });
+    renderSwitcher({ provider: 'altflow', model: 'seed-turbo' });
+    const trigger = await screen.findByRole('button', { name: /Model:.*豆包 Seed 2.1 Turbo/ });
+    expect(trigger.querySelector('img')).toBeNull();
+    fireEvent.click(trigger);
+    fireEvent.click(await screen.findByRole('button', { name: /Reasoning level/ }));
+    fireEvent.click(await screen.findByRole('option', { name: 'High' }));
+    expect(JSON.parse(screen.getByTestId('settings').textContent ?? '{}').modelSettings.providerOptions).toEqual({
+      altflow: { reasoningLevel: 'high' },
+    });
+    expect(localStorage.getItem('mastra-thread-preferences-["test-agent","test-thread"]')).toContain('reasoningLevel');
+    fireEvent.click(screen.getByRole('button', { name: /Model:.*豆包 Seed 2.1 Turbo/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
+    fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'DeepSeek' } });
+    const option = await screen.findByRole('option', { name: /DeepSeek V4 Pro/ });
+    expect(option.querySelector('img')).toBeNull();
+    fireEvent.click(option);
+    fireEvent.click(await screen.findByRole('button', { name: /Model:.*DeepSeek V4 Pro/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Reasoning level/ }));
+    expect(screen.queryByRole('option', { name: 'Off' })).toBeNull();
+    expect(screen.getByRole('option', { name: 'High' }).getAttribute('aria-selected')).toBe('true');
   });
 });

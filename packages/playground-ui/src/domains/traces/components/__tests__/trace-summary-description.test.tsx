@@ -23,18 +23,16 @@ describe('TraceSummaryDescription', () => {
     expect(screen.getByText('46.3s')).not.toBeNull();
 
     fireEvent.focus(startedAt);
-    expect((await screen.findByRole('tooltip')).textContent).toBe(
-      `Started at ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 }).format(rootSpan.startedAt)}`,
-    );
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
-  it('shows the readable entity type in a tooltip', async () => {
+  it('keeps the readable entity type without a hover hint', async () => {
     render(<TraceSummaryDescription rootSpan={rootSpan} />);
 
-    const entity = screen.getByText('Weather Agent').closest('[tabindex]');
+    const entity = screen.getByText('Weather Agent');
     assert(entity);
     fireEvent.focus(entity);
-    expect((await screen.findByRole('tooltip')).textContent).toBe('Agent');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it.each([
@@ -75,13 +73,13 @@ describe('TraceSummaryDescription', () => {
   it('titles multi-word entity types in the tooltip', async () => {
     render(<TraceSummaryDescription rootSpan={{ ...rootSpan, entityType: 'workflow_run' }} />);
 
-    const entity = screen.getByText('Weather Agent').closest('[tabindex]');
+    const entity = screen.getByText('Weather Agent');
     assert(entity);
     fireEvent.focus(entity);
-    expect((await screen.findByRole('tooltip')).textContent).toBe('Workflow Run');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
-  it('shows input tokens, output tokens, and estimated cost inline with tooltip labels', async () => {
+  it('shows token counts and cost inline without hover hints', async () => {
     render(
       <TraceSummaryDescription
         rootSpan={rootSpan}
@@ -94,7 +92,7 @@ describe('TraceSummaryDescription', () => {
     expect(screen.getByText('<$0.01')).not.toBeNull();
 
     fireEvent.focus(screen.getByLabelText('Input tokens'));
-    expect((await screen.findByRole('tooltip')).textContent).toBe('Input tokens');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('leaves out the entity block when the span never carried one', () => {

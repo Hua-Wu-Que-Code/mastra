@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { Txt } from '@/ds/components/Txt';
 import { messageSurfaceStyle } from '@/ds/primitives/message-surface';
 import { cn } from '@/lib/utils';
@@ -10,9 +10,21 @@ export interface MessageProps extends ComponentProps<'div'> {
   /** Sent files, displayed above and outside the text bubble. */
   attachments?: ReactNode;
   pending?: boolean;
+  /** Typography overrides scoped to content, leaving action controls unchanged. */
+  contentStyle?: CSSProperties;
 }
 
-export function Message({ from, avatar, footer, attachments, pending, children, className, ...props }: MessageProps) {
+export function Message({
+  from,
+  avatar,
+  footer,
+  attachments,
+  pending,
+  contentStyle,
+  children,
+  className,
+  ...props
+}: MessageProps) {
   const isUser = from === 'user';
 
   return (
@@ -38,6 +50,7 @@ export function Message({ from, avatar, footer, attachments, pending, children, 
         {children !== undefined && children !== null && children !== false && (
           <div
             data-slot="message-content"
+            style={contentStyle}
             className={cn(
               'max-w-full min-w-0 text-body break-words',
               isUser && cn(messageSurfaceStyle, 'px-4 py-2'),

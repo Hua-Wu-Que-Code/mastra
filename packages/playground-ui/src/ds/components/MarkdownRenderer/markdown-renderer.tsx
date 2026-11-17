@@ -305,8 +305,9 @@ function markdownLink(externalLinkTarget: MarkdownExternalLinkTarget): NonNullab
 
     return (
       <a
+        aria-description={title}
         href={href}
-        title={title}
+
         onClick={openInPopup}
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noopener noreferrer' : undefined}

@@ -89,7 +89,6 @@ export function ModelPicker({
     disabled: busy,
     'aria-label': ariaLabel,
     'aria-busy': busy,
-    title: value ? `${value.provider}/${value.model}` : undefined,
   };
   const triggerClass = cn('max-w-full min-w-0 gap-1.5', triggerClassName);
   const triggerContent = (

@@ -29,7 +29,7 @@ export function ImpersonationBanner() {
         type="button"
         onClick={stopImpersonation}
         className="ml-auto shrink-0 rounded p-0.5 text-info-subtle-foreground hover:bg-info-edge"
-        title={studioT('Exit role preview')}
+        aria-label={studioT('Exit role preview')}
       >
         <IconCrossMedium className="size-icon-xs" />
       </button>

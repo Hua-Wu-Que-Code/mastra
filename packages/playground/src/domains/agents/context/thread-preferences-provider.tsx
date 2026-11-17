@@ -6,7 +6,7 @@ import { PlaygroundModelContext } from './playground-model-context';
 import { threadPreferencesSchema, serializeThreadPreferences } from './thread-preferences';
 import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-agent-builder-allowed-models';
 import { useBuilderSettings } from '@/domains/agent-builder/hooks/use-builder-settings';
-import { defaultSettings as fallbackSettings } from '@/domains/agents/hooks/use-agent-settings-state';
+import { resolveChatSettings } from '@/domains/agents/utils/chat-settings';
 import type { AgentSettingsType } from '@/types';
 
 export interface ThreadPreferencesProviderProps {
@@ -69,13 +69,14 @@ function ThreadPreferencesState({
   const provider = selection?.provider ?? policyDefault?.provider ?? defaultProvider;
   const model = selection?.model ?? policyDefault?.modelId ?? defaultModel;
   const modelOverride = (selection || policyDefault) && provider && model ? `${provider}/${model}` : undefined;
-  const settings: AgentSettingsType = {
-    modelSettings: {
-      ...fallbackSettings.modelSettings,
-      ...defaultSettings?.modelSettings,
-      ...preferences.modelSettings,
-    },
-  };
+  const settings = resolveChatSettings(
+    defaultSettings,
+    // Reasoning belongs to the saved model too. If policy replaces that model,
+    // inherit the new route's defaults instead of sending the old route's level.
+    policyResolved && !locked && (!savedSelection || selection) && preferences.modelSettings
+      ? { modelSettings: preferences.modelSettings }
+      : undefined,
+  );
 
   return (
     <PlaygroundModelContext.Provider

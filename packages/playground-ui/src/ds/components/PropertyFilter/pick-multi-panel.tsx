@@ -31,7 +31,7 @@ function PickMultiItem({
       aria-checked={checked}
       data-selected={checked || undefined}
       data-pick-multi-item=""
-      title={label}
+      aria-label={label}
       className={pickMultiItemClass}
       onClick={onClick}
     >

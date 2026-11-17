@@ -688,7 +688,7 @@ describe('FilterBar', () => {
       render(<Harness initial={[{ id: 'f', fieldId: 'status', operatorId: 'in', value: ['running', 'error'] }]} />);
       const valueSegment = screen.getByLabelText('Value: Running, Error');
       expect(valueSegment.textContent).toBe('Running +1');
-      expect(valueSegment.getAttribute('title')).toBe('Running, Error');
+      expect(valueSegment.getAttribute('aria-label')).toBe('Value: Running, Error');
     });
 
     it('serializes chip field and operator options as strings', () => {
@@ -1354,7 +1354,7 @@ describe('FilterBar', () => {
     const getLogicToggles = () => document.querySelectorAll<HTMLElement>('[data-slot="filter-bar-logic"]');
     const getEditors = () => document.querySelectorAll<HTMLElement>('[data-slot="filter-bar-group-editor"]');
     const openPopover = async () => {
-      fireEvent.click(screen.getByRole('button', { name: /^Advanced filter/ }));
+      fireEvent.click(screen.getByRole('button', { name: 'Edit advanced filter' }));
       return screen.findByRole('group', { name: /^Conditions joined with/ });
     };
 

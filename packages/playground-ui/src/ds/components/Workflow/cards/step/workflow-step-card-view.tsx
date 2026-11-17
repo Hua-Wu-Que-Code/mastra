@@ -130,7 +130,7 @@ export function WorkflowStepCardView(props: WorkflowStepCardViewProps) {
             onClick={onSelect}
           >
             <span className="flex items-start justify-between gap-2.5 rounded-(--card-radius) px-3.5 py-3 group-hover:bg-fill-subtle">
-              <Txt as="span" variant="column" tone="ink" className="min-w-0 wrap-anywhere" title={label}>
+              <Txt aria-label={label} as="span" variant="column" tone="ink" className="min-w-0 wrap-anywhere">
                 <Shimmer active={isRunning}>{label}</Shimmer>
               </Txt>
               <WorkflowTypeBadge {...props} />

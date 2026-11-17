@@ -1,5 +1,4 @@
 import { dataKeysAndValuesValueStyles } from './shared';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { cn } from '@/lib/utils';
 
 export interface DataKeysAndValuesValueWithTooltipProps {
@@ -11,18 +10,11 @@ export interface DataKeysAndValuesValueWithTooltipProps {
 export function DataKeysAndValuesValueWithTooltip({
   className,
   children,
-  tooltip,
+  tooltip: _tooltip,
 }: DataKeysAndValuesValueWithTooltipProps) {
   return (
     <dd className={cn(dataKeysAndValuesValueStyles, className)}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div tabIndex={0} className="inline cursor-help truncate">
-            {children}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
-      </Tooltip>
+      <div className="inline truncate">{children}</div>
     </dd>
   );
 }

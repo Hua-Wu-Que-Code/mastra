@@ -39,11 +39,11 @@ function RunDuration({ span, spansSuspension }: Omit<WorkflowRunTiming, 'waiting
 
   return (
     <Txt
+      aria-label={spansSuspension ? studioT('Run duration, including time spent suspended') : studioT('Run duration')}
       as="span"
       variant="meta"
       tone="muted"
       className="flex items-center gap-1.5"
-      title={spansSuspension ? studioT('Run duration, including time spent suspended') : studioT('Run duration')}
     >
       <IconStopwatch aria-hidden className="size-icon-sm" />
       <Txt as="span" variant="meta" font="mono">
@@ -59,10 +59,10 @@ function RunWaiting({ since }: { since: number }) {
 
   return (
     <Txt
+      aria-label={studioT('Waiting for input')}
       as="span"
       variant="meta"
       className="flex items-center gap-1.5 text-warning-foreground tabular-nums"
-      title={studioT('Waiting for input')}
     >
       <IconPause aria-hidden className="size-icon-sm" />
       {waiting}
@@ -93,7 +93,7 @@ export function RunWorkflowHeader({
           <WorkflowRunStatusBadge status={status} />
           {resourceId && (
             <Badge size="md" variant="neutral" emphasis="subtle" className="min-w-0">
-              <span className="min-w-0 truncate" title={studioT('Resource {value0}', { value0: resourceId })}>
+              <span aria-label={studioT('Resource {value0}', { value0: resourceId })} className="min-w-0 truncate">
                 {resourceId}
               </span>
             </Badge>
@@ -105,7 +105,7 @@ export function RunWorkflowHeader({
         </div>
       </div>
       <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
-        <Txt as="span" variant="meta" font="mono" className="min-w-0 truncate" title={runId}>
+        <Txt aria-label={runId} as="span" variant="meta" font="mono" className="min-w-0 truncate">
           {runId}
         </Txt>
         <CopyButton

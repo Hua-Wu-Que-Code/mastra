@@ -144,7 +144,7 @@ describe('ComparisonSideCell', () => {
 
       fireEvent.focus(within(metricsRegion()).getByText(/^\+50\.0%$/));
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe('+$0.001');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

@@ -8,6 +8,7 @@ import { BREAKDOWN_SPAN_TYPES, countsSpans, isEntityTab, withDropped } from './b
 import { formatCount, formatDuration, formatPercent, formatUsd } from './chart-format';
 import { previousWindow } from './time-window';
 import { toTraceAggregateTimeRange } from './trace-aggregate';
+import { getIntlLocale, t as studioT } from '@/lib/i18n';
 
 export const DASH = '—';
 
@@ -16,32 +17,36 @@ const CHANGE_METRICS: readonly string[] = ['count', 'errorRate', 'p95', 'tokens'
 export const isChangeMetric = (key: string): key is ChangeMetric => CHANGE_METRICS.includes(key);
 
 /** The count column's header: traces, or spans where one trace makes many (tool and model calls). */
-export const volumeLabel = (tab: BreakdownTab) => (countsSpans(tab) ? 'Spans' : 'Traces');
+export const volumeLabel = (tab: BreakdownTab) => (countsSpans(tab) ? studioT('Spans') : studioT('Traces'));
 
 const TRACE_DESCRIPTION = 'A trace is one end-to-end request, with every step it took.';
 const SPAN_DESCRIPTION =
   'A span is one step inside a trace, such as a tool call or a model call. One trace can have many.';
 
 /** The count column's tooltip: explains whichever unit the tab counts. */
-export const countDescription = (tab: BreakdownTab) => (countsSpans(tab) ? SPAN_DESCRIPTION : TRACE_DESCRIPTION);
+export const countDescription = (tab: BreakdownTab) =>
+  countsSpans(tab) ? studioT(SPAN_DESCRIPTION) : studioT(TRACE_DESCRIPTION);
 
-const METRIC_LABEL: Record<Exclude<ChangeMetric, 'count'>, string> = {
+const METRIC_LABEL = {
   errorRate: 'Errors',
   p95: 'P95 latency',
   tokens: 'Tokens',
   cost: 'Cost',
-};
+} as const;
 
 const fmtMoment = (d: Date) =>
-  d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  d.toLocaleString(getIntlLocale(), { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 const fmtRange = ({ start, end }: { start: Date; end: Date }) => `${fmtMoment(start)} – ${fmtMoment(end)}`;
 
 /** The % Change column's tooltip: which figure it compares, and both ranges' dates. */
 export function changeDescription(window: { start: Date; end: Date }, label: string) {
   return {
-    summary: `Change in ${label.toLowerCase()} from the previous range of the same length. Sort by another column to compare that instead.`,
-    current: `Selected: ${fmtRange(window)}`,
-    previous: `Previous: ${fmtRange(previousWindow(window))}`,
+    summary: studioT(
+      'Change in {metric} from the previous range of the same length. Sort by another column to compare that instead.',
+      { metric: label.toLowerCase() },
+    ),
+    current: studioT('Selected: {range}', { range: fmtRange(window) }),
+    previous: studioT('Previous: {range}', { range: fmtRange(previousWindow(window)) }),
   };
 }
 
@@ -50,7 +55,7 @@ export const showsProject = (tab: BreakdownTab, byProject: boolean) => byProject
 
 /** The compared column's header, so "Cost change" sits beside Cost. */
 export const comparedLabel = (tab: BreakdownTab, metric: ChangeMetric) =>
-  metric === 'count' ? volumeLabel(tab) : METRIC_LABEL[metric];
+  metric === 'count' ? volumeLabel(tab) : studioT(METRIC_LABEL[metric]);
 
 /**
  * The rows to list. Traces without a thread aren't a thread, and threads that ended are the norm,
@@ -79,9 +84,9 @@ export function tableRows({
 export function rowLabel(tab: BreakdownTab, row: BreakdownRow, projectLabel?: (projectId: string) => string) {
   if (tab === 'projects') return projectLabel?.(row.key) ?? row.key;
   if (row.name) return row.name;
-  if (tab === 'environments') return 'No environment';
-  if (tab === 'models') return 'Unknown model';
-  return 'Unnamed';
+  if (tab === 'environments') return studioT('No environment');
+  if (tab === 'models') return studioT('Unknown model');
+  return studioT('Unnamed');
 }
 
 const rowProject = (tab: BreakdownTab, row: BreakdownRow) => (tab === 'projects' ? row.key : row.projectId);
@@ -113,7 +118,7 @@ export const formatMetric = (metric: ChangeMetric, value: number, costUnit: stri
   FORMAT[metric](value, costUnit);
 
 export function formatChange(change: Change, metric: ChangeMetric) {
-  if (change.isNew) return 'New';
+  if (change.isNew) return studioT('New');
   if (change.change === undefined) return DASH;
   if (change.change === 0) return metric === 'errorRate' ? '0 pt' : '0%';
   const sign = change.change > 0 ? '+' : '−';

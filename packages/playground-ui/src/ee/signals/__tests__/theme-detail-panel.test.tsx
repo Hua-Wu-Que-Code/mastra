@@ -84,7 +84,7 @@ describe('ThemeDetailPanel', () => {
       expect(screen.queryByText(/^theme$/i)).toBeNull();
       fireEvent.focus(screen.getByRole('button', { name: 'Goal' }));
 
-      expect((await screen.findByRole('tooltip')).textContent).toContain('What the user wanted');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('paginates examples with page numbers in both directions', async () => {

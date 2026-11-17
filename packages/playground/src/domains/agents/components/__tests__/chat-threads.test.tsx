@@ -114,9 +114,7 @@ describe('ChatThreads — hide threads panel', () => {
 
     fireEvent.focus(screen.getByRole('button', { name: 'Hide threads panel' }));
 
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip.textContent).toContain('Hide threads panel');
-    expect(tooltip.querySelector('kbd')?.textContent).toBe('{');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
 

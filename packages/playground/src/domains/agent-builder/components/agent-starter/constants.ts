@@ -1,6 +1,7 @@
 import { IconChatBubbles } from '@mastra/playground-ui/icons/central/IconChatBubbles';
 import { IconGraduateCap } from '@mastra/playground-ui/icons/central/IconGraduateCap';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
+import { IconQuestionmarkCircle } from '@mastra/playground-ui/icons/central/IconQuestionmarkCircle';
 import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 
 export const FALLBACK_MODEL = { provider: 'google', name: 'gemini-2.5-flash' } as const;

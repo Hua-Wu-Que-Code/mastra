@@ -103,11 +103,14 @@ export function TimelineNameCol({
                   is in the span's payload instead, the whole name is painted in the indirect color
                   so the row explains its own presence. */}
               <Txt
+                aria-label={
+                  span.matchedInPayloadOnly ? studioT('Matches your search in this span’s details') : undefined
+                }
                 as="span"
                 variant="body-sm"
                 data-highlight={span.matchedInPayloadOnly ? undefined : ''}
                 data-highlight-indirect={span.matchedInPayloadOnly ? '' : undefined}
-                title={span.matchedInPayloadOnly ? studioT('Matches your search in this span’s details') : undefined}
+
                 className="min-w-0 truncate font-[450]"
               >
                 {kind ? <SegmentedName parts={[kind, value]} /> : span.name}
@@ -115,9 +118,10 @@ export function TimelineNameCol({
             </button>
             {span.signalLabel && (
               <Badge
+                aria-label={span.signalLabel}
                 size="xs"
                 data-slot="span-signal-badge"
-                title={span.signalLabel}
+
                 className="mr-1 max-w-1/2 min-w-0 shrink"
               >
                 <span className="truncate">{span.signalLabel}</span>

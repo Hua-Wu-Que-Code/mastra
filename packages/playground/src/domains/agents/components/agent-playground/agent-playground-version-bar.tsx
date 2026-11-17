@@ -180,7 +180,7 @@ export function AgentPlaygroundVersionBar({
                 variant="primary"
                 size="md"
                 onClick={() => void onOpenPr?.()}
-                title={openPrTitle}
+                aria-label={openPrTitle}
                 icon={<IconPullRequest />}
               >
                 {studioT('Open PR')}

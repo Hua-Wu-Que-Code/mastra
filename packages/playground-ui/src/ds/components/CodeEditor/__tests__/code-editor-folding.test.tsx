@@ -56,6 +56,8 @@ describe('CodeEditor folding', () => {
       for (const marker of markers()) {
         expect(marker.dataset.state).toBe('open');
         expect(marker.textContent).toBe('−');
+        expect(marker.getAttribute('aria-label')).toBe('Fold');
+        expect(marker.hasAttribute('title')).toBe(false);
       }
     });
   });
@@ -73,6 +75,8 @@ describe('CodeEditor folding', () => {
       expect(content()).toContain('"list"');
       expect(markerAt(1).dataset.state).toBe('closed');
       expect(markerAt(1).textContent).toBe('+');
+      expect(markerAt(1).getAttribute('aria-label')).toBe('Unfold');
+      expect(container.querySelector('.cm-foldPlaceholder')?.hasAttribute('title')).toBe(false);
     });
   });
 

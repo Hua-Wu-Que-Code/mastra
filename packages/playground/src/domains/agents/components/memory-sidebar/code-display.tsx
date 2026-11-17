@@ -56,16 +56,6 @@ export function CodeDisplay({
               {studioT('Copied!')}
             </Txt>
           )}
-          {onCopy && (
-            <Txt
-              as="span"
-              variant="meta"
-              tone="muted"
-              className="pointer-events-none absolute top-2 right-2 z-20 rounded-full bg-muted px-1.5 py-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              {studioT('Click to copy')}
-            </Txt>
-          )}
         </div>
       </ScrollArea>
     </div>

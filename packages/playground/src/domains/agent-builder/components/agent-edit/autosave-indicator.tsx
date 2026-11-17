@@ -49,7 +49,7 @@ export const AutosaveIndicator = ({ status, lastError, onRetry }: AutosaveIndica
   if (status === 'error') {
     return (
       <span className="flex items-center gap-1.5 text-muted-foreground" data-testid="agent-builder-autosave-error">
-        <Txt as="span" variant="caption" title={lastError?.message}>
+        <Txt aria-label={lastError?.message} as="span" variant="caption">
           {studioT('Failed to save')}
         </Txt>
         <button

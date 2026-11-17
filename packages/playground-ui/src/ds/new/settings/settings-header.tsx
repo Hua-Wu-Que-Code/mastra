@@ -1,6 +1,5 @@
 import { createContext, useContext, useId } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip';
 import { Txt } from '@/ds/components/Txt';
 import { cn } from '@/lib/utils';
 
@@ -47,13 +46,13 @@ export function SettingsHeader({
 
 export function SettingsTitle({
   accessory,
-  info,
+  info: _info,
   className,
   children,
   ...props
 }: Omit<ComponentProps<'h2'>, 'id'> & {
   accessory?: ReactNode;
-  /** What the section is for, shown in a tooltip on the title. For sections whose name isn't self-explanatory. */
+  /** @deprecated Hover explanations are no longer displayed. */
   info?: ReactNode;
 }) {
   const titleId = useContext(SettingsTitleIdContext);
@@ -61,34 +60,10 @@ export function SettingsTitle({
   return (
     <div className={cn('flex min-w-0 flex-wrap items-center gap-2', settingsInset)}>
       <Txt as="h2" id={titleId} variant="subheading" tone="ink" className={className} {...props}>
-        {info == null ? children : <SettingsTitleInfo info={info}>{children}</SettingsTitleInfo>}
+        {children}
       </Txt>
       {accessory}
     </div>
-  );
-}
-
-/** The title's text as a tooltip trigger, described by `info`. */
-function SettingsTitleInfo({ info, children }: { info: ReactNode; children: ReactNode }) {
-  const infoId = useId();
-
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span
-            tabIndex={0}
-            aria-describedby={infoId}
-            className="cursor-help underline decoration-transparent decoration-dotted underline-offset-4 hover:decoration-current focus-visible:decoration-current focus-visible:outline-none"
-          />
-        }
-      >
-        {children}
-      </TooltipTrigger>
-      <TooltipContent id={infoId} keepMounted className="max-w-64">
-        {info}
-      </TooltipContent>
-    </Tooltip>
   );
 }
 

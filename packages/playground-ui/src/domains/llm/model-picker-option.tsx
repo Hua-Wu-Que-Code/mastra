@@ -25,17 +25,21 @@ export function ModelPickerOption({
   renderProviderIcon,
 }: ModelPickerOptionProps) {
   useLocale();
-  const name = formatModelName(model.id);
+  const name = model.name ?? formatModelName(model.id);
+  const icon = renderProviderIcon(provider.id);
   return (
     <CommandItem
+      aria-description={model.id}
       value={`${provider.id}/${model.id}`}
       keywords={[provider.name, name]}
-      title={model.id}
+
       onSelect={onSelect}
     >
-      <span aria-hidden className="flex shrink-0">
-        {renderProviderIcon(provider.id)}
-      </span>
+      {icon && (
+        <span aria-hidden className="flex shrink-0">
+          {icon}
+        </span>
+      )}
       <span className="truncate">{name}</span>
       {isDefault ? (
         <Badge variant="blue" size="xs">

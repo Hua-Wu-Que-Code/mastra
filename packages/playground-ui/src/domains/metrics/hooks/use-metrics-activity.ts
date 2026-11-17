@@ -1,8 +1,10 @@
 import { useMastraClient } from '@mastra/react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { isMultiDay, localizeBuckets } from '../lib/bucket-labels';
 import type { BucketLabels, Point } from '../lib/metrics-buckets';
 import { bucketGrid, bucketPlan, gridIndex } from '../lib/metrics-buckets';
 import { useMetricsFilters } from './use-metrics-filters';
+import { useLocale } from '@/lib/i18n';
 
 export type ActivityBucket = BucketLabels & {
   /** Uncached input tokens. */
@@ -30,11 +32,14 @@ const AGENT_DURATION = 'mastra_agent_duration_ms';
  * Keeps the previous range on screen while a new one loads (`isPlaceholderData`).
  */
 export function useMetricsActivity() {
+  useLocale();
   const client = useMastraClient();
   const { filters, filterKey, timestamp } = useMetricsFilters();
   const { interval, stepHours } = bucketPlan(timestamp.start, timestamp.end);
 
+  const multiDay = isMultiDay(timestamp.start, timestamp.end);
   return useQuery({
+    select: buckets => localizeBuckets(buckets, stepHours, multiDay),
     queryKey: ['metrics', 'activity', filterKey, interval],
     placeholderData: keepPreviousData,
     queryFn: async (): Promise<ActivityBucket[]> => {

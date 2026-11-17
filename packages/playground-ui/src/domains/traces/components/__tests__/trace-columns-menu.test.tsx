@@ -34,7 +34,7 @@ describe('TraceColumnsMenu', () => {
 
       await userEvent.hover(screen.getByRole('button', { name: 'Columns' }));
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe('Columns');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 
@@ -208,7 +208,7 @@ describe('TraceColumnsMenu', () => {
       const tenantId = await screen.findByRole('menuitemcheckbox', { name: 'tenantId' });
       expect(tenantId.getAttribute('aria-checked')).toBe('true');
       // The full key is on the item, so a truncated label still reads in a tooltip.
-      expect(tenantId.getAttribute('title')).toBe('tenantId');
+      expect(tenantId.getAttribute('aria-label')).toBe('tenantId');
       expect(screen.getByRole('menuitemcheckbox', { name: 'region' })).toBeTruthy();
 
       fireEvent.click(tenantId);

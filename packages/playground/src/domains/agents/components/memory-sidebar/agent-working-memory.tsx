@@ -71,6 +71,11 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
           </Txt>
           {isWorkingMemoryEnabled && workingMemorySource && (
             <Txt
+              aria-label={
+                workingMemorySource === 'resource'
+                  ? studioT('Shared across all threads for this agent')
+                  : studioT('Specific to this conversation thread')
+              }
               as="span"
               variant="column"
               className={cn(
@@ -79,11 +84,6 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                   ? 'bg-badge-purple-strong text-badge-purple-foreground'
                   : 'bg-badge-blue-strong text-badge-blue-foreground',
               )}
-              title={
-                workingMemorySource === 'resource'
-                  ? studioT('Shared across all threads for this agent')
-                  : studioT('Specific to this conversation thread')
-              }
             >
               {workingMemorySource}
             </Txt>
@@ -132,14 +132,6 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                                 {studioT('Copied!')}
                               </Txt>
                             )}
-                            <Txt
-                              as="span"
-                              variant="meta"
-                              tone="muted"
-                              className="pointer-events-none absolute top-2 right-2 z-20 rounded-full bg-card px-1.5 py-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-                            >
-                              {studioT('Click to copy')}
-                            </Txt>
                           </div>
                         </ScrollArea>
                       </div>
@@ -205,11 +197,7 @@ export const AgentWorkingMemory = ({ agentId }: AgentWorkingMemoryProps) => {
                   }}
                   disabled={isUpdating}
                 >
-                  {isUpdating ? (
-                    <IconArrowRotateCounterClockwise className="h-3 w-3 animate-spin" />
-                  ) : (
-                    studioT('Save changes')
-                  )}
+                  {isUpdating ? <IconArrowRotateCounterClockwise className="animate-spin" /> : studioT('Save changes')}
                 </Button>
                 <Button
                   icon={<IconCrossMedium />}

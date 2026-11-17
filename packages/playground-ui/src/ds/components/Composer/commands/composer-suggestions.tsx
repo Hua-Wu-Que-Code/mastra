@@ -80,13 +80,13 @@ export function ComposerSuggestions({
                     onMouseDown={event => event.preventDefault()}
                     onClick={() => onSelect(index)}
                   >
-                    <span className="max-w-[60%] min-w-0 shrink-0 truncate" title={item.label}>
+                    <span aria-label={item.label} className="max-w-[60%] min-w-0 shrink-0 truncate">
                       {item.label}
                     </span>
                     {(item.description || item.active) && (
                       <span className="flex min-w-0 items-center gap-1.5 text-right">
                         {item.description && (
-                          <span className="truncate" title={item.description}>
+                          <span aria-label={item.description} className="truncate">
                             {item.description}
                           </span>
                         )}

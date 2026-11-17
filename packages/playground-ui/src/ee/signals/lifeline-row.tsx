@@ -69,10 +69,10 @@ export function LifelineRow({
       className={`group flex items-center gap-3 rounded-md hover:bg-fill-subtle ${isPersistent ? '' : 'opacity-55 hover:opacity-100'}`}
     >
       <Txt
+        aria-label={row.label}
         as="span"
         variant="caption"
         className={cn(quietTextHoverInGroup, controlStateColorTransition, 'w-52 shrink-0 truncate text-right')}
-        title={row.label}
       >
         {row.label}
       </Txt>

@@ -97,7 +97,6 @@ export const AgentChat = ({
         suggestedPrompts={suggestedPrompts}
         hasModelList={Boolean(modelList)}
         hideModelSwitcher={hideModelSwitcher}
-        refreshThreadList={refreshThreadList}
         runOptionsSlot={runOptionsSlot}
         isHistoryLoading={isMessagesLoading}
         onLoadPrevious={hasNextPage ? loadOlderMessages : undefined}

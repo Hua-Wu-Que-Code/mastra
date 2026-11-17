@@ -28,6 +28,18 @@ describe('buildAgentDefaultSettings', () => {
     expect(result.modelSettings).toEqual({ temperature: 0.7, topP: 0.9 });
   });
 
+  it('preserves the agent tool approval policy', () => {
+    expect(
+      buildAgentDefaultSettings({ defaultOptions: { requireToolApproval: true } }).modelSettings.requireToolApproval,
+    ).toBe(true);
+    expect(
+      buildAgentDefaultSettings({ defaultOptions: { requireToolApproval: false } }).modelSettings.requireToolApproval,
+    ).toBe(false);
+    expect(
+      buildAgentDefaultSettings({ defaultOptions: { requireToolApproval: 'false' } }).modelSettings.requireToolApproval,
+    ).toBeUndefined();
+  });
+
   it('ignores defaultOptions with a mismatched shape', () => {
     expect(buildAgentDefaultSettings({ defaultOptions: 'nope' })).toEqual({ modelSettings: {} });
     expect(buildAgentDefaultSettings({ defaultOptions: 42 })).toEqual({ modelSettings: {} });

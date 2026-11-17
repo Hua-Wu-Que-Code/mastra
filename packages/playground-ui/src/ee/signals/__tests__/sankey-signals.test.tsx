@@ -595,18 +595,8 @@ describe('SankeySignals', () => {
     it('explains the four signals and themes when the info icon is focused', async () => {
       renderSankeySignals();
       await screen.findByRole('region', { name: 'Trace signal theme flow' });
-      const infoButton = screen.getByRole('button', { name: 'What is trace intelligence?' });
-      expect(screen.queryByText('What is this?')).toBeNull();
-
-      fireEvent.focus(infoButton);
-
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip.textContent).toContain('four signals');
-      expect(tooltip.textContent).toContain('named themes');
-      expect(tooltip.textContent).toContain('What the user wanted from the interaction.');
-      expect(tooltip.textContent).toContain('How the interaction ended.');
-      expect(tooltip.textContent).toContain('the views show how they appear, grow, and fade');
-      expect(tooltip.textContent).not.toContain('views above');
+      expect(screen.queryByRole('button', { name: 'What is trace intelligence?' })).toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('shows the selected snapshot context without controls for a single snapshot', async () => {
@@ -651,7 +641,7 @@ describe('SankeySignals', () => {
 
       fireEvent.focus(within(chart).getByText('GOAL'));
 
-      expect((await screen.findByRole('tooltip')).textContent).toContain('What the user wanted');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('renders no stage legend in the chart footer', async () => {

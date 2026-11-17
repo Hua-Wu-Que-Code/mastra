@@ -51,7 +51,7 @@ const grantEdges = () =>
   [...document.querySelectorAll<SVGPathElement>('[data-testid="knowledge-grant-edge"]')].map(path => ({
     edge: path.closest('.react-flow__edge')?.getAttribute('data-id'),
     role: path.dataset.role,
-    title: path.querySelector('title')?.textContent,
+    title: path.getAttribute('aria-label'),
   }));
 
 beforeAll(() => {
@@ -83,7 +83,7 @@ describe('KnowledgePageGraph grants', () => {
       renderGraph();
       await screen.findAllByTestId('knowledge-page-node');
       expect(screen.getByTestId('knowledge-legend-grant')).toBeTruthy();
-      expect(screen.getByText('Grants access (hover for role)')).toBeTruthy();
+      expect(screen.getByText('Grants access')).toBeTruthy();
     });
 
     it('draws a declared principal with no scope page as a placeholder that does not open', async () => {

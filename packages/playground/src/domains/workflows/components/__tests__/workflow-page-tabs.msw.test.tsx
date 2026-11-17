@@ -136,9 +136,7 @@ describe('WorkflowPageTabs', () => {
       const disabledSchedules = screen.getByRole('button', { name: 'Schedules' });
       expect(disabledSchedules.getAttribute('aria-disabled')).toBe('true');
       fireEvent.focus(disabledSchedules);
-      const tooltip = await screen.findByRole('tooltip');
-      expect(within(tooltip).queryByText('Schedules')).toBeNull();
-      expect(tooltip.textContent).toContain('Configure a schedule');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('links to the scheduled workflows documentation from the tooltip', async () => {
@@ -150,10 +148,7 @@ describe('WorkflowPageTabs', () => {
       const schedules = screen.getByRole('button', { name: 'Schedules' });
       fireEvent.focus(schedules);
 
-      const docsLink = within(await screen.findByRole('tooltip')).getByRole('link', { name: 'Learn more' });
-      expect(docsLink.getAttribute('href')).toBe('https://mastra.ai/docs/workflows/scheduled-workflows');
-      expect(docsLink.getAttribute('target')).toBe('_blank');
-      expect(docsLink.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

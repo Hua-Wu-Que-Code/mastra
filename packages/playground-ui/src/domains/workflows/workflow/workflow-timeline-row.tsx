@@ -124,7 +124,7 @@ export function WorkflowTimelineRow({
           if (row.isNestedEntry) return;
           onSelectStep(row.stepId);
         }}
-        title={row.stepId}
+        aria-label={row.stepId}
         className={cn(
           'text-foreground',
           'flex min-h-9 min-w-0 cursor-pointer items-center gap-2.5 text-left focus-visible:rounded-sm aria-disabled:cursor-default',
@@ -167,13 +167,13 @@ export function WorkflowTimelineRow({
         )}
       </div>
       <Txt
+        aria-label={
+          row.timing && row.spansSuspension ? studioT('Includes time spent suspended waiting for input') : undefined
+        }
         as="span"
         variant="meta"
         tone="muted"
         className="text-right whitespace-nowrap"
-        title={
-          row.timing && row.spansSuspension ? studioT('Includes time spent suspended waiting for input') : undefined
-        }
       >
         {row.timing ? (
           <Txt as="span" variant="meta" font="mono">

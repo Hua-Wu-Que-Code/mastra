@@ -45,12 +45,12 @@ export function ScoresDataListInputCell({ input }: ScoresDataListInputCellProps)
   return (
     <DataListCell>
       <Txt
+        aria-label={display}
         as="span"
         variant="body-sm"
         tone="muted"
         font="mono"
         className="block max-w-full min-w-0 truncate"
-        title={display}
       >
         {display}
       </Txt>
@@ -70,7 +70,7 @@ export function ScoresDataListEntityCell({ entityId }: ScoresDataListEntityCellP
   const display = entityId || '-';
   return (
     <DataListCell>
-      <Txt as="span" variant="body-sm" className="block max-w-full min-w-0 truncate" title={display}>
+      <Txt aria-label={display} as="span" variant="body-sm" className="block max-w-full min-w-0 truncate">
         {display}
       </Txt>
     </DataListCell>
@@ -90,12 +90,12 @@ export function ScoresDataListScoreCell({ score }: ScoresDataListScoreCellProps)
   return (
     <DataListCell>
       <Txt
+        aria-label={display}
         as="span"
         variant="body-sm"
         tone="muted"
         font="mono"
         className="block max-w-full min-w-0 truncate"
-        title={display}
       >
         {display}
       </Txt>

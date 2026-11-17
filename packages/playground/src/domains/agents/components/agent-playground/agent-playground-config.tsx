@@ -760,13 +760,7 @@ export function AgentPlaygroundConfig({ agentId, selectedVersionId, latestVersio
                     'Add instruction blocks to your agent. Blocks are combined in order to form the system prompt. You can',
                   )}{' '}
                   <Tooltip>
-                    <TooltipTrigger
-                      className={cn(
-                        'inline cursor-pointer underline decoration-dotted',
-                        quietTextHover,
-                        controlStateColorTransition,
-                      )}
-                    >
+                    <TooltipTrigger className={cn('inline', quietTextHover, controlStateColorTransition)}>
                       {studioT('use variables')}
                     </TooltipTrigger>
                     <TooltipContent side="bottom" align="start" className="max-w-72">

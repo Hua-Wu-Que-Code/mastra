@@ -174,23 +174,12 @@ afterEach(() => {
 });
 
 describe('voice call from a brand-new chat (/threads/new)', () => {
-  it('navigates to the thread URL and shows persisted messages in the chat', async () => {
+  it('omits the call control without opening a voice room', async () => {
     installHandlers();
     renderPage();
-
-    // Page renders in new-thread state with the voice button available.
-    const button = await screen.findByTestId('voice-call-button');
+    await screen.findByRole('heading', { name: 'Your story, your choice.' });
+    expect(screen.queryByTestId('voice-call-button')).toBeNull();
+    expect(fakeRooms).toHaveLength(0);
     expect(screen.getByTestId('location-probe').textContent).toBe(`/agents/${AGENT_ID}/threads/new`);
-
-    fireEvent.click(button);
-
-    // The call connecting must transition the page out of /threads/new (like a text send).
-    await waitFor(() => {
-      const path = screen.getByTestId('location-probe').textContent;
-      expect(path).toMatch(new RegExp(`^/agents/${AGENT_ID}/threads/(?!new$).+`));
-    });
-
-    // With the messages query now enabled, the persisted greeting appears in the chat.
-    expect(await screen.findByText(GREETING)).not.toBeNull();
   });
 });

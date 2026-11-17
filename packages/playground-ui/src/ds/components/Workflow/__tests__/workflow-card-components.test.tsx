@@ -20,7 +20,7 @@ describe('Workflow card UI components', () => {
         />,
       );
 
-      expect(screen.getByTitle('Map customer')).not.toBeNull();
+      expect(screen.getByLabelText('Map customer')).not.toBeNull();
       expect(screen.getByText('Map the previous output')).not.toBeNull();
       expect(screen.getByText('Map')).not.toBeNull();
       expect(screen.getByText('Completed')).not.toBeNull();

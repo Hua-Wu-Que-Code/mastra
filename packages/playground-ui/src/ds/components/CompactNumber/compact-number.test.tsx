@@ -8,11 +8,11 @@ afterEach(() => {
 });
 
 describe('CompactNumber', () => {
-  it('shows the full value in a tooltip on focus', async () => {
+  it('retains the accessible value without a focus popup', async () => {
     const { container } = render(<CompactNumber value={12_310} />);
     expect(screen.getByText('12.3K')).toBeTruthy();
     act(() => container.querySelector<HTMLElement>('[tabindex="0"]')?.focus());
-    expect((await screen.findByRole('tooltip')).textContent).toBe('12,310');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('skips the tooltip when nothing is hidden', () => {

@@ -95,9 +95,10 @@ export function ComposerAttachment({
       }}
     >
       <ContextMenu.Trigger
+        aria-label={name}
         ref={triggerRef}
         data-slot="composer-attachment"
-        title={name}
+
         className={cn(
           attachmentSurfaceStyle,
           'group/attachment relative h-17 shrink-0 rounded-(--attachment-radius) [--attachment-radius:var(--radius-xl)] [--attachment-thumbnail-size:--spacing(15)]',
@@ -156,7 +157,6 @@ export function ComposerAttachment({
             className="h-auto w-full flex-1 rounded-(--attachment-action-radius)"
             onClick={onRemove}
             aria-label={studioT('Remove {value0}', { value0: name })}
-            title={studioT('Remove {value0}', { value0: name })}
           >
             <IconCrossMedium />
           </Button>
@@ -168,7 +168,6 @@ export function ComposerAttachment({
               className="h-auto w-full flex-1 rounded-(--attachment-action-radius)"
               onClick={onEdit}
               aria-label={studioT('Edit {value0}', { value0: name })}
-              title={studioT('Edit {value0}', { value0: name })}
             >
               <IconPencil />
             </Button>

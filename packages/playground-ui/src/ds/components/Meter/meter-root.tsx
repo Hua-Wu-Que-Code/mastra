@@ -87,10 +87,11 @@ export function MeterRoot({
       <span data-slot="meter-header" className="flex min-w-0 items-baseline justify-between gap-3">
         {label !== undefined && (
           <Txt
+            aria-label={typeof label === 'string' ? label : undefined}
             as="span"
             variant="label"
             tone="ink"
-            title={typeof label === 'string' ? label : undefined}
+
             className="min-w-0 flex-1 truncate"
           >
             {label}

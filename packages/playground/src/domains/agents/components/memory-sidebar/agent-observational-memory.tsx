@@ -206,7 +206,7 @@ const ProgressBar = ({
           {isAdaptive && totalBudget && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-help text-badge-amber-indicator">
+                <span className="cursor-default text-badge-amber-indicator">
                   <Txt as="span" variant="meta">
                     ({formatTokens(baseThreshold)})
                   </Txt>

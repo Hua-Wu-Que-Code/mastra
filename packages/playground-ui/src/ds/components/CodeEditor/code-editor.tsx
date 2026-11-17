@@ -11,7 +11,7 @@ import type { VariantProps } from 'class-variance-authority';
 import { forwardRef, useMemo } from 'react';
 import type { HTMLAttributes } from 'react';
 import { codeLanguages } from './code-languages';
-import { codeFoldGutter } from './fold-gutter-extension';
+import { codeFoldGutter, codeFoldPlaceholder } from './fold-gutter-extension';
 import { syntaxHighlighter } from './highlight';
 import { createVariableAutocomplete } from './variable-autocomplete-extension';
 import { variableHighlight } from './variable-highlight-extension';
@@ -264,6 +264,7 @@ export const CodeEditor = forwardRef<ReactCodeMirrorRef, CodeEditorProps>(
 
       const exts: Extension[] = [
         ...editorFocusExtensions,
+        codeFoldPlaceholder,
         EditorView.contentAttributes.of(contentAttributes),
         variant === 'inline' ? inlineTheme : codeFoldGutter,
       ];

@@ -269,19 +269,19 @@ export const MemorySearch = ({
                           >
                             {result.role}
                           </Txt>
-                          <Txt variant="meta" tone="muted" title={formatDate(result.createdAt, 'date-time')}>
+                          <Txt aria-label={formatDate(result.createdAt, 'date-time')} variant="meta" tone="muted">
                             {formatRelativeTime(result.createdAt)}
                           </Txt>
                           {result.threadTitle && (
                             <div className="flex items-center gap-1">
                               <Txt
+                                aria-label={result.threadTitle}
                                 variant="meta"
                                 tone={result.threadId !== currentThreadId ? undefined : 'muted'}
                                 className={cn(
                                   'max-w-[150px] truncate',
                                   result.threadId !== currentThreadId && 'text-info-indicator',
                                 )}
-                                title={result.threadTitle}
                               >
                                 {result.threadTitle}
                               </Txt>

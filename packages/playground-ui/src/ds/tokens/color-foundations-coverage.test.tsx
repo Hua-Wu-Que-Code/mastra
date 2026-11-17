@@ -45,7 +45,7 @@ const foundationPages = [
 describe('color foundations coverage', () => {
   it('names every shared theme color in its existing Foundations page', () => {
     const markup = foundationPages.map(Page => renderToStaticMarkup(<Page />)).join('');
-    const namedTokens = [...markup.matchAll(/title="(--[\w-]+)"/g)].map(match => match[1]?.slice(2));
+    const namedTokens = [...markup.matchAll(/(?:title|aria-label)="(--[\w-]+)"/g)].map(match => match[1]?.slice(2));
 
     expect(new Set(namedTokens)).toEqual(new Set(themeColorTokens));
     expect(namedTokens.length).toBe(new Set(namedTokens).size);

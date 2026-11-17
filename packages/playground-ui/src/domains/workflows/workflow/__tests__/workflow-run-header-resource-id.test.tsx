@@ -47,7 +47,7 @@ describe('stored workflow run header', () => {
     it('shows it beside the run status', async () => {
       renderStoredRun({ ...run, resourceId: 'tenant-42' });
 
-      expect(await screen.findByTitle('Resource tenant-42')).not.toBeNull();
+      expect(await screen.findByLabelText('Resource tenant-42')).not.toBeNull();
     });
   });
 
@@ -56,7 +56,7 @@ describe('stored workflow run header', () => {
       renderStoredRun({ ...run, resourceId: null });
 
       await screen.findByText('Paused');
-      expect(screen.queryByTitle(/^Resource /)).toBeNull();
+      expect(screen.queryByLabelText(/^Resource /)).toBeNull();
     });
   });
 });

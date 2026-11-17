@@ -762,7 +762,7 @@ describe('Traces side panel scores tab', () => {
       });
 
       fireEvent.mouseEnter(await within(scoresTab).findByRole('button', { name: 'Show Relevance reason' }));
-      expect(await screen.findByText('Stays on the user question')).not.toBeNull();
+      expect(screen.queryByText('Stays on the user question')).toBeNull();
     });
   });
 

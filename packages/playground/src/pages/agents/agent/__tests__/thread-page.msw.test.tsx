@@ -711,11 +711,13 @@ describe('Standalone thread page', () => {
           await screen.findByRole('button', { name: 'Preview leads.csv' }, ATTACHMENT_TIMEOUT);
           const originalRead = FileReader.prototype.readAsText;
           let finishReading = () => {};
-          const reader = vi
-            .spyOn(FileReader.prototype, 'readAsText')
-            .mockImplementationOnce(function (this: FileReader, file, encoding) {
-              finishReading = () => originalRead.call(this, file, encoding);
-            });
+          const reader = vi.spyOn(FileReader.prototype, 'readAsText').mockImplementationOnce(function (
+            this: FileReader,
+            file,
+            encoding,
+          ) {
+            finishReading = () => originalRead.call(this, file, encoding);
+          });
           fireEvent.keyDown(input, { key: 'Enter' });
           if (editWhilePreparing) {
             fireEvent.change(input, { target: { value: 'Keep the next question' } });
@@ -915,7 +917,7 @@ describe('Standalone thread page', () => {
     // Provider + model pill (needs PlaygroundModelProvider, which this page must supply itself).
     expect(await screen.findByRole('button', { name: /^Model:.*GPT-5 Mini$/ })).not.toBeNull();
     expect(await screen.findByText('GPT-5 Mini')).not.toBeNull();
-    expect(await screen.findByTestId('composer-model-settings-trigger')).not.toBeNull();
+    expect(screen.queryByTestId('composer-model-settings-trigger')).toBeNull();
   });
 
   it('shows the thread list next to the chat', async () => {
@@ -1323,6 +1325,59 @@ describe('Standalone thread page', () => {
     });
   });
 
+  describe('when the removed settings panel left saved overrides', () => {
+    it.each(['threads', 'session'])('streams with agent defaults on the %s page', async route => {
+      installHandlers();
+      const stored = {
+        modelSettings: {
+          chatWithGenerate: true,
+          chatWithNetwork: true,
+          chatWithLegacyStream: true,
+          temperature: 0.2,
+          topP: 0.4,
+          maxSteps: 99,
+          requireToolApproval: false,
+        },
+      };
+      localStorage.setItem(
+        `mastra-thread-preferences-${JSON.stringify([AGENT_ID, THREAD_ID])}`,
+        JSON.stringify(stored),
+      );
+      localStorage.setItem(`mastra-agent-store-${AGENT_ID}`, JSON.stringify(stored));
+      const sent = vi.fn();
+      server.use(
+        http.get(`${BASE_URL}/api/agents/${AGENT_ID}`, () =>
+          HttpResponse.json({
+            ...agentResponse,
+            defaultOptions: { maxSteps: 9, modelSettings: { temperature: 0.7 }, requireToolApproval: true },
+          }),
+        ),
+        http.post(`${BASE_URL}/api/agents/${AGENT_ID}/stream`, async ({ request }) => {
+          sent(await request.json());
+          return new HttpResponse('data: {"type":"finish","payload":{}}\n\n', {
+            headers: { 'content-type': 'text/event-stream' },
+          });
+        }),
+      );
+      renderAt(`/agents/${AGENT_ID}/${route}/${THREAD_ID}`);
+      await screen.findByText('Tonight we cook carbonara.');
+      expect(screen.queryByTestId('composer-model-settings-trigger')).toBeNull();
+      const input = await screen.findByRole('textbox');
+      await waitFor(() => expect(input.hasAttribute('disabled')).toBe(false));
+      fireEvent.change(input, { target: { value: 'Use the agent defaults' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await waitFor(() => expect(sent).toHaveBeenCalledOnce());
+      expect(sent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxSteps: 9,
+          modelSettings: expect.objectContaining({ temperature: 0.7 }),
+        }),
+      );
+      expect(sent.mock.calls[0][0].modelSettings).not.toHaveProperty('topP');
+      expect(sent.mock.calls[0][0]).toHaveProperty('requireToolApproval', true);
+    });
+  });
+
   describe('when a thread has saved model preferences', () => {
     it('retains real composer edits through the first send, navigation, and reload', async () => {
       installHandlers();
@@ -1340,9 +1395,9 @@ describe('Standalone thread page', () => {
         ),
         http.get(`${BASE_URL}/api/agents/${AGENT_ID}/voice/speakers`, () => HttpResponse.json(voiceSpeakers)),
         http.get(`${BASE_URL}/api/mcp/v0/servers`, () => HttpResponse.json(mcpServers)),
-        http.post(
-          `${BASE_URL}/api/agents/${AGENT_ID}/threads/subscribe`,
-          () => new HttpResponse('', { headers: { 'content-type': 'text/event-stream' } }),
+        // Older servers automatically fall back to the direct streaming route.
+        http.post(`${BASE_URL}/api/agents/${AGENT_ID}/threads/subscribe`, () =>
+          HttpResponse.json({ error: 'Not found' }, { status: 404 }),
         ),
       );
       server.use(
@@ -1357,16 +1412,11 @@ describe('Standalone thread page', () => {
       // The switcher lists only the agent's own model until the providers query resolves.
       await waitFor(() => expect(providersServed).toHaveBeenCalled());
       fireEvent.click(await screen.findByRole('button', { name: /^Model:.*GPT-5 Mini$/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       fireEvent.click(await screen.findByRole('option', { name: /GPT-4o Mini/ }));
-      fireEvent.click(screen.getByTestId('composer-model-settings-trigger'));
-      fireEvent.click(await screen.findByRole('radio', { name: 'Stream' }));
-      // Base UI hides slider thumbs until layout measurement, which jsdom cannot provide.
-      const temperature = screen.getAllByRole('slider', { hidden: true })[0];
-      fireEvent.change(temperature, { target: { value: '0.2' } });
-      fireEvent.click(screen.getByRole('button', { name: 'Advanced settings' }));
-      fireEvent.change(await screen.findByLabelText('Max Steps'), { target: { value: '8' } });
-      fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
-      fireEvent.keyDown(screen.getByTestId('composer-model-settings-trigger'), { key: 'Escape' });
+      fireEvent.click(await screen.findByRole('button', { name: /Model:.*GPT-4o Mini/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /Reasoning level/ }));
+      fireEvent.click(await screen.findByRole('option', { name: 'High' }));
       const firstInput = await screen.findByRole('textbox');
       await waitFor(() => expect(firstInput.hasAttribute('disabled')).toBe(false));
       fireEvent.change(firstInput, { target: { value: 'Save my preferences' } });
@@ -1377,8 +1427,9 @@ describe('Standalone thread page', () => {
       expect(sent).toHaveBeenLastCalledWith(
         expect.objectContaining({
           model: 'openai/gpt-4o-mini',
-          maxSteps: 8,
-          modelSettings: expect.objectContaining({ temperature: 0.2 }),
+          maxSteps: 15,
+          providerOptions: { openai: { reasoningLevel: 'high' } },
+          modelSettings: expect.not.objectContaining({ temperature: expect.anything() }),
         }),
       );
       expect(await screen.findByText('GPT-4o Mini')).toBeTruthy();
@@ -1389,9 +1440,6 @@ describe('Standalone thread page', () => {
       cleanup();
       renderAt(savedPath);
       expect(await screen.findByText('GPT-4o Mini')).toBeTruthy();
-      fireEvent.click(screen.getByTestId('composer-model-settings-trigger'));
-      expect((await screen.findByRole('radio', { name: 'Stream' })).getAttribute('aria-checked')).toBe('true');
-      fireEvent.keyDown(screen.getByTestId('composer-model-settings-trigger'), { key: 'Escape' });
       const input = await screen.findByRole('textbox');
       await waitFor(() => expect(input.hasAttribute('disabled')).toBe(false));
       fireEvent.change(input, { target: { value: 'Use my saved settings' } });
@@ -1400,8 +1448,9 @@ describe('Standalone thread page', () => {
       expect(sent).toHaveBeenLastCalledWith(
         expect.objectContaining({
           model: 'openai/gpt-4o-mini',
-          maxSteps: 8,
-          modelSettings: expect.objectContaining({ temperature: 0.2 }),
+          maxSteps: 15,
+          providerOptions: { openai: { reasoningLevel: 'high' } },
+          modelSettings: expect.not.objectContaining({ temperature: expect.anything() }),
         }),
       );
     }, 15_000);

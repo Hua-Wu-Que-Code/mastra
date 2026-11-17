@@ -11,8 +11,7 @@ import { MetricsCard } from '@/ds/components/MetricsCard';
 import { t as studioT, useLocale } from '@/lib/i18n';
 
 export type BreakdownGate<Scope> =
-  | { status: 'ready'; scope: Scope }
-  | { status: 'unsupported-filter'; unsupportedFields: string[] };
+  { status: 'ready'; scope: Scope } | { status: 'unsupported-filter'; unsupportedFields: string[] };
 
 const FILTER_NAMES: Record<string, string> = {
   serviceName: 'service',

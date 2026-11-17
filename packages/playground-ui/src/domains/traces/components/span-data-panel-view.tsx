@@ -257,7 +257,7 @@ function SpanIdentity({ span, headingId }: { span: SpanRecord; headingId: string
       <Tooltip>
         <TooltipTrigger
           render={
-            <Txt as="span" variant="body-sm" tone="muted" className="shrink-0 cursor-help tabular-nums" tabIndex={0}>
+            <Txt as="span" variant="body-sm" tone="muted" className="shrink-0 cursor-default tabular-nums" tabIndex={0}>
               {durationMs == null ? studioT('Running') : formatDuration(durationMs)}
             </Txt>
           }

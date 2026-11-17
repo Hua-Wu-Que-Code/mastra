@@ -274,7 +274,7 @@ describe('Metrics storage support', () => {
 
       renderPage('/metrics?period=7d');
 
-      fireEvent.click(await screen.findByTitle('Explore Subagent'));
+      fireEvent.click(await screen.findByLabelText('Explore Subagent'));
       expect(screen.queryByRole('button', { name: 'Workflow runs' })).toBeNull();
       expect(screen.getAllByRole('button', { name: 'Agent runs' })).toHaveLength(1);
       await waitFor(() => expect(screen.getByTestId('location').textContent).toMatch(/^\/traces\?/));

@@ -46,13 +46,12 @@ export function MetricsCardHeadline({
             value
           )}
         </span>
-        {!isLoading &&
-          change && (
-            // Trimmed like the value, so its line box doesn't make the row taller than while loading.
-            <span className="text-body-sm text-muted-foreground tabular-nums [text-box:trim-both_cap_alphabetic]">
-              <Trans id="{part0} vs previous" values={{ part0: change }} />
-            </span>
-          )}
+        {!isLoading && change && (
+          // Trimmed like the value, so its line box doesn't make the row taller than while loading.
+          <span className="text-body-sm text-muted-foreground tabular-nums [text-box:trim-both_cap_alphabetic]">
+            <Trans id="{part0} vs previous" values={{ part0: change }} />
+          </span>
+        )}
       </span>
     </div>
   );

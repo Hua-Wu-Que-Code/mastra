@@ -6,9 +6,9 @@ export function ToolCallTime({ at }: { at?: number }) {
 
   return (
     <time
+      aria-label={formatDate(time, 'date-time-seconds')}
       className="shrink-0 text-meta text-muted-foreground tabular-nums"
       dateTime={time.toISOString()}
-      title={formatDate(time, 'date-time-seconds')}
     >
       {formatDate(time, 'time-seconds')}
     </time>

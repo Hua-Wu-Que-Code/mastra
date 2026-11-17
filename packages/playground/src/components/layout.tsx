@@ -6,6 +6,7 @@ import { ThemeProvider } from '@mastra/playground-ui/components/ThemeProvider';
 import { Toaster } from '@mastra/playground-ui/components/Toaster';
 import { TooltipProvider } from '@mastra/playground-ui/components/Tooltip';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { ChatPreferencesProvider } from '@mastra/playground-ui/domains/chat';
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
 import { IconMagnifyingGlass } from '@mastra/playground-ui/icons/central/IconMagnifyingGlass';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
@@ -135,20 +136,24 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   // Optimistic: render chrome by default so cold loads don't jump.
   const shouldHideSidebar = !account && isFetched && authCapabilities?.enabled && !isAuthenticated(authCapabilities);
   const shouldShowSidebar = !shouldHideSidebar;
+  const protectedPage = (
+    <AuthRequired>
+      <ErrorBoundary resetKeys={[pathname]}>{children}</ErrorBoundary>
+    </AuthRequired>
+  );
+
+  if (pathname === '/settings') return protectedPage;
 
   return (
     <>
+      <SidebarShortcuts />
       <NavigationCommand />
       <AppShell
         sidebar={shouldShowSidebar ? <AppSidebar /> : undefined}
         mobileHeader={shouldShowSidebar ? <MobileNavbar /> : undefined}
       >
         <StudioFrame className="flex min-h-0 flex-1 flex-col">
-          <MainCard>
-            <AuthRequired>
-              <ErrorBoundary resetKeys={[pathname]}>{children}</ErrorBoundary>
-            </AuthRequired>
-          </MainCard>
+          <MainCard>{protectedPage}</MainCard>
         </StudioFrame>
       </AppShell>
     </>
@@ -156,6 +161,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
+  const account = useAccount();
+  const preferencesScope = account?.user.id ?? 'local';
   const { experimentalUIEnabled } = useExperimentalUIEnabled();
   const { Link } = useLinkComponent();
 
@@ -166,9 +173,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         <TooltipProvider delayDuration={0}>
           <ExperimentalUIProvider experiments={experimentalUIEnabled ? UI_EXPERIMENTS : []}>
             <Sidebar.Provider LinkComponent={Link}>
-              <SidebarShortcuts />
               <RouteSidePanelProvider>
-                <LayoutContent>{children}</LayoutContent>
+                <ChatPreferencesProvider key={preferencesScope} scope={preferencesScope}>
+                  <LayoutContent>{children}</LayoutContent>
+                </ChatPreferencesProvider>
               </RouteSidePanelProvider>
             </Sidebar.Provider>
           </ExperimentalUIProvider>

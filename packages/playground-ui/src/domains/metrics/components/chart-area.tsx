@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Txt } from '@/ds/components/Txt';
 import { CHART_MARGIN, ChartHideYAxis, X_AXIS_HEIGHT } from '@/ds/primitives/chart-layout';
+import { t as studioT, useLocale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export type ChartAreaProps = {
@@ -19,7 +20,8 @@ export type ChartAreaProps = {
  * its footprint but is hidden (its dates stay), under three rulers and one message; the card's
  * title already says what's missing.
  */
-export function ChartArea({ isEmpty = false, emptyMessage = 'No data in this range', children }: ChartAreaProps) {
+export function ChartArea({ isEmpty = false, emptyMessage, children }: ChartAreaProps) {
+  useLocale();
   return (
     <div className="relative flex min-h-0 flex-1 flex-col" data-chart-empty={isEmpty || undefined}>
       <div
@@ -28,7 +30,7 @@ export function ChartArea({ isEmpty = false, emptyMessage = 'No data in this ran
         {/* Without the y-axis, the first and last dates sit at the card's edges. */}
         <ChartHideYAxis.Provider value={isEmpty}>{children}</ChartHideYAxis.Provider>
       </div>
-      {isEmpty && <ChartEmpty message={emptyMessage} />}
+      {isEmpty && <ChartEmpty message={emptyMessage ?? studioT('No data in this range')} />}
     </div>
   );
 }

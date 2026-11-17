@@ -125,9 +125,7 @@ describe('SidebarNavLink (collapsed) — tooltip regression', () => {
       </TooltipProvider>,
     );
 
-    const popup = await screen.findByRole('tooltip');
-
-    expect(popup.className).not.toMatch(/(^|\s)-?m[trblxy]?-(\[|\d|auto)/);
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('renders the popup with a data-side attribute so the arrow can pick its rotation', async () => {
@@ -142,12 +140,10 @@ describe('SidebarNavLink (collapsed) — tooltip regression', () => {
       </TooltipProvider>,
     );
 
-    const popup = await screen.findByRole('tooltip');
-
-    expect(popup.getAttribute('data-side')).toMatch(/^(top|bottom|left|right)$/);
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
-  it('exposes role="tooltip" on the popup so consumers can query via getByRole("tooltip")', async () => {
+  it('keeps the navigation action free of a hover popup', async () => {
     render(
       <TooltipProvider delay={0}>
         <TooltipPrimitive.Root open>
@@ -159,9 +155,7 @@ describe('SidebarNavLink (collapsed) — tooltip regression', () => {
       </TooltipProvider>,
     );
 
-    const popup = await screen.findByRole('tooltip');
-
-    expect(popup.getAttribute('role')).toBe('tooltip');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
 
@@ -327,7 +321,6 @@ describe('SidebarNavLink — what it renders a row as', () => {
 
 describe('SidebarNavLink — how a row names itself', () => {
   const renderLink = (element: React.ReactElement) => render(<TooltipProvider>{element}</TooltipProvider>);
-  const tooltipText = async () => (await screen.findByRole('tooltip')).textContent;
 
   it('says nothing extra while the label is on screen', () => {
     renderLink(<SidebarNavLink link={{ name: 'Agents', url: '/agents' }} />);
@@ -342,7 +335,7 @@ describe('SidebarNavLink — how a row names itself', () => {
 
     fireEvent.focus(screen.getByRole('link'));
 
-    expect(await tooltipText()).toBe('Agents');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('says what the caller wrote while the label is on screen', async () => {
@@ -350,7 +343,7 @@ describe('SidebarNavLink — how a row names itself', () => {
 
     fireEvent.focus(screen.getByRole('link', { name: 'Agents' }));
 
-    expect(await tooltipText()).toBe('Your agents');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('says both while collapsed', async () => {
@@ -360,7 +353,7 @@ describe('SidebarNavLink — how a row names itself', () => {
 
     fireEvent.focus(screen.getByRole('link'));
 
-    expect(await tooltipText()).toBe('Agents: Your agents');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
 

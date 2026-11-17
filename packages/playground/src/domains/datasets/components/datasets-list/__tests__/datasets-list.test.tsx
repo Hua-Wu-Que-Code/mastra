@@ -62,7 +62,7 @@ describe('DatasetsList', () => {
       expect(within(row).getByText('english')).toBeTruthy();
       expect(within(row).queryByText('reviewed')).toBeNull();
       expect(within(row).getByText('+1')).toBeTruthy();
-      expect(within(row).getByTitle('support, english, reviewed')).toBeTruthy();
+      expect(within(row).getByLabelText('support, english, reviewed')).toBeTruthy();
     });
 
     it('renders each visible tag with colors computed from its value', () => {

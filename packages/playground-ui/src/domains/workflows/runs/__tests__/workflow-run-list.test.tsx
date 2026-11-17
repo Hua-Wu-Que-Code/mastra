@@ -158,7 +158,7 @@ describe('WorkflowRecentRuns', () => {
       stubRuns(oneSuccessfulRun);
       renderRunList();
       const link = await screen.findByRole('link', { name: /run-success-1/ });
-      expect(within(link).getByTitle('run-success-1')).not.toBeNull();
+      expect(within(link).getByLabelText('run-success-1')).not.toBeNull();
       expect(within(link).getByText(/2026/).getAttribute('datetime')).not.toBeNull();
     });
   });
@@ -168,9 +168,9 @@ describe('WorkflowRecentRuns', () => {
       stubRuns(runsWithResource);
       renderRunList();
       const attributed = await screen.findByRole('link', { name: /run-tenant/ });
-      expect(within(attributed).getByTitle('Resource tenant-42')).not.toBeNull();
+      expect(within(attributed).getByLabelText('Resource tenant-42')).not.toBeNull();
       const unattributed = screen.getByRole('link', { name: /run-anonymous/ });
-      expect(within(unattributed).queryByTitle(/^Resource /)).toBeNull();
+      expect(within(unattributed).queryByLabelText(/^Resource /)).toBeNull();
     });
   });
 
@@ -181,7 +181,7 @@ describe('WorkflowRecentRuns', () => {
     renderRunList('run-with-input');
 
     const link = await screen.findByRole('link', { name: /run-with-input/ });
-    expect(within(link).getByTitle('run-with-input')).not.toBeNull();
+    expect(within(link).getByLabelText('run-with-input')).not.toBeNull();
     expect(await within(link).findByText('{"city":"Paris"}')).not.toBeNull();
   });
 
@@ -191,7 +191,7 @@ describe('WorkflowRecentRuns', () => {
     renderRunList();
 
     const link = await screen.findByRole('link', { name: /run-with-input/ });
-    expect(within(link).getByTitle('run-with-input')).not.toBeNull();
+    expect(within(link).getByLabelText('run-with-input')).not.toBeNull();
     expect(within(link).queryByText('{"city":"Paris"}')).toBeNull();
   });
 

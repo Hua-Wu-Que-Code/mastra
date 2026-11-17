@@ -250,7 +250,7 @@ export function FilterBarChip({
       <FilterBarChipOperator />
       <FilterBarChipValue />
       {validationMessage && (
-        <span className={cn(segmentClass, 'text-destructive-foreground')} title={validationMessage}>
+        <span aria-label={validationMessage} className={cn(segmentClass, 'text-destructive-foreground')}>
           <IconExclamationTriangle aria-hidden="true" />
         </span>
       )}
@@ -288,8 +288,8 @@ export function FilterBarChip({
       >
         {readOnly && (
           <span
+            aria-label={studioT('This filter is locked')}
             className={cn(segmentClass, 'pr-0 text-muted-foreground [--filter-bar-segment-padding:0.5rem_0]')}
-            title={studioT('This filter is locked')}
           >
             <IconLock />
           </span>
@@ -388,13 +388,13 @@ function SegmentCombobox<T>({
   if (chip.readOnly || chip.draft || chip.leaving) {
     return (
       <span
+        aria-label={fullLabel}
         className={cn(
           segmentClass,
           isField && 'text-foreground',
           segment === 'operator' && chip.field?.alwaysShowOperator && 'shrink-0',
         )}
         style={isField ? fieldSegmentAccentStyle(chip.field) : undefined}
-        title={fullLabel}
       >
         {content}
       </span>
@@ -435,7 +435,6 @@ function SegmentCombobox<T>({
             data-filter-bar-segment=""
             tabIndex={segment === 'value' ? 0 : -1}
             aria-label={`${ariaLabel}: ${fullLabel}`}
-            title={fullLabel}
             className={cn(
               editableSegmentClass,
               isField && 'text-foreground',
@@ -750,7 +749,7 @@ export function FilterBarChipRemove() {
       data-filter-bar-segment=""
       tabIndex={-1}
       aria-label={label}
-      title={label}
+
       ref={el => ctx.registerSegment(chip.item.id, 'remove', el)}
       className={removeSegmentClass}
       onClick={() => {

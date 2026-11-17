@@ -131,7 +131,7 @@ describe('TaskList', () => {
 
       fireEvent.mouseEnter(screen.getByRole('progressbar'));
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe('1/3 completed');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('expands when the collapsed card itself is clicked', () => {

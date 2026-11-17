@@ -379,77 +379,20 @@ describe.each([
 });
 
 describe('FieldLabel with info', () => {
-  const renderWithInfo = (label: ReactNode = 'Display name') =>
-    render(
-      <TooltipProvider delay={0}>
+  describe('when a field supplies explanatory info', () => {
+    it('keeps the field label and omits the information button', async () => {
+      const user = userEvent.setup();
+      render(
         <Field>
-          <FieldLabel info="Shown to people who pick this agent.">{label}</FieldLabel>
+          <FieldLabel info="Shown to people who pick this agent.">Display name</FieldLabel>
           <Input />
-        </Field>
-      </TooltipProvider>,
-    );
-
-  it('keeps the label naming the control and names the icon after the label', () => {
-    renderWithInfo();
-
-    expect(screen.getByRole('textbox', { name: 'Display name' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'About Display name' })).toBeTruthy();
-  });
-
-  it('names the icon from a label built from several strings', () => {
-    const name = 'Request Context';
-    render(
-      <Field>
-        <FieldLabel info="The values every run gets.">{name} (JSON)</FieldLabel>
-        <Input />
-      </Field>,
-    );
-
-    expect(screen.getByRole('button', { name: 'About Request Context (JSON)' })).toBeTruthy();
-  });
-
-  it('describes the icon with the info for screen readers while the tooltip is closed', () => {
-    renderWithInfo();
-
-    expect(screen.queryByRole('tooltip')).toBeNull();
-    expect(
-      screen.getByRole('button', { name: 'About Display name', description: 'Shown to people who pick this agent.' }),
-    ).toBeTruthy();
-  });
-
-  it('names the icon from the rendered label when the label holds elements', () => {
-    renderWithInfo(<span>Display name</span>);
-
-    expect(screen.getByRole('button', { name: 'About Display name' })).toBeTruthy();
-  });
-
-  it('opens the tooltip on hover', async () => {
-    renderWithInfo();
-
-    fireEvent.mouseEnter(screen.getByRole('button', { name: 'About Display name' }));
-    fireEvent.mouseMove(screen.getByRole('button', { name: 'About Display name' }));
-
-    expect(await screen.findByRole('tooltip', { name: 'Shown to people who pick this agent.' })).toBeTruthy();
-  });
-
-  it('is reached with Tab and opens the tooltip on keyboard focus', async () => {
-    const user = userEvent.setup();
-    renderWithInfo();
-
-    await user.tab();
-
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'About Display name' }));
-    expect(await screen.findByRole('tooltip', { name: 'Shown to people who pick this agent.' })).toBeTruthy();
-  });
-
-  it('focuses the icon, not the control, when the icon is clicked', async () => {
-    const user = userEvent.setup();
-    renderWithInfo();
-    const icon = screen.getByRole('button', { name: 'About Display name' });
-
-    await user.click(icon);
-
-    expect(document.activeElement).toBe(icon);
-    expect(document.activeElement).not.toBe(screen.getByRole('textbox', { name: 'Display name' }));
+        </Field>,
+      );
+      const input = screen.getByRole('textbox', { name: 'Display name' });
+      await user.tab();
+      expect(document.activeElement).toBe(input);
+      expect(screen.queryByRole('button', { name: /About/ })).toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
+    });
   });
 });

@@ -209,7 +209,7 @@ describe('SankeySignals compare mode', () => {
       fireEvent.click(screen.getByRole('tab', { name: 'Compare' }));
 
       const goalColumn = await screen.findByRole('region', { name: 'Goal changes' });
-      const legacyRow = within(goalColumn).getByTitle('Legacy support request').closest('li');
+      const legacyRow = within(goalColumn).getByLabelText('Legacy support request').closest('li');
       if (!legacyRow) throw new Error('Legacy support request row was not rendered');
       expect(within(legacyRow).getByText('-8%')).not.toBeNull();
       expect(within(legacyRow).getByText('8% → 0%')).not.toBeNull();
@@ -280,7 +280,7 @@ describe('SankeySignals compare mode', () => {
       const goalColumn = await screen.findByRole('region', { name: 'Goal changes' });
       fireEvent.focus(within(goalColumn).getByRole('button', { name: 'goal' }));
 
-      expect((await screen.findByRole('tooltip')).textContent).toContain('What the user wanted');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('returns to the flow chart when the user switches back', async () => {
@@ -316,7 +316,7 @@ describe('SankeySignals compare mode', () => {
       fireEvent.click(screen.getByRole('tab', { name: 'Compare' }));
 
       const goalColumn = await screen.findByRole('region', { name: 'Goal changes' });
-      const themeRow = within(goalColumn).getByTitle('Resolve support request').closest('li');
+      const themeRow = within(goalColumn).getByLabelText('Resolve support request').closest('li');
       if (!themeRow) throw new Error('Resolve support request row was not rendered');
 
       await waitFor(() => expect(themeRow.querySelectorAll('polyline')).toHaveLength(2));

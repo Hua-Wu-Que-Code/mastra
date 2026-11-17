@@ -1,94 +1,71 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
-
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Button } from '../Button';
 import { InfoTooltip } from './info-tooltip';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
 
 describe('Tooltip', () => {
-  it('accepts Base UI positioning props through content', () => {
-    render(
-      <TooltipProvider>
-        <Tooltip defaultOpen>
-          <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent
-            align="start"
-            alignOffset={4}
-            arrowPadding={6}
-            collisionAvoidance={{ side: 'shift', align: 'shift', fallbackAxisSide: 'none' }}
-            collisionBoundary={document.body}
-            collisionPadding={8}
-            positionMethod="fixed"
-            sticky
-          >
-            Positioned tooltip
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>,
-    );
-
-    expect(screen.getByRole('tooltip', { name: 'Positioned tooltip' })).toBeTruthy();
+  describe('when a control is hovered or focused', () => {
+    it('keeps the action usable without opening a hint', async () => {
+      const user = userEvent.setup();
+      const click = vi.fn();
+      render(
+        <TooltipProvider delay={0}>
+          <Tooltip>
+            <TooltipTrigger render={<button onClick={click}>Save</button>} />
+            <TooltipContent>Save your changes</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>,
+      );
+      const button = screen.getByRole('button', { name: 'Save' });
+      await user.hover(button);
+      await user.tab();
+      await user.click(button);
+      expect(click).toHaveBeenCalledOnce();
+      expect(screen.queryByRole('tooltip')).toBeNull();
+      expect(screen.queryByText('Save your changes')).toBeNull();
+      expect(button.getAttribute('aria-describedby')).toBeNull();
+    });
   });
-  it('positions the popup with a fixed strategy so stale popups never widen the page', () => {
-    render(
-      <TooltipProvider>
-        <Tooltip defaultOpen>
-          <TooltipTrigger>Hover me</TooltipTrigger>
-          <TooltipContent>Fixed tooltip</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>,
-    );
-
-    const popup = screen.getByRole('tooltip', { name: 'Fixed tooltip' });
-    expect(popup.parentElement?.style.position).toBe('fixed');
+  describe('when a caller requests open content', () => {
+    it('does not mount a popup even when open or keepMounted is passed', () => {
+      render(
+        <TooltipProvider>
+          <Tooltip open>
+            <TooltipTrigger>Save</TooltipTrigger>
+            <TooltipContent keepMounted>Save your changes</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>,
+      );
+      expect(screen.queryByText('Save your changes')).toBeNull();
+    });
+  });
+  describe('when an icon button gets its name from a hint', () => {
+    it('retains its accessible name and click action', async () => {
+      const user = userEvent.setup();
+      const click = vi.fn();
+      render(
+        <Button size="icon-md" tooltip="Close panel" onClick={click}>
+          <svg />
+        </Button>,
+      );
+      await user.click(screen.getByRole('button', { name: 'Close panel' }));
+      expect(click).toHaveBeenCalledOnce();
+      expect(screen.queryByRole('tooltip')).toBeNull();
+    });
   });
 });
 
 describe('InfoTooltip', () => {
-  it('is a named button described by its text while the tooltip is closed', () => {
-    render(
-      <TooltipProvider>
-        <InfoTooltip aria-label="Version information">Each save creates a version.</InfoTooltip>
-      </TooltipProvider>,
-    );
-
-    expect(screen.queryByRole('tooltip')).toBeNull();
-    expect(
-      screen.getByRole('button', { name: 'Version information', description: 'Each save creates a version.' }),
-    ).toBeTruthy();
-  });
-
-  it('opens the tooltip on keyboard focus and keeps rich content', async () => {
-    const user = userEvent.setup();
-    render(
-      <TooltipProvider delay={0}>
-        <InfoTooltip aria-label="What is trace intelligence?">
-          <p>Traces are clustered into themes.</p>
-          <ul>
-            <li>Errors</li>
-          </ul>
-        </InfoTooltip>
-      </TooltipProvider>,
-    );
-
-    await user.tab();
-
-    const tooltip = await screen.findByRole('tooltip');
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'What is trace intelligence?' }));
-    expect(tooltip.textContent).toContain('Traces are clustered into themes.');
-    expect(tooltip.querySelector('li')?.textContent).toBe('Errors');
-    // The description reuses the popup instead of a second copy of the content.
-    expect(document.querySelectorAll('li')).toHaveLength(1);
-    expect(
-      screen.getByRole('button', {
-        name: 'What is trace intelligence?',
-        description: 'Traces are clustered into themes. Errors',
-      }),
-    ).toBeTruthy();
+  describe('when a section supplies an explanation', () => {
+    it('does not leave an inactive information button behind', () => {
+      render(<InfoTooltip aria-label="Version information">Each save creates a version.</InfoTooltip>);
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(screen.queryByText('Each save creates a version.')).toBeNull();
+    });
   });
 });

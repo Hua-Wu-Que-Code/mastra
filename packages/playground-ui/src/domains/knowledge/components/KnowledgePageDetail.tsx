@@ -291,7 +291,7 @@ export function KnowledgeNoteItem({
         {note.stampScopeIds.length > 0 ? (
           <div className="flex min-w-0 flex-wrap gap-1" aria-label={studioT('Stamped to')}>
             {note.stampScopeIds.map(id => (
-              <Badge key={id} variant="neutral" size="xs" title={scopeLabel(id)}>
+              <Badge aria-label={scopeLabel(id)} key={id} variant="neutral" size="xs">
                 <span className="truncate">{scopeLabel(id)}</span>
               </Badge>
             ))}

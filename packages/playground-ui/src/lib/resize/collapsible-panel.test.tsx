@@ -148,15 +148,13 @@ describe('CollapsiblePanel', () => {
       expect(screen.getByTestId('panel-content').parentElement?.getAttribute('hidden')).toBe('');
     });
 
-    it('shows the keyboard shortcut in its tooltip when one is provided', async () => {
+    it('omits the hover hint even when a keyboard shortcut is provided', async () => {
       render(<Harness minSize={280} expandShortcut="{" />);
       fireEvent.click(screen.getByTestId('resize-collapsed'));
 
       fireEvent.focus(screen.getByRole('button', { name: 'Expand panel' }));
 
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip.textContent).toContain('Expand panel');
-      expect(tooltip.querySelector('kbd')?.textContent).toBe('{');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('shows no shortcut hint by default', async () => {
@@ -165,8 +163,7 @@ describe('CollapsiblePanel', () => {
 
       fireEvent.focus(screen.getByRole('button', { name: 'Expand panel' }));
 
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip.querySelector('kbd')).toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

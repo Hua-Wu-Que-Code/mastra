@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 import type { DrilldownScope } from '../../drilldown';
 import type { BreakdownTab } from '../../lib/breakdown';
 import { ChartCard } from '../chart-card';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 export const BREAKDOWN_TITLE = 'Breakdown';
 
-const TAB_TITLE: Record<BreakdownTab, string> = {
+const TAB_TITLE = {
   projects: 'Breakdown by project',
   agents: 'Breakdown by agent',
   workflows: 'Breakdown by workflow',
@@ -13,7 +14,7 @@ const TAB_TITLE: Record<BreakdownTab, string> = {
   models: 'Breakdown by model',
   threads: 'Breakdown by thread',
   environments: 'Breakdown by environment',
-};
+} as const;
 
 /** What every tab passes down: the tab list, and what a tab change or row click does. */
 export type BreakdownFrameProps = {
@@ -31,15 +32,16 @@ export function BreakdownFrame({
   isUpdating,
   children,
 }: BreakdownFrameProps & { tab: BreakdownTab; isUpdating?: boolean; children: ReactNode }) {
+  useLocale();
   return (
     <ChartCard
-      title={TAB_TITLE[tab]}
+      title={studioT(TAB_TITLE[tab])}
       titleMenu={
         tabs.length > 1
           ? {
               value: tab,
               onValueChange: onTabChange,
-              options: tabs.map(t => ({ value: t, label: TAB_TITLE[t] })),
+              options: tabs.map(t => ({ value: t, label: studioT(TAB_TITLE[t]) })),
             }
           : undefined
       }

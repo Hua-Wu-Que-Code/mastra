@@ -34,7 +34,7 @@ export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, 
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <Txt as="span" variant="body-sm" className="block truncate" title={name}>
+          <Txt aria-label={name} as="span" variant="body-sm" className="block truncate">
             {name}
           </Txt>
           <Txt as="span" variant="meta" tone="muted" className="block truncate">
@@ -53,7 +53,6 @@ export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, 
         className={className}
         onClick={onClick}
         aria-label={studioT('Preview {value0}', { value0: name })}
-        title={name}
       >
         {content}
       </button>
@@ -67,14 +66,13 @@ export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, 
         target="_blank"
         rel="noreferrer noopener"
         aria-label={studioT('Open {value0}', { value0: name })}
-        title={name}
       >
         {content}
       </a>
     );
   }
   return (
-    <div className={className} title={name}>
+    <div aria-label={name} className={className}>
       {content}
     </div>
   );

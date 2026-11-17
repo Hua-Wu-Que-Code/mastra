@@ -95,11 +95,11 @@ export const Specimen = ({ name, note, children }: { name: string; note?: string
   <div className="flex min-w-0 flex-col gap-2">
     {children}
     <div className="flex min-w-0 flex-col gap-0.5">
-      <Txt variant="meta" font="mono" tone="muted" className="break-all" title={name}>
+      <Txt aria-label={name} variant="meta" font="mono" tone="muted" className="break-all">
         {name}
       </Txt>
       {note && (
-        <Txt variant="meta" tone="faint" className="truncate" title={note}>
+        <Txt aria-label={note} variant="meta" tone="faint" className="truncate">
           {note}
         </Txt>
       )}

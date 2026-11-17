@@ -1,8 +1,7 @@
 import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 
 export type RequestContextResult =
-  | { ok: true; requestContext?: Record<string, unknown> }
-  | { ok: false; message: string };
+  { ok: true; requestContext?: Record<string, unknown> } | { ok: false; message: string };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

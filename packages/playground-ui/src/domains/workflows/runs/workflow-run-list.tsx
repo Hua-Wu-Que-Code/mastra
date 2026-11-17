@@ -69,7 +69,7 @@ function WorkflowRunMeta({ timestamp, resourceId }: { timestamp?: number; resour
           </Metadata.Item>
         )}
         {resourceId && (
-          <Metadata.Item title={studioT('Resource {value0}', { value0: resourceId })}>{resourceId}</Metadata.Item>
+          <Metadata.Item aria-label={studioT('Resource {value0}', { value0: resourceId })}>{resourceId}</Metadata.Item>
         )}
       </Metadata>
     </Txt>
@@ -166,11 +166,11 @@ export const WorkflowRecentRuns = ({ workflowId, runId, canDelete: canDeleteRun 
                             <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
                               <span className="flex w-full min-w-0 items-center gap-2">
                                 <Txt
+                                  aria-label={run.runId}
                                   as="span"
                                   variant="column"
                                   tone="ink"
                                   className="min-w-0 flex-1 truncate"
-                                  title={run.runId}
                                 >
                                   {run.runId}
                                 </Txt>

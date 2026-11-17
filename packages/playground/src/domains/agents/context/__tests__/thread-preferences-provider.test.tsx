@@ -25,7 +25,7 @@ import { ChatProvider } from '@/lib/ai-ui/chat/chat-provider';
 import { server } from '@/test/msw-server';
 
 const BASE_URL = 'http://localhost:4111';
-const defaults = { modelSettings: { temperature: 0.9, maxSteps: 5, chatWithLegacyStream: true } };
+const defaults = { modelSettings: { temperature: 0.9, maxSteps: 5, chatWithLegacyStream: false } };
 const messages: [] = [];
 
 function Controls() {
@@ -37,18 +37,22 @@ function Controls() {
       <ComposerModelSwitcher />
       <ComposerModelWarning />
       <output>
-        {model}:{settings?.modelSettings.temperature}
+        {model}:{settings?.modelSettings.providerOptions?.openai?.reasoningLevel ?? 'default'}
       </output>
       <button
         onClick={() => {
           setModel('openai', 'gpt-4o-mini');
-          setSettings({ modelSettings: { ...settings?.modelSettings, temperature: 0.2, maxSteps: 8 } });
+          setSettings({
+            modelSettings: { ...settings?.modelSettings, providerOptions: { openai: { reasoningLevel: 'high' } } },
+          });
         }}
       >
         Customize
       </button>
-      <button onClick={() => setSettings({ modelSettings: { ...settings?.modelSettings, temperature: undefined } })}>
-        Clear temperature
+      <button
+        onClick={() => setSettings({ modelSettings: { ...settings?.modelSettings, providerOptions: undefined } })}
+      >
+        Clear reasoning
       </button>
       <button onClick={() => setProvider('openai')}>Select provider</button>
       <button onClick={() => resetAll()}>Reset settings</button>
@@ -127,9 +131,9 @@ describe('ThreadPreferencesProvider', () => {
       const view = mountSession();
       fireEvent.click(screen.getByText('Customize'));
       view.rerender(<Session threadId="thread-b" />);
-      expect(screen.getByText('gpt-4o:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
       view.rerender(<Session threadId="thread-a" />);
-      expect(screen.getByText('gpt-4o-mini:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:high')).toBeTruthy();
     });
     it('restores preferences after a fresh mount and sends them to the server', async () => {
       const bodies: unknown[] = [];
@@ -145,20 +149,21 @@ describe('ThreadPreferencesProvider', () => {
       fireEvent.click(screen.getByText('Customize'));
       view.unmount();
       mountSession();
-      expect(screen.getByText('gpt-4o-mini:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:high')).toBeTruthy();
       fireEvent.click(screen.getByText('Send'));
       await waitFor(() => expect(bodies).toHaveLength(1));
       expect(bodies[0]).toMatchObject({
         model: 'openai/gpt-4o-mini',
-        maxSteps: 8,
-        modelSettings: { temperature: 0.2 },
+        maxSteps: 5,
+        providerOptions: { openai: { reasoningLevel: 'high' } },
+        modelSettings: { temperature: 0.9 },
       });
     });
     it('does not leak preferences to another agent with the same thread ID', () => {
       const view = mountSession();
       fireEvent.click(screen.getByText('Customize'));
       view.rerender(<Session agentId="agent-2" threadId="thread-a" />);
-      expect(screen.getByText('gpt-4o:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
     });
     it('keeps an explicit settings reset after remounting', () => {
       const view = mountSession();
@@ -166,7 +171,7 @@ describe('ThreadPreferencesProvider', () => {
       fireEvent.click(screen.getByText('Reset settings'));
       view.unmount();
       mountSession();
-      expect(screen.getByText('gpt-4o-mini:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:default')).toBeTruthy();
     });
   });
 
@@ -174,6 +179,7 @@ describe('ThreadPreferencesProvider', () => {
     const openPicker = async () => {
       mountSession('thread-a', { active: false }, undefined, agentModelProviders);
       fireEvent.click(await screen.findByRole('button', { name: /Model:.*GPT-4o$/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       return screen.findByRole('listbox');
     };
 
@@ -197,6 +203,7 @@ describe('ThreadPreferencesProvider', () => {
       const list = await openPicker();
       fireEvent.click(within(list).getByRole('option', { name: /GPT-4o Mini/ }));
       fireEvent.click(await screen.findByRole('button', { name: /Model:.*GPT-4o Mini/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
       fireEvent.click(await screen.findByRole('option', { name: /Reset to the agent's model/ }));
 
       fireEvent.click(screen.getByText('Send'));
@@ -243,7 +250,7 @@ describe('ThreadPreferencesProvider', () => {
       );
       try {
         await waitFor(() => expect(requested).toHaveBeenCalledOnce());
-        expect(screen.getByText(`${locked ? 'gpt-5-mini' : 'gpt-4o'}:0.9`)).toBeTruthy();
+        expect(screen.getByText(`${locked ? 'gpt-5-mini' : 'gpt-4o'}:default`)).toBeTruthy();
         expect(screen.queryByText(/is no longer allowed by admin policy/)).toBeNull();
         if (locked) {
           expect((await screen.findByTestId('composer-model-locked')).textContent).toContain('openai/gpt-5-mini');
@@ -257,7 +264,7 @@ describe('ThreadPreferencesProvider', () => {
         }
         await act(async () => release());
         const expectedModel = locked ? 'gpt-5-mini' : 'gpt-4o-mini';
-        await screen.findByText(`${expectedModel}:0.9`);
+        await screen.findByText(`${expectedModel}:default`);
         fireEvent.click(screen.getByText('Send'));
         await waitFor(() => expect(sent).toHaveBeenCalledTimes(2));
         expect(sent.mock.calls[1][0]).toMatchObject({ model: `openai/${expectedModel}` });
@@ -288,13 +295,13 @@ describe('ThreadPreferencesProvider', () => {
         http.get(`${BASE_URL}/api/editor/builder/models/available`, () => new HttpResponse(null, { status: 500 })),
       );
       expect(await screen.findByText(/Unable to verify model policy/)).toBeTruthy();
-      expect(screen.getByText('gpt-4o:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
       fireEvent.click(screen.getByText('Send'));
       await waitFor(() => expect(sent).toHaveBeenCalledOnce());
       expect(sent.mock.calls[0][0]).not.toHaveProperty('model');
       server.use(http.get(`${BASE_URL}/api/editor/builder/models/available`, () => HttpResponse.json(allowedModels)));
       await act(() => view.client.invalidateQueries({ queryKey: ['builder-available-models'] }));
-      await screen.findByText('gpt-4o-mini:0.9');
+      await screen.findByText('gpt-4o-mini:default');
       expect(screen.queryByText(/Unable to verify model policy/)).toBeNull();
       fireEvent.click(screen.getByText('Send'));
       await waitFor(() => expect(sent).toHaveBeenCalledTimes(2));
@@ -330,7 +337,7 @@ describe('ThreadPreferencesProvider', () => {
         http.get(`${BASE_URL}/api/editor/builder/models/available`, () => HttpResponse.json(restrictedModels)),
       );
       await waitFor(() => expect(view.client.getQueryData(['builder-available-models'])).toEqual(restrictedModels));
-      expect(screen.getByText('gpt-5-mini:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-5-mini:default')).toBeTruthy();
       fireEvent.click(screen.getByText('Send'));
       await waitFor(() => expect(bodies).toHaveLength(1));
       expect(bodies[0]).toMatchObject({ model: 'openai/gpt-5-mini' });
@@ -347,11 +354,11 @@ describe('ThreadPreferencesProvider', () => {
       await waitFor(() => expect(view.client.isFetching({ queryKey: ['builder-available-models'] })).toBe(0));
       server.use(http.get(`${BASE_URL}/api/editor/builder/models/available`, () => HttpResponse.json(allowedModels)));
       await act(() => view.client.invalidateQueries({ queryKey: ['builder-available-models'] }));
-      await waitFor(() => expect(screen.getByText('gpt-4o-mini:0.9')).toBeTruthy());
+      await waitFor(() => expect(screen.getByText('gpt-4o-mini:default')).toBeTruthy());
       fireEvent.click(screen.getByText('Select provider'));
-      expect(screen.getByText(':0.9')).toBeTruthy();
+      expect(screen.getByText(':default')).toBeTruthy();
       fireEvent.click(screen.getByText('Customize'));
-      expect(screen.getByText('gpt-4o-mini:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:high')).toBeTruthy();
     });
 
     it('does not send the saved override when the policy request fails', async () => {
@@ -368,10 +375,11 @@ describe('ThreadPreferencesProvider', () => {
         }),
       );
       await act(() => view.client.invalidateQueries({ queryKey: ['builder-settings'] }));
-      await waitFor(() => expect(screen.getByText('gpt-4o:0.2')).toBeTruthy());
+      await waitFor(() => expect(screen.getByText('gpt-4o:default')).toBeTruthy());
       fireEvent.click(screen.getByText('Send'));
       await waitFor(() => expect(sent).toHaveBeenCalledOnce());
       expect(sent.mock.calls[0][0]).not.toHaveProperty('model');
+      expect(sent.mock.calls[0][0]).not.toHaveProperty('providerOptions');
     });
 
     it('reconciles policy changes without replacing the saved preference', async () => {
@@ -391,24 +399,24 @@ describe('ThreadPreferencesProvider', () => {
         ),
       );
       await act(() => view.client.invalidateQueries({ queryKey: ['builder-settings'] }));
-      await waitFor(() => expect(screen.getByText('gpt-5-mini:0.2')).toBeTruthy());
+      await waitFor(() => expect(screen.getByText('gpt-5-mini:default')).toBeTruthy());
       expect(
         JSON.parse(localStorage.getItem('mastra-thread-preferences-["agent-1","thread-a"]')!).selection.model,
       ).toBe('gpt-4o-mini');
     });
   });
 
-  describe('when a code-default setting is explicitly cleared', () => {
+  describe('when a saved reasoning level is cleared', () => {
     it('keeps the field unset after switching chats and remounting', () => {
       const view = mountSession();
-      fireEvent.click(screen.getByText('Clear temperature'));
-      expect(screen.getByText('gpt-4o:')).toBeTruthy();
+      fireEvent.click(screen.getByText('Clear reasoning'));
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
       view.rerender(<Session threadId="thread-b" />);
       view.rerender(<Session threadId="thread-a" />);
-      expect(screen.getByText('gpt-4o:')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
       view.unmount();
       mountSession();
-      expect(screen.getByText('gpt-4o:')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
     });
   });
 
@@ -416,20 +424,20 @@ describe('ThreadPreferencesProvider', () => {
     it('starts from defaults and keeps subsequent preferences scoped to each chat', () => {
       localStorage.setItem('mastra-agent-store-agent-1', JSON.stringify({ modelSettings: { temperature: 0.4 } }));
       const view = mountSession();
-      expect(screen.getByText('gpt-4o:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
       fireEvent.click(screen.getByText('Customize'));
       view.rerender(<Session threadId="thread-b" />);
-      expect(screen.getByText('gpt-4o:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
       expect(localStorage.getItem('mastra-agent-store-agent-1')).toBe(
         JSON.stringify({ modelSettings: { temperature: 0.4 } }),
       );
       localStorage.setItem('mastra-agent-store-agent-1', JSON.stringify({ modelSettings: { temperature: 0.7 } }));
       view.rerender(<Session threadId="thread-a" />);
-      expect(screen.getByText('gpt-4o-mini:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:high')).toBeTruthy();
       fireEvent.click(screen.getByText('Reset settings'));
       view.unmount();
       mountSession();
-      expect(screen.getByText('gpt-4o-mini:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:default')).toBeTruthy();
     });
   });
 
@@ -439,22 +447,22 @@ describe('ThreadPreferencesProvider', () => {
         'mastra-thread-preferences-["agent-1","thread-a"]',
         JSON.stringify({
           selection: { provider: 'openai', model: 'gpt-4o-mini' },
-          modelSettings: { temperature: 0.2, maxSteps: 'bad', providerOptions: 'bad' },
+          modelSettings: { temperature: 0.2, maxSteps: 'bad', providerOptions: { openai: { reasoningLevel: 'high' } } },
         }),
       );
       mountSession();
-      expect(screen.getByText('gpt-4o-mini:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:high')).toBeTruthy();
     });
     it('keeps settings when only the selection is invalid', () => {
       localStorage.setItem(
         'mastra-thread-preferences-["agent-1","thread-a"]',
         JSON.stringify({
           selection: { provider: 42 },
-          modelSettings: { temperature: 0.2 },
+          modelSettings: { providerOptions: { openai: { reasoningLevel: 'high' } } },
         }),
       );
       mountSession();
-      expect(screen.getByText('gpt-4o:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:high')).toBeTruthy();
     });
   });
 
@@ -462,7 +470,7 @@ describe('ThreadPreferencesProvider', () => {
     it.each(['not-json', '{"selection":{"model":42}}'])('uses defaults for %s', stored => {
       localStorage.setItem('mastra-thread-preferences-["agent-1","thread-a"]', stored);
       mountSession();
-      expect(screen.getByText('gpt-4o:0.9')).toBeTruthy();
+      expect(screen.getByText('gpt-4o:default')).toBeTruthy();
     });
   });
 
@@ -476,7 +484,7 @@ describe('ThreadPreferencesProvider', () => {
       });
       mountSession();
       fireEvent.click(screen.getByText('Customize'));
-      expect(screen.getByText('gpt-4o-mini:0.2')).toBeTruthy();
+      expect(screen.getByText('gpt-4o-mini:high')).toBeTruthy();
     });
   });
 });

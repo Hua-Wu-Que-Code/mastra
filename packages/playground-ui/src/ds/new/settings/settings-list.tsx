@@ -99,8 +99,7 @@ export function SettingsItem({ media, title, description, children, className, .
     >
       {media}
       <div className="flex min-w-0 flex-1 flex-col gap-px">
-        {/* A string title truncates, so it also goes in the hover title to stay readable in full. */}
-        <div className="truncate text-label text-foreground" title={typeof title === 'string' ? title : undefined}>
+        <div aria-label={typeof title === 'string' ? title : undefined} className="truncate text-label text-foreground">
           {title}
         </div>
         {description != null && <div className="truncate text-caption text-muted-foreground">{description}</div>}

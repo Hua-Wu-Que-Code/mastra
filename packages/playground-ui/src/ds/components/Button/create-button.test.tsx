@@ -86,7 +86,7 @@ describe('CreateButton', () => {
     expect(ref.current).toBe(screen.getByRole('button', { name: 'New item' }));
   });
 
-  it('shows the tooltip text followed by a C kbd hint', async () => {
+  it('does not show a hover hint for the create action', async () => {
     render(
       <TooltipProvider delay={0}>
         <CreateButton tooltip="Create a new item">New item</CreateButton>
@@ -100,9 +100,6 @@ describe('CreateButton', () => {
     fireEvent.mouseMove(button);
     button.focus();
 
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip.textContent).toContain('Create a new item');
-    const kbd = tooltip.querySelector('kbd');
-    expect(kbd?.textContent).toBe('C');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });

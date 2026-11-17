@@ -492,7 +492,7 @@ describe('ExperimentResultPanel score reason', () => {
 
       fireEvent.focus(screen.getByRole('button', { name: 'Show accuracy reason' }));
 
-      expect((await screen.findByText('bold')).tagName).toBe('STRONG');
+      expect(screen.queryByText('bold')).toBeNull();
     });
   });
 

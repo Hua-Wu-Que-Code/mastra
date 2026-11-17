@@ -85,7 +85,7 @@ export function ProposalTag({
           setIsEditing(true);
         }}
         className={cn(quietTextHover, 'p-0.5 opacity-0 transition-opacity group-hover:opacity-100')}
-        title={studioT('Edit tag')}
+        aria-label={studioT('Edit tag')}
       >
         <IconPencil className="size-icon-xs" />
       </button>
@@ -93,7 +93,7 @@ export function ProposalTag({
         type="button"
         onClick={onRemove}
         className="p-0.5 text-placeholder opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive-foreground"
-        title={studioT('Remove tag')}
+        aria-label={studioT('Remove tag')}
       >
         <IconCrossMedium className="size-icon-xs" />
       </button>

@@ -80,13 +80,13 @@ function RowShell({
 function RowLabel({ row }: { row: ShownRow }) {
   if (typeof row.label !== 'string') {
     return (
-      <span className="flex min-w-0 flex-1" title={row.title}>
+      <span aria-label={row.title} className="flex min-w-0 flex-1">
         {row.label}
       </span>
     );
   }
   return (
-    <span className="min-w-0 flex-1 truncate" title={row.title ?? row.label}>
+    <span aria-label={row.title ?? row.label} className="min-w-0 flex-1 truncate">
       <Txt as="span" variant="body-sm" tone="ink">
         {row.label}
       </Txt>

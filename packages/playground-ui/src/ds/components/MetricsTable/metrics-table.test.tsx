@@ -81,7 +81,7 @@ describe('MetricsTable', () => {
         rowTitle={() => 'Hide this line'}
       />,
     );
-    const row = screen.getAllByTitle('Hide this line')[0];
+    const row = screen.getAllByLabelText('Hide this line')[0];
 
     fireEvent.mouseEnter(row);
     expect(onRowHover).toHaveBeenLastCalledWith(rows[0]);
@@ -179,7 +179,7 @@ describe('MetricsTable', () => {
     // Not sortable, so a focusable label rather than a button; no separate info icon.
     const header = screen.getByText('% Change').parentElement;
     const id = header?.getAttribute('aria-describedby');
-    expect(header?.getAttribute('tabindex')).toBe('0');
+    expect(header?.getAttribute('tabindex')).toBeNull();
     expect(id && document.getElementById(id)?.textContent).toBe('Against last week');
     expect(screen.queryByRole('button', { name: /About/ })).toBeNull();
   });

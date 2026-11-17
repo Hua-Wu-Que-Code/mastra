@@ -67,7 +67,7 @@ describe('DatasetItemDetails', () => {
 
       expect(screen.getByText('Item Id')).not.toBeNull();
       const shortId = screen.getByText('0bbd9730');
-      expect(shortId.getAttribute('title')).toBe(itemWithUuid.id);
+      expect(shortId.getAttribute('aria-label')).toBe(itemWithUuid.id);
     });
 
     it('copies the full item id', () => {

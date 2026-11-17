@@ -16,11 +16,11 @@ import { useLocale, t as studioT } from '@/lib/i18n';
 
 type View = 'agents' | 'models' | 'threads';
 
-const TITLE: Record<View, string> = {
+const TITLE = {
   agents: 'Usage by agent',
   models: 'Usage by model',
   threads: 'Usage by thread',
-};
+} as const;
 
 const VIEWS = [
   { value: 'agents', label: TITLE.agents },
@@ -141,8 +141,12 @@ function UsageFrame({
   }));
 
   const layout = {
-    title: TITLE[view],
-    titleMenu: { value: view, onValueChange: onViewChange, options: VIEWS },
+    title: studioT(TITLE[view]),
+    titleMenu: {
+      value: view,
+      onValueChange: onViewChange,
+      options: VIEWS.map(option => ({ ...option, label: studioT(option.label) })),
+    },
     actions: onViewTraces && <OpenInTracesButton onClick={onViewTraces} />,
   };
 

@@ -14,12 +14,12 @@ import {
 import { Button } from '../../../ds/components/Button';
 import { Txt } from '../../../ds/components/Txt';
 
-import { overlaySurfaceStyle } from '../../../ds/primitives/raised-surface';
 import type { ExtractedOmMarker } from '../lib/extract-markers';
 import { tToTimestampMs } from '../lib/replay-selection';
-import type { TDomain } from '../lib/timeline';
 import { tToTimestamp } from '../lib/timeline';
+import type { TDomain } from '../lib/timeline';
 import type { MemoryMessage, OMHistoryRecord } from '../types';
+import {
   getAreaRowYMax,
   isEventPoint,
   toActiveObservationData,
@@ -82,60 +82,13 @@ function TimeAxis({ domain }: { domain: TDomain }) {
   );
 }
 
-export function FlameTooltip({
-  active,
-  payload,
-  domain,
-  showValue,
-}: {
+export function FlameTooltip(_props: {
   active?: boolean;
   payload?: Array<{ value: unknown; name: string; payload?: { t?: number } }>;
   domain?: TDomain;
   showValue?: boolean;
 }) {
-  useLocale();
-  if (!active || !payload?.length) return null;
-  const t = payload[0]?.payload?.t;
-  const time =
-    domain != null && t != null ? formatDate(tToTimestamp(t, domain), 'date-time-seconds', { timeZone: 'UTC' }) : null;
-  const visibleEntries = payload.filter(entry => entry.name !== 't' && entry.name !== 'time' && entry.value != null);
-
-  if (showValue) {
-    return (
-      <div className={`${overlaySurfaceStyle} flex flex-col gap-0.5 rounded px-2 py-1.5 tabular-nums`}>
-        {time && (
-          <div className="flex items-center justify-between gap-3">
-            <Txt as="span" variant="meta" tone="muted">
-              {studioT('time')}
-            </Txt>
-            <Txt as="span" variant="meta" font="mono" tone="ink">
-              {time}
-            </Txt>
-          </div>
-        )}
-        {visibleEntries.map(entry => (
-          <div key={entry.name} className="flex items-center justify-between gap-3">
-            <Txt as="span" variant="meta" tone="muted">
-              {entry.name}
-            </Txt>
-            <Txt as="span" variant="meta" tone="ink">
-              {typeof entry.value === 'number' ? Math.round(entry.value).toLocaleString() : String(entry.value)}
-            </Txt>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <Txt as="p" variant="meta" className={`${overlaySurfaceStyle} rounded px-2 py-1`}>
-      {time && (
-        <Txt as="span" variant="meta" font="mono" tone="ink">
-          {time}
-        </Txt>
-      )}
-    </Txt>
-  );
+  return null;
 }
 
 interface AreaRowProps {
@@ -210,8 +163,8 @@ function EventRow({ label, data, color, height = 32, domain, zoomDomain }: Event
               data={data}
               fill={color}
               isAnimationActive={false}
-              shape={(props: Record<string, unknown>) => {
-                const cx = props.cx as number;
+              shape={props => {
+                const cx = props.cx ?? 0;
                 return (
                   <g>
                     <rect x={cx - 6} y={0} width={12} height={height} fill="transparent" />
@@ -371,7 +324,7 @@ function ZoomTrack({
           {studioT('Zoom')}
         </Txt>
         <Button variant="ghost" size="icon-sm" aria-label={studioT('Reset zoom')} onClick={onReset}>
-          <IconArrowRotateCounterClockwise className="size-3" />
+          <IconArrowRotateCounterClockwise />
         </Button>
       </div>
       <div

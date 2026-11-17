@@ -1,4 +1,8 @@
 export * from './components';
+export { useChatPreferences } from './preferences/chat-preferences-context';
+export * from './preferences/chat-preferences-provider';
+export * from './preferences/chat-preferences-settings';
+export { WorkDetails, WorkDetailsToggle } from './preferences/work-details-context';
 export * from './context/chat-context';
 export * from './context/tool-call-context';
 export * from './messages/message-metadata';

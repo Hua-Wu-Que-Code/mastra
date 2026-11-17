@@ -41,18 +41,11 @@ describe('FlameGraph', () => {
       );
     });
 
-    it('shows the UTC seconds in the tooltip', () => {
-      render(<FlameTooltip active domain={domain} payload={[{ name: 'Messages', value: 1, payload: { t: 0.25 } }]} />);
-      const timestamp = new Intl.DateTimeFormat(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'UTC',
-      }).format(new Date('2026-09-24T10:00:10Z'));
-      expect(screen.getByText(timestamp)).toBeTruthy();
+    it('omits the hover timestamp readout', () => {
+      const { container } = render(
+        <FlameTooltip active domain={domain} payload={[{ name: 'Messages', value: 1, payload: { t: 0.25 } }]} />,
+      );
+      expect(container.firstChild).toBeNull();
     });
   });
   it('renders the zoom controls in uncontrolled mode without crashing', () => {
@@ -523,102 +516,17 @@ describe('FlameGraph zoom track', () => {
 // DOM. What the click decides is `toSelectedT`, covered in flame-graph-data.test.ts.
 
 describe('FlameTooltip', () => {
-  const entry = (name: string, value: unknown, t?: number) => ({ name, value, payload: t == null ? {} : { t } });
-
-  it('says nothing while the pointer is away', () => {
-    const { container } = render(<FlameTooltip payload={[entry('tokens', 5, 0.5)]} domain={tDomain} />);
-
-    expect(container.innerHTML).toBe('');
-  });
-
-  it('says nothing with no series under the pointer', () => {
-    const { container } = render(<FlameTooltip active payload={[]} domain={tDomain} />);
-
-    expect(container.innerHTML).toBe('');
-  });
-
-  it('says nothing when there is no payload at all', () => {
-    const { container } = render(<FlameTooltip active domain={tDomain} />);
-
-    expect(container.innerHTML).toBe('');
-  });
-
-  it('shows only the time for a row with nothing to quantify', () => {
-    const { container } = render(<FlameTooltip active payload={[entry('tokens', 1200, 0.5)]} domain={tDomain} />);
-
-    expect(container.textContent).not.toContain('1,200');
-    expect(container.textContent).not.toBe('');
-    expect(container.querySelectorAll('span')).toHaveLength(1);
-  });
-
-  it('leaves the plain tooltip empty when there is no time to show', () => {
-    const { container } = render(<FlameTooltip active payload={[entry('tokens', 1200)]} domain={tDomain} />);
-
-    // No blank span padding out an otherwise empty box.
-    expect(container.querySelector('span')).toBeNull();
-    expect(container.textContent).toBe('');
-  });
-
-  it('shows each series value alongside the time when asked to', () => {
-    render(
-      <FlameTooltip
-        active
-        showValue
-        payload={[entry('pendingMessageTokens', 1200.4, 0.5), entry('observationTokenCount', 320)]}
-        domain={tDomain}
-      />,
-    );
-
-    expect(screen.getByText('time')).toBeTruthy();
-    expect(screen.getByText('pendingMessageTokens')).toBeTruthy();
-    // Rounded and grouped, so a fractional chart value still reads as a count.
-    expect(screen.getByText(new Intl.NumberFormat().format(1200).replace(/\s/g, ' '))).toBeTruthy();
-    expect(screen.getByText('320')).toBeTruthy();
-  });
-
-  it('leaves out the axis series, which are not readings', () => {
-    render(
-      <FlameTooltip
-        active
-        showValue
-        payload={[entry('t', 0.5, 0.5), entry('time', 'x'), entry('tokens', 320)]}
-        domain={tDomain}
-      />,
-    );
-
-    expect(screen.queryByText('t')).toBeNull();
-    // `time` survives once, as the moment's own label — not as a reading.
-    expect(screen.getAllByText('time')).toHaveLength(1);
-    expect(screen.queryByText('x')).toBeNull();
-    expect(screen.getByText('tokens')).toBeTruthy();
-  });
-
-  it('leaves out a series with no reading at this moment', () => {
-    render(
-      <FlameTooltip active showValue payload={[entry('missing', null, 0.5), entry('tokens', 320)]} domain={tDomain} />,
-    );
-
-    expect(screen.queryByText('missing')).toBeNull();
-    expect(screen.getByText('tokens')).toBeTruthy();
-  });
-
-  it('prints a non-numeric value as it stands', () => {
-    render(<FlameTooltip active showValue payload={[entry('role', 'assistant', 0.5)]} domain={tDomain} />);
-
-    expect(screen.getByText('assistant')).toBeTruthy();
-  });
-
-  it('omits the time when it has no domain to place it in', () => {
-    render(<FlameTooltip active showValue payload={[entry('tokens', 320, 0.5)]} />);
-
-    expect(screen.queryByText('time')).toBeNull();
-    expect(screen.getByText('320')).toBeTruthy();
-  });
-
-  it('omits the time when the point carries none', () => {
-    render(<FlameTooltip active showValue payload={[entry('tokens', 320)]} domain={tDomain} />);
-
-    expect(screen.queryByText('time')).toBeNull();
-    expect(screen.getByText('320')).toBeTruthy();
+  describe('when a caller requests a value readout', () => {
+    it('renders no hover hint', () => {
+      const { container } = render(
+        <FlameTooltip
+          active
+          showValue
+          payload={[{ name: 'tokens', value: 320, payload: { t: 0.5 } }]}
+          domain={tDomain}
+        />,
+      );
+      expect(container.firstChild).toBeNull();
+    });
   });
 });

@@ -177,6 +177,11 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
               </Txt>
               {searchMemoryData?.searchScope && (
                 <Txt
+                  aria-label={
+                    searchScope === 'resource'
+                      ? studioT('Searching across all threads')
+                      : studioT('Searching within current thread only')
+                  }
                   as="span"
                   variant="column"
                   className={cn(
@@ -185,11 +190,6 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
                       ? 'bg-badge-purple-strong text-badge-purple-foreground'
                       : 'bg-badge-blue-strong text-badge-blue-foreground',
                   )}
-                  title={
-                    searchScope === 'resource'
-                      ? studioT('Searching across all threads')
-                      : studioT('Searching within current thread only')
-                  }
                 >
                   {searchScope}
                 </Txt>

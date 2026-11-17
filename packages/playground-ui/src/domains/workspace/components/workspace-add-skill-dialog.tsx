@@ -7,6 +7,7 @@ import {
 import type { SkillsShSkill } from '@mastra/react/hooks/workspace';
 import { useState, useCallback, useMemo } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import {
   Dialog,
   DialogAction,
   DialogBody,
@@ -300,7 +301,11 @@ export function WorkspaceAddSkillDialog({
               </Txt>
               <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border">
                 {!selectedSkill ? (
-                  <EmptyState variant="fill" iconSlot={<IconPackage />} titleSlot={studioT('Select a skill to preview')} />
+                  <EmptyState
+                    variant="fill"
+                    iconSlot={<IconPackage />}
+                    titleSlot={studioT('Select a skill to preview')}
+                  />
                 ) : (
                   <>
                     <div className="border-b border-border bg-card p-4">
@@ -332,11 +337,11 @@ export function WorkspaceAddSkillDialog({
                         </div>
                         {parsedSource && (
                           <a
+                            aria-label={studioT('View on GitHub')}
                             href={`https://github.com/${parsedSource.owner}/${parsedSource.repo}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={cn(quietTextHover, controlStateColorTransition)}
-                            title={studioT('View on GitHub')}
                           >
                             <IconSquareArrowTopRight className="size-icon-md" />
                           </a>

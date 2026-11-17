@@ -1,88 +1,38 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
-
 import { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card';
 
-afterEach(() => {
-  cleanup();
-});
+afterEach(cleanup);
 
 describe('HoverCard', () => {
-  it('renders the trigger', () => {
-    render(
-      <HoverCard>
-        <HoverCardTrigger>Hover me</HoverCardTrigger>
-        <HoverCardContent>Card content</HoverCardContent>
-      </HoverCard>,
-    );
-
-    expect(screen.getByText('Hover me')).toBeTruthy();
+  describe('when a preview link is hovered', () => {
+    it('preserves navigation without opening a preview', async () => {
+      const user = userEvent.setup();
+      render(
+        <HoverCard>
+          <HoverCardTrigger href="/knowledge/page">Knowledge page</HoverCardTrigger>
+          <HoverCardContent>Page preview</HoverCardContent>
+        </HoverCard>,
+      );
+      const link = screen.getByRole('link', { name: 'Knowledge page' });
+      await user.hover(link);
+      await user.tab();
+      expect(link.getAttribute('href')).toBe('/knowledge/page');
+      expect(screen.queryByText('Page preview')).toBeNull();
+    });
   });
-
-  it('keeps the content unmounted while closed', () => {
-    render(
-      <HoverCard>
-        <HoverCardTrigger>Hover me</HoverCardTrigger>
-        <HoverCardContent>Card content</HoverCardContent>
-      </HoverCard>,
-    );
-
-    expect(screen.queryByText('Card content')).toBeNull();
-  });
-
-  it('renders the content when open', () => {
-    render(
-      <HoverCard defaultOpen>
-        <HoverCardTrigger>Hover me</HoverCardTrigger>
-        <HoverCardContent>Card content</HoverCardContent>
-      </HoverCard>,
-    );
-
-    expect(screen.getByText('Card content')).toBeTruthy();
-  });
-
-  it('accepts Base UI positioning props through content', () => {
-    render(
-      <HoverCard defaultOpen>
-        <HoverCardTrigger>Hover me</HoverCardTrigger>
-        <HoverCardContent
-          align="start"
-          alignOffset={4}
-          arrowPadding={6}
-          collisionAvoidance={{ side: 'shift', align: 'shift', fallbackAxisSide: 'none' }}
-          collisionBoundary={document.body}
-          collisionPadding={8}
-          positionMethod="fixed"
-          sticky
-        >
-          Positioned content
-        </HoverCardContent>
-      </HoverCard>,
-    );
-
-    expect(screen.getByText('Positioned content')).toBeTruthy();
-  });
-
-  it('forwards className to the content popup', () => {
-    render(
-      <HoverCard defaultOpen>
-        <HoverCardTrigger>Hover me</HoverCardTrigger>
-        <HoverCardContent className="custom-content">Card content</HoverCardContent>
-      </HoverCard>,
-    );
-
-    expect(screen.getByText('Card content').classList.contains('custom-content')).toBe(true);
-  });
-
-  it('projects the trigger onto an existing element via render', () => {
-    render(
-      <HoverCard>
-        <HoverCardTrigger render={<button type="button">Custom trigger</button>} />
-        <HoverCardContent>Card content</HoverCardContent>
-      </HoverCard>,
-    );
-
-    expect(screen.getByRole('button', { name: 'Custom trigger' })).toBeTruthy();
+  describe('when a caller requests an open preview', () => {
+    it('does not mount it', () => {
+      render(
+        <HoverCard defaultOpen>
+          <HoverCardTrigger render={<button>Details</button>} />
+          <HoverCardContent>Page preview</HoverCardContent>
+        </HoverCard>,
+      );
+      expect(screen.getByRole('button', { name: 'Details' })).toBeTruthy();
+      expect(screen.queryByText('Page preview')).toBeNull();
+    });
   });
 });

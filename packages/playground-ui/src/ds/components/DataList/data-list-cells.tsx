@@ -245,7 +245,10 @@ export interface DataListCreatedCellProps {
 /** Locale-aware date and time cell with second precision. */
 export function DataListCreatedCell({ timestamp, preset = 'date-time-seconds' }: DataListCreatedCellProps) {
   return (
-    <DataListCell className="text-muted-foreground tabular-nums" title={formatDate(timestamp, 'date-time-seconds')}>
+    <DataListCell
+      aria-label={formatDate(timestamp, 'date-time-seconds')}
+      className="text-muted-foreground tabular-nums"
+    >
       {formatDate(timestamp, preset)}
     </DataListCell>
   );

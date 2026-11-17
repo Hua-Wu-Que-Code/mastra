@@ -196,7 +196,7 @@ describe('SankeyChart', () => {
       expect(narrowLabel.length).toBeLessThan(wideLabel.length);
     });
 
-    it('truncates column headers and keeps the full name in a title', async () => {
+    it('truncates column headers and keeps the full accessible name', async () => {
       const { container } = renderAtWidth(400, [
         { id: 'channel', label: 'Acquisition channel grouping' },
         { id: 'region', label: 'Region' },
@@ -204,12 +204,12 @@ describe('SankeyChart', () => {
       ]);
       await screen.findAllByText('EU');
 
-      const header = [...container.querySelectorAll('svg text[font-size="12"]')].find(label =>
-        label.textContent?.includes('Acquisition'),
+      const header = [...container.querySelectorAll('svg text[font-size="12"]')].find(
+        label => label.getAttribute('aria-label') === 'Acquisition channel grouping',
       );
 
-      expect(getVisibleText(header).endsWith('…')).toBe(true);
-      expect(header?.querySelector('title')?.textContent).toBe('Acquisition channel grouping');
+      expect(getVisibleText(header)).toMatch(/…$/);
+      expect(header?.getAttribute('aria-label')).toBe('Acquisition channel grouping');
     });
   });
 
@@ -325,25 +325,25 @@ describe('SankeyChart', () => {
       );
     }
 
-    it('shows the description when the node receives focus', async () => {
+    it('omits the popup when the node receives focus', async () => {
       renderDescribedNode();
       const node = await screen.findByLabelText(nodeLabel);
 
       fireEvent.focus(node);
 
-      expect(screen.getByRole('tooltip', { name: tooltipLabel })).not.toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('shows the description when the node is hovered', async () => {
+    it('omits the popup when the node is hovered', async () => {
       renderDescribedNode();
       const node = await screen.findByLabelText(nodeLabel);
 
       fireEvent.mouseEnter(node);
 
-      expect(screen.getByRole('tooltip', { name: tooltipLabel }).textContent).toContain(description);
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('keeps the description and ribbons active when the pointer leaves a focused node', async () => {
+    it('keeps ribbons highlighted without a popup when the pointer leaves a focused node', async () => {
       const { container } = renderDescribedNode();
       const node = await screen.findByLabelText(nodeLabel);
       fireEvent.focus(node);
@@ -351,17 +351,17 @@ describe('SankeyChart', () => {
 
       fireEvent.mouseLeave(node);
 
-      expect(screen.getByRole('tooltip', { name: tooltipLabel })).not.toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
       expect(container.querySelector('svg path[fill-opacity]')?.getAttribute('fill-opacity')).toBe('0.75');
     });
 
-    it('shows only the custom tooltip, never a second native title popup', async () => {
+    it('omits both custom and native hover popups', async () => {
       renderDescribedNode();
       const node = await screen.findByLabelText(nodeLabel);
 
       fireEvent.mouseEnter(node);
 
-      expect(screen.getByRole('tooltip', { name: tooltipLabel })).not.toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
       expect(node.querySelector('title')).toBeNull();
     });
 
@@ -379,7 +379,7 @@ describe('SankeyChart', () => {
       expect(screen.getByLabelText(nodeLabel).contains(header)).toBe(false);
     });
 
-    it('keeps the description and ribbons active when a hovered node loses focus', async () => {
+    it('keeps ribbons highlighted without a popup when a hovered node loses focus', async () => {
       const { container } = renderDescribedNode();
       const node = await screen.findByLabelText(nodeLabel);
       fireEvent.mouseEnter(node);
@@ -387,7 +387,7 @@ describe('SankeyChart', () => {
 
       fireEvent.blur(node);
 
-      expect(screen.getByRole('tooltip', { name: tooltipLabel })).not.toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
       expect(container.querySelector('svg path[fill-opacity]')?.getAttribute('fill-opacity')).toBe('0.75');
     });
   });
@@ -411,17 +411,17 @@ describe('SankeyChart', () => {
       return header;
     }
 
-    it('shows the description when the column header is hovered', async () => {
+    it('omits the popup when the column header is hovered', async () => {
       const { container } = renderDescribedColumns();
       await screen.findAllByText('Channel');
       const header = findColumnHeader(container, 'Channel');
 
       fireEvent.mouseEnter(header);
 
-      expect(screen.getByRole('tooltip').textContent).toContain('Where the lead came from.');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('shows the description when the named column header receives focus', async () => {
+    it('omits the popup when the named column header receives focus', async () => {
       const { container } = renderDescribedColumns();
       await screen.findAllByText('Channel');
       const header = findColumnHeader(container, 'Channel');
@@ -429,10 +429,10 @@ describe('SankeyChart', () => {
       fireEvent.focus(header);
 
       expect(screen.getByRole('img', { name: 'Channel' })).toBe(header);
-      expect(screen.getByRole('tooltip').textContent).toContain('Where the lead came from.');
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('hides the description again when the header loses focus', async () => {
+    it('keeps the popup absent when the header loses focus', async () => {
       const { container } = renderDescribedColumns();
       await screen.findAllByText('Channel');
       const header = findColumnHeader(container, 'Channel');
@@ -443,7 +443,7 @@ describe('SankeyChart', () => {
       expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
-    it('hides the description again when the pointer leaves the header', async () => {
+    it('keeps the popup absent when the pointer leaves the header', async () => {
       const { container } = renderDescribedColumns();
       await screen.findAllByText('Channel');
       const header = findColumnHeader(container, 'Channel');
@@ -497,7 +497,12 @@ describe('SankeyChart', () => {
       );
 
       await screen.findByText('Adding a transcript to…');
-      expect([...container.querySelectorAll('svg title')].map(title => title.textContent)).toContain(longLabel);
+      expect(
+        [...container.querySelectorAll('svg g[aria-label]')].some(node =>
+          node.getAttribute('aria-label')?.includes(longLabel),
+        ),
+      ).toBe(true);
+      expect([...container.querySelectorAll('svg title')].some(title => title.textContent)).toBe(false);
       expect(screen.getByLabelText(`${longLabel}: 1 trace (100%)`)).not.toBeNull();
     });
   });

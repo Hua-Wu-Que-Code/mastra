@@ -74,11 +74,11 @@ export function McpTaskChip({ task }: { task: McpTaskView }) {
   return (
     <span className="inline-flex flex-wrap items-center gap-2" data-testid="mcp-task-chip">
       <Badge
+        aria-label={studioT('MCP task {value0} on {value1}', { value0: task.taskId, value1: task.serverName })}
         size="sm"
         variant={variant}
         emphasis="subtle"
         indicator={indicator}
-        title={studioT('MCP task {value0} on {value1}', { value0: task.taskId, value1: task.serverName })}
       >
         <span>
           <Trans id="task {part0}" values={{ part0: label }} />

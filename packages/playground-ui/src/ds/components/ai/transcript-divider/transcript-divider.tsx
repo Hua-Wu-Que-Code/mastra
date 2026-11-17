@@ -24,7 +24,7 @@ export function TranscriptDivider({ label, title, children, hideLabel = false }:
       <span aria-hidden className="h-px flex-1 bg-border" />
       <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
         {!hideLabel && (
-          <Txt as="span" variant="meta" tone="muted" title={title} className="shrink-0">
+          <Txt aria-label={title} as="span" variant="meta" tone="muted" className="shrink-0">
             {label}
           </Txt>
         )}

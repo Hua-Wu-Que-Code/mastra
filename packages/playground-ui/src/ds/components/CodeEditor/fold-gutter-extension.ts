@@ -1,4 +1,4 @@
-import { foldGutter } from '@codemirror/language';
+import { codeFolding, foldGutter } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 
@@ -45,10 +45,22 @@ export const codeFoldGutter: Extension = [
       const marker = document.createElement('span');
       marker.className = 'cm-fold-marker';
       marker.dataset.state = open ? 'open' : 'closed';
-      marker.title = open ? 'Fold' : 'Unfold';
+      marker.setAttribute('aria-label', open ? 'Fold' : 'Unfold');
       marker.textContent = open ? '−' : '+';
       return marker;
     },
   }),
   foldTheme,
 ];
+
+/** Keep unfolding available without CodeMirror's native hover title. */
+export const codeFoldPlaceholder: Extension = codeFolding({
+  placeholderDOM: (view, onclick) => {
+    const placeholder = document.createElement('span');
+    placeholder.textContent = '…';
+    placeholder.className = 'cm-foldPlaceholder';
+    placeholder.setAttribute('aria-label', view.state.phrase('folded code'));
+    placeholder.onclick = onclick;
+    return placeholder;
+  },
+});

@@ -32,6 +32,7 @@ import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useCallback, useMemo, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import {
   useBuilderRegistryPreview,
   useInstallBuilderRegistrySkill,
   usePopularBuilderRegistrySkills,
@@ -272,7 +273,11 @@ export function BuilderAddSkillDialog({
 
             <div className="flex min-h-0 w-1/2 flex-col overflow-hidden rounded-lg border border-border">
               {!selectedSkill ? (
-                <EmptyState className="flex-1" iconSlot={<IconPackage />} titleSlot={studioT('Select a skill to preview')} />
+                <EmptyState
+                  className="flex-1"
+                  iconSlot={<IconPackage />}
+                  titleSlot={studioT('Select a skill to preview')}
+                />
               ) : (
                 <>
                   <div className="border-b border-border bg-card p-4">
@@ -304,11 +309,11 @@ export function BuilderAddSkillDialog({
                       </div>
                       {githubUrl && (
                         <a
+                          aria-label={studioT('View on GitHub')}
                           href={githubUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={cn(quietTextHover, controlStateColorTransition)}
-                          title={studioT('View on GitHub')}
                         >
                           <IconSquareArrowTopRight className="size-icon-md" />
                         </a>
@@ -327,7 +332,11 @@ export function BuilderAddSkillDialog({
                       </div>
                     </ScrollArea>
                   ) : (
-                    <EmptyState className="flex-1" iconSlot={<IconPackage />} titleSlot={studioT('Preview unavailable')} />
+                    <EmptyState
+                      className="flex-1"
+                      iconSlot={<IconPackage />}
+                      titleSlot={studioT('Preview unavailable')}
+                    />
                   )}
                 </>
               )}

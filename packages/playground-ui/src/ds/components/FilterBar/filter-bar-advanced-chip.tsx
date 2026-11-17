@@ -89,6 +89,7 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
         onKeyDown={handleKeyDown}
       >
         <PopoverTrigger
+          aria-label={studioT('Edit advanced filter')}
           ref={el => {
             triggerRef.current = el;
             ctx.registerSegment(group.id, 'field', leaving ? null : el);
@@ -96,7 +97,6 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
           render={<button type="button" />}
           data-filter-bar-segment="field"
           className={editableSegmentClass}
-          title={studioT('Edit advanced filter')}
         >
           <IconCodeBrackets aria-hidden />
           <span className="truncate">{studioT('Advanced filter')}</span>
@@ -116,7 +116,7 @@ export function FilterBarAdvancedChip({ group, className }: FilterBarAdvancedChi
             ref={el => ctx.registerSegment(group.id, 'remove', el)}
             data-filter-bar-segment="remove"
             aria-label={studioT('Remove advanced filter')}
-            title={studioT('Remove advanced filter')}
+
             className={removeSegmentClass}
             onClick={remove}
           >

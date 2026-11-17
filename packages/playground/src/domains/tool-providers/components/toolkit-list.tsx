@@ -81,7 +81,7 @@ export function ToolkitList({ providerId, selectedToolkit, onSelectToolkit, sele
             key={toolkit.slug}
             type="button"
             onClick={() => onSelectToolkit(toolkit.slug)}
-            title={toolkit.name}
+            aria-label={toolkit.name}
             className={cn(
               'text-foreground',
               'truncate rounded-md px-3 py-2 text-left',

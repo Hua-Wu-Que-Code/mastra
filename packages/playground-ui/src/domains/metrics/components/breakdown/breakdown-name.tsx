@@ -18,7 +18,7 @@ export function BreakdownName({
   return (
     <span className="flex min-w-0 items-center gap-2">
       {mark}
-      <span className="truncate" title={title}>
+      <span aria-label={title} className="truncate">
         {model ? <SegmentedName parts={modelNameParts(model.name, model.provider)} /> : title}
       </span>
     </span>

@@ -1,7 +1,7 @@
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-import { ModelPicker, cleanProviderId } from '@mastra/playground-ui/domains/llm';
+import { ModelSettingsPicker, cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import type { ModelPickerProvider } from '@mastra/playground-ui/domains/llm';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
 import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
@@ -10,6 +10,7 @@ import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
+import { useAgentSettings } from '../context/agent-context';
 import { usePlaygroundModelOptional } from '../context/playground-model-context';
 import { useBuilderFilteredModels, useBuilderFilteredProviders, useBuilderModelPolicy } from '@/domains/agent-builder';
 import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-agent-builder-allowed-models';
@@ -20,6 +21,7 @@ import { useFilteredProviders } from '@/domains/llm/hooks/use-filtered-providers
 export const ComposerModelSwitcher = () => {
   useLocale();
   const selection = usePlaygroundModelOptional();
+  const { settings, setSettings } = useAgentSettings();
   const { data: dataProviders, isLoading: providersLoading } = useLLMProviders();
   const policy = useBuilderModelPolicy();
   const allProviders = dataProviders?.providers || [];
@@ -31,7 +33,7 @@ export const ComposerModelSwitcher = () => {
     connected: provider.connected,
     models: allowedModels
       .filter(model => model.provider === provider.id)
-      .map(model => ({ id: model.model, releaseDate: model.releaseDate })),
+      .map(model => ({ id: model.model, name: provider.modelNames?.[model.model], releaseDate: model.releaseDate })),
   }));
 
   if (!selection) return null;
@@ -66,15 +68,62 @@ export const ComposerModelSwitcher = () => {
   // Resolve the full provider ID (handles gateway prefix, e.g., 'custom' -> 'acme/custom')
   const fullProviderId = resolveProviderId(selectedProvider);
 
+  const reasoning = allProviders.find(provider => provider.id === fullProviderId)?.modelReasoning?.[selectedModel];
+  const storedLevel = settings?.modelSettings.providerOptions?.[cleanProviderId(fullProviderId)]?.reasoningLevel;
+  const level =
+    typeof storedLevel === 'string' && reasoning?.levels.includes(storedLevel) ? storedLevel : reasoning?.defaultLevel;
+  const setReasoning = (provider: string, nextLevel?: string) => {
+    if (!setSettings) return;
+    // Reasoning levels belong to a model route. Never carry a previous route's choice across a switch.
+    const providerOptions = Object.fromEntries(
+      Object.entries(settings?.modelSettings.providerOptions ?? {})
+        .map(([key, options]) => {
+          const { reasoningLevel: _level, ...rest } = options;
+          return [key, rest];
+        })
+        .filter(([, options]) => Object.keys(options).length),
+    );
+    const key = cleanProviderId(provider);
+    if (nextLevel !== undefined) providerOptions[key] = { ...providerOptions[key], reasoningLevel: nextLevel };
+    setSettings({ modelSettings: { ...settings?.modelSettings, providerOptions } });
+  };
+
   return (
-    <ModelPicker
+    <ModelSettingsPicker
       providers={pickerProviders}
       value={fullProviderId ? { provider: fullProviderId, model: selectedModel } : undefined}
-      onValueChange={({ provider, model }) => setModel(provider, model)}
+      onValueChange={({ provider, model }) => {
+        if (provider === fullProviderId && model === selectedModel) return;
+        setReasoning(
+          provider,
+          allProviders.find(entry => entry.id === provider)?.modelReasoning?.[model]?.defaultLevel,
+        );
+        setModel(provider, model);
+      }}
       defaultModel={agentModel && { provider: resolveProviderId(agentModel.provider), model: agentModel.model }}
-      reset={resetModel && { label: studioT("Reset to the agent's model"), onClick: resetModel }}
-      openOnSelectedProvider
-      triggerClassName="max-w-48"
+      reset={
+        resetModel && {
+          label: studioT("Reset to the agent's model"),
+          onClick: () => {
+            const provider = resolveProviderId(agentModel?.provider ?? '');
+            setReasoning(
+              provider,
+              allProviders.find(entry => entry.id === provider)?.modelReasoning?.[agentModel?.model ?? '']
+                ?.defaultLevel,
+            );
+            resetModel();
+          },
+        }
+      }
+      reasoning={
+        reasoning && level !== undefined
+          ? {
+              levels: reasoning.levels,
+              value: level,
+              onChange: next => setReasoning(fullProviderId, next),
+            }
+          : undefined
+      }
     />
   );
 };

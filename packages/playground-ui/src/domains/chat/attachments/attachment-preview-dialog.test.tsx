@@ -135,13 +135,13 @@ describe('FileChipEntry', () => {
 
     const link = container.querySelector('a');
     expect(link?.getAttribute('href')).toBe('https://example.com/clip.mp4');
-    expect(link?.getAttribute('title')).toBe('clip.mp4');
+    expect(link?.getAttribute('aria-label')).toBe('clip.mp4');
   });
 
   it('renders a static chip without a URL', () => {
     const { container } = render(<FileChipEntry name="gs://bucket/clip.mp4" />);
 
     expect(container.querySelector('a')).toBeNull();
-    expect(container.querySelector('[title="gs://bucket/clip.mp4"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="gs://bucket/clip.mp4"]')).not.toBeNull();
   });
 });

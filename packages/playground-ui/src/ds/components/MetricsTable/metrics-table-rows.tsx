@@ -165,10 +165,11 @@ function MetricsTableRow<Row>({
 
   return (
     <div
+      aria-label={rowTitle?.(row)}
       role="row"
       aria-current={active || undefined}
       tabIndex={onRowClick ? 0 : undefined}
-      title={rowTitle?.(row)}
+
       onClick={onRowClick ? handleClick : undefined}
       onKeyDown={onRowClick ? handleKeyDown : undefined}
       onMouseEnter={onRowHover ? () => onRowHover(row) : undefined}

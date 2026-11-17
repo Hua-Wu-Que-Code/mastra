@@ -70,9 +70,9 @@ describe('DataListCell', () => {
   });
 
   it('passes the rest of its props through to the element', () => {
-    const { container } = render(<DataListCell data-testid="cell" title="a cell" />);
+    const { container } = render(<DataListCell data-testid="cell" aria-label="a cell" />);
 
-    expect(cellOf(container).getAttribute('title')).toBe('a cell');
+    expect(cellOf(container).getAttribute('aria-label')).toBe('a cell');
     expect(screen.getByTestId('cell')).toBeTruthy();
   });
 });
@@ -369,7 +369,7 @@ describe('DataListCreatedCell', () => {
     const { container } = render(<DataListCreatedCell timestamp={new Date(2020, 7, 31, 13, 7, 47, 657)} />);
 
     expect(container.textContent).toBe('Aug 31, 2020, 1:07:47 PM');
-    expect(cellOf(container).title).toBe('Aug 31, 2020, 1:07:47 PM');
+    expect(cellOf(container).getAttribute('aria-label')).toBe('Aug 31, 2020, 1:07:47 PM');
   });
 
   it('keeps the time to seconds when the timestamp is today', () => {
@@ -393,7 +393,7 @@ describe('DataListCreatedCell', () => {
     );
 
     expect(container.textContent).toBe('Aug 31, 1:07:47 PM');
-    expect(cellOf(container).title).toBe('Aug 31, 2020, 1:07:47 PM');
+    expect(cellOf(container).getAttribute('aria-label')).toBe('Aug 31, 2020, 1:07:47 PM');
   });
 
   it('shows nothing for a date it cannot read', () => {

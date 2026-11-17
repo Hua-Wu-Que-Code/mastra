@@ -9,7 +9,7 @@ import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 
 import { useMCPServers } from '@mastra/react/hooks/mcps';
 import { useWorkspaces } from '@mastra/react/hooks/workspace';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { useAccount } from '@/domains/account/account-context';
 import { AccountMenu } from '@/domains/account/account-menu';
 import { useAgentBuilderSidebarVisibility } from '@/domains/agent-builder/hooks/use-agent-builder-sidebar-visibility';
@@ -152,17 +152,28 @@ export function AppSidebar() {
       </Sidebar.Nav>
 
       <Sidebar.Footer>
-        <AccountMenu />
-        <Sidebar.NavList>
-          {filteredBottom.map(item => (
-            <Sidebar.NavLink
-              key={item.name}
-              state={state}
-              link={toSidebarLink(item)}
-              isActive={getIsLinkActive(item, pathname)}
-            />
-          ))}
-        </Sidebar.NavList>
+        {account ? (
+          <AccountMenu />
+        ) : (
+          <Sidebar.NavList>
+            {filteredBottom.map(item => (
+              <Sidebar.NavLink
+                key={item.name}
+                state={state}
+                link={toSidebarLink(item)}
+                isActive={getIsLinkActive(item, pathname)}
+                render={
+                  item.url === '/settings' ? (
+                    <Link to={item.url} state={{ returnTo: location.pathname + location.search + location.hash }}>
+                      <item.Icon />
+                      <Sidebar.NavLabel>{item.name}</Sidebar.NavLabel>
+                    </Link>
+                  ) : undefined
+                }
+              />
+            ))}
+          </Sidebar.NavList>
+        )}
       </Sidebar.Footer>
     </Sidebar>
   );

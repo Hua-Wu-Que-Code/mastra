@@ -9,22 +9,12 @@ import { LifelinePoint } from '../lifeline-point';
 
 describe('LifelinePoint', () => {
   describe('when the point does not select a theme', () => {
-    it('exposes its tooltip from the keyboard', () => {
-      render(
-        <LifelinePoint
-          title="Unlinked theme · Jul 1, 2026 · 3 traces (10%)"
-          positionPercent={50}
-          height={12}
-          color="green"
-          onSelect={undefined}
-        />,
+    it('keeps its accessible label without an inactive tab stop', () => {
+      const { container } = render(
+        <LifelinePoint title="Snapshot A" positionPercent={20} height={12} color="blue" onSelect={undefined} />,
       );
-
-      const point = screen.getByRole('img', { name: /Unlinked theme/ });
-      act(() => point.focus());
-
-      expect(document.activeElement).toBe(point);
-      expect(screen.getByRole('tooltip').textContent).toContain('Unlinked theme');
+      expect(screen.getByRole('img', { name: 'Snapshot A' }).tabIndex).toBe(-1);
+      expect(container.querySelector('[role="tooltip"]')).toBeNull();
     });
 
     it('does not render without a timeline position', () => {
@@ -72,33 +62,32 @@ describe('LifelinePoint — when the point selects a theme', () => {
     expect(onSelect).toHaveBeenCalledTimes(1);
   });
 
-  it('shows its tooltip on hover and takes it away again', () => {
+  it('keeps hover free of a popup', () => {
     renderPoint();
     const point = screen.getByRole('button', { name: /Linked theme/ });
 
     expect(screen.queryByRole('tooltip')).toBeNull();
 
     fireEvent.mouseEnter(point);
-    expect(screen.getByRole('tooltip').textContent).toContain('Linked theme');
-    expect(point.getAttribute('aria-describedby')).toBe(screen.getByRole('tooltip').id);
+    expect(screen.queryByRole('tooltip')).toBeNull();
 
     fireEvent.mouseLeave(point);
     expect(screen.queryByRole('tooltip')).toBeNull();
     expect(point.getAttribute('aria-describedby')).toBeNull();
   });
 
-  it('takes the tooltip away when focus leaves', () => {
+  it('keeps focus free of a popup', () => {
     renderPoint();
     const point = screen.getByRole('button', { name: /Linked theme/ });
 
     fireEvent.focus(point);
-    expect(screen.getByRole('tooltip')).toBeTruthy();
+    expect(screen.queryByRole('tooltip')).toBeNull();
 
     fireEvent.blur(point);
     expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
-  it('places the tooltip centred just above the point', () => {
+  it('does not position a popup above the point', () => {
     renderPoint();
     const point = screen.getByRole('button', { name: /Linked theme/ });
     point.getBoundingClientRect = () => ({
@@ -115,18 +104,16 @@ describe('LifelinePoint — when the point selects a theme', () => {
 
     fireEvent.mouseEnter(point);
 
-    const tooltip = screen.getByRole('tooltip');
-    expect(tooltip.style.left).toBe('120px');
-    expect(tooltip.style.top).toBe('194px');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
-  it('renders the tooltip outside the timeline so it is never clipped', () => {
+  it('does not mount a popup outside the timeline', () => {
     const { container } = renderPoint();
 
     fireEvent.mouseEnter(screen.getByRole('button', { name: /Linked theme/ }));
 
     expect(container.querySelector('[role="tooltip"]')).toBeNull();
-    expect(document.body.contains(screen.getByRole('tooltip'))).toBe(true);
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('sits where the timeline puts it, in the colour it was given', () => {

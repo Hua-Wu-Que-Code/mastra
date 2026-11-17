@@ -319,6 +319,8 @@ export const providerSchema = z.object({
   docUrl: z.string().optional(),
   models: z.array(z.string()),
   modelReleaseDates: z.record(z.string(), z.string()).optional(),
+  modelNames: z.record(z.string(), z.string()).optional(),
+  modelReasoning: z.record(z.string(), z.object({ defaultLevel: z.string(), levels: z.array(z.string()) })).optional(),
 });
 
 /**

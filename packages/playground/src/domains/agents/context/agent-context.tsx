@@ -18,6 +18,14 @@ export interface AgentSettingsProviderProps {
 }
 
 export function AgentSettingsProvider({ children, agentId, defaultSettings }: AgentSettingsProviderProps) {
+  return (
+    <AgentSettingsState key={agentId} agentId={agentId} defaultSettings={defaultSettings}>
+      {children}
+    </AgentSettingsState>
+  );
+}
+
+function AgentSettingsState({ children, agentId, defaultSettings }: AgentSettingsProviderProps) {
   const { settings, setSettings, resetAll } = useAgentSettingsState({
     agentId,
     defaultSettings,

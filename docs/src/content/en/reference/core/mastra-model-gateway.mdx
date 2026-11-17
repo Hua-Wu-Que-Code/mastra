@@ -1,8 +1,8 @@
 ---
-title: "Reference: MastraModelGateway | Core"
-description: "Extend MastraModelGateway to implement a custom model gateway with provider discovery, model resolution, authentication, and gateway-specific configuration."
+title: 'Reference: MastraModelGateway | Core'
+description: 'Extend MastraModelGateway to implement a custom model gateway with provider discovery, model resolution, authentication, and gateway-specific configuration.'
 packages:
-  - "@mastra/core"
+  - '@mastra/core'
 ---
 
 # MastraModelGateway
@@ -20,16 +20,12 @@ npm install @ai-sdk/openai-compatible
 ```
 
 ```typescript
-import {
-  MastraModelGateway,
-  type GatewayLanguageModel,
-  type ProviderConfig,
-} from '@mastra/core/llm'
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
+import { MastraModelGateway, type GatewayLanguageModel, type ProviderConfig } from '@mastra/core/llm';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 
 class MyCustomGateway extends MastraModelGateway {
-  readonly id = 'custom'
-  readonly name = 'My Custom Gateway'
+  readonly id = 'custom';
+  readonly name = 'My Custom Gateway';
 
   async fetchProviders(): Promise<Record<string, ProviderConfig>> {
     return {
@@ -39,17 +35,17 @@ class MyCustomGateway extends MastraModelGateway {
         apiKeyEnvVar: 'MY_API_KEY',
         gateway: this.id,
       },
-    }
+    };
   }
 
   buildUrl(modelId: string, envVars?: Record<string, string>): string {
-    return 'https://api.my-provider.com/v1'
+    return 'https://api.my-provider.com/v1';
   }
 
   async getApiKey(modelId: string): Promise<string> {
-    const apiKey = process.env.MY_API_KEY
-    if (!apiKey) throw new Error('MY_API_KEY not set')
-    return apiKey
+    const apiKey = process.env.MY_API_KEY;
+    if (!apiKey) throw new Error('MY_API_KEY not set');
+    return apiKey;
   }
 
   async resolveLanguageModel({
@@ -57,16 +53,16 @@ class MyCustomGateway extends MastraModelGateway {
     providerId,
     apiKey,
   }: {
-    modelId: string
-    providerId: string
-    apiKey: string
+    modelId: string;
+    providerId: string;
+    apiKey: string;
   }): Promise<GatewayLanguageModel> {
-    const baseURL = this.buildUrl(`${providerId}/${modelId}`)
+    const baseURL = this.buildUrl(`${providerId}/${modelId}`);
     return createOpenAICompatible({
       name: providerId,
       apiKey,
       baseURL,
-    }).chatModel(modelId)
+    }).chatModel(modelId);
   }
 }
 ```
@@ -75,18 +71,18 @@ class MyCustomGateway extends MastraModelGateway {
 
 <PropertiesTable
   content={[
-  {
-    name: 'id',
-    type: 'string',
-    description:
-      'Unique identifier for the gateway. This ID is used as the prefix for all providers from this gateway (e.g., "netlify/anthropic"). Exception: models.dev is a provider registry and doesn\'t use a prefix.',
-  },
-  {
-    name: 'name',
-    type: 'string',
-    description: 'Human-readable name for the gateway.',
-  },
-]}
+    {
+      name: 'id',
+      type: 'string',
+      description:
+        'Unique identifier for the gateway. This ID is used as the prefix for all providers from this gateway (e.g., "netlify/anthropic"). Exception: models.dev is a provider registry and doesn\'t use a prefix.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      description: 'Human-readable name for the gateway.',
+    },
+  ]}
 />
 
 ## Required methods
@@ -101,52 +97,65 @@ Fetches provider configurations from the gateway.
 
 <PropertiesTable
   content={[
-  {
-    name: 'name',
-    type: 'string',
-    description: 'Display name of the provider',
-  },
-  {
-    name: 'models',
-    type: 'string[]',
-    description: 'Array of available model IDs',
-  },
-  {
-    name: 'apiKeyEnvVar',
-    type: 'string | string[]',
-    description: 'Environment variable(s) for API key',
-  },
-  {
-    name: 'gateway',
-    type: 'string',
-    description: 'Gateway identifier',
-  },
-  {
-    name: 'url',
-    type: 'string',
-    isOptional: true,
-    description: 'Optional base API URL',
-  },
-  {
-    name: 'apiKeyHeader',
-    type: 'string',
-    isOptional: true,
-    description: 'Optional custom auth header name',
-  },
-  {
-    name: 'docUrl',
-    type: 'string',
-    isOptional: true,
-    description: 'Optional documentation URL',
-  },
-  {
-    name: 'pricing',
-    type: 'Record<string, ModelPricing>',
-    isOptional: true,
-    description:
-      'Prices per model ID in USD per 1 million tokens, with the same keys as a models.dev `cost` (`input`, `output`, `cache_read`, `cache_write`, `reasoning`, `input_audio`, `output_audio`). Optional `tiers` hold long-context rates. `@mastra/observability` uses them for cost metrics when models.dev has no price for the model.',
-  },
-]}
+    {
+      name: 'name',
+      type: 'string',
+      description: 'Display name of the provider',
+    },
+    {
+      name: 'models',
+      type: 'string[]',
+      description: 'Array of available model IDs',
+    },
+    {
+      name: 'modelNames',
+      type: 'Record<string, string>',
+      isOptional: true,
+      description: 'Display names keyed by model ID. Studio uses these names in the composer model picker.',
+    },
+    {
+      name: 'modelReasoning',
+      type: 'Record<string, { defaultLevel: string; levels: string[] }>',
+      isOptional: true,
+      description:
+        'Selectable reasoning levels keyed by model ID. Studio shows these levels in the composer and sends the choice as providerOptions[SDK provider name].reasoningLevel. The gateway must validate the level and translate it into upstream request parameters.',
+    },
+    {
+      name: 'apiKeyEnvVar',
+      type: 'string | string[]',
+      description: 'Environment variable(s) for API key',
+    },
+    {
+      name: 'gateway',
+      type: 'string',
+      description: 'Gateway identifier',
+    },
+    {
+      name: 'url',
+      type: 'string',
+      isOptional: true,
+      description: 'Optional base API URL',
+    },
+    {
+      name: 'apiKeyHeader',
+      type: 'string',
+      isOptional: true,
+      description: 'Optional custom auth header name',
+    },
+    {
+      name: 'docUrl',
+      type: 'string',
+      isOptional: true,
+      description: 'Optional documentation URL',
+    },
+    {
+      name: 'pricing',
+      type: 'Record<string, ModelPricing>',
+      isOptional: true,
+      description:
+        'Prices per model ID in USD per 1 million tokens, with the same keys as a models.dev `cost` (`input`, `output`, `cache_read`, `cache_write`, `reasoning`, `input_audio`, `output_audio`). Optional `tiers` hold long-context rates. `@mastra/observability` uses them for cost metrics when models.dev has no price for the model.',
+    },
+  ]}
 />
 
 ### `buildUrl()`
@@ -159,17 +168,17 @@ If your provider URL contains placeholders such as `${ACCOUNT_ID}`, resolve them
 
 <PropertiesTable
   content={[
-  {
-    name: 'modelId',
-    type: 'string',
-    description: 'Full model ID (e.g., "custom/my-provider/model-1")',
-  },
-  {
-    name: 'envVars',
-    type: 'Record<string, string>',
-    description: 'Environment variables available to the gateway',
-  },
-]}
+    {
+      name: 'modelId',
+      type: 'string',
+      description: 'Full model ID (e.g., "custom/my-provider/model-1")',
+    },
+    {
+      name: 'envVars',
+      type: 'Record<string, string>',
+      description: 'Environment variables available to the gateway',
+    },
+  ]}
 />
 
 **Returns:** `string | undefined | Promise<string | undefined>`
@@ -182,12 +191,12 @@ Retrieves the API key for authentication.
 
 <PropertiesTable
   content={[
-  {
-    name: 'modelId',
-    type: 'string',
-    description: 'Full model ID',
-  },
-]}
+    {
+      name: 'modelId',
+      type: 'string',
+      description: 'Full model ID',
+    },
+  ]}
 />
 
 **Returns:** `Promise<string>`
@@ -200,13 +209,13 @@ Resolves credentials before Mastra creates the language model. Implement this op
 
 <PropertiesTable
   content={[
-  {
-    name: 'request',
-    type: 'GatewayAuthRequest',
-    description:
-      'Incoming request context containing gatewayId, providerId, modelId, and routerId for the gateway to inspect and validate.',
-  },
-]}
+    {
+      name: 'request',
+      type: 'GatewayAuthRequest',
+      description:
+        'Incoming request context containing gatewayId, providerId, modelId, and routerId for the gateway to inspect and validate.',
+    },
+  ]}
 />
 
 **Returns:** `GatewayAuthResult | undefined | Promise<GatewayAuthResult | undefined>`
@@ -221,40 +230,40 @@ Creates a language model instance.
 
 <PropertiesTable
   content={[
-  {
-    name: 'modelId',
-    type: 'string',
-    description: 'The model ID',
-  },
-  {
-    name: 'providerId',
-    type: 'string',
-    description: 'The provider ID',
-  },
-  {
-    name: 'apiKey',
-    type: 'string',
-    description: 'The API key for authentication',
-  },
-  {
-    name: 'headers',
-    type: 'Record<string, string>',
-    isOptional: true,
-    description: 'Additional headers to send with model requests',
-  },
-  {
-    name: 'transport',
-    type: "'auto' | 'websocket' | 'fetch'",
-    isOptional: true,
-    description: 'Transport for OpenAI Responses API requests',
-  },
-  {
-    name: 'responsesWebSocket',
-    type: 'ResponsesWebSocketOptions',
-    isOptional: true,
-    description: 'WebSocket options used when transport is websocket',
-  },
-]}
+    {
+      name: 'modelId',
+      type: 'string',
+      description: 'The model ID',
+    },
+    {
+      name: 'providerId',
+      type: 'string',
+      description: 'The provider ID',
+    },
+    {
+      name: 'apiKey',
+      type: 'string',
+      description: 'The API key for authentication',
+    },
+    {
+      name: 'headers',
+      type: 'Record<string, string>',
+      isOptional: true,
+      description: 'Additional headers to send with model requests',
+    },
+    {
+      name: 'transport',
+      type: "'auto' | 'websocket' | 'fetch'",
+      isOptional: true,
+      description: 'Transport for OpenAI Responses API requests',
+    },
+    {
+      name: 'responsesWebSocket',
+      type: 'ResponsesWebSocketOptions',
+      isOptional: true,
+      description: 'WebSocket options used when transport is websocket',
+    },
+  ]}
 />
 
 **Returns:** `GatewayLanguageModel | Promise<GatewayLanguageModel>`, where `GatewayLanguageModel` is `LanguageModelV2 | LanguageModelV3 | LanguageModelV4` (AI SDK v5, v6, and v7 models).

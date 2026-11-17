@@ -71,7 +71,7 @@ export function SignalDeltaColumn({
           const card = (
             <>
               <div className="flex items-baseline justify-between gap-2">
-                <Txt as="span" variant="column" tone="ink" className="truncate" title={delta.label}>
+                <Txt aria-label={delta.label} as="span" variant="column" tone="ink" className="truncate">
                   {delta.label}
                 </Txt>
                 <Txt as="span" variant="column" tone="ink" className="shrink-0 tabular-nums">

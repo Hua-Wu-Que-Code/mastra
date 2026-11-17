@@ -126,13 +126,8 @@ describe('TraceIntelligenceEntityIndex', () => {
       renderIndex();
 
       await screen.findByText('custom-agent');
-      fireEvent.focus(screen.getByRole('button', { name: 'What is trace intelligence?' }));
-
-      const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip.textContent).toContain('Tool usage');
-      expect(tooltip.textContent).toContain('How effectively the agent uses tools.');
-      expect(tooltip.textContent).toContain('Response quality');
-      expect(tooltip.textContent).toContain('How useful the final answer is.');
+      expect(screen.queryByRole('button', { name: 'What is trace intelligence?' })).toBeNull();
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('renders entity metadata and canonical detail links', async () => {
@@ -165,9 +160,7 @@ describe('TraceIntelligenceEntityIndex', () => {
       await screen.findByText('billing-agent');
       fireEvent.focus(closestElement('Analyzing', '[tabindex="0"]'));
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe(
-        '42 traces collected. Signals appear when analysis finishes.',
-      );
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
 
     it('shows analyzing agents as non-clickable cards in compact view', async () => {
@@ -281,7 +274,7 @@ describe('TraceIntelligenceEntityIndex', () => {
       await screen.findByText('new-agent');
       fireEvent.focus(closestElement('Analyzing', '[tabindex="0"]'));
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe(expectedDescription);
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

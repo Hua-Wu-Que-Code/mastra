@@ -61,7 +61,7 @@ const SkillItem = ({ skill, editable, onToggle, isChecked }: SkillItemProps) => 
             {skill.name}
           </Txt>
           {skill.description && (
-            <Txt as="span" variant="meta" tone="muted" className="mt-0.5 truncate" title={skill.description}>
+            <Txt aria-label={skill.description} as="span" variant="meta" tone="muted" className="mt-0.5 truncate">
               {skill.description}
             </Txt>
           )}

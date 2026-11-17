@@ -89,9 +89,7 @@ describe('AgentPlaygroundConfig', () => {
       const variableHelpTrigger = screen.getByRole('button', { name: 'use variables' });
       fireEvent.focus(variableHelpTrigger);
 
-      expect((await screen.findByRole('tooltip')).textContent).toBe(
-        'Use {{variableName}} syntax to insert dynamic values into your instruction blocks.',
-      );
+      expect(screen.queryByRole('tooltip')).toBeNull();
     });
   });
 

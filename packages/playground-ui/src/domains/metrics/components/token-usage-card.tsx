@@ -14,7 +14,7 @@ import { MetricsCard } from '@/ds/components/MetricsCard';
 import { MetricsLineChartLegend } from '@/ds/components/MetricsLineChart';
 import type { MetricsLineChartSeries } from '@/ds/components/MetricsLineChart';
 import { MetricsStackedBarChart } from '@/ds/components/MetricsStackedBarChart';
-import { t as studioT } from '@/lib/i18n';
+import { t as studioT, useLocale } from '@/lib/i18n';
 
 type View = 'tokens' | 'cost';
 
@@ -51,10 +51,10 @@ const COST_SERIES: MetricsLineChartSeries[] = [
   },
 ];
 
-const TITLE: Record<View, string> = {
+const TITLE = {
   tokens: 'Token usage',
   cost: 'Model cost',
-};
+} as const;
 
 const VIEWS = [
   { value: 'tokens', label: TITLE.tokens },
@@ -70,6 +70,7 @@ export type TokenUsageCardProps = {
 };
 
 export function TokenUsageCard({ onViewTraces, onTimeRangeClick }: TokenUsageCardProps) {
+  useLocale();
   const [view, setView] = useState<View>('tokens');
   const { data = [], isLoading, isError, isPlaceholderData } = useMetricsActivity();
   const { timestamp } = useMetricsFilters();
@@ -80,8 +81,12 @@ export function TokenUsageCard({ onViewTraces, onTimeRangeClick }: TokenUsageCar
   const series = isTokens ? TOKEN_SERIES : COST_SERIES;
 
   const layout = {
-    title: TITLE[view],
-    titleMenu: { value: view, onValueChange: setView, options: VIEWS },
+    title: studioT(TITLE[view]),
+    titleMenu: {
+      value: view,
+      onValueChange: setView,
+      options: VIEWS.map(option => ({ ...option, label: studioT(option.label) })),
+    },
     actions: onViewTraces && <OpenInTracesButton onClick={onViewTraces} />,
     toolbar: (
       <MetricsCard.Toolbar>

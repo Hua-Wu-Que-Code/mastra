@@ -45,19 +45,9 @@ describe('MetricsStackedBarChart tooltip', () => {
   useFixedChartSize(600, 300);
 
   // A short chart in a clipping container (like the observability histogram above a list) would cut it off.
-  it('renders outside the chart, so a clipping container cannot cut it off', async () => {
-    const { wrapper, container } = renderChart();
-
+  it('keeps hover free of a popup', async () => {
+    const { wrapper } = renderChart();
     await moveTo(wrapper, 2);
-
-    const tooltip = [...document.body.querySelectorAll('[data-slot="chart-tooltip-portal"]')];
-    expect(tooltip).toHaveLength(1);
-    expect(tooltip[0]?.textContent).toContain('3 PM');
-    expect(container.contains(tooltip[0] ?? null)).toBe(false);
-    expect(tooltip[0]?.classList.contains('fixed')).toBe(true);
-
-    fireEvent.mouseLeave(wrapper);
-    await act(() => new Promise(requestAnimationFrame));
     expect(document.body.querySelector('[data-slot="chart-tooltip-portal"]')).toBeNull();
   });
 });

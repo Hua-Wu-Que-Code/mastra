@@ -28,11 +28,11 @@ const COLUMNS = [
   },
 ];
 
-const TITLE: Record<Entity, string> = {
+const TITLE = {
   agents: 'Agent runs',
   workflows: 'Workflow runs',
   tools: 'Tool calls',
-};
+} as const;
 
 const VIEWS = [
   { value: 'agents', label: TITLE.agents },
@@ -78,8 +78,12 @@ export function TraceVolumeCard({ onViewTraces, onViewErrors, onEntityClick }: T
   const total = source.reduce((sum, r) => sum + r.completed + r.errors, 0);
 
   const layout = {
-    title: TITLE[entity],
-    titleMenu: { value: entity, onValueChange: setEntity, options: VIEWS },
+    title: studioT(TITLE[entity]),
+    titleMenu: {
+      value: entity,
+      onValueChange: setEntity,
+      options: VIEWS.map(option => ({ ...option, label: studioT(option.label) })),
+    },
     actions: (onViewTraces || onViewErrors) && (
       <>
         {onViewTraces && <OpenInTracesButton onClick={() => onViewTraces(rootEntityType)} />}

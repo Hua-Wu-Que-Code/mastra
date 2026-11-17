@@ -31,7 +31,7 @@ export function TimelineTimingCol({
     <HoverCard>
       <HoverCardTrigger
         className={cn(
-          'grid h-8 cursor-help grid-cols-[1fr_auto] items-center gap-2 rounded-r-md p-1 pr-2',
+          'grid h-8 cursor-default grid-cols-[1fr_auto] items-center gap-2 rounded-r-md p-1 pr-2',
           chartWidth === 'wide' ? 'min-w-72' : 'min-w-32',
           '[&:hover>div]:bg-fill',
           {

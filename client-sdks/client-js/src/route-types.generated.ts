@@ -244,12 +244,12 @@ type InputShared_Auxiliary_814 = {
   children?: InputShared_Auxiliary_814[] | undefined;
 };
 
-type Shared_Auxiliary_799 = {
+type Shared_Auxiliary_803 = {
   id?: string | undefined;
   name: string;
   type: 'file' | 'folder';
   content?: string | undefined;
-  children?: Shared_Auxiliary_799[] | undefined;
+  children?: Shared_Auxiliary_803[] | undefined;
 };
 
 type InputShared_Type_0 = {
@@ -2454,6 +2454,19 @@ type Shared_Type_8 = {
         [key: string]: string;
       }
     | undefined;
+  modelNames?:
+    | {
+        [key: string]: string;
+      }
+    | undefined;
+  modelReasoning?:
+    | {
+        [key: string]: {
+          defaultLevel: string;
+          levels: string[];
+        };
+      }
+    | undefined;
 };
 
 type Shared_Type_9 =
@@ -4528,7 +4541,7 @@ type Shared_Type_88 = {
   /** List of asset file paths */
   assets?: string[] | undefined;
   /** Full file tree structure for the skill */
-  files?: Shared_Auxiliary_799[] | undefined;
+  files?: Shared_Auxiliary_803[] | undefined;
   /** Additional metadata for the skill */
   metadata?:
     | {

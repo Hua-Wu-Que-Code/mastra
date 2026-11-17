@@ -14,7 +14,7 @@ export function WorkflowStepActions({ children }: { children: ReactNode }) {
             size="icon-sm"
             variant="ghost"
             aria-label={studioT('Step actions')}
-            title={studioT('Step actions')}
+
             className="nodrag nopan"
           >
             <IconDotGrid1x3Vertical />

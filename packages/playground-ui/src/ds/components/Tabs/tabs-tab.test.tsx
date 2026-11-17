@@ -57,7 +57,7 @@ describe('Tab', () => {
 
     const tab = screen.getByRole('tab', { name: 'Second' });
     act(() => tab.focus());
-    expect(await screen.findByText('Second tab')).toBeTruthy();
+    expect(screen.queryByText('Second tab')).toBeNull();
 
     fireEvent.click(tab);
     expect(tab.getAttribute('aria-selected')).toBe('true');
@@ -513,7 +513,7 @@ describe('Tab', () => {
       const tooltipTrigger = (name: string) => screen.getByRole('tab', { name }).parentElement;
 
       // Only a tab that is both disabled and has something to say gets one.
-      expect(tooltipTrigger('Explained')?.hasAttribute('data-base-ui-tooltip-trigger')).toBe(true);
+      expect(tooltipTrigger('Explained')?.hasAttribute('data-trigger-disabled')).toBe(true);
       expect(tooltipTrigger('Explained')?.tabIndex).toBe(0);
       expect(tooltipTrigger('Silent')?.hasAttribute('data-base-ui-tooltip-trigger')).toBe(false);
       expect(tooltipTrigger('Enabled with text')?.hasAttribute('data-base-ui-tooltip-trigger')).toBe(false);

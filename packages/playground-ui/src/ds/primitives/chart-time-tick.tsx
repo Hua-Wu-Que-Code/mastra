@@ -3,10 +3,10 @@ import { CHART_AXIS_FONT_SIZE } from './chart-layout';
 import { CHART_LABEL_COLOR } from '@/ds/tokens';
 
 export type ChartTimeTickProps = {
-  x?: number;
-  y?: number;
+  x?: number | string;
+  y?: number | string;
   /** The axis' drawn width, which Recharts passes to every tick: the plot's real width. */
-  width?: number;
+  width?: number | string;
   index?: number;
   payload?: { value: string; index: number; offset?: number };
   /** Buckets that print a label (from `pickTimeTicks`). */
@@ -24,11 +24,11 @@ export function ChartTimeTick({ x = 0, y = 0, width, payload, picked, labels, co
   if (!payload || !width || !picked.has(payload.index)) return null;
   const text = labels?.get(payload.index) ?? String(payload.value);
   const placed = placeTimeTick({
-    x,
+    x: Number(x),
     index: payload.index,
     offset: payload.offset,
     count,
-    plotWidth: width,
+    plotWidth: Number(width),
     textWidth: labelWidth(text),
   });
   return (

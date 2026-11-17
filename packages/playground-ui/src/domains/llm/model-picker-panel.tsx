@@ -51,7 +51,7 @@ function searchModels(providers: ModelPickerProvider[], query: string) {
   for (const provider of providers) {
     const providerText = searchWords(`${provider.name} ${provider.id}`);
     const found = provider.models.filter(model => {
-      const text = `${providerText} ${searchWords(model.id)}`;
+      const text = `${providerText} ${searchWords(`${model.id} ${model.name ?? ''}`)}`;
       return words.every(word => text.includes(word));
     });
     for (const model of found.toSorted(byReleaseDate)) matches.push({ provider, model });
@@ -75,6 +75,8 @@ export interface ModelPickerPanelProps {
   onAddProvider: () => void;
   /** Bottom-sheet layout: 44px touch targets and a taller list. */
   sheet: boolean;
+  /** Keep product catalog ordering instead of sorting by release date. */
+  preserveOrder?: boolean;
 }
 
 /**
@@ -100,6 +102,7 @@ export function ModelPickerPanel({
   reset,
   onAddProvider,
   sheet,
+  preserveOrder = false,
 }: ModelPickerPanelProps) {
   useLocale();
   // The popover and sheet unmount when closed, so each open starts with a fresh search and filter.
@@ -233,7 +236,9 @@ export function ModelPickerPanel({
             ) : (
               shownProviders.map(provider => (
                 <CommandGroup key={provider.id} heading={mixedProviders ? provider.name : undefined}>
-                  {provider.models.toSorted(byReleaseDate).map(model => renderOption(provider, model))}
+                  {(preserveOrder ? provider.models : provider.models.toSorted(byReleaseDate)).map(model =>
+                    renderOption(provider, model),
+                  )}
                 </CommandGroup>
               ))
             )}

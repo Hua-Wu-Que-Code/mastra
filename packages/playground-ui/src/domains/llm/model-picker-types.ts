@@ -3,6 +3,8 @@ import type { ReactElement } from 'react';
 export interface ModelPickerModel {
   /** Unique within its provider. Shown formatted by `formatModelName`, e.g. `claude-opus-4-6` reads "Claude Opus 4.6". */
   id: string;
+  /** Authoritative product name from a gateway catalog. */
+  name?: string;
   /** Lists newest first; models without a date follow, by id. */
   releaseDate?: string;
 }

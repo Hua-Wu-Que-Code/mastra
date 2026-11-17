@@ -85,7 +85,7 @@ export function SchedulesList({ schedules, isLoading, search = '', sort, onSortC
         <DataList.RowLink key={s.id} to={paths.scheduleLink(s.id)} LinkComponent={Link} {...getRowProps(index)}>
           <DataList.NameCell>{s.workflowId ?? s.agentId}</DataList.NameCell>
           <DataList.Cell className="min-w-0">
-            <Txt as="span" variant="body-sm" tone="muted" font="mono" className="block truncate" title={s.id}>
+            <Txt aria-label={s.id} as="span" variant="body-sm" tone="muted" font="mono" className="block truncate">
               {s.id}
             </Txt>
           </DataList.Cell>

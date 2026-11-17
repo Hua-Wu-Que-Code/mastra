@@ -73,13 +73,14 @@ export function AgentCompactCard({ agent }: AgentCompactCardProps) {
       </CardLink>
 
       <CardContent density="compact" className="pointer-events-none relative grid h-full min-w-0 gap-2">
-        <CardTitle title={agent.name} className="max-w-full min-w-0 overflow-clip text-ellipsis whitespace-nowrap">
+        <CardTitle aria-label={agent.name} className="max-w-full min-w-0 overflow-clip text-ellipsis whitespace-nowrap">
           {agent.name}
         </CardTitle>
 
         <CardDescription
+          aria-label={instructions || instructionPreview}
           id={`${accessibleId}-instructions`}
-          title={instructions || instructionPreview}
+
           className="min-w-0 overflow-clip text-ellipsis whitespace-nowrap"
         >
           {instructionPreview}
