@@ -3,8 +3,8 @@ import { MastraClient } from '@mastra/client-js';
 import type { SendAgentSignalParams } from '@mastra/client-js';
 import type { AIV5Type, MastraDBMessage, MastraToolInvocationPart } from '@mastra/core/agent/message-list';
 import { AIV5Adapter } from '@mastra/core/agent/message-list';
-import type { MemoryConfigInternal } from '@mastra/core/memory';
 import type { CoreUserMessage } from '@mastra/core/llm';
+import type { MemoryConfigInternal } from '@mastra/core/memory';
 import type { TracingOptions } from '@mastra/core/observability';
 import type { RequestContext } from '@mastra/core/request-context';
 import type { TaskItem } from '@mastra/core/signals';
@@ -199,6 +199,8 @@ export interface MastraChatProps {
   clientTools?: ClientToolsInput;
   onSignalSent?: (signalId: string, preview: string) => void;
   onSignalEcho?: (signalId: string) => void;
+  /** Receives persisted titles emitted with `memory.options.generateTitle.emitEvent`. Also runs for subscribed turns. */
+  onThreadTitleGenerated?: (event: { threadId: string; title: string }) => void;
   onThreadSignalsUnsupported?: () => void;
   /**
    * Use the agent-signals streaming path (sendSignal + subscribeToThread).
@@ -334,6 +336,7 @@ export const useChat = ({
   clientTools: hookClientTools,
   onSignalSent,
   onSignalEcho,
+  onThreadTitleGenerated,
   onThreadSignalsUnsupported,
   enableThreadSignals = false,
   streamPath,
@@ -342,6 +345,10 @@ export const useChat = ({
   const threadSignalsDisabled = enableThreadSignals === false;
   const _currentRunId = useRef<string | undefined>(undefined);
   const _onChunk = useRef<((chunk: ChunkType) => Promise<void>) | undefined>(undefined);
+  const threadTitleListener = useRef(onThreadTitleGenerated);
+  useEffect(() => {
+    threadTitleListener.current = onThreadTitleGenerated;
+  }, [onThreadTitleGenerated]);
   const _networkRunId = useRef<string | undefined>(undefined);
   const _onNetworkChunk = useRef<((chunk: NetworkChunkType) => Promise<void>) | undefined>(undefined);
   const _activeContinuation = useRef<ActiveContinuation>({ requestContext: propsRequestContext });
@@ -581,6 +588,15 @@ export const useChat = ({
       if (streamedTasks !== undefined) {
         liveTasks.current = streamedTasks;
         setTasks(streamedTasks);
+      }
+
+      if (
+        chunk.type === 'data-thread-title' &&
+        isDataChunk(chunk) &&
+        typeof chunk.data?.threadId === 'string' &&
+        typeof chunk.data?.title === 'string'
+      ) {
+        threadTitleListener.current?.({ threadId: chunk.data.threadId, title: chunk.data.title });
       }
 
       if (

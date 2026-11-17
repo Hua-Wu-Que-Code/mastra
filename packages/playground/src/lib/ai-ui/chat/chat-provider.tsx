@@ -41,8 +41,8 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useChatSendHandler } from './use-chat-send-handler';
 import { useObservationalMemoryContext } from '@/domains/agents/context';
-import { useWorkingMemory } from '@/domains/agents/context/agent-working-memory-context';
 import { resolveMemoryOptions, useAgentMemoryPreferences } from '@/domains/agents/context/agent-memory-preferences';
+import { useWorkingMemory } from '@/domains/agents/context/agent-working-memory-context';
 import { usePlaygroundModelOptional } from '@/domains/agents/context/playground-model-context';
 import { getCanSendWhileStreaming } from '@/services/mastra-runtime-state';
 import type { ChatProps } from '@/types';
@@ -80,7 +80,6 @@ export function ChatProvider({
   const threadSignalsUnsupportedRef = useRef(false);
   const modelSettings = settings?.modelSettings ?? {};
   const [memoryPreferences] = useAgentMemoryPreferences(agentId);
-  const memoryOptions = resolveMemoryOptions(memoryPreferences);
   const threadSignalsEnabled =
     window.MASTRA_AGENT_SIGNALS !== 'false' && supportsMemory !== false && !modelSettings.chatWithLegacyStream;
 
@@ -130,6 +129,9 @@ export function ChatProvider({
     onSignalSent: () => {
       refreshThreadList?.();
     },
+    onThreadTitleGenerated: () => {
+      refreshThreadList?.();
+    },
     onThreadSignalsUnsupported: () => {
       threadSignalsUnsupportedRef.current = true;
       setThreadSignalsUnsupported(true);
@@ -145,6 +147,12 @@ export function ChatProvider({
     requestContext: useEntityRequestContext('agent', agentId)[0],
     queryOptions: { enabled: Boolean(agentId) },
   });
+  const configuredMemoryOptions = resolveMemoryOptions(memoryPreferences);
+  // Request a notification after persistence instead of racing background title generation at finish.
+  // The server merges this override with its existing title model, instructions, and message threshold.
+  const memoryOptions = memoryConfigData?.config?.generateTitle
+    ? { ...configuredMemoryOptions, generateTitle: { emitEvent: true } }
+    : configuredMemoryOptions;
   const omConfig = memoryConfigData?.config?.observationalMemory as unknown;
   const isOMEnabled =
     memoryPreferences.enabled !== false &&

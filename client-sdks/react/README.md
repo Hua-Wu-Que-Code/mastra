@@ -24,6 +24,8 @@ export function App({ children }: { children: React.ReactNode }) {
 
 The package exports agent hooks such as `useChat` for generated or streamed conversations, including optimistic messages, tool calls, approvals, task signals, aborts, and reconnection to active runs. It also exports workflow hooks and `WorkflowStepFactory` for consuming workflow state and streamed step results.
 
+`useChat({ onThreadTitleGenerated: ({ threadId, title }) => { /* refresh thread metadata */ } })` receives persisted title events for both locally sent replies and open thread subscriptions. Enable `memory.options.generateTitle.emitEvent` on stream requests to receive this event before `finish`; title generation then delays stream completion until the title is saved.
+
 Voice helpers include browser speech recognition, microphone recording, and Web Audio playback. Message utilities expose Mastra's database message types and accumulation helpers, while the `@mastra/react/ui` entry point provides reusable message, code, icon, button, entity, and tooltip components. Import `@mastra/react/styles.css` when using the packaged UI components.
 
 React 19 or newer is required. The package also expects compatible versions of `@mastra/core` and Zod in the consuming application.

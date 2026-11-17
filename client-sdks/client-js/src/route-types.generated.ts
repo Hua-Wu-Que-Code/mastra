@@ -9067,6 +9067,7 @@ export type GetMemoryConfig_Response = {
           atMaxRemoveTokens?: number | undefined;
         }
       | undefined;
+    generateTitle?: (boolean | Shared_Type_25) | undefined;
     semanticRecall?: (boolean | unknown) | undefined;
     workingMemory?:
       | {

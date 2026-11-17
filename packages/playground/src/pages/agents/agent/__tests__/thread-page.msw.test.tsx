@@ -30,6 +30,7 @@ import {
   preferenceThread,
 } from './fixtures/thread-preferences';
 import { emptyHistory, liveChunks, staleHistory } from './fixtures/thread-recovery';
+import { generatedTitleChunk, titleMemoryConfig } from './fixtures/thread-title';
 import { emptyThreadTracesList } from './fixtures/thread-traces';
 import { AgentLayout } from '@/domains/agents/agent-layout';
 import { readThreadDraft } from '@/domains/conversation/context/thread-draft-storage';
@@ -310,6 +311,92 @@ async function composerInput(placeholder = 'Enter your message') {
 }
 
 describe('Standalone thread page', () => {
+  describe('when automatic titles are configured by the agent', () => {
+    it('requests the persisted-title event on the reply stream', async () => {
+      installHandlers();
+      const sent = vi.fn();
+      let titleSaved = false;
+      server.use(
+        http.get(`${BASE_URL}/api/memory/config`, () => HttpResponse.json(titleMemoryConfig)),
+        http.get(`${BASE_URL}/api/memory/threads`, () =>
+          HttpResponse.json({
+            threads: threadsResponse.threads.map(thread =>
+              thread.id === THREAD_ID && titleSaved ? { ...thread, title: 'Carbonara tips' } : thread,
+            ),
+          }),
+        ),
+        http.post(`${BASE_URL}/api/agents/${AGENT_ID}/stream`, async ({ request }) => {
+          const body = await request.json();
+          sent(body);
+          // Like the server, publish only after saving, and only when the request opts in.
+          titleSaved = body.memory?.options?.generateTitle?.emitEvent === true;
+          const titleEvent = titleSaved ? `data: ${JSON.stringify(generatedTitleChunk)}\n\n` : '';
+          return new HttpResponse(`${titleEvent}data: {"type":"finish","payload":{}}\n\n`, {
+            headers: { 'Content-Type': 'text/event-stream' },
+          });
+        }),
+      );
+      renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
+      await screen.findByText('Tonight we cook carbonara.');
+      const input = await composerInput();
+      await waitFor(() => expect(input.disabled).toBe(false));
+      fireEvent.change(input, { target: { value: 'How do I cook carbonara?' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+      await waitFor(() => expect(sent).toHaveBeenCalledOnce());
+      expect(sent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          memory: expect.objectContaining({ options: expect.objectContaining({ generateTitle: { emitEvent: true } }) }),
+        }),
+      );
+      await screen.findByText('Carbonara tips', {}, SSE_TIMEOUT);
+    });
+  });
+
+  describe('when a generated title arrives on the open thread subscription', () => {
+    it('updates the sidebar without leaving the conversation or sending another message', async () => {
+      installHandlers();
+      let pushTitle = () => {};
+      let close = () => {};
+      let titleSaved = false;
+      server.use(
+        http.get(`${BASE_URL}/api/memory/threads`, () =>
+          HttpResponse.json({
+            threads: threadsResponse.threads.map(thread =>
+              thread.id === THREAD_ID && titleSaved ? { ...thread, title: 'Carbonara tips' } : thread,
+            ),
+          }),
+        ),
+        http.post(
+          `${BASE_URL}/api/agents/${AGENT_ID}/threads/subscribe`,
+          () =>
+            new HttpResponse(
+              new ReadableStream<Uint8Array>({
+                start(controller) {
+                  close = () => controller.close();
+                  pushTitle = () => {
+                    titleSaved = true;
+                    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(generatedTitleChunk)}\n\n`));
+                  };
+                },
+              }),
+              { headers: { 'Content-Type': 'text/event-stream' } },
+            ),
+        ),
+      );
+      const router = renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
+      try {
+        await screen.findByText('Pasta night');
+        await screen.findByRole('button', { name: /GPT-5 Mini/ });
+        await act(async () => pushTitle());
+        await screen.findByText('Carbonara tips', {}, SSE_TIMEOUT);
+        expect(router.state.location.pathname).toBe(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
+        expect(screen.queryByText('Pasta night')).toBeNull();
+      } finally {
+        close();
+      }
+    });
+  });
+
   describe('when a history response arrives after live output', () => {
     it.each([
       { name: 'empty', history: emptyHistory },
@@ -711,13 +798,11 @@ describe('Standalone thread page', () => {
           await screen.findByRole('button', { name: 'Preview leads.csv' }, ATTACHMENT_TIMEOUT);
           const originalRead = FileReader.prototype.readAsText;
           let finishReading = () => {};
-          const reader = vi.spyOn(FileReader.prototype, 'readAsText').mockImplementationOnce(function (
-            this: FileReader,
-            file,
-            encoding,
-          ) {
-            finishReading = () => originalRead.call(this, file, encoding);
-          });
+          const reader = vi
+            .spyOn(FileReader.prototype, 'readAsText')
+            .mockImplementationOnce(function (this: FileReader, file, encoding) {
+              finishReading = () => originalRead.call(this, file, encoding);
+            });
           fireEvent.keyDown(input, { key: 'Enter' });
           if (editWhilePreparing) {
             fireEvent.change(input, { target: { value: 'Keep the next question' } });

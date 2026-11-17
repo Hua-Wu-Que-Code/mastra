@@ -1,6 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeQueryParams } from '../server-adapter/index';
-import { awaitBufferStatusResponseSchema, listMessagesQuerySchema, listThreadsQuerySchema } from './memory';
+import {
+  awaitBufferStatusResponseSchema,
+  listMessagesQuerySchema,
+  listThreadsQuerySchema,
+  memoryConfigResponseSchema,
+} from './memory';
+
+describe('Memory title configuration', () => {
+  describe('when a client reads the title generation policy', () => {
+    it.each([false, true, { instructions: 'Short title', minMessages: 2, emitEvent: true }])(
+      'preserves the configured policy %j in the HTTP response',
+      generateTitle => {
+        const response = { config: { generateTitle } };
+        expect(memoryConfigResponseSchema.parse(response)).toEqual(response);
+      },
+    );
+  });
+});
 
 /**
  * Regression tests for GitHub Issue #11761

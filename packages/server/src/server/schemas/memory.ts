@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { paginationInfoSchema, createPagePaginationSchema, successResponseSchema } from './common';
+import { titleGenerationSchema } from './memory-config';
 import { lastMessagesSchema, messageHistorySchema } from './message-history';
 
 // Path parameter schemas
@@ -484,6 +485,7 @@ export const memoryConfigResponseSchema = z.object({
     .object({
       lastMessages: lastMessagesSchema.optional(),
       messageHistory: messageHistorySchema.optional(),
+      generateTitle: titleGenerationSchema.optional(),
       semanticRecall: z.union([z.boolean(), z.unknown()]).optional(),
       workingMemory: z
         .object({

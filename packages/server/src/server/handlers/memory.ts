@@ -763,6 +763,7 @@ export const GET_MEMORY_CONFIG_ROUTE = createRoute({
       return {
         config: {
           ...config,
+          generateTitle: memory.getConfig().options?.generateTitle,
           observationalMemory: omConfig,
         },
       };
