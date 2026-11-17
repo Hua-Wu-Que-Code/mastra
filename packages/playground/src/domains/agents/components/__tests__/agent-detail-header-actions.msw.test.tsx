@@ -74,12 +74,12 @@ afterEach(async () => {
 });
 
 describe('AgentDetailHeaderActions', () => {
-  it('renders Share and the Config toggle inside the route header slot', async () => {
+  it('renders the Config toggle without a Share action inside the route header slot', async () => {
     installHandlers();
     renderActions();
 
     const slot = screen.getByTestId('header-actions');
-    await waitFor(() => expect(slot.querySelector('[data-testid="agent-entity-header-share"]')).not.toBeNull());
+    expect(screen.queryByRole('button', { name: 'Copy session URL' })).toBeNull();
     const toggle = screen.getByTestId('agent-overview-panel-toggle');
     expect(slot.contains(toggle)).toBe(true);
     expect(toggle.getAttribute('aria-pressed')).toBe('false');
@@ -102,7 +102,7 @@ describe('AgentDetailHeaderActions', () => {
     installHandlers();
     renderActions();
 
-    await screen.findByTestId('agent-entity-header-share');
+    await screen.findByTestId('agent-overview-panel-toggle');
     await waitFor(() => expect(screen.queryByText('Edit')).toBeNull());
   });
 
@@ -178,7 +178,7 @@ describe('when the screen is narrow', () => {
       </TestLinkProvider>,
     );
 
-    expect(await screen.findByTestId('agent-entity-header-share')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Copy session URL' })).toBeNull();
     expect(screen.queryByTestId('agent-overview-panel-toggle')).toBeNull();
   });
 });

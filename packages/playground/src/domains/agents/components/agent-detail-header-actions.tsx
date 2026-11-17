@@ -1,8 +1,5 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
-import { useCopyToClipboard } from '@mastra/playground-ui/hooks/use-copy-to-clipboard';
-import { IconChainLink3 } from '@mastra/playground-ui/icons/central/IconChainLink3';
-import { IconCheckmark2Medium } from '@mastra/playground-ui/icons/central/IconCheckmark2Medium';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
 
@@ -10,14 +7,13 @@ import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useAgent } from '@mastra/react/hooks/agents';
 import { AgentConfigToggle } from './agent-config-toggle';
 import { useCanCreateAgent } from '@/domains/agent-builder/hooks/use-can-create-agent';
-import { withStudioBasePath } from '@/lib/studio-base-path';
 
 export interface AgentDetailHeaderActionsProps {
   agentId: string;
   showConfig?: boolean;
 }
 
-/** Edit / Share / Config actions shown in the route header on every agent sub-page. */
+/** Edit / Config actions shown in the route header on every agent sub-page. */
 export function AgentDetailHeaderActions({ agentId, showConfig = true }: AgentDetailHeaderActionsProps) {
   useLocale();
   const { data: agent } = useAgent({
@@ -27,12 +23,6 @@ export function AgentDetailHeaderActions({ agentId, showConfig = true }: AgentDe
   });
   const { canCreateAgent } = useCanCreateAgent();
   const { Link: FrameworkLink, paths } = useLinkComponent();
-
-  const sessionUrl = `${window.location.origin}${withStudioBasePath(`/agents/${encodeURIComponent(agentId)}/session`)}`;
-  const { handleCopy: handleShareLink, isCopied: isShareCopied } = useCopyToClipboard({
-    text: sessionUrl,
-    copyMessage: studioT('Session URL copied to clipboard!'),
-  });
 
   const editPath = paths.cmsAgentEditLink(agentId);
   const showEditButton = canCreateAgent && agent?.source === 'stored' && Boolean(editPath);
@@ -44,17 +34,6 @@ export function AgentDetailHeaderActions({ agentId, showConfig = true }: AgentDe
           {studioT('Edit')}
         </Button>
       )}
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        type="button"
-        aria-label={studioT('Copy session URL')}
-        onClick={handleShareLink}
-        tooltip={studioT('Copy session URL to share with your team')}
-        data-testid="agent-entity-header-share"
-      >
-        {isShareCopied ? <IconCheckmark2Medium /> : <IconChainLink3 />}
-      </Button>
       {showConfig && <AgentConfigToggle />}
     </>
   );

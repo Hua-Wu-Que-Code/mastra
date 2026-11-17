@@ -30,7 +30,6 @@ export function AccountMenu() {
       <DropdownMenu.Trigger
         variant="ghost"
         aria-label={displayName}
-
         className={`w-full rounded-lg ${collapsed ? 'h-control-md justify-center px-0' : 'h-auto min-h-control-lg justify-start gap-3 px-3 py-2'}`}
       >
         <Avatar size="sm">
@@ -45,17 +44,6 @@ export function AccountMenu() {
         )}
       </DropdownMenu.Trigger>
       <DropdownMenu.Content side="top" align="start" className="min-w-56">
-        <DropdownMenu.Label className="flex min-w-0 flex-col gap-0.5">
-          <Txt as="span" variant="body-sm" className="truncate font-medium">
-            {displayName}
-          </Txt>
-          {account.user.email && (
-            <Txt as="span" variant="caption" tone="muted" className="truncate">
-              {account.user.email}
-            </Txt>
-          )}
-        </DropdownMenu.Label>
-        <DropdownMenu.Separator />
         <DropdownMenu.LinkItem
           render={<Link to="/settings" state={{ returnTo: location.pathname + location.search + location.hash }} />}
           onClick={() => setOpenMobile(false)}
