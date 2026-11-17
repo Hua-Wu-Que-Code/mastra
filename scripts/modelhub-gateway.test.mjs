@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { ModelHubGateway } from '../src/mastra/modelhub-gateway.ts';
 import { modelHubFixture } from './modelhub-fixture.mjs';
 
-test('ModelHub catalog drives listing and real SDK request routing, including cached instances', async t => {
+test('ModelHub catalog drives listing and real SDK request routing, including cached instances', async (t) => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   const gateway = new ModelHubGateway({ apiKey: 'server-test-key', baseURL: hub.baseURL });
@@ -40,17 +40,17 @@ test('ModelHub catalog drives listing and real SDK request routing, including ca
   assert.equal(hub.state.requests[2].body.model, 'new-qwen-route', 'temporary failure retains validated snapshot');
 });
 
-test('invalid or unavailable first catalog fails closed', async t => {
+test('invalid or unavailable first catalog fails closed', async (t) => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   for (const corrupt of [
-    catalog => {
+    (catalog) => {
       catalog.free_chat_models = [];
     },
-    catalog => {
+    (catalog) => {
       catalog.free_chat_models.push(catalog.free_chat_models[0]);
     },
-    catalog => {
+    (catalog) => {
       catalog.free_chat_models[0].default_thinking_level = 'missing';
     },
   ]) {
@@ -64,22 +64,29 @@ test('invalid or unavailable first catalog fails closed', async t => {
   assert.throws(() => new ModelHubGateway({ apiKey: 'test-key', baseURL: 'http://untrusted.example/v1' }));
 });
 
-
-test('catalog publishes names and supported reasoning; a selected level controls the upstream route', async t => {
+test('catalog publishes names and supported reasoning; a selected level controls the upstream route', async (t) => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   hub.state.catalog.free_chat_models[1].thinking_options.push({
-    level: 'off', target: 'qwen-no-thinking', supports_thinking_level: false, supports_thinking_budget: false,
+    level: 'off',
+    target: 'qwen-no-thinking',
+    supports_thinking_level: false,
+    supports_thinking_budget: false,
   });
   const gateway = new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL });
   const providers = await gateway.fetchProviders();
   assert.equal(providers.altflow.modelNames['qwen3.8-max'], 'Qwen3.8 Max');
-  assert.deepEqual(providers.altflow.modelReasoning['qwen3.8-max'], { defaultLevel: 'high', levels: ['high', 'off'] });
-  const model = await gateway.resolveLanguageModel({ modelId: 'qwen3.8-max' });
-  const generate = level => model.doGenerate({
-    prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
-    providerOptions: { altflow: { reasoningLevel: level } },
+  assert.deepEqual(providers.altflow.modelReasoning['qwen3.8-max'], {
+    defaultLevel: 'high',
+    levels: ['high', 'off'],
+    contextWindows: { high: 983616 },
   });
+  const model = await gateway.resolveLanguageModel({ modelId: 'qwen3.8-max' });
+  const generate = (level) =>
+    model.doGenerate({
+      prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+      providerOptions: { altflow: { reasoningLevel: level } },
+    });
   await generate('off');
   assert.equal(hub.state.requests[0].body.model, 'qwen-no-thinking');
   assert.equal(hub.state.requests[0].body.metadata.modelhub_thinking_level, 'off');
@@ -90,4 +97,39 @@ test('catalog publishes names and supported reasoning; a selected level controls
   assert.equal(hub.state.requests[1].body.modelhub_thinking_budget, 8000);
   await assert.rejects(generate('unsupported'), /reasoning level/);
   assert.equal(hub.state.requests.length, 2);
+});
+
+test('model/info supplies exact per-reasoning route capacities without guessing output limits as context', async (t) => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  hub.state.catalog.free_chat_models[1].thinking_options.push({
+    level: 'off',
+    target: 'qwen-no-thinking',
+    supports_thinking_level: false,
+    supports_thinking_budget: false,
+  });
+  hub.state.info.data.push(
+    { model_name: 'qwen-no-thinking', model_info: { max_input_tokens: 991808, context_window: 1048576 } },
+    { model_name: 'internal-qwen-route', model_info: { max_input_tokens: 1048576 } },
+  );
+  const gateway = new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL });
+  const { altflow } = await gateway.fetchProviders();
+  assert.equal(altflow.modelContextWindows['deepseek-v4-pro'], 1048576);
+  assert.equal(altflow.modelContextWindows['qwen3.8-max'], 983616);
+  assert.deepEqual(altflow.modelReasoning['qwen3.8-max'].contextWindows, { high: 983616, off: 991808 });
+  await gateway.fetchProviders();
+  assert.equal(hub.state.infos, 1);
+});
+
+test('missing or unavailable model/info never fabricates a context capacity or blocks chat', async (t) => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  hub.state.info.data = [{ model_name: 'internal-deepseek-route', model_info: { max_output_tokens: 131072 } }];
+  const missing = await new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL }).fetchProviders();
+  assert.deepEqual(missing.altflow.modelContextWindows, {});
+  hub.state.infoStatus = 403;
+  const gateway = new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL });
+  const unavailable = await gateway.fetchProviders();
+  assert.deepEqual(unavailable.altflow.modelContextWindows, {});
+  assert.equal((await gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' })).modelId, 'deepseek-v4-pro');
 });

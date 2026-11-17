@@ -38,6 +38,14 @@ export async function modelHubFixture() {
     catalog: catalogFixture(),
     requests: [],
     catalogs: 0,
+    infos: 0,
+    infoStatus: 200,
+    info: {
+      data: [
+        { model_name: 'internal-deepseek-route', model_info: { max_input_tokens: 1048576, max_output_tokens: 131072 } },
+        { model_name: 'internal-qwen-route', model_info: { max_input_tokens: 983616 } },
+      ],
+    },
     unavailable: false,
     toolCallText: undefined,
     blocked: false,
@@ -47,16 +55,20 @@ export async function modelHubFixture() {
       state.catalogs++;
       response.writeHead(state.unavailable ? 503 : 200, { 'Content-Type': 'application/json' });
       response.end(JSON.stringify(state.catalog));
+    } else if (request.url === '/model/info') {
+      state.infos++;
+      response.writeHead(state.infoStatus, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(state.info));
     } else if (request.url === '/v1/chat/completions') {
       let raw = '';
       for await (const chunk of request) raw += chunk;
       state.requests.push({ body: JSON.parse(raw), authorization: request.headers.authorization });
       const body = JSON.parse(raw);
-      while (state.blocked) await new Promise(resolve => setTimeout(resolve, 20));
+      while (state.blocked) await new Promise((resolve) => setTimeout(resolve, 20));
       const callTool =
         state.toolCallText !== undefined &&
-        body.tools?.some(tool => tool.function?.name === 'countText') &&
-        !body.messages.some(message => message.role === 'tool');
+        body.tools?.some((tool) => tool.function?.name === 'countText') &&
+        !body.messages.some((message) => message.role === 'tool');
       const message = callTool
         ? {
             role: 'assistant',
@@ -77,7 +89,7 @@ export async function modelHubFixture() {
       const usage = { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
       if (body.stream) {
         response.writeHead(200, { 'Content-Type': 'text/event-stream' });
-        const chunk = delta => ({
+        const chunk = (delta) => ({
           id: 'test-completion',
           object: 'chat.completion.chunk',
           created: 1,
@@ -87,7 +99,7 @@ export async function modelHubFixture() {
         const delta = callTool
           ? {
               role: 'assistant',
-              tool_calls: message.tool_calls.map(tool => ({ index: 0, ...tool })),
+              tool_calls: message.tool_calls.map((tool) => ({ index: 0, ...tool })),
             }
           : message;
         response.write('data: ' + JSON.stringify(chunk(delta)) + '\n\n');
@@ -126,6 +138,6 @@ export async function modelHubFixture() {
   return {
     state,
     baseURL: `http://127.0.0.1:${server.address().port}/v1`,
-    close: () => new Promise((resolve, reject) => server.close(error => (error ? reject(error) : resolve()))),
+    close: () => new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
   };
 }
