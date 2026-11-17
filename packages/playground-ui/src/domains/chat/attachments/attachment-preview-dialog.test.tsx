@@ -47,7 +47,8 @@ describe('ImageEntry', () => {
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(screen.getByRole('dialog').textContent).toContain('Image preview');
+    expect(screen.getByRole('dialog', { name: 'Image preview' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Image preview' }).classList.contains('sr-only')).toBe(true);
     expect(screen.getByAltText('Image').getAttribute('src')).toBe('https://example.com/cat.png');
   });
 });

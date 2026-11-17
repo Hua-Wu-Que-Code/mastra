@@ -26,8 +26,8 @@ export interface ComposerAttachmentProps {
   onEdit?: () => void;
   /** Explicitly enables the context-menu preview action. Applications own preview state or navigation. */
   onPreview?: () => void;
-  /** Inline entries allow a little more width for long filenames. */
-  variant?: 'thumbnail' | 'inline';
+  /** Images use a compact preview; inline entries allow more width for long filenames. */
+  variant?: 'thumbnail' | 'inline' | 'image';
 }
 
 export function ComposerAttachment({
@@ -104,7 +104,7 @@ export function ComposerAttachment({
           'group/attachment relative h-17 shrink-0 rounded-(--attachment-radius) [--attachment-radius:var(--radius-xl)] [--attachment-thumbnail-size:--spacing(15)]',
           // Concentric corners: the inner radius is the outer radius minus its inset.
           '[--attachment-action-inset:--spacing(1)] [--attachment-action-radius:max(0px,calc(var(--attachment-radius)-var(--attachment-action-inset)))] [--attachment-action-width:--spacing(9)] [--attachment-sleeve-width:calc(var(--attachment-action-width)+2*var(--attachment-action-inset))]',
-          variant === 'inline' ? 'w-72' : 'w-66',
+          variant === 'image' ? 'w-28' : variant === 'inline' ? 'w-72' : 'w-66',
         )}
         onClickCapture={event => {
           // Releasing a long press must not also activate the underlying file.

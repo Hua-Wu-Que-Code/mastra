@@ -121,7 +121,7 @@ export const ComposerAttachments = () => {
           name={att.name}
           onRemove={() => remove(att.id)}
           onPreview={canPreviewAttachment(att) ? () => openPreview(att) : undefined}
-          variant={att.kind === 'text' ? 'inline' : 'thumbnail'}
+          variant={att.kind === 'image' ? 'image' : att.kind === 'text' ? 'inline' : 'thumbnail'}
         >
           <AttachmentPreview
             attachment={att}

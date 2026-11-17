@@ -183,9 +183,7 @@ export const ImagePreviewDialog = ({ src, open, onOpenChange, returnFocusRef }: 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="xl" finalFocus={returnFocusRef}>
-        <DialogHeader>
-          <DialogTitle>{studioT('Image preview')}</DialogTitle>
-        </DialogHeader>
+        <DialogTitle className="sr-only">{studioT('Image preview')}</DialogTitle>
         <DialogBody>{open && <img src={src} alt={studioT('Image')} />}</DialogBody>
       </DialogContent>
     </Dialog>

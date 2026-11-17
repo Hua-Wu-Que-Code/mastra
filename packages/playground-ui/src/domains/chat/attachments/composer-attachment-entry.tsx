@@ -2,7 +2,6 @@ import { useContext } from 'react';
 import type { ReactNode } from 'react';
 import { ComposerAttachmentContext } from './composer-attachment-context';
 import { Txt } from '@/ds/components/Txt';
-import { cn } from '@/utils/cn';
 
 /** Preview content shares the composer's filename without duplicating it in each adapter. */
 export function ComposerAttachmentEntry({
@@ -17,18 +16,21 @@ export function ComposerAttachmentEntry({
   const composerName = useContext(ComposerAttachmentContext);
   const filename = composerName ?? name;
 
+  if (variant === 'image') {
+    return (
+      <span className="size-full p-1">
+        <span className="flex size-full items-center justify-center overflow-hidden rounded-[max(0px,calc(var(--attachment-radius,var(--radius-lg))-var(--spacing)))] [&_img]:size-full [&_img]:object-cover">
+          {children}
+        </span>
+      </span>
+    );
+  }
+
   if (!filename) return children;
 
   return (
-    <span className={cn('flex size-full min-w-0 items-center gap-2', variant === 'image' ? 'px-1' : 'px-3')}>
-      <span
-        className={cn(
-          'flex shrink-0 items-center justify-center overflow-hidden [&_img]:size-full [&_img]:object-cover',
-          variant === 'image'
-            ? 'size-[var(--attachment-thumbnail-size,--spacing(12))] rounded-[max(0px,calc(var(--attachment-radius,var(--radius-lg))-var(--spacing)))]'
-            : 'size-8 rounded-md',
-        )}
-      >
+    <span className="flex size-full min-w-0 items-center gap-2 px-3">
+      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md [&_img]:size-full [&_img]:object-cover">
         {children}
       </span>
       <Txt as="span" variant="label" className="min-w-0 flex-1 truncate text-left">

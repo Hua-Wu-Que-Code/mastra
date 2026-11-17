@@ -752,6 +752,54 @@ describe('Thread', () => {
     expect(textarea.value).toBe('');
   });
 
+  describe('when files are pasted into the composer', () => {
+    it.each([
+      {
+        name: 'pasted.png',
+        type: 'image/png',
+        expected: 'data:image/png;base64,aW1hZ2UgYnl0ZXM=',
+        content: 'image bytes',
+      },
+      {
+        name: 'report.pdf',
+        type: 'application/pdf',
+        expected: 'data:application/pdf;base64,cGRmIGJ5dGVz',
+        content: 'pdf bytes',
+      },
+      {
+        name: 'notes.txt',
+        type: 'text/plain',
+        expected: '<attachment name="notes.txt">pasted notes</attachment>',
+        content: 'pasted notes',
+      },
+    ])('sends the contents of $name through the real chat transport', async ({ name, type, expected, content }) => {
+      const captured: CapturedBody[] = [];
+      server.use(
+        ...baseHandlers(),
+        http.post(`${BASE_URL}/api/agents/agent-1/stream`, async ({ request }) => {
+          captured.push(await captureBody(request));
+          return sseResponse();
+        }),
+      );
+      await act(async () => {
+        renderThread([]);
+      });
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      const file = new File([content], name, { type });
+      const event = new Event('paste', { bubbles: true, cancelable: true, composed: true });
+      Object.defineProperty(event, 'clipboardData', {
+        value: { items: [{ kind: 'file', getAsFile: () => file }], files: [file], getData: () => '' },
+      });
+      fireEvent(textarea, event);
+      expect(await screen.findByRole('button', { name: `Remove ${name}` })).toBeTruthy();
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Send' }).hasAttribute('disabled')).toBe(false));
+      fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+      await waitFor(() => expect(captured).toHaveLength(1));
+      expect(JSON.stringify(captured[0].messages)).toContain(expected.replaceAll('"', '\\"'));
+      expect(screen.queryByRole('button', { name: `Remove ${name}` })).toBeNull();
+    });
+  });
+
   it('restores unsent composer drafts when switching threads', async () => {
     server.use(...baseHandlers());
 
@@ -948,11 +996,12 @@ describe('Thread', () => {
         }),
       );
       const read = FileReader.prototype.readAsArrayBuffer;
-      const probe = vi
-        .spyOn(FileReader.prototype, 'readAsArrayBuffer')
-        .mockImplementation(function (this: FileReader, blob) {
-          void pending.then(() => read.call(this, blob));
-        });
+      const probe = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (
+        this: FileReader,
+        blob,
+      ) {
+        void pending.then(() => read.call(this, blob));
+      });
       try {
         await act(async () => {
           renderThread([]);
