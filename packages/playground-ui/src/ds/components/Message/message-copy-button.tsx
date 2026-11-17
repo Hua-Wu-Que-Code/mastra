@@ -14,6 +14,7 @@ export function MessageCopyButton({ text }: { text: string }) {
       variant="ghost"
       onClick={handleCopy}
       aria-label={isCopied ? t('Copied!') : t('Copy message')}
+      title={isCopied ? t('Copied!') : t('Copy message')}
     >
       {isCopied ? <IconCheckmark2Medium /> : <DshCopy />}
     </Button>

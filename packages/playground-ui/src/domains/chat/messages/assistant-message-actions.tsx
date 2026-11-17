@@ -37,6 +37,7 @@ export function AssistantMessageActions({
             size="icon-sm"
             tooltip={studioT('Stop')}
             aria-label={studioT('Stop')}
+            title={studioT('Stop')}
             onClick={() => onStopSpeaking?.()}
           >
             <IconStopCircle />
@@ -47,6 +48,7 @@ export function AssistantMessageActions({
             size="icon-sm"
             tooltip={studioT('Read aloud')}
             aria-label={studioT('Read aloud')}
+            title={studioT('Read aloud')}
             onClick={() => onReadAloud?.(text)}
           >
             <IconVoiceSimple />

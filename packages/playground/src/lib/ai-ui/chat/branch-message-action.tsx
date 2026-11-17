@@ -68,6 +68,7 @@ export function BranchMessageAction({
       size="icon-sm"
       variant="ghost"
       aria-label={t('Branch conversation')}
+      title={t('Branch conversation')}
       disabled={mutation.isPending || unfinished}
       onClick={() => mutation.mutate()}
     >
