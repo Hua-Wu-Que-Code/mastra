@@ -98,6 +98,13 @@ export class ModelHubGateway extends MastraModelGateway {
         gateway: this.id,
         apiKeyEnvVar: 'ALTFLOW_MODELHUB_API_KEY',
         url: this.#baseURL,
+        modelNames: Object.fromEntries(catalog.free_chat_models.map(model => [model.id, model.display_name])),
+        modelReasoning: Object.fromEntries(
+          catalog.free_chat_models.map(model => [model.id, {
+            defaultLevel: model.default_thinking_level,
+            levels: model.thinking_options.map(option => option.level),
+          }]),
+        ),
         models: [...catalog.free_chat_models]
           .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
           .map(model => model.id),
@@ -126,10 +133,13 @@ export class ModelHubGateway extends MastraModelGateway {
         // per HTTP call so catalog changes apply to later generations too.
         const catalog = await this.catalog();
         const product = catalog.free_chat_models.find(model => model.id === modelId);
-        const option = product?.thinking_options.find(option => option.level === product.default_thinking_level);
-        if (!product || !option) throw new Error('Model is not in the ModelHub product catalog');
         const body = JSON.parse(init.body);
+        if (!product) throw new Error('Model is not in the ModelHub product catalog');
+        const level = body.reasoningLevel ?? product.default_thinking_level;
+        const option = product.thinking_options.find(option => option.level === level);
+        if (!option) throw new Error('Unsupported ModelHub reasoning level; select a level from the current catalog');
         for (const key of [
+          'reasoningLevel',
           'reasoning_effort',
           'thinking',
           'thinking_budget',

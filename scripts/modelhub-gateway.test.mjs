@@ -63,3 +63,31 @@ test('invalid or unavailable first catalog fails closed', async t => {
   await assert.rejects(new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL }).fetchProviders());
   assert.throws(() => new ModelHubGateway({ apiKey: 'test-key', baseURL: 'http://untrusted.example/v1' }));
 });
+
+
+test('catalog publishes names and supported reasoning; a selected level controls the upstream route', async t => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  hub.state.catalog.free_chat_models[1].thinking_options.push({
+    level: 'off', target: 'qwen-no-thinking', supports_thinking_level: false, supports_thinking_budget: false,
+  });
+  const gateway = new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL });
+  const providers = await gateway.fetchProviders();
+  assert.equal(providers.altflow.modelNames['qwen3.8-max'], 'Qwen3.8 Max');
+  assert.deepEqual(providers.altflow.modelReasoning['qwen3.8-max'], { defaultLevel: 'high', levels: ['high', 'off'] });
+  const model = await gateway.resolveLanguageModel({ modelId: 'qwen3.8-max' });
+  const generate = level => model.doGenerate({
+    prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+    providerOptions: { altflow: { reasoningLevel: level } },
+  });
+  await generate('off');
+  assert.equal(hub.state.requests[0].body.model, 'qwen-no-thinking');
+  assert.equal(hub.state.requests[0].body.metadata.modelhub_thinking_level, 'off');
+  assert.equal('modelhub_reasoning_effort' in hub.state.requests[0].body, false);
+  assert.equal('modelhub_thinking_budget' in hub.state.requests[0].body, false);
+  assert.equal('reasoningLevel' in hub.state.requests[0].body, false);
+  await generate('high');
+  assert.equal(hub.state.requests[1].body.modelhub_thinking_budget, 8000);
+  await assert.rejects(generate('unsupported'), /reasoning level/);
+  assert.equal(hub.state.requests.length, 2);
+});
