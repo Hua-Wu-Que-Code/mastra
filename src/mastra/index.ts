@@ -143,8 +143,9 @@ const creatorAgent = new Agent({
     vector,
     embedder: localEmbedder,
     options: {
-      // The durable checkpoint projects history at the provider boundary. A second
-      // history limiter/OM projection would erase the prefix the checkpoint represents.
+      // Register the shared engine so request-level preferences can control observations.
+      observationalMemory: { model },
+      // Auto leaves history to token-budget compaction; requests can impose a smaller count.
       lastMessages: Number.MAX_SAFE_INTEGER,
       semanticRecall: false,
       workingMemory: {

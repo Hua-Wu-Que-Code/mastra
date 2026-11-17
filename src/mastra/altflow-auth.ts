@@ -76,13 +76,44 @@ const forbiddenOverrides = new Set([
   'userPermissions',
   'userRoles',
 ]);
+const conversationMemory = z
+  .object({
+    thread: z
+      .union([z.string(), z.object({ id: z.string() }).strict()])
+      .optional(),
+    resource: z.string().optional(),
+    options: z
+      .object({
+        lastMessages: z
+          .union([
+            z.literal(false),
+            z.number().int().min(0).max(10000),
+            z.literal(Number.MAX_SAFE_INTEGER),
+          ])
+          .optional(),
+        workingMemory: z.object({ enabled: z.boolean() }).strict().optional(),
+        observationalMemory: z.boolean().optional(),
+        semanticRecall: z.literal(false).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+const conversationStreamOptions = z
+  .object({
+    memory: conversationMemory.optional(),
+    disableSubAgents: z.boolean().optional(),
+  })
+  .strict();
 function hasOverride(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
   if (Array.isArray(value)) return value.some(hasOverride);
   return Object.entries(value).some(
     ([key, child]) =>
       key.startsWith('mastra__') ||
-      forbiddenOverrides.has(key) ||
+      (key === 'streamOptions' ? !conversationStreamOptions.safeParse(child).success : forbiddenOverrides.has(key)) ||
+      (key === 'memory' && !conversationMemory.safeParse(child).success) ||
+      (key === 'disableSubAgents' && typeof child !== 'boolean') ||
       ((key === 'requestContext' || key === 'ifIdle') && hasOverride(child)),
   );
 }

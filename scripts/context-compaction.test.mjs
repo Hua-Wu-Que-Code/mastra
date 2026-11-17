@@ -65,7 +65,7 @@ async function setup(t, trace = false) {
     await storage.close();
     await rm(dir, { recursive: true, force: true });
   });
-  const agent = async (tools = {}, modelId = 'deepseek-v4-pro') => {
+  const agent = async (tools = {}, modelId = 'deepseek-v4-pro', memoryOptions = {}) => {
     const compaction = new ContextCompaction({ gateway, storage });
     const instance = new Agent({
       id: 'test',
@@ -78,6 +78,7 @@ async function setup(t, trace = false) {
           lastMessages: Number.MAX_SAFE_INTEGER,
           semanticRecall: false,
           generateTitle: false,
+          ...memoryOptions,
         },
       }),
       inputProcessors: [compaction],
@@ -281,4 +282,25 @@ test('cancelled summarization never commits a checkpoint or sends a continuation
   });
   assert.equal(saved.metadata.dshContext?.checkpoint, undefined);
   assert.equal(hub.state.requests.filter(request => !isSummary(request)).length, 0);
+});
+
+test('memory off excludes stored history, working notes and observations while retaining stored records', async t => {
+  const { hub, store, agent, seed, gateway } = await setup(t);
+  await seed(4, 64);
+  await store.saveResource({ resource: { id: 'owner', workingMemory: 'PRIVATE_WORKING_NOTE', createdAt: new Date(), updatedAt: new Date() } });
+  const instance = await agent({}, 'deepseek-v4-pro', {
+    workingMemory: { enabled: true, scope: 'resource' },
+    observationalMemory: { model: await gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' }) },
+  });
+  const result = await instance.generate('CURRENT TASK ONLY', {
+    ...options,
+    memory: { ...options.memory, options: { lastMessages: false, semanticRecall: false,
+      workingMemory: { enabled: false }, observationalMemory: false } },
+  });
+  assert.equal(result.text, 'verified');
+  const main = hub.state.requests.filter(request => !isSummary(request)).at(-1).body;
+  assert.doesNotMatch(JSON.stringify(main), /PRIVATE_WORKING_NOTE|old-0: original fact|updateWorkingMemory/);
+  assert.match(JSON.stringify(main.messages), /CURRENT TASK ONLY/);
+  const stored = await store.listMessages({ threadId: 'thread', resourceId: 'owner', perPage: 100 });
+  assert.ok(stored.messages.some(message => message.id === 'old-0'));
 });
