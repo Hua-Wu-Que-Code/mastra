@@ -49,6 +49,9 @@ export async function modelHubFixture() {
     unavailable: false,
     toolCallText: undefined,
     blocked: false,
+    summaryText: '## Primary Request and Intent\n- Preserve original task.\n## Current Work\n- Continue the task.',
+    summaryFinish: 'stop',
+    rejectContextOnce: false,
   };
   const server = createServer(async (request, response) => {
     if (request.url === '/v1/model-catalog') {
@@ -64,9 +67,17 @@ export async function modelHubFixture() {
       for await (const chunk of request) raw += chunk;
       state.requests.push({ body: JSON.parse(raw), authorization: request.headers.authorization });
       const body = JSON.parse(raw);
+      state.onRequest?.(body);
       while (state.blocked) await new Promise((resolve) => setTimeout(resolve, 20));
+      const summarizing = body.messages.at(-1)?.content?.includes('You are now acting as a compaction engine');
+      if (state.rejectContextOnce && !summarizing) {
+        state.rejectContextOnce = false;
+        response.writeHead(400, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ error: { message: 'maximum context length exceeded', code: 'context_length_exceeded' } }));
+        return;
+      }
       const callTool =
-        state.toolCallText !== undefined &&
+        !summarizing && state.toolCallText !== undefined &&
         body.tools?.some((tool) => tool.function?.name === 'countText') &&
         !body.messages.some((message) => message.role === 'tool');
       const message = callTool
@@ -84,9 +95,11 @@ export async function modelHubFixture() {
               },
             ],
           }
-        : { role: 'assistant', content: 'verified' };
-      const finishReason = callTool ? 'tool_calls' : 'stop';
-      const usage = { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
+        : { role: 'assistant', content: summarizing ? state.summaryText : 'verified' };
+      const finishReason = summarizing ? state.summaryFinish : callTool ? 'tool_calls' : 'stop';
+      const usage = summarizing
+        ? { prompt_tokens: 100, completion_tokens: 1, total_tokens: 101, prompt_tokens_details: { cached_tokens: 80 } }
+        : { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
       if (body.stream) {
         response.writeHead(200, { 'Content-Type': 'text/event-stream' });
         const chunk = (delta) => ({

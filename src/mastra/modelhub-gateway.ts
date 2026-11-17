@@ -1,7 +1,8 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { MastraModelGateway } from '@mastra/core/llm';
-import type { GatewayLanguageModel, ProviderConfig } from '@mastra/core/llm';
+import type { ProviderConfig } from '@mastra/core/llm';
 import { z } from 'zod';
+import { contextPolicy } from './context-policy.ts';
 
 const optionSchema = z
   .object({
@@ -147,7 +148,7 @@ export class ModelHubGateway extends MastraModelGateway {
       Object.fromEntries(
         model.thinking_options.flatMap((option) => {
           const capacity = info[option.target];
-          return capacity === undefined ? [] : [[option.level, capacity]];
+          return capacity === undefined ? [] : [[option.level, contextPolicy(capacity).window]];
         }),
       );
     return {
@@ -185,7 +186,14 @@ export class ModelHubGateway extends MastraModelGateway {
   async getApiKey() {
     return this.#apiKey;
   }
-  async resolveLanguageModel({ modelId }: { modelId: string }): Promise<GatewayLanguageModel> {
+  async resolveLanguageModel({ modelId }: { modelId: string }) {
+    return this.#languageModel(modelId, false);
+  }
+  /** Only the server's checkpoint processor uses the auxiliary completion reservation. */
+  async resolveSummaryModel(modelId: string) {
+    return this.#languageModel(modelId, true);
+  }
+  async #languageModel(modelId: string, summary: boolean) {
     if (!(await this.catalog()).free_chat_models.some((model) => model.id === modelId))
       throw new Error('Model is not in the ModelHub product catalog');
     const provider = createOpenAICompatible({
@@ -217,6 +225,13 @@ export class ModelHubGateway extends MastraModelGateway {
           'modelhub_thinking_budget',
         ])
           delete body[key];
+        const capacity = (await this.modelInfo())[option.target];
+        const policy = contextPolicy(capacity);
+        const outputLimit = summary ? 65536 : policy.output;
+        body.max_tokens = Math.min(
+          typeof body.max_tokens === 'number' && body.max_tokens > 0 ? body.max_tokens : outputLimit,
+          outputLimit,
+        );
         body.model = option.target;
         if (option.supports_thinking_level) body.modelhub_reasoning_effort = option.level;
         if (option.supports_thinking_budget) body.modelhub_thinking_budget = option.agent_budget_tokens;

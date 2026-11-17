@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "verify": "node scripts/verify.mjs",
     "dev:auth": "node start-auth.mjs",
-    "test": "node --test scripts/modelhub-gateway.test.mjs"
+    "test": "node --test scripts/modelhub-gateway.test.mjs scripts/context-compaction.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "2.0.88",

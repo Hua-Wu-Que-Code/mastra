@@ -79,7 +79,7 @@ test('catalog publishes names and supported reasoning; a selected level controls
   assert.deepEqual(providers.altflow.modelReasoning['qwen3.8-max'], {
     defaultLevel: 'high',
     levels: ['high', 'off'],
-    contextWindows: { high: 983616 },
+    contextWindows: { high: 131072 },
   });
   const model = await gateway.resolveLanguageModel({ modelId: 'qwen3.8-max' });
   const generate = (level) =>
@@ -114,9 +114,9 @@ test('model/info supplies exact per-reasoning route capacities without guessing 
   );
   const gateway = new ModelHubGateway({ apiKey: 'test-key', baseURL: hub.baseURL });
   const { altflow } = await gateway.fetchProviders();
-  assert.equal(altflow.modelContextWindows['deepseek-v4-pro'], 1048576);
-  assert.equal(altflow.modelContextWindows['qwen3.8-max'], 983616);
-  assert.deepEqual(altflow.modelReasoning['qwen3.8-max'].contextWindows, { high: 983616, off: 991808 });
+  assert.equal(altflow.modelContextWindows['deepseek-v4-pro'], 131072);
+  assert.equal(altflow.modelContextWindows['qwen3.8-max'], 131072);
+  assert.deepEqual(altflow.modelReasoning['qwen3.8-max'].contextWindows, { high: 131072, off: 131072 });
   await gateway.fetchProviders();
   assert.equal(hub.state.infos, 1);
 });
@@ -132,4 +132,16 @@ test('missing or unavailable model/info never fabricates a context capacity or b
   const unavailable = await gateway.fetchProviders();
   assert.deepEqual(unavailable.altflow.modelContextWindows, {});
   assert.equal((await gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' })).modelId, 'deepseek-v4-pro');
+});
+
+
+test('gateway caps output for every call while retaining the physical model/info limit', async t => {
+  const hub = await modelHubFixture(); t.after(hub.close);
+  const gateway = new ModelHubGateway({ apiKey: 'test', baseURL: hub.baseURL });
+  assert.equal((await gateway.modelInfo())['internal-deepseek-route'], 1048576);
+  const model = await gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' });
+  await model.doGenerate({ prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }], maxOutputTokens: 64000 });
+  assert.equal(hub.state.requests.at(-1).body.max_tokens, 8192);
+  await model.doGenerate({ prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }], maxOutputTokens: 100 });
+  assert.equal(hub.state.requests.at(-1).body.max_tokens, 100);
 });

@@ -1,7 +1,6 @@
 import { Mastra } from '@mastra/core';
 import { Agent } from '@mastra/core/agent';
 import { Knowledge, knowledgeMemoryScopes } from '@mastra/core/knowledge';
-import { TokenLimiter } from '@mastra/core/processors';
 import { MastraCompositeStore } from '@mastra/core/storage';
 import { createTool } from '@mastra/core/tools';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
@@ -18,6 +17,7 @@ import { z } from 'zod';
 import { localEmbedder } from './embedding';
 import { createAltFlowAuth } from './altflow-auth';
 import { ModelHubGateway } from './modelhub-gateway';
+import { ContextCompaction } from './context-compaction';
 
 const previewPath = (...parts: string[]) => resolve(process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(), ...parts);
 const accounts = createAltFlowAuth({
@@ -126,7 +126,7 @@ const textReview = createWorkflow({
   .then(analyzeText)
   .then(composeReport)
   .commit();
-const contextLimiter = new TokenLimiter({ limit: 48000 });
+const contextCompaction = new ContextCompaction({ gateway: modelHub, storage });
 const creatorAgent = new Agent({
   id: 'creator-agent',
   name: '创作者助手',
@@ -143,10 +143,10 @@ const creatorAgent = new Agent({
     vector,
     embedder: localEmbedder,
     options: {
-      // Use the existing authenticated gateway for both observation and reflection.
-      observationalMemory: { model },
-      lastMessages: 20,
-      semanticRecall: { topK: 4, messageRange: { before: 1, after: 1 }, scope: 'resource' },
+      // The durable checkpoint projects history at the provider boundary. A second
+      // history limiter/OM projection would erase the prefix the checkpoint represents.
+      lastMessages: Number.MAX_SAFE_INTEGER,
+      semanticRecall: false,
       workingMemory: {
         enabled: true,
         scope: 'resource',
@@ -155,7 +155,9 @@ const creatorAgent = new Agent({
       generateTitle: { instructions: '根据首条用户消息生成简洁的中文对话标题，不超过 12 个汉字，只输出标题。' },
     },
   }),
-  inputProcessors: [contextLimiter],
+  inputProcessors: [contextCompaction],
+  outputProcessors: [contextCompaction],
+  errorProcessors: [contextCompaction],
   tools: { countText },
   workflows: { textReview },
 });
@@ -165,7 +167,7 @@ export const mastra = new Mastra({
   agents: { creatorAgent },
   workflows: { textReview },
   tools: { countText },
-  processors: { contextLimiter },
+  processors: { contextCompaction },
   workspace,
   knowledge: { creatorKnowledge: knowledge },
   vectors: { creatorVectors: vector },
