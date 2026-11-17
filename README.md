@@ -9,8 +9,9 @@ Go 后端复用 AltFlow 的密码登录、令牌校验、退出和账号角色�
 1. `npm ci`，复制 `.env.example` 为 `.env`。
 2. 配置 `ALTFLOW_BACKEND_REPO` 和 `ALTFLOW_BACKEND_ENV_FILE`，指向含 `cmd/studio-auth` 的 Go 仓库及本地环境文件。
 3. 配置 `ALTFLOW_MODELHUB_API_KEY`；或通过 `ALTFLOW_MODELHUB_ENV_FILE` 明确指定含 `LITELLM_MASTER_KEY` 的文件。启动器不会搜索其他目录的密钥。
-4. 分别运行 `npm run dev:auth` 和 `npm run dev`，监听 `127.0.0.1:8080` 和 `127.0.0.1:4111`。
-5. 在修改后的 Mastra 仓库运行 Studio 的 Vite 开发服务，端口 5174，将 `/api`、`/account` 代理到 4111。
+4. 配置服务端 `ALTFLOW_OSS_ACCESS_KEY_ID`、`ALTFLOW_OSS_ACCESS_KEY_SECRET`，以及 `.env.example` 中的 OSS 桶和区域。
+5. 分别运行 `npm run dev:auth` 和 `npm run dev`，监听 `127.0.0.1:8080` 和 `127.0.0.1:4111`。
+6. 在修改后的 Mastra 仓库运行 Studio 的 Vite 开发服务，端口 5174，将 `/api`、`/account`、`/storage` 代理到 4111。
 
 Go 认证入口只用于本地开发，不启动项目任务恢复或业务后台任务，不迁移数据库。正式部署应让 `ALTFLOW_BACKEND_URL` 指向正式 Go 服务，配置 `STUDIO_ALLOWED_ORIGINS`，使用 HTTPS、持久化存储及生产进程入口；这份开发启动脚本不承担部署。
 
@@ -25,12 +26,12 @@ Go 认证入口只用于本地开发，不启动项目任务恢复或业务后�
 - `admin` 角色显示管理入口；`creator`、旧 `user` 角色只能对话及读取获授权的知识。每次 API 请求向 Go 校验身份，角色变更、停用、退出立即生效。
 - Cookie 使用 HttpOnly、SameSite=Lax；生产环境附加 Secure。写请求校验 Origin，远程认证服务必须 HTTPS。前端隐藏入口之外，服务端也检查权限及配置覆盖。
 - 会话、消息、工作记忆、观察记忆、私人知识按 Go 用户 ID 隔离，管理员也不能读取其他用户的这些私人数据。
-- `library:creator` 是共享创作资料，管理员维护、普通用户读取。管理员的文件工作区、工作流记录和全局追踪/日志属于管理资源，**不是按账号隔离的私人空间**。正式多租户场景需另行拆分这些资源。
+- `library:creator` 是共享创作资料，管理员维护、普通用户读取。全局管理员工作区、工作流记录和全局追踪/日志属于管理资源，**不是按账号隔离的私人空间**。正式多租户场景需另行拆分这些资源。
 - `ALTFLOW_LEGACY_OWNER_ID` 可将接入账号前的本地会话明确归属给一个用户，默认不映射。
 
 ## 能力和持久化
 
-默认开启工作记忆、中文标题和 DSH 检查点压缩。Agent 默认无需审批即可执行已提供的工具。字符统计工具、篇幅检查工作流、知识库、编辑器、MCP、文件工作区及可观测性保留给管理员。
+默认开启工作记忆、中文标题和 DSH 检查点压缩。Agent 默认无需审批即可执行已提供的工具。字符统计工具、篇幅检查工作流、知识库管理、编辑器、MCP 及全局可观测性保留给管理员。所有已登录用户均可通过 Agent 使用自己的私有文件工作区。
 
 ### DSH 上下文策略
 
@@ -54,3 +55,16 @@ Go 认证入口只用于本地开发，不启动项目任务恢复或业务后�
 - 设置 `TEST_STUDIO_DATABASE_URL` 后运行 `npm run verify`：真实 Go 密码验证、临时 Mastra 实例及独立账号，验证角色、跨用户隔离、私有知识、目录过滤、自动工具执行、繁忙时排队与插话、停用、角色变更和退出。
 - 测试库名必须以 `studio_auth_verify_` 开头，并预先人工准备与 Go 相同的 schema。测试不自动迁移，不使用正常业务库。
 - `TEST_STUDIO_LIVE_MODEL=1 npm run verify` 使用真实 ModelHub 目录及模型，验证回复和消息保存，会产生模型费用。默认验证使用本地 HTTP 目录服务。
+
+## 用户文件与 512 MB 配额
+
+- 文件内容使用阿里云 OSS 官方 Node.js SDK、V4 签名和 HTTPS，写入私有桶 `altflow-harness`。对象键为 `users/<用户ID的SHA256>/objects/<UUID>`；文件名和权限由服务端账本管理，不接受前端传入的用户 ID。密钥只在服务端环境中配置。
+- `data/user-files.db` 保存路径、文件大小、来源、摘要、配额预留和失败清理记录。它是新建的专用文件账本，不修改账号/会话库 schema。部署时必须同时持久化、备份该账本与 OSS 对象；多实例须使用同一个账本，不能各自用本地 SQLite。
+- 每个账号 `512 × 1024 × 1024` 字节。上传和 Agent 写文件共用事务配额预留，并发上传不能超额。相同上传 ID 与内容可安全重试；覆盖只计算新旧文件的大小差额。删除 OSS 成功后才释放容量；失败保留文件及容量。覆盖产生的旧对象清理失败会持久化记录，启动时和每 10 分钟重试。
+- 附件先保存再发送消息。文本/其他文档通过工作区文件工具读取，图片和 PDF 同时保留原生模型输入。Agent 的 `read_file`、`write_file`、`edit_file`、`list_files` 等工具都使用同一账号空间，不再落入全局管理员目录。生成文件在设置的存储页可下载。
+- `/storage`、`/storage/upload`、`/storage/download`、`/storage/file` 每次复用 Go 身份验证；Cookie 写请求校验 Origin，下载无公共 OSS URL。页面支持容量条、文件/图像分类、搜索、下载、删除确认和错误恢复。
+- 当前身份需有桶内 `users/*` 的 `oss:PutObject`、`oss:GetObject`、`oss:DeleteObject` 权限。验证前缀 `integration-tests/*` 用于独立连通性检查。删除权限缺失时页面会报错，不会伪造删除成功。
+- `node --import tsx scripts/import-legacy-files.mjs` 可恢复历史会话中的原始文本附件和内联文件，按会话账本归属写入用户空间。旧 `creator-agent` 资源必须有明确的 `ALTFLOW_LEGACY_OWNER_ID`；不推断归属、不下载历史外部 URL、不改写会话，重复执行不会重复占用空间。
+- `npm test` 包含真实 OSS SDK 对接本地 HTTP 边界、真实临时 LibSQL、真实文件适配器和 HTTP 路由验证，覆盖并发配额、身份隔离、Origin、重启恢复、读取/生成、下载和失败删除。
+
+官方参考：[Mastra 文件系统](https://mastra.ai/docs/sandbox/filesystem)、[OSS Node.js SDK 初始化](https://www.alibabacloud.com/help/en/oss/initialization-10)。

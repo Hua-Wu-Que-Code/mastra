@@ -13,21 +13,25 @@ import { Memory } from '@mastra/memory';
 import { Observability, MastraStorageExporter } from '@mastra/observability';
 import { KNOWLEDGE_ROUTES } from '@mastra/server/server-adapter';
 import { resolve } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import OSS from 'ali-oss';
 import { z } from 'zod';
 import { localEmbedder } from './embedding';
 import { createAltFlowAuth } from './altflow-auth';
 import { ModelHubGateway } from './modelhub-gateway';
 import { ContextCompaction } from './context-compaction';
+import { UserStorage } from './user-storage';
+import { UserFilesystem } from './user-filesystem';
+import { userStorageRoutes } from './user-storage-routes';
 
 const previewPath = (...parts: string[]) => resolve(process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(), ...parts);
+const accountsOrigins = (
+  process.env.STUDIO_ALLOWED_ORIGINS ??
+  'http://127.0.0.1:5174,http://127.0.0.1:4111,http://localhost:5174,http://localhost:4111'
+).split(',').map(value => value.trim());
 const accounts = createAltFlowAuth({
   backendUrl: process.env.ALTFLOW_BACKEND_URL ?? 'http://127.0.0.1:8080',
-  origins: (
-    process.env.STUDIO_ALLOWED_ORIGINS ??
-    'http://127.0.0.1:5174,http://127.0.0.1:4111,http://localhost:5174,http://localhost:4111'
-  )
-    .split(',')
-    .map(value => value.trim()),
+  origins: accountsOrigins,
   secureCookies: process.env.NODE_ENV === 'production',
   legacyOwnerId: process.env.ALTFLOW_LEGACY_OWNER_ID,
 });
@@ -46,6 +50,30 @@ const storage = new MastraCompositeStore({
   },
 });
 const vector = new LibSQLVector({ id: 'creator-vectors', url: `file:${previewPath('data/vectors.db')}` });
+await mkdir(previewPath('data'), { recursive: true });
+const ossKey = process.env.ALTFLOW_OSS_ACCESS_KEY_ID;
+const ossSecret = process.env.ALTFLOW_OSS_ACCESS_KEY_SECRET;
+if (!ossKey || !ossSecret)
+  throw new Error(
+    'Configure server-only ALTFLOW_OSS_ACCESS_KEY_ID and ALTFLOW_OSS_ACCESS_KEY_SECRET',
+  );
+const userFiles = new UserStorage({
+  client: new OSS({
+    accessKeyId: ossKey,
+    accessKeySecret: ossSecret,
+    region: process.env.ALTFLOW_OSS_REGION ?? 'oss-cn-beijing',
+    bucket: process.env.ALTFLOW_OSS_BUCKET ?? 'altflow-harness',
+    endpoint: process.env.ALTFLOW_OSS_ENDPOINT ?? 'https://oss-cn-beijing.aliyuncs.com',
+    authorizationV4: true,
+    timeout: 30000,
+  }),
+  databaseUrl:
+    process.env.ALTFLOW_FILES_DATABASE_URL ?? `file:${previewPath('data/user-files.db')}`,
+  authToken: process.env.ALTFLOW_FILES_DATABASE_AUTH_TOKEN,
+});
+await userFiles.init();
+const recoveryTimer = setInterval(() => void userFiles.recover().catch(() => {}), 10 * 60_000);
+recoveryTimer.unref();
 const workspace = new Workspace({
   id: 'creator-workspace',
   name: '创作工作区',
@@ -131,10 +159,15 @@ const creatorAgent = new Agent({
   id: 'creator-agent',
   name: '创作者助手',
   instructions:
-    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。工作区之外的文件和联网权限未提供，不要声称拥有。不要编造工具结果。',
+    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。工作区之外的文件和联网权限未提供，不要声称拥有。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取；生成的文件也写入该工作区。写入成功后提供下载链接，格式为 [下载文件](/storage/download?path=URL编码后的绝对文件路径)。',
   model,
   defaultOptions: { requireToolApproval: false },
-  workspace: ({ user }) => (user?.role === 'admin' ? workspace : undefined),
+  workspace: async ({ user }) => {
+    if (!user?.id) return undefined;
+    const privateWorkspace = new Workspace({ id: `files-${user.id}`, name: '我的文件', filesystem: new UserFilesystem(userFiles, user.id) });
+    await privateWorkspace.init();
+    return privateWorkspace;
+  },
   knowledge,
   // Server auth supplies library access; do not grant every caller ownership.
   scopes: ({ scopes }) => scopes,
@@ -184,7 +217,11 @@ export const mastra = new Mastra({
     host: '127.0.0.1',
     port: Number(process.env.STUDIO_PORT ?? 4111),
     auth: accounts.auth,
-    apiRoutes: [...accounts.apiRoutes, ...KNOWLEDGE_ROUTES],
+    apiRoutes: [
+      ...accounts.apiRoutes,
+      ...userStorageRoutes(userFiles, accounts.authenticate, accountsOrigins),
+      ...KNOWLEDGE_ROUTES,
+    ],
     cors: {
       origin: (
         process.env.STUDIO_ALLOWED_ORIGINS ??
