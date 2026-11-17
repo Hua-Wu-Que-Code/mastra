@@ -99,12 +99,24 @@ export function projectRunMetrics(trace: ChatTrace): RunMetrics {
   const spans = [...new Map(trace.spans.map(span => [span.spanId, span])).values()];
   const root = spans.find(span => span.parentSpanId === null && span.spanType === 'agent_run');
   const calls = usageSpans(spans);
-  const steps = spans.filter(span => span.spanType === 'model_step').length;
+  const main = mainLoopSpans(spans, root);
+  const mainCalls = calls.filter(span => main.has(span.spanId));
+  const stepSpans = spans.filter(span => main.has(span.spanId) && span.spanType === 'model_step');
+  const steps = stepSpans.length
+    ? new Set(
+        stepSpans
+          .filter(span => instant(span.endedAt) !== undefined)
+          .map(span => {
+            const index = isRecord(span.attributes) ? count(span.attributes.stepIndex) : undefined;
+            return index === undefined ? span.spanId : String(index);
+          }),
+      ).size
+    : mainCalls.filter(span => instant(span.endedAt) !== undefined).length;
   let llmMs = 0;
   let toolMs = 0;
   let ttftMs = 0;
   let ttftSteps = 0;
-  for (const span of calls) {
+  for (const span of mainCalls) {
     const start = instant(span.startedAt);
     const end = instant(span.endedAt);
     if (start !== undefined && end !== undefined) llmMs += Math.max(0, end - start);
@@ -116,14 +128,14 @@ export function projectRunMetrics(trace: ChatTrace): RunMetrics {
     }
   }
   for (const span of spans) {
-    if (span.spanType !== 'tool_call') continue;
+    if (span.spanType !== 'tool_call' || !main.has(span.spanId)) continue;
     const start = instant(span.startedAt);
     const end = instant(span.endedAt);
     if (start !== undefined && end !== undefined) toolMs += Math.max(0, end - start);
   }
   let decodeMs = 0;
   let decodeTokens = 0;
-  for (const span of calls) {
+  for (const span of mainCalls) {
     if (span.spanType !== 'model_inference') continue;
     const attributes = isRecord(span.attributes) ? span.attributes : {};
     const first = instant(attributes.completionStartTime);
@@ -144,13 +156,13 @@ export function projectRunMetrics(trace: ChatTrace): RunMetrics {
         : typeof attributes.finishReason === 'string'
           ? attributes.finishReason
           : root?.status,
-    steps: steps || calls.length,
+    steps,
     models: calls.map(modelUsage),
     llmMs,
     toolMs,
     ttftMs,
     ttftSteps,
-    context: contextReading(contextCalls(calls, spans, root)),
+    context: contextReading(mainCalls),
     decodeMs,
     decodeTokens,
   };
@@ -186,28 +198,40 @@ export function uncachedTokens(usage: ModelUsage): number | undefined {
   return count(usage.input - usage.cacheRead - usage.cacheWrite);
 }
 
-/** Root first-chunk attribution identifies its own loop even when title/processor calls share the trace. */
-function contextCalls(calls: ChatSpan[], spans: ChatSpan[], root?: ChatSpan): ChatSpan[] {
+/** Main-loop lifecycle only; sidecars remain billable but cannot create turns or steps. */
+function mainLoopSpans(spans: ChatSpan[], root?: ChatSpan): Set<string> {
   const attributes = isRecord(root?.attributes) ? root.attributes : {};
   const firstChunk = instant(attributes.completionStartTime);
-  // Older traces do not carry root attribution; preserve their latest-call fallback.
-  if (firstChunk === undefined) return calls;
-  const generation = spans.find(span => {
-    const attributes = isRecord(span.attributes) ? span.attributes : {};
-    return span.spanType === 'model_generation' && instant(attributes.completionStartTime) === firstChunk;
-  });
-  if (!generation) return [];
+  const generations = spans.filter(span => span.spanType === 'model_generation');
+  const generation =
+    generations.find(
+      span => isRecord(span.metadata) && span.metadata.agentMainLoop === true && span.parentSpanId === root?.spanId,
+    ) ??
+    (firstChunk === undefined
+      ? undefined
+      : generations.find(
+          span => isRecord(span.attributes) && instant(span.attributes.completionStartTime) === firstChunk,
+        )) ??
+    generations
+      .filter(span => span.parentSpanId === root?.spanId)
+      .sort((a, b) => (instant(a.startedAt) ?? 0) - (instant(b.startedAt) ?? 0))[0];
   const byId = new Map(spans.map(span => [span.spanId, span]));
-  return calls.filter(span => {
-    const visited = new Set<string>();
-    let id: string | null | undefined = span.spanId;
-    while (id && !visited.has(id)) {
-      if (id === generation.spanId) return true;
-      visited.add(id);
-      id = byId.get(id)?.parentSpanId;
-    }
-    return false;
-  });
+  return new Set(
+    spans
+      .filter(span => {
+        const visited = new Set<string>();
+        let current: ChatSpan | undefined = span;
+        while (current && !visited.has(current.spanId)) {
+          visited.add(current.spanId);
+          if (isRecord(current.metadata) && current.metadata.auxiliary) return false;
+          if (current.spanType === 'model_generation') return current.spanId === generation?.spanId;
+          if (current.spanType === 'agent_run') return !generation && current.spanId === root?.spanId;
+          current = current.parentSpanId ? byId.get(current.parentSpanId) : undefined;
+        }
+        return false;
+      })
+      .map(span => span.spanId),
+  );
 }
 
 /** Exact input occupancy from the latest main-loop provider request. Never estimate prompt components. */

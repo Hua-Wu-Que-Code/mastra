@@ -2134,7 +2134,7 @@ describe('Conversation process and accounting', () => {
     });
     it('opens session timings and token accounting from the dock', async () => {
       renderThread(measuredConversation);
-      fireEvent.click(await screen.findByRole('button', { name: 'Execution statistics' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Conversation statistics' }));
       expect(await screen.findByText('Model time')).toBeDefined();
       expect(screen.getByText('Average time to first token (TTFT)')).toBeDefined();
       expect(screen.getByText('Output speed (TPS)')).toBeDefined();

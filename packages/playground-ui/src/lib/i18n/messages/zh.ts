@@ -4394,7 +4394,7 @@ export const zh = {
   'Cache write': '缓存写入',
   'Reasoning tokens': '思考 Token',
   'Usage {tokens}': '用量 {tokens}',
-  'Conversation statistics': '对话统计',
+  'Conversation statistics': '会话统计',
   'Execution statistics': '会话统计',
   '{rounds} turns {steps} steps': '{rounds} 轮 {steps} 步',
   'Cache hit {percent}%': '缓存命中 {percent}%',

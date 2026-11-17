@@ -33,7 +33,10 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
   const toolMs = metrics.reduce((sum, metric) => sum + metric.toolMs, 0);
   const ttftMs = metrics.reduce((sum, metric) => sum + metric.ttftMs, 0);
   const ttftSteps = metrics.reduce((sum, metric) => sum + metric.ttftSteps, 0);
-  const counts = t('{rounds} turns {steps} steps', { rounds: metrics.length, steps });
+  const counts = t('{rounds} turns {steps} steps', {
+    rounds: metrics.filter(metric => metric.steps > 0).length,
+    steps,
+  });
   const rows = [
     ...(llmMs > 0 ? [{ label: t('Model time'), value: duration(llmMs) }] : []),
     ...(toolMs > 0 ? [{ label: t('Tool time'), value: duration(toolMs) }] : []),
@@ -65,7 +68,7 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
             {speed !== undefined && <> · {t('{speed} tok/s', { speed })}</>}
           </>
         }
-        title={t('Execution statistics')}
+        title={t('Conversation statistics')}
         value={counts}
         open={card === 'activity'}
         onOpenChange={open => setCard(open ? 'activity' : undefined)}

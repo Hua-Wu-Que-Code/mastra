@@ -78,9 +78,10 @@ describe('durable conversation accounting', () => {
     const metrics = projectRunMetrics(
       trace([
         span(),
-        span({ spanId: 'first', spanType: 'model_inference', attributes: { usage } }),
+        span({ spanId: 'first', parentSpanId: 'root', spanType: 'model_inference', attributes: { usage } }),
         span({
           spanId: 'last',
+          parentSpanId: 'root',
           spanType: 'model_inference',
           startedAt: '2026-11-16T07:54:01Z',
           input: [
@@ -126,5 +127,59 @@ describe('durable conversation accounting', () => {
     expect(metrics.context?.usedTokens).toBe(1000);
     // Sidecar costs are still real provider costs and belong in the token total.
     expect(totalTokens(metrics.models)).toBe(1310);
+  });
+  it('counts closed main steps excluding title, compaction, child agents and in-step retries', () => {
+    const metrics = projectRunMetrics(
+      trace([
+        span(),
+        span({ spanId: 'main', parentSpanId: 'root', spanType: 'model_generation', metadata: { agentMainLoop: true } }),
+        span({ spanId: 'step', parentSpanId: 'main', spanType: 'model_step', attributes: { stepIndex: 0 } }),
+        span({ spanId: 'retry-step', parentSpanId: 'main', spanType: 'model_step', attributes: { stepIndex: 0 } }),
+        span({ spanId: 'retry1', parentSpanId: 'step', spanType: 'model_inference', attributes: { usage } }),
+        span({ spanId: 'retry2', parentSpanId: 'step', spanType: 'model_inference', attributes: { usage } }),
+        span({ spanId: 'tool', parentSpanId: 'step', spanType: 'tool_call' }),
+        span({ spanId: 'open', parentSpanId: 'main', spanType: 'model_step', endedAt: null }),
+        span({ spanId: 'title', parentSpanId: 'root', spanType: 'model_generation' }),
+        span({ spanId: 'title-step', parentSpanId: 'title', spanType: 'model_step' }),
+        span({ spanId: 'compact', parentSpanId: 'step', spanType: 'model_generation' }),
+        span({ spanId: 'compact-step', parentSpanId: 'compact', spanType: 'model_step' }),
+        span({
+          spanId: 'compact-call',
+          parentSpanId: 'step',
+          spanType: 'model_inference',
+          metadata: { auxiliary: 'compaction' },
+          attributes: { usage: { inputTokens: 90000, outputTokens: 1000 } },
+        }),
+        span({ spanId: 'child', parentSpanId: 'tool', spanType: 'agent_run' }),
+        span({
+          spanId: 'child-main',
+          parentSpanId: 'child',
+          spanType: 'model_generation',
+          metadata: { agentMainLoop: true },
+        }),
+        span({ spanId: 'child-step', parentSpanId: 'child-main', spanType: 'model_step' }),
+      ]),
+    );
+    expect(metrics.steps).toBe(1);
+    expect(metrics.models.filter(model => model.input === 1000)).toHaveLength(2);
+    expect(metrics.context?.usedTokens).toBe(1000);
+    expect(metrics.llmMs).toBe(6000);
+  });
+  it('counts failed steps before the first token and leaves admission failures at zero', () => {
+    expect(projectRunMetrics(trace([span()])).steps).toBe(0);
+    expect(
+      projectRunMetrics(
+        trace([
+          span({ outcome: 'failed' }),
+          span({
+            spanId: 'main',
+            parentSpanId: 'root',
+            spanType: 'model_generation',
+            metadata: { agentMainLoop: true },
+          }),
+          span({ spanId: 'failed', parentSpanId: 'main', spanType: 'model_step', status: 'error' }),
+        ]),
+      ).steps,
+    ).toBe(1);
   });
 });

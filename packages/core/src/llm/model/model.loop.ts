@@ -213,6 +213,8 @@ export class MastraLLMVNext extends MastraBase {
         runId,
         threadId,
         resourceId,
+        // Lifecycle attribution survives failures before the first token and excludes auxiliary calls.
+        agentMainLoop: Boolean(agentRunSpan),
       },
       tracingPolicy: this.#options?.tracingPolicy,
       requestContext,
