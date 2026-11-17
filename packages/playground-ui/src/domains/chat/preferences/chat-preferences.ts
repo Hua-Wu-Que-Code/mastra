@@ -6,6 +6,9 @@ export const WORK_DETAIL_MODES = ['compact', 'standard', 'detailed', 'verbose'] 
 export type WorkDetailMode = (typeof WORK_DETAIL_MODES)[number];
 
 export interface ChatPreferences {
+  plainText: boolean;
+  showContextUsage: boolean;
+  sendShortcut: 'enter' | 'mod-enter';
   busyEnter: 'queue' | 'steer';
   fontSize: number;
   workDetails: WorkDetailMode;
@@ -14,6 +17,9 @@ export interface ChatPreferences {
 }
 
 export const DEFAULT_CHAT_PREFERENCES: ChatPreferences = {
+  plainText: true,
+  showContextUsage: true,
+  sendShortcut: 'enter',
   busyEnter: 'queue',
   fontSize: 14,
   workDetails: 'detailed',
@@ -29,6 +35,9 @@ function parsePreferences(stored: unknown): ChatPreferences {
   if (typeof stored !== 'object' || stored === null) return DEFAULT_CHAT_PREFERENCES;
   const fontSize = 'fontSize' in stored ? stored.fontSize : undefined;
   return {
+    plainText: !('plainText' in stored) || stored.plainText !== false,
+    showContextUsage: !('showContextUsage' in stored) || stored.showContextUsage !== false,
+    sendShortcut: 'sendShortcut' in stored && stored.sendShortcut === 'mod-enter' ? 'mod-enter' : 'enter',
     busyEnter: 'busyEnter' in stored && stored.busyEnter === 'steer' ? 'steer' : 'queue',
     fontSize:
       typeof fontSize === 'number' &&

@@ -57,7 +57,7 @@ function createRouter(document: Document) {
   };
 
   document.addEventListener('focusin', onFocus, true);
-  document.addEventListener('paste', onPaste);
+  document.addEventListener('paste', onPaste, true);
   return {
     register(target: PasteTarget) {
       targets.add(target);
@@ -66,7 +66,7 @@ function createRouter(document: Document) {
         if (focused === target) focused = undefined;
         if (targets.size === 0) {
           document.removeEventListener('focusin', onFocus, true);
-          document.removeEventListener('paste', onPaste);
+          document.removeEventListener('paste', onPaste, true);
           routers.delete(document);
         }
       };

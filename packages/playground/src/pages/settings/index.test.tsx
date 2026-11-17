@@ -58,6 +58,27 @@ afterEach(() => {
 });
 
 describe('StudioSettingsPage', () => {
+  describe('when editor preferences are changed', () => {
+    it('restores input mode, context visibility, shortcut and follow-up behavior', async () => {
+      await renderSettingsPage();
+      const editor = within(screen.getByRole('region', { name: 'Editor', exact: true }));
+      fireEvent.click(editor.getByRole('switch', { name: 'Plain text editor' }));
+      fireEvent.click(editor.getByRole('switch', { name: 'Show context window usage' }));
+      fireEvent.click(editor.getByRole('combobox', { name: 'Send shortcut' }));
+      const option = await screen.findByRole('option', { name: 'Cmd/Ctrl+Enter', exact: true });
+      fireEvent.pointerDown(option, { pointerType: 'mouse' });
+      fireEvent.click(option, { detail: 1 });
+      fireEvent.click(editor.getByRole('button', { name: 'Steer', exact: true }));
+      cleanup();
+      await renderSettingsPage();
+      expect(screen.getByRole('switch', { name: 'Plain text editor' }).getAttribute('aria-checked')).toBe('false');
+      expect(screen.getByRole('switch', { name: 'Show context window usage' }).getAttribute('aria-checked')).toBe(
+        'false',
+      );
+      expect(screen.getByRole('combobox', { name: 'Send shortcut' }).textContent).toContain('Cmd/Ctrl+Enter');
+      expect(screen.getByRole('button', { name: 'Steer', exact: true }).getAttribute('aria-pressed')).toBe('true');
+    });
+  });
   describe('when conversation display preferences are changed', () => {
     it('restores the choices after reopening settings', async () => {
       await renderSettingsPage();

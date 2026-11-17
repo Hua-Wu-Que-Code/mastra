@@ -49,6 +49,7 @@ import { useReadAloud } from '@mastra/react/hooks/voice';
 import type { MessageFactoryPart } from '@mastra/react/ui';
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { toast } from 'sonner';
 import { AttachFileMenu } from './attachments/attach-file-menu';
 import { ComposerAttachments as ChatComposerAttachments } from './attachments/attachment';
@@ -58,6 +59,7 @@ import { BranchMessageAction } from './chat/branch-message-action';
 import { ConversationStats } from './chat/conversation-stats';
 import { QueuedMessages } from './chat/queued-messages';
 import { BracketOverlay } from './components/bracket-overlay';
+import { MarkdownComposerInput } from './components/markdown-composer-input';
 import { useComposerAutofocus } from './hooks/use-composer-autofocus';
 import { SuggestedPromptList } from './suggested-prompt-list';
 import { TaskPanel } from './task-panel';
@@ -396,12 +398,26 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
   const { canExecute } = usePermissions();
   const canExecuteAgent = canExecute('agents');
   const inputDisabled = !canExecuteAgent || Boolean(draftStatus?.restoring);
-  useComposerAutofocus(textareaRef, { threadId, disabled: inputDisabled });
+  useComposerAutofocus(textareaRef, { threadId, disabled: inputDisabled || !preferences.plainText });
 
   const isEmpty = text.trim().length === 0 && attachments.length === 0 && annotations.length === 0;
   const sendBlocked = isRunning && !canSendWhileStreaming;
   const showModelSwitcher = Boolean(agentId && !hasModelList && !hideModelSwitcher);
   const shownError = submitError || draftStatus?.error;
+  const placeholder = canExecuteAgent
+    ? studioT('Enter your message')
+    : studioT("You don't have permission to execute agents");
+
+  const onComposerKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.defaultPrevented || event.nativeEvent.isComposing || event.keyCode === 229) return;
+    if (event.key !== 'Enter' || event.altKey || sendBlocked) return;
+    const modifier = event.metaKey || event.ctrlKey;
+    if (preferences.sendShortcut === 'enter' ? event.shiftKey : !modifier) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const opposite = preferences.sendShortcut === 'enter' ? modifier : event.shiftKey;
+    void submit(opposite);
+  };
 
   const submit = async (accelerated = false) => {
     const deliveryMode =
@@ -496,31 +512,27 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
             <ComposerBox sendingPulseKey={sendPulseKey}>
               <ComposerAnnotations />
               <ChatComposerAttachments />
-              <ComposerInput
-                ref={textareaRef}
-                value={text}
-                placeholder={
-                  canExecuteAgent
-                    ? studioT('Enter your message')
-                    : studioT("You don't have permission to execute agents")
-                }
-                onChange={event => {
-                  setThreadInput(event.target.value);
-                }}
-                onKeyDown={event => {
-                  // Ignore Enter while an IME composition is active (e.g. committing a
-                  // CJK/pinyin candidate). `isComposing` is the browser-owned flag; the
-                  // `keyCode === 229` fallback covers browsers that fire keydown without it.
-                  if (event.nativeEvent.isComposing || event.keyCode === 229) return;
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    if (sendBlocked) return;
-                    event.preventDefault();
-                    event.stopPropagation();
-                    void submit(event.metaKey || event.ctrlKey);
-                  }
-                }}
-                disabled={inputDisabled}
-              />
+              {preferences.plainText ? (
+                <ComposerInput
+                  ref={textareaRef}
+                  value={text}
+                  placeholder={placeholder}
+                  onChange={event => {
+                    setThreadInput(event.target.value);
+                  }}
+                  onKeyDown={onComposerKeyDown}
+                  disabled={inputDisabled}
+                />
+              ) : (
+                <MarkdownComposerInput
+                  value={text}
+                  onChange={setThreadInput}
+                  placeholder={placeholder}
+                  disabled={inputDisabled}
+                  threadId={threadId}
+                  onKeyDown={onComposerKeyDown}
+                />
+              )}
               {showModelSwitcher && <ComposerModelWarning />}
               <ComposerActions>
                 <ComposerActionRow

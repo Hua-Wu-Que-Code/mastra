@@ -1,6 +1,19 @@
 import type { en } from './en';
 
 export const zh = {
+  'Plain text editor': '纯文本编辑器',
+  'Keep code, Markdown, and links as plain text while composing messages.':
+    '编写消息时，将代码、Markdown 和链接保留为纯文本。',
+  'Show context window usage': '显示上下文窗口使用情况',
+  'Send shortcut': '发送快捷键',
+  'Choose whether Enter sends your message or inserts a new line.': '选择按 Enter 时是发送消息还是换行。',
+  Enter: '按 Enter 键',
+  'Cmd/Ctrl+Enter': 'Cmd/Ctrl+Enter',
+  'Follow-up messages': '后续消息处理方式',
+  'Queue follow-up messages while the agent runs, or steer the current run. {shortcut} uses the opposite behavior.':
+    '在智能体运行时将后续消息加入队列，或引导当前运行。按 {shortcut} 可对单条消息执行相反操作。',
+  Queue: '排队',
+
   Auto: '自动',
   'Agent teamwork': '智能体团队协作',
   'Enable agent teamwork': '启用智能体团队协作',

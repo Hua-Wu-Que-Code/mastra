@@ -1,4 +1,4 @@
-import { ChatPreferencesSettings } from '@mastra/playground-ui/domains/chat';
+import { ChatPreferencesSettings, EditorPreferencesSettings } from '@mastra/playground-ui/domains/chat';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
 import { LanguageSelect } from '@mastra/playground-ui/lib/i18n/language-select';
@@ -32,6 +32,8 @@ export const StudioSettingsPage = () => {
               <ChatPreferencesSettings />
             </SettingsContainer>
           </SettingsGroup>
+
+          <EditorPreferencesSettings />
 
           {!account && <StudioConnectionSettings />}
         </section>

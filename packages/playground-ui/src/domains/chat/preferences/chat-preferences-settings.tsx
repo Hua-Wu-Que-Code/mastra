@@ -78,25 +78,6 @@ export function ChatPreferencesSettings() {
           </Select>
         </SettingsRow>
       )}
-      <SettingsRow
-        label={t('Sending while busy')}
-        description={t('While the agent is running, Enter and Send use this behavior; Cmd/Ctrl+Enter uses the other.')}
-      >
-        <Select
-          value={preferences.busyEnter}
-          onValueChange={value => {
-            if (value === 'queue' || value === 'steer') updatePreferences({ busyEnter: value });
-          }}
-        >
-          <SelectTrigger aria-label={t('Sending while busy')}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent align="end">
-            <SelectItem value="queue">{t('Queue message')}</SelectItem>
-            <SelectItem value="steer">{t('Steer agent')}</SelectItem>
-          </SelectContent>
-        </Select>
-      </SettingsRow>
     </>
   );
 }

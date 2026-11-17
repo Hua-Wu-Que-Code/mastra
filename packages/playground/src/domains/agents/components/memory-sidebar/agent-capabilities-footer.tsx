@@ -4,7 +4,6 @@ import { DisclosureChevron } from '@mastra/playground-ui/components/DisclosureCh
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
-import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconSettingsSliderHor';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
@@ -14,10 +13,9 @@ import { controlStateColorTransition, focusRing, focusRingInset } from '@mastra/
 import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 
 import { cn } from '@mastra/playground-ui/utils/cn';
-import { useAgent, useAgentVersions } from '@mastra/react/hooks/agents';
+import { useAgent } from '@mastra/react/hooks/agents';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { useIsCmsAvailable } from '@/domains/cms/hooks/use-is-cms-available';
 
 type CapabilityTone = 'purple' | 'amber' | 'emerald' | 'sky' | 'cyan' | 'orange';
 
@@ -57,10 +55,6 @@ const countStatus = (count: number) => (count > 0 ? String(count) : 'Off');
 
 const getProcessorCount = (agent: GetAgentResponse | null | undefined) =>
   (agent?.inputProcessors?.length ?? 0) + (agent?.outputProcessors?.length ?? 0);
-
-// isCmsAvailable is false while its query loads, so no extra loading flag is needed here.
-const isEditorAvailable = (agent: GetAgentResponse | null | undefined, isCmsAvailable: boolean) =>
-  Boolean(isCmsAvailable && agent && agent.editor !== false);
 
 type CapabilityView = 'chip' | 'row';
 
@@ -145,47 +139,6 @@ function CapabilityItem({ view, label, status, description, docsHref, enabled, t
 
 // Each capability component owns its data and loading state; React Query
 // dedupes the underlying requests across instances — see client-request-dedupe.
-function EditorCapability({ agentId, view }: AgentCapabilityProps) {
-  useLocale();
-  const { data: agent, isLoading: isAgentLoading } = useAgent({
-    agentId: agentId,
-    requestContext: useEntityRequestContext('agent', agentId)[0],
-    queryOptions: { enabled: Boolean(agentId) },
-  });
-  const { isCmsAvailable, isLoading: isCmsAvailabilityLoading } = useIsCmsAvailable();
-  const enabled = isEditorAvailable(agent, isCmsAvailable);
-  const locked = agent?.editor === false;
-  const versionsQuery = useAgentVersions({
-    agentId: agentId,
-    params: { orderBy: { field: 'createdAt', direction: 'DESC' } },
-    queryOptions: { enabled: Boolean(agentId) && enabled },
-  });
-  const versionCount = versionsQuery.data?.total ?? versionsQuery.data?.versions.length ?? 0;
-  const isLoading = isAgentLoading || isCmsAvailabilityLoading || (enabled && versionsQuery.isLoading);
-
-  const availableStatus = versionCount > 0 ? String(versionCount) : 'Ready';
-  const settledStatus = enabled ? availableStatus : locked ? 'Locked' : 'Off';
-  const status = isLoading ? 'Checking' : settledStatus;
-
-  const disabledDescription = locked
-    ? 'This code-defined agent explicitly disables editor overrides.'
-    : 'Register MastraEditor to enable versioned agent overrides.';
-  const description = enabled ? 'Editor is available for versioned agent overrides.' : disabledDescription;
-
-  return (
-    <CapabilityItem
-      view={view}
-      label={studioT('Editor')}
-      status={status}
-      description={description}
-      docsHref="https://mastra.ai/docs/editor/overview"
-      enabled={enabled}
-      tone="amber"
-      icon={<IconPencil />}
-    />
-  );
-}
-
 function ToolsCapability({ agentId, view }: AgentCapabilityProps) {
   useLocale();
   const { data: agent, isLoading } = useAgent({
@@ -276,10 +229,8 @@ function CapabilitiesSummary({ agentId }: { agentId: string }) {
     requestContext: useEntityRequestContext('agent', agentId)[0],
     queryOptions: { enabled: Boolean(agentId) },
   });
-  const { isCmsAvailable } = useIsCmsAvailable();
 
   const enabledFlags = [
-    isEditorAvailable(agent, isCmsAvailable),
     getRecordCount(agent?.tools) > 0,
     getRecordCount(agent?.workflows) > 0,
     getProcessorCount(agent) > 0,
@@ -315,7 +266,6 @@ export function AgentCapabilitiesFooter({ agentId }: { agentId: string }) {
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
-              <EditorCapability agentId={agentId} view="chip" />
               <ToolsCapability agentId={agentId} view="chip" />
               <WorkflowsCapability agentId={agentId} view="chip" />
               <ProcessorsCapability agentId={agentId} view="chip" />
@@ -327,7 +277,6 @@ export function AgentCapabilitiesFooter({ agentId }: { agentId: string }) {
 
         <CollapsibleContent className="px-2 pb-2">
           <div className="grid gap-1">
-            <EditorCapability agentId={agentId} view="row" />
             <ToolsCapability agentId={agentId} view="row" />
             <WorkflowsCapability agentId={agentId} view="row" />
             <ProcessorsCapability agentId={agentId} view="row" />

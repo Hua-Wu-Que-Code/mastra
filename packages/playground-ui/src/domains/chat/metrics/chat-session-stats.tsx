@@ -1,6 +1,7 @@
 // DSH parity: the requested metadata pills intentionally retain its middle-dot separators.
 /* eslint-disable playground-ui/no-text-separators */
 import { useState } from 'react';
+import { useChatPreferences } from '../preferences/chat-preferences-context';
 import { cacheHit, compactTokens, exactTokens, groupModelUsage, totalTokens, uncachedTokens } from './chat-metrics';
 import { useChatMetrics, usePartialMetrics } from './chat-metrics-context';
 import { ContextUsage } from './context-usage';
@@ -18,6 +19,7 @@ function duration(ms: number): string {
 export function ChatSessionStats({ contextWindow, route }: { contextWindow?: number; route?: string }) {
   useLocale();
   const [card, setCard] = useState<string>();
+  const { preferences } = useChatPreferences();
   const metrics = useChatMetrics();
   const incomplete = usePartialMetrics();
   if (!metrics.length) return null;
@@ -102,13 +104,15 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
           <StatRows rows={usageRows} />
         </StatCard>
       )}
-      <ContextUsage
-        reading={latest}
-        capacity={contextWindow}
-        route={route}
-        open={card === 'context'}
-        onOpenChange={open => setCard(open ? 'context' : undefined)}
-      />
+      {preferences.showContextUsage && (
+        <ContextUsage
+          reading={latest}
+          capacity={contextWindow}
+          route={route}
+          open={card === 'context'}
+          onOpenChange={open => setCard(open ? 'context' : undefined)}
+        />
+      )}
     </div>
   );
 }

@@ -154,11 +154,12 @@ describe('MemorySidebar', () => {
   it('shows the remaining capabilities without memory or sub-agent rows', async () => {
     renderSidebar([]);
     const footer = await screen.findByTestId('agent-capabilities-footer');
-    expect(footer.textContent).toMatch(/\/4/);
+    expect(footer.textContent).toMatch(/\/3/);
     fireEvent.click(footer);
     expect(await screen.findByRole('link', { name: /^Tools:/ })).not.toBeNull();
     expect(screen.queryByRole('link', { name: /^Memory:/ })).toBeNull();
     expect(screen.queryByRole('link', { name: /^Sub-agents:/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /^Editor:/ })).toBeNull();
   });
   it('explains missing thread storage when the server has no memory configured', async () => {
     renderSidebar([], false);

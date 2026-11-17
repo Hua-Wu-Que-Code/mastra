@@ -3,7 +3,7 @@
 `/settings` opens a dedicated settings workspace with its own sidebar. The main
 Studio navigation and rounded content frame are not rendered on this route.
 
-- General contains language, appearance, conversation display preferences, and busy-send behavior.
+- General contains language, appearance, conversation display preferences, and an Editor section.
   Appearance offers Light, Dark, and Follow system choices, using the app theme
   provider. Old `?section=appearance` links open the same consolidated page.
 - Account and main sidebar links carry the current path, query and fragment in
@@ -40,9 +40,21 @@ between devices. Unavailable storage falls back to the current page's memory.
 The DSH reference is `packages/client/ui-chat/src/client/presentation-policy.ts`,
 `transcript-view.ts`, and `ui-theme/src/theme-settings.ts` in deepseek-harness.
 
+The Editor section groups plain text mode, context-window visibility, sending
+shortcuts, and follow-up message handling. Plain text is initially enabled and
+uses the existing textarea. Turning it off uses the shared Markdown code editor
+with syntax highlighting. Both modes edit the same source text, preserve drafts,
+and support attachments. This is a source editor, not a rich-text document editor.
+Context-window visibility is initially enabled; hiding it removes only the context
+ring and its popover, without changing model limits or other conversation statistics.
+The sidebar no longer advertises the separate agent-configuration editor as a
+message editor. Its tools, workflows, and processor capabilities remain available.
+
 Busy-send behavior follows DSH's `submission-policy.ts`: Queue message is the
-initial choice. During a run, Enter and the send button use that choice;
-Cmd/Ctrl+Enter uses the opposite (Queue message / Steer agent). Shift+Enter and
+initial choice. The send button always uses the selected Queue or Steer behavior.
+With the initial Enter shortcut, Enter sends and Cmd/Ctrl+Enter uses the opposite
+behavior. With Cmd/Ctrl+Enter selected, Enter inserts a newline, Cmd/Ctrl+Enter
+sends, and Cmd/Ctrl+Shift+Enter uses the opposite behavior. Shift+Enter and
 IME composition retain their editing behavior. The empty busy composer keeps
 its Stop button. This requires the thread-signals transport; older servers that
 only support a single response stream retain Stop until the current response

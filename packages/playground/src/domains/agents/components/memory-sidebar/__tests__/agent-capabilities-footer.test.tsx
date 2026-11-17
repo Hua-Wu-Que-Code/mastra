@@ -1,4 +1,4 @@
-import type { GetAgentResponse, GetMemoryStatusResponse, ListAgentVersionsResponse } from '@mastra/client-js';
+import type { GetAgentResponse, ListAgentVersionsResponse } from '@mastra/client-js';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -27,22 +27,17 @@ const emptyVersions: ListAgentVersionsResponse = {
   hasMore: false,
 };
 
-const memoryOn: GetMemoryStatusResponse = { result: true, memoryType: 'local' };
-
-// Counts the version lookups so each test can prove the editor gate works: the
-// footer must only hit this endpoint when the editor is actually available.
+// Settings own editor controls; the capability footer should not query versions.
 const onVersions = vi.fn<() => void>();
 
 function registerFooterHandlers({
   agent = baseAgent,
   cmsEnabled = false,
   versions = emptyVersions,
-  memory = memoryOn,
 }: {
   agent?: GetAgentResponse;
   cmsEnabled?: boolean;
   versions?: ListAgentVersionsResponse;
-  memory?: GetMemoryStatusResponse | 'loading';
 } = {}) {
   server.use(
     http.get(`${BASE_URL}/api/agents/${AGENT_ID}`, () => HttpResponse.json(agent)),
@@ -51,10 +46,6 @@ function registerFooterHandlers({
       onVersions();
       return HttpResponse.json(versions);
     }),
-    // 'loading' returns a never-resolving response so the memory query stays pending.
-    http.get(`${BASE_URL}/api/memory/status`, () =>
-      memory === 'loading' ? new Promise<Response>(() => {}) : HttpResponse.json(memory),
-    ),
   );
 }
 
@@ -76,54 +67,33 @@ afterEach(() => {
 });
 
 describe('AgentCapabilitiesFooter', () => {
-  it('keeps the editor capability off and never fetches versions when CMS is unavailable', async () => {
-    registerFooterHandlers({ cmsEnabled: false });
-    renderFooter();
-
-    const footer = await screen.findByTestId('agent-capabilities-footer');
-    fireEvent.click(footer);
-
-    // Editor reads "Off" and the gated versions query stays put.
-    expect(await screen.findByRole('link', { name: 'Editor: Off' })).not.toBeNull();
-    // Once "Editor: Off" has rendered the gate has settled (versions query disabled), so no extra wait is needed.
-    expect(onVersions).not.toHaveBeenCalled();
-
-    expect(screen.queryByRole('link', { name: /^Memory:/ })).toBeNull();
-    expect(screen.queryByRole('link', { name: /^Sub-agents:/ })).toBeNull();
-  });
-
-  it('enables the editor capability and fetches versions when CMS is available', async () => {
-    registerFooterHandlers({ cmsEnabled: true, versions: { ...emptyVersions, total: 2 } });
-    renderFooter();
-
-    // The gate opens: the footer looks up versions exactly once...
-    await waitFor(() => expect(onVersions).toHaveBeenCalledTimes(1));
-
-    // ...and the editor row surfaces the version count.
-    fireEvent.click(await screen.findByTestId('agent-capabilities-footer'));
-    expect(await screen.findByRole('link', { name: 'Editor: 2' })).not.toBeNull();
-  });
-
-  it('marks the editor locked and skips the versions fetch when the agent disables editing', async () => {
-    registerFooterHandlers({ cmsEnabled: true, agent: { ...baseAgent, editor: false } });
-    renderFooter();
-
-    fireEvent.click(await screen.findByTestId('agent-capabilities-footer'));
-    expect(await screen.findByRole('link', { name: 'Editor: Locked' })).not.toBeNull();
-    // The editor is locked, so the versions query stays disabled — assert directly without a timer.
-    expect(onVersions).not.toHaveBeenCalled();
-  });
-
-  it('excludes sub-agent and memory capabilities after their controls move to settings', async () => {
-    registerFooterHandlers({
-      cmsEnabled: false,
-      agent: { ...baseAgent, agents: { researcher: { id: 'researcher', name: 'Researcher' } } },
+  describe('when editor and memory controls live in settings', () => {
+    it('shows remaining capabilities without version lookups or moved status cards', async () => {
+      registerFooterHandlers({ cmsEnabled: true });
+      renderFooter();
+      const footer = await screen.findByTestId('agent-capabilities-footer');
+      await waitFor(() => expect(footer.textContent).toMatch(/0\/3/));
+      fireEvent.click(footer);
+      expect(await screen.findByRole('link', { name: 'Tools: Off' })).not.toBeNull();
+      expect(screen.queryByRole('link', { name: /^Editor:/ })).toBeNull();
+      expect(screen.queryByRole('link', { name: /^Memory:/ })).toBeNull();
+      expect(screen.queryByRole('link', { name: /^Sub-agents:/ })).toBeNull();
+      expect(onVersions).not.toHaveBeenCalled();
     });
-    renderFooter();
-    const footer = await screen.findByTestId('agent-capabilities-footer');
-    await waitFor(() => expect(footer.textContent).toMatch(/0\/4/));
-    fireEvent.click(footer);
-    expect(screen.queryByRole('link', { name: /^Sub-agents:/ })).toBeNull();
-    expect(screen.queryByRole('link', { name: /^Memory:/ })).toBeNull();
+    it('counts the configured tools, workflows and processors', async () => {
+      registerFooterHandlers({
+        agent: {
+          ...baseAgent,
+          tools: {
+            lookup: { id: 'lookup', description: 'Look up a document.', inputSchema: '{}', outputSchema: '{}' },
+          },
+        },
+      });
+      renderFooter();
+      const footer = await screen.findByTestId('agent-capabilities-footer');
+      await waitFor(() => expect(footer.textContent).toMatch(/1\/3/));
+      fireEvent.click(footer);
+      expect(await screen.findByRole('link', { name: 'Tools: 1' })).not.toBeNull();
+    });
   });
 });

@@ -9,6 +9,7 @@ import { ToolCallProvider } from '../../context/tool-call-context';
 import { MessageRow } from '../../messages/message-row';
 import { ChatPreferencesProvider } from '../chat-preferences-provider';
 import { ChatPreferencesSettings } from '../chat-preferences-settings';
+import { EditorPreferencesSettings } from '../editor-preferences-settings';
 import { WorkDetails, WorkDetailsToggle } from '../work-details-context';
 import { approvalConversation, conversation, failedConversation } from './fixtures/conversation';
 import { server } from '@/test/msw-server';
@@ -31,6 +32,7 @@ function tree({ running = false, latest = true, scope = 'alice', messages = conv
         >
           <ChatPreferencesProvider key={scope} scope={scope}>
             <ChatPreferencesSettings />
+            <EditorPreferencesSettings />
             <div data-testid="conversation">
               <WorkDetails messages={messages} running={running} latest={latest}>
                 <WorkDetailsToggle />
@@ -182,15 +184,15 @@ describe('Chat presentation', () => {
   describe('when busy sending is configured', () => {
     it('defaults to queue and persists the alternative per account', async () => {
       const view = render(tree());
-      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Queue message');
-      await choose('Sending while busy', 'Steer agent');
+      expect(screen.getByRole('button', { name: 'Queue', exact: true }).getAttribute('aria-pressed')).toBe('true');
+      fireEvent.click(screen.getByRole('button', { name: 'Steer', exact: true }));
       view.rerender(tree({ scope: 'bob' }));
-      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Queue message');
+      expect(screen.getByRole('button', { name: 'Queue', exact: true }).getAttribute('aria-pressed')).toBe('true');
       view.rerender(tree());
-      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Steer agent');
+      expect(screen.getByRole('button', { name: 'Steer', exact: true }).getAttribute('aria-pressed')).toBe('true');
       view.unmount();
       render(tree());
-      expect(screen.getByRole('combobox', { name: 'Sending while busy' }).textContent).toContain('Steer agent');
+      expect(screen.getByRole('button', { name: 'Steer', exact: true }).getAttribute('aria-pressed')).toBe('true');
     });
   });
   describe('when accounts change', () => {

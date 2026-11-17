@@ -274,6 +274,7 @@ const uninstallFakeSpeechRecognition = () => {
 afterEach(() => {
   delete window.MASTRA_AGENT_SIGNALS;
   cleanup();
+  localStorage.removeItem('mastra:chat-preferences:v1:thread-test');
   locale.adopt('en');
 });
 
@@ -785,6 +786,32 @@ describe('Thread', () => {
     expect(textarea.value).toBe('');
   });
 
+  describe('when Cmd/Ctrl+Enter is the send shortcut', () => {
+    it.each(['ctrlKey', 'metaKey'] as const)('keeps Enter for editing and sends with %s', async modifier => {
+      createChatPreferencesStore('thread-test').write({
+        ...createChatPreferencesStore('thread-test').read(),
+        sendShortcut: 'mod-enter',
+      });
+      const captured: Captured[] = [];
+      server.use(
+        ...baseHandlers(),
+        http.post(`${BASE_URL}/api/agents/agent-1/stream`, async ({ request }) => {
+          captured.push({ url: request.url, body: await captureBody(request) });
+          return sseResponse();
+        }),
+      );
+      renderThread([]);
+      const textarea = await screen.findByPlaceholderText('Enter your message');
+      fireEvent.change(textarea, { target: { value: '**Keep this draft**' } });
+      expect(fireEvent.keyDown(textarea, { key: 'Enter' })).toBe(true);
+      expect(fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true })).toBe(true);
+      expect(captured).toHaveLength(0);
+      fireEvent.keyDown(textarea, { key: 'Enter', [modifier]: true });
+      await waitFor(() => expect(captured).toHaveLength(1));
+      expect(JSON.stringify(captured[0].body.messages)).toContain('**Keep this draft**');
+    });
+  });
+
   describe('when files are pasted into the composer', () => {
     it.each([
       {
@@ -1029,12 +1056,11 @@ describe('Thread', () => {
         }),
       );
       const read = FileReader.prototype.readAsArrayBuffer;
-      const probe = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (
-        this: FileReader,
-        blob,
-      ) {
-        void pending.then(() => read.call(this, blob));
-      });
+      const probe = vi
+        .spyOn(FileReader.prototype, 'readAsArrayBuffer')
+        .mockImplementation(function (this: FileReader, blob) {
+          void pending.then(() => read.call(this, blob));
+        });
       try {
         await act(async () => {
           renderThread([]);
@@ -1400,6 +1426,24 @@ describe('Thread', () => {
       fireEvent.change(textarea, { target: { value: 'Queue with shortcut' } });
       fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
       await waitFor(() => expect(queuedMessages.join()).toContain('Queue with shortcut'));
+      expect(abortRequests).toBe(0);
+    });
+
+    it('queues Cmd+Enter and steers Cmd+Shift+Enter when Enter is reserved for editing', async () => {
+      act(() => {
+        const store = createChatPreferencesStore('thread-test');
+        store.write({ ...store.read(), sendShortcut: 'mod-enter' });
+        window.dispatchEvent(new StorageEvent('storage', { key: 'mastra:chat-preferences:v1:thread-test' }));
+      });
+      const textarea = screen.getByPlaceholderText('Enter your message');
+      fireEvent.change(textarea, { target: { value: 'Queue with Cmd+Enter' } });
+      expect(fireEvent.keyDown(textarea, { key: 'Enter' })).toBe(true);
+      expect(queuedMessages).toHaveLength(0);
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true });
+      await waitFor(() => expect(queuedMessages.join()).toContain('Queue with Cmd+Enter'));
+      fireEvent.change(textarea, { target: { value: 'Steer with Cmd+Shift+Enter' } });
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+      await waitFor(() => expect(sentMessages.join()).toContain('Steer with Cmd+Shift+Enter'));
       expect(abortRequests).toBe(0);
     });
 
@@ -2116,7 +2160,7 @@ describe('Conversation process and accounting', () => {
       expect(screen.queryByText('Project documentation.')).toBeNull();
       fireEvent.click(screen.getByRole('button', { name: 'Read' }));
       expect(await screen.findByText('Project documentation.')).toBeDefined();
-      fireEvent.click(screen.getAllByRole('button', { name: 'Reasoning' })[0]!);
+      fireEvent.click(screen.getAllByRole('button', { name: 'Reasoning' })[0]);
       expect(await screen.findByText('Then inspect the implementation.')).toBeDefined();
       fireEvent.click(screen.getByRole('button', { name: 'Run command' }));
       expect(await screen.findByText('Clean working tree.')).toBeDefined();
@@ -2142,6 +2186,24 @@ describe('Conversation process and accounting', () => {
       expect(await screen.findByText('39,555 tok')).toBeDefined();
       expect(screen.getByText('81%')).toBeDefined();
       expect(screen.getByText('7,422 tok')).toBeDefined();
+    });
+    it('hides the context ring without hiding other statistics when disabled', async () => {
+      render(
+        <Wrapper>
+          <ChatMetricsProvider messages={measuredConversation} running={false}>
+            <ChatSessionStats contextWindow={131072} route="altflow/qwen3.8-flash" />
+          </ChatMetricsProvider>
+        </Wrapper>,
+      );
+      expect(await screen.findByRole('button', { name: 'Context usage' })).toBeDefined();
+      act(() => {
+        const store = createChatPreferencesStore('thread-test');
+        store.write({ ...store.read(), showContextUsage: false });
+        window.dispatchEvent(new StorageEvent('storage', { key: 'mastra:chat-preferences:v1:thread-test' }));
+      });
+      expect(screen.queryByRole('button', { name: 'Context usage' })).toBeNull();
+      expect(screen.getByRole('button', { name: 'Conversation statistics' })).toBeDefined();
+      expect(screen.getByRole('button', { name: 'Token usage' })).toBeDefined();
     });
     it('opens the DSH context ring with exact request usage and model limits', async () => {
       render(

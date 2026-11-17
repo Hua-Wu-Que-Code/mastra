@@ -1,4 +1,18 @@
 export const en = {
+  'Plain text editor': 'Plain text editor',
+  'Keep code, Markdown, and links as plain text while composing messages.':
+    'Keep code, Markdown, and links as plain text while composing messages.',
+  'Show context window usage': 'Show context window usage',
+  'Send shortcut': 'Send shortcut',
+  'Choose whether Enter sends your message or inserts a new line.':
+    'Choose whether Enter sends your message or inserts a new line.',
+  Enter: 'Enter',
+  'Cmd/Ctrl+Enter': 'Cmd/Ctrl+Enter',
+  'Follow-up messages': 'Follow-up messages',
+  'Queue follow-up messages while the agent runs, or steer the current run. {shortcut} uses the opposite behavior.':
+    'Queue follow-up messages while the agent runs, or steer the current run. {shortcut} uses the opposite behavior.',
+  Queue: 'Queue',
+
   Auto: 'Auto',
   'Agent teamwork': 'Agent teamwork',
   'Enable agent teamwork': 'Enable agent teamwork',
