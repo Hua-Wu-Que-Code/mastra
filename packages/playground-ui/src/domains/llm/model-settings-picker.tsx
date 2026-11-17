@@ -24,17 +24,19 @@ const noProviderIcon = () => undefined;
 const levelName = (level: string) => {
   switch (level) {
     case 'off':
-      return t('Off');
+      return 'Off';
     case 'low':
-      return t('Low');
+      return 'Low';
     case 'medium':
-      return t('Medium');
+      return 'Medium';
     case 'high':
-      return t('High');
+      return 'High';
+    case 'max':
+      return 'Max';
     case 'minimal':
-      return t('Minimal');
+      return 'Minimal';
     case 'xhigh':
-      return t('Extra high');
+      return 'Extra high';
     default:
       return level;
   }
@@ -77,7 +79,7 @@ export function ModelSettingsPicker({
   const name = selected?.name ?? (value?.model ? formatModelName(value.model) : t('Select model'));
   const close = () => setOpen(false);
   const rowClass =
-    'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-label hover:bg-accent focus-visible:bg-accent focus-visible:outline-hidden';
+    'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label hover:bg-accent focus-visible:bg-accent focus-visible:outline-hidden';
 
   return (
     <Popover
@@ -100,7 +102,7 @@ export function ModelSettingsPicker({
       <PopoverContent
         side="top"
         align="end"
-        className="w-80 max-w-[calc(100vw-2rem)] p-1.5"
+        className={`max-w-[calc(100vw-2rem)] p-1 ${pane === 'reasoning' ? 'w-56' : pane === 'root' ? 'w-72' : 'w-80'}`}
         aria-label={t('Model and reasoning level')}
       >
         {pane === 'root' ? (
