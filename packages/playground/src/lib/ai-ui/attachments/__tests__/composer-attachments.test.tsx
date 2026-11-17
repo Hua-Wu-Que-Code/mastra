@@ -4,6 +4,10 @@ import { useEffect } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { ComposerAttachmentsProvider, useComposerAttachments } from '../composer-attachments';
+import { creatorSession } from '@/domains/account/__tests__/fixtures/session';
+import { AccountContext } from '@/domains/account/account-context';
+import { StudioConfigContext } from '@/domains/configuration/context/studio-config-state';
+import { storageFixture } from '@/pages/settings/__tests__/fixtures/storage';
 import { server } from '@/test/msw-server';
 
 afterEach(() => cleanup());
@@ -43,6 +47,62 @@ const textFile = () => new File(['hello world'], 'notes.txt', { type: 'text/plai
 const pdfFile = () => new File(['pdf-bytes'], 'doc.pdf', { type: 'application/pdf' });
 
 describe('composer attachments', () => {
+  describe('when an authenticated user attaches a document', () => {
+    it('persists the bytes before sending a workspace file reference', async () => {
+      let uploaded = '';
+      server.use(
+        http.post('http://localhost:4111/storage/upload', async ({ request }) => {
+          uploaded = await request.text();
+          return HttpResponse.json(storageFixture.files[0]);
+        }),
+      );
+      const ref: CaptureRef = { current: null };
+      render(
+        <AccountContext.Provider value={creatorSession}>
+          <StudioConfigContext.Provider
+            value={{ baseUrl: 'http://localhost:4111', headers: {}, isLoading: false, setConfig: () => {} }}
+          >
+            <ComposerAttachmentsProvider>
+              <Capture into={ref} />
+            </ComposerAttachmentsProvider>
+          </StudioConfigContext.Provider>
+        </AccountContext.Provider>,
+      );
+      await act(async () => {
+        await ref.current!.addFiles([textFile()]);
+      });
+      const messages = await ref.current!.toCoreUserMessages();
+      expect(uploaded).toBe('hello world');
+      expect(JSON.stringify(messages)).toContain('/uploads/a/小说.txt');
+      expect(JSON.stringify(messages)).not.toContain('hello world');
+    });
+  });
+  describe('when storage rejects an attachment', () => {
+    it('keeps the draft and does not send an unpersisted file', async () => {
+      server.use(
+        http.post('http://localhost:4111/storage/upload', () =>
+          HttpResponse.json({ error: '存储空间不足' }, { status: 413 }),
+        ),
+      );
+      const ref: CaptureRef = { current: null };
+      render(
+        <AccountContext.Provider value={creatorSession}>
+          <StudioConfigContext.Provider
+            value={{ baseUrl: 'http://localhost:4111', headers: {}, isLoading: false, setConfig: () => {} }}
+          >
+            <ComposerAttachmentsProvider>
+              <Capture into={ref} />
+            </ComposerAttachmentsProvider>
+          </StudioConfigContext.Provider>
+        </AccountContext.Provider>,
+      );
+      await act(async () => {
+        await ref.current!.addFiles([textFile()]);
+      });
+      await expect(ref.current!.toCoreUserMessages()).rejects.toThrow('存储空间不足');
+      expect(ref.current!.attachments).toHaveLength(1);
+    });
+  });
   describe.each([false, true])('when concurrent URL additions are pending and cleared: %s', cleared => {
     it('tracks only the current additions until all of them settle', async () => {
       const gates = Array.from({ length: 3 }, () => {

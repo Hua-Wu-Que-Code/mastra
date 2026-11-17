@@ -301,6 +301,10 @@ export default defineConfig(({ mode }) => {
             target: `http://${targetHost}:${targetPort}`,
             changeOrigin: true,
           },
+          '/storage': {
+            target: `http://${targetHost}:${targetPort}`,
+            changeOrigin: true,
+          },
           '/voice': {
             target: `http://${targetHost}:${targetPort}`,
             changeOrigin: true,

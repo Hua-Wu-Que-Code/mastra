@@ -2,8 +2,11 @@ import type { CoreUserMessage } from '@mastra/core/llm';
 import { classifyAttachment } from '@mastra/playground-ui/domains/chat/attachments/attachment-kind';
 import type { ComposerAttachmentKind } from '@mastra/playground-ui/domains/chat/attachments/attachment-kind';
 import { fileToBase64, getFileContentType, isRemoteUrl } from '@mastra/playground-ui/utils/file';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import { useAccount } from '@/domains/account/account-context';
+import { storageUrl, uploadStoredFile } from '@/domains/account/storage-api';
+import { useStudioConfig } from '@/domains/configuration/context/studio-config-state';
 
 export type { ComposerAttachmentKind } from '@mastra/playground-ui/domains/chat/attachments/attachment-kind';
 
@@ -126,7 +129,14 @@ export const ComposerAttachmentsProvider = ({
   const attachments = controlled?.value ?? localAttachments;
   const setAttachments = controlled?.onChange ?? setLocalAttachments;
   const generation = useRef(0);
+  const account = useAccount();
+  const storageTarget = useStudioConfig();
+  const persisted = useRef(new Map<string, Promise<CoreUserMessage>>());
   const [pendingAdditions, setPendingAdditions] = useState(0);
+  useEffect(() => {
+    const active = new Set(attachments.map(attachment => attachment.id));
+    for (const id of persisted.current.keys()) if (!active.has(id)) persisted.current.delete(id);
+  }, [attachments]);
   useEffect(
     () => () => {
       generation.current++;
@@ -197,23 +207,52 @@ export const ComposerAttachmentsProvider = ({
     setAttachments([]);
   }, [setAttachments]);
 
-  const toCoreUserMessages = useCallback(async () => {
-    return Promise.all(attachments.map(attachmentToCoreUserMessage));
-  }, [attachments]);
+  const toCoreUserMessages = async () => {
+    return Promise.all(
+      attachments.map(async attachment => {
+        if (!account || attachment.isUrl) return attachmentToCoreUserMessage(attachment);
+        const cached = persisted.current.get(attachment.id);
+        if (cached) return cached;
+        const conversion = (async (): Promise<CoreUserMessage> => {
+          const file = await uploadStoredFile(storageTarget, attachment.file, attachment.id, attachment.contentType);
+          const escape = (value: string) =>
+            value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+          const reference = `文件已保存到当前用户工作区：${file.path}\n请使用 mastra_workspace_read_file 读取文件内容；大文档可按行分段读取。\n下载地址：${storageUrl(storageTarget, '/download', { path: file.path })}`;
+          if (attachment.kind === 'image' || attachment.contentType === 'application/pdf') {
+            const original = await attachmentToCoreUserMessage(attachment);
+            return {
+              role: 'user',
+              content: [
+                ...(typeof original.content === 'string'
+                  ? [{ type: 'text' as const, text: original.content }]
+                  : original.content),
+                { type: 'text', text: `<workspace-attachment>\n${reference}\n</workspace-attachment>` },
+              ],
+            };
+          }
+          return { role: 'user', content: `<attachment name="${escape(attachment.name)}">${reference}</attachment>` };
+        })();
+        persisted.current.set(attachment.id, conversion);
+        try {
+          return await conversion;
+        } catch (error) {
+          persisted.current.delete(attachment.id);
+          throw error;
+        }
+      }),
+    );
+  };
 
-  const value = useMemo<ComposerAttachmentsContextValue>(
-    () => ({
-      attachments,
-      addFiles,
-      addUrl,
-      remove,
-      restore,
-      clear,
-      isAddingAttachments: pendingAdditions > 0,
-      toCoreUserMessages,
-    }),
-    [attachments, addFiles, addUrl, remove, restore, clear, toCoreUserMessages, pendingAdditions],
-  );
+  const value: ComposerAttachmentsContextValue = {
+    attachments,
+    addFiles,
+    addUrl,
+    remove,
+    restore,
+    clear,
+    isAddingAttachments: pendingAdditions > 0,
+    toCoreUserMessages,
+  };
 
   return <ComposerAttachmentsContext.Provider value={value}>{children}</ComposerAttachmentsContext.Provider>;
 };

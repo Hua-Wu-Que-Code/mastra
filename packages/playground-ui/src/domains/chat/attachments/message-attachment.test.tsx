@@ -48,6 +48,19 @@ describe('sent attachment previews', () => {
     expect(screen.getByRole('link').textContent).not.toContain('private');
   });
 
+  it('keeps one image card while hiding its private workspace reference from the transcript', () => {
+    const image = { type: 'file', mimeType: 'image/png', data: 'data:image/png;base64,dGVzdA==' };
+    const reference = {
+      type: 'text',
+      text: '<workspace-attachment>\n文件已保存到当前用户工作区：/uploads/a/cover.png\n</workspace-attachment>',
+    };
+    const question = { type: 'text', text: 'Describe this image.' };
+    expect(splitMessageAttachments([image, reference, question])).toEqual({
+      attachments: [image],
+      content: [question],
+    });
+  });
+
   it('moves only complete legacy attachment envelopes and keeps text and file order', () => {
     const before = { type: 'text', text: 'The tag <attachment name="notes.txt"> is part of my question.' };
     const legacy = { type: 'text', text: '<attachment name="notes.txt">Original notes</attachment>' };

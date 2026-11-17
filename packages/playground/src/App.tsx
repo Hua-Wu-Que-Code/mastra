@@ -78,6 +78,7 @@ import Scorers from './pages/scorers';
 import Scorer from './pages/scorers/scorer';
 import { StudioSettingsPage } from './pages/settings';
 import { MemorySettingsPage } from './pages/settings/memory-settings';
+import { StorageSettingsPage } from './pages/settings/storage-settings';
 import { SignUp } from './pages/signup';
 import Spans from './pages/spans';
 import Templates from './pages/templates';
@@ -296,6 +297,7 @@ export const routes: RouteObject[] = [
         : [
             { path: '/settings', element: <StudioSettingsPage /> },
             { path: '/settings/memory', element: <MemorySettingsPage /> },
+            { path: '/settings/storage', element: <StorageSettingsPage /> },
             {
               path: '/templates',
               element: <Templates />,

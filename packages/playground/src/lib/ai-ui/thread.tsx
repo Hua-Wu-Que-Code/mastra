@@ -477,9 +477,11 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
       void Promise.resolve(send({ message, attachments: coreUserMessages, deliveryMode })).then(delivered => {
         if (delivered === false) restoreSubmission(sentAnnotations);
       });
-    } catch {
+    } catch (error) {
       if (lifetime.current === currentLifetime)
-        setSubmitError('Attachments could not be prepared. Your draft has been kept.');
+        setSubmitError(
+          error instanceof Error ? error.message : 'Attachments could not be prepared. Your draft has been kept.',
+        );
     } finally {
       preparing.current = false;
     }

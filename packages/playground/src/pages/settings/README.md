@@ -97,3 +97,19 @@ still allows changing teamwork. Turning it off omits configured sub-agent delega
 tools from subsequent executions and reconstructed tool sets; ordinary tools and
 existing child conversations remain available. It does not attach new agents or
 cancel running child tasks. The execution option is `disableSubAgents`.
+
+## Account file storage
+
+`/settings/storage` displays the authenticated user's server quota, documents, and
+images, including Agent-generated files. The account integration provides
+`GET /storage`, `POST /storage/upload`, `GET /storage/download`, and
+`DELETE /storage/file`. The server authenticates each call and enforces quota;
+the UI never supplies an owner ID or receives OSS credentials. Vite proxies
+`/storage` to the configured API host.
+
+Managed chat attachments are persisted before submitting the turn. Text and
+other documents become workspace references, so long documents can be read
+through file tools instead of filling the prompt with their entire contents.
+Images and PDFs retain their native model input plus a hidden workspace reference.
+Upload failures preserve the draft and expose the server's actionable error.
+Unmanaged Studio connections keep the existing attachment transport.

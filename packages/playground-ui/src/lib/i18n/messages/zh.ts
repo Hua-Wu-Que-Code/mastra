@@ -1,6 +1,28 @@
 import type { en } from './en';
 
 export const zh = {
+  Download: '下载',
+  Storage: '存储',
+  'See how much storage you are using and manage your files.': '查看存储空间使用情况并管理文件。',
+  '{used} used of {total}': '已使用 {used}，共 {total}',
+  'Storage used': '已用存储空间',
+  '{size} uploading': '{size} 正在上传',
+  'Manage storage': '管理存储空间',
+  'Manage stored content to free up space.': '管理已存储的内容，释放空间。',
+  Images: '图像',
+  '{count} images': '{count} 张图像',
+  '{count} files': '{count} 个文件',
+  'Manage images': '管理图像',
+  'Manage files': '管理文件',
+  'Search files': '搜索文件',
+  'No files found.': '没有找到文件。',
+  Uploaded: '用户上传',
+  'Agent generated': 'Agent 生成',
+  'Download {name}': '下载 {name}',
+  'Delete {name}': '删除 {name}',
+  'Confirm delete': '确认删除',
+  'File storage is unavailable. Please retry.': '文件存储服务暂不可用，请重试。',
+  'Files are saved in your private workspace.': '文件已保存到你的私人工作区。',
   'Plain text editor': '纯文本编辑器',
   'Keep code, Markdown, and links as plain text while composing messages.':
     '编写消息时，将代码、Markdown 和链接保留为纯文本。',

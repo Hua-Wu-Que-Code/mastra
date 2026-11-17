@@ -13,7 +13,10 @@ export function isMessageAttachment(part: Part) {
 }
 
 /** Context an MCP App attached for the model; never shown to the user. */
-const isHiddenPart = (part: Part) => part.type === 'text' && isMcpAppContextText(part.text ?? '');
+const isHiddenPart = (part: Part) =>
+  part.type === 'text' &&
+  (isMcpAppContextText(part.text ?? '') ||
+    /^<workspace-attachment>\n[\s\S]*\n<\/workspace-attachment>$/.test(part.text ?? ''));
 
 /** Group sent files without changing the relative order of files or message content. */
 export function splitMessageAttachments<T extends Part>(parts: readonly T[]) {
