@@ -1,3 +1,4 @@
+import type { MemoryConfigInternal } from '@mastra/core/memory';
 import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import { RequestContext } from '@mastra/core/di';
 import type { ChatSendArgs } from '@mastra/playground-ui/domains/chat/context/chat-context';
@@ -63,6 +64,8 @@ interface SendDeps {
   agentVersionId?: string;
   threadId?: string;
   modelSettingsArgs: Record<string, unknown>;
+  memoryOptions?: MemoryConfigInternal;
+  disableSubAgents?: boolean;
   chatWithNetwork?: boolean;
   chatWithGenerate?: boolean;
   maxSteps?: number;
@@ -76,6 +79,8 @@ interface UseChatSendHandlerArgs {
   agentVersionId?: string;
   threadId?: string;
   modelSettingsArgs: Record<string, unknown>;
+  memoryOptions?: MemoryConfigInternal;
+  disableSubAgents?: boolean;
   model?: string;
   chatWithNetwork?: boolean;
   chatWithGenerate?: boolean;
@@ -134,6 +139,8 @@ export const useChatSendHandler = ({
   agentVersionId,
   threadId,
   modelSettingsArgs,
+  memoryOptions,
+  disableSubAgents,
   model,
   chatWithNetwork,
   chatWithGenerate,
@@ -172,6 +179,8 @@ export const useChatSendHandler = ({
     agentVersionId,
     threadId,
     modelSettingsArgs,
+    memoryOptions,
+    disableSubAgents,
     model,
     chatWithNetwork,
     chatWithGenerate,
@@ -184,6 +193,8 @@ export const useChatSendHandler = ({
     agentVersionId,
     threadId,
     modelSettingsArgs,
+    memoryOptions,
+    disableSubAgents,
     model,
     chatWithNetwork,
     chatWithGenerate,
@@ -300,6 +311,8 @@ export const useChatSendHandler = ({
             requestContext: requestContextInstance,
             threadId: deps.threadId,
             modelSettings: deps.modelSettingsArgs,
+            memoryOptions: deps.memoryOptions,
+            disableSubAgents: deps.disableSubAgents,
             model: deps.model,
             signal: controller.signal,
             tracingOptions: deps.tracingOptions,
@@ -322,6 +335,8 @@ export const useChatSendHandler = ({
             requestContext: requestContextInstance,
             threadId: deps.threadId,
             modelSettings: deps.modelSettingsArgs,
+            memoryOptions: deps.memoryOptions,
+            disableSubAgents: deps.disableSubAgents,
             model: deps.model,
             signal: controller.signal,
             tracingOptions: deps.tracingOptions,
@@ -339,6 +354,8 @@ export const useChatSendHandler = ({
             requestContext: requestContextInstance,
             threadId: deps.threadId,
             modelSettings: deps.modelSettingsArgs,
+            memoryOptions: deps.memoryOptions,
+            disableSubAgents: deps.disableSubAgents,
             model: deps.model,
             tracingOptions: deps.tracingOptions,
             onChunk: async (chunk: any) => {

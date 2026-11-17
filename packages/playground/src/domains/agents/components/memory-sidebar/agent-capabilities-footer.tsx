@@ -1,14 +1,12 @@
-import type { GetAgentResponse, GetMemoryStatusResponse } from '@mastra/client-js';
+import type { GetAgentResponse } from '@mastra/client-js';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@mastra/playground-ui/components/Collapsible';
 import { DisclosureChevron } from '@mastra/playground-ui/components/DisclosureChevron';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMaintenance';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
-import { IconRobot } from '@mastra/playground-ui/icons/central/IconRobot';
 import { IconSettingsSliderHor } from '@mastra/playground-ui/icons/central/IconSettingsSliderHor';
 import { IconSquareArrowTopRight } from '@mastra/playground-ui/icons/central/IconSquareArrowTopRight';
-import { MemoryIcon } from '@mastra/playground-ui/icons/MemoryIcon';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
 
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
@@ -17,7 +15,6 @@ import { quietTextHover } from '@mastra/playground-ui/primitives/typography';
 
 import { cn } from '@mastra/playground-ui/utils/cn';
 import { useAgent, useAgentVersions } from '@mastra/react/hooks/agents';
-import { useMemory } from '@mastra/react/hooks/memory';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { useIsCmsAvailable } from '@/domains/cms/hooks/use-is-cms-available';
@@ -60,8 +57,6 @@ const countStatus = (count: number) => (count > 0 ? String(count) : 'Off');
 
 const getProcessorCount = (agent: GetAgentResponse | null | undefined) =>
   (agent?.inputProcessors?.length ?? 0) + (agent?.outputProcessors?.length ?? 0);
-
-const hasConfiguredMemory = (memory: GetMemoryStatusResponse | null | undefined) => Boolean(memory?.result);
 
 // isCmsAvailable is false while its query loads, so no extra loading flag is needed here.
 const isEditorAvailable = (agent: GetAgentResponse | null | undefined, isCmsAvailable: boolean) =>
@@ -150,36 +145,6 @@ function CapabilityItem({ view, label, status, description, docsHref, enabled, t
 
 // Each capability component owns its data and loading state; React Query
 // dedupes the underlying requests across instances — see client-request-dedupe.
-function MemoryCapability({ agentId, view }: AgentCapabilityProps) {
-  useLocale();
-  const { data: memory, isLoading } = useMemory({
-    agentId: agentId,
-    requestContext: useEntityRequestContext('agent', agentId)[0],
-    queryOptions: { enabled: Boolean(agentId) },
-  });
-  const enabled = hasConfiguredMemory(memory);
-
-  const settledStatus = enabled ? (memory?.memoryType === 'gateway' ? 'Gateway' : 'On') : 'Off';
-  const status = isLoading ? 'Checking' : settledStatus;
-
-  return (
-    <CapabilityItem
-      view={view}
-      label={studioT('Memory')}
-      status={status}
-      description={
-        enabled
-          ? studioT('Conversation history and configured memory features are available for this agent.')
-          : studioT('This agent has no memory configured, so conversations are not saved as memory-backed threads.')
-      }
-      docsHref="https://mastra.ai/docs/memory/overview"
-      enabled={enabled}
-      tone="purple"
-      icon={<MemoryIcon />}
-    />
-  );
-}
-
 function EditorCapability({ agentId, view }: AgentCapabilityProps) {
   useLocale();
   const { data: agent, isLoading: isAgentLoading } = useAgent({
@@ -275,33 +240,6 @@ function WorkflowsCapability({ agentId, view }: AgentCapabilityProps) {
   );
 }
 
-function SubAgentsCapability({ agentId, view }: AgentCapabilityProps) {
-  useLocale();
-  const { data: agent, isLoading } = useAgent({
-    agentId: agentId,
-    requestContext: useEntityRequestContext('agent', agentId)[0],
-    queryOptions: { enabled: Boolean(agentId) },
-  });
-  const count = getRecordCount(agent?.agents);
-
-  return (
-    <CapabilityItem
-      view={view}
-      label={studioT('Sub-agents')}
-      status={isLoading ? 'Checking' : countStatus(count)}
-      description={
-        count > 0
-          ? studioT('{value0} sub-agent{value1} available.', { value0: count, value1: count === 1 ? '' : 's' })
-          : studioT('No sub-agents are attached to this agent.')
-      }
-      docsHref="https://mastra.ai/docs/agents/supervisor-agents"
-      enabled={count > 0}
-      tone="cyan"
-      icon={<IconRobot />}
-    />
-  );
-}
-
 function ProcessorsCapability({ agentId, view }: AgentCapabilityProps) {
   useLocale();
   const { data: agent, isLoading } = useAgent({
@@ -333,11 +271,6 @@ function ProcessorsCapability({ agentId, view }: AgentCapabilityProps) {
 }
 
 function CapabilitiesSummary({ agentId }: { agentId: string }) {
-  const { data: memory } = useMemory({
-    agentId: agentId,
-    requestContext: useEntityRequestContext('agent', agentId)[0],
-    queryOptions: { enabled: Boolean(agentId) },
-  });
   const { data: agent } = useAgent({
     agentId: agentId,
     requestContext: useEntityRequestContext('agent', agentId)[0],
@@ -346,11 +279,9 @@ function CapabilitiesSummary({ agentId }: { agentId: string }) {
   const { isCmsAvailable } = useIsCmsAvailable();
 
   const enabledFlags = [
-    hasConfiguredMemory(memory),
     isEditorAvailable(agent, isCmsAvailable),
     getRecordCount(agent?.tools) > 0,
     getRecordCount(agent?.workflows) > 0,
-    getRecordCount(agent?.agents) > 0,
     getProcessorCount(agent) > 0,
   ];
   const enabledCount = enabledFlags.filter(Boolean).length;
@@ -384,11 +315,9 @@ export function AgentCapabilitiesFooter({ agentId }: { agentId: string }) {
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
-              <MemoryCapability agentId={agentId} view="chip" />
               <EditorCapability agentId={agentId} view="chip" />
               <ToolsCapability agentId={agentId} view="chip" />
               <WorkflowsCapability agentId={agentId} view="chip" />
-              <SubAgentsCapability agentId={agentId} view="chip" />
               <ProcessorsCapability agentId={agentId} view="chip" />
             </div>
             <CapabilitiesSummary agentId={agentId} />
@@ -398,11 +327,9 @@ export function AgentCapabilitiesFooter({ agentId }: { agentId: string }) {
 
         <CollapsibleContent className="px-2 pb-2">
           <div className="grid gap-1">
-            <MemoryCapability agentId={agentId} view="row" />
             <EditorCapability agentId={agentId} view="row" />
             <ToolsCapability agentId={agentId} view="row" />
             <WorkflowsCapability agentId={agentId} view="row" />
-            <SubAgentsCapability agentId={agentId} view="row" />
             <ProcessorsCapability agentId={agentId} view="row" />
           </div>
         </CollapsibleContent>

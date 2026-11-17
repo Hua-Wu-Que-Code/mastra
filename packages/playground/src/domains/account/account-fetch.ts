@@ -1,16 +1,35 @@
 import { z } from 'zod';
 import type { AccountSession } from './account-api';
 
-const chatBody = z.object({
+// These are conversation preferences, not permission to replace an agent's configuration.
+const memoryPreferences = z.object({
+  lastMessages: z
+    .union([z.literal(false), z.number().int().min(0).max(10000), z.literal(Number.MAX_SAFE_INTEGER)])
+    .optional(),
+  workingMemory: z.object({ enabled: z.boolean() }).optional(),
+  observationalMemory: z.boolean().optional(),
+  semanticRecall: z.literal(false).optional(),
+});
+const memoryBody = z.object({
+  thread: z.union([z.string(), z.object({ id: z.string() })]).optional(),
+  options: memoryPreferences.optional(),
+});
+const conversationPreferences = z.object({
+  memory: memoryBody.optional(),
+  disableSubAgents: z.boolean().optional(),
+});
+const chatBody = conversationPreferences.extend({
   messages: z.unknown(),
   runId: z.string().optional(),
-  memory: z.object({ thread: z.union([z.string(), z.object({ id: z.string() })]).optional() }).optional(),
+});
+const threadMessageBody = z.object({
+  message: z.unknown(),
+  threadId: z.string(),
+  ifIdle: z.object({ streamOptions: conversationPreferences.optional() }).optional(),
 });
 
-const threadMessageBody = z.object({ message: z.unknown(), threadId: z.string() });
-
 // Studio normally sends editable run settings. Managed accounts use the preset
-// assistant, so send only conversation data; the server independently rejects overrides.
+// assistant, so send conversation data and bounded preferences; the server independently rejects overrides.
 export function createAccountFetch(account: AccountSession, apiPrefix = '/api'): typeof fetch {
   return async (input, init) => {
     const request = new Request(input, { ...init, credentials: 'include' });
@@ -23,7 +42,32 @@ export function createAccountFetch(account: AccountSession, apiPrefix = '/api'):
     if (!managed || (!chat && !threadMessage) || request.method !== 'POST') return fetch(request);
     if (threadMessage) {
       const parsed = threadMessageBody.parse(await request.clone().json());
-      return fetch(new Request(request, { body: JSON.stringify({ ...parsed, resourceId: account.resourceId }) }));
+      const streamOptions = parsed.ifIdle?.streamOptions;
+      const hasPreferences = streamOptions && Object.keys(streamOptions).length > 0;
+      const body = {
+        message: parsed.message,
+        threadId: parsed.threadId,
+        resourceId: account.resourceId,
+        ...(hasPreferences
+          ? {
+              ifIdle: {
+                streamOptions: {
+                  ...streamOptions,
+                  ...(streamOptions.memory
+                    ? {
+                        memory: {
+                          ...streamOptions.memory,
+                          thread: parsed.threadId,
+                          resource: account.resourceId,
+                        },
+                      }
+                    : {}),
+                },
+              },
+            }
+          : {}),
+      };
+      return fetch(new Request(request, { body: JSON.stringify(body) }));
     }
     const parsed = chatBody.parse(await request.clone().json());
     const body = { ...parsed, memory: parsed.memory ? { ...parsed.memory, resource: account.resourceId } : undefined };

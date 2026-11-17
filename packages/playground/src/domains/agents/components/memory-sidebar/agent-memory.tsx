@@ -28,10 +28,11 @@ import { MemorySearch } from '@/lib/ai-ui/memory-search';
 interface AgentMemoryProps {
   agentId: string;
   threadId: string;
+  hideRecentMessages?: boolean;
   memoryType?: 'local' | 'gateway';
 }
 
-export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps) {
+export function AgentMemory({ agentId, threadId, memoryType, hideRecentMessages = false }: AgentMemoryProps) {
   const studioLocale = useLocale();
   const isGatewayMemory = memoryType === 'gateway';
   const { threadInput: chatInputValue } = useThreadInput(threadId);
@@ -151,14 +152,16 @@ export function AgentMemory({ agentId, threadId, memoryType }: AgentMemoryProps)
         </div>
       )}
 
-      <div className="border-b border-border p-4">
-        <Txt as="h3" variant="subheading" tone="ink">
-          {studioT('Recent Messages')}
-        </Txt>
-        <Txt variant="caption" tone="muted" className="mt-1">
-          {getRecentMessagesSettings(config?.lastMessages, config?.messageHistory).description}
-        </Txt>
-      </div>
+      {!hideRecentMessages && (
+        <div className="border-b border-border p-4">
+          <Txt as="h3" variant="subheading" tone="ink">
+            {studioT('Recent Messages')}
+          </Txt>
+          <Txt variant="caption" tone="muted" className="mt-1">
+            {getRecentMessagesSettings(config?.lastMessages, config?.messageHistory).description}
+          </Txt>
+        </div>
+      )}
 
       {/* Observational Memory Section - moved above Semantic Recall */}
       {isOMEnabled && (

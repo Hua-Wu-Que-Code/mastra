@@ -69,6 +69,7 @@ export interface ModelSettings {
   chatWithLegacyStream?: boolean;
   chatWithNetwork?: boolean;
   requireToolApproval?: boolean;
+  teamwork?: boolean;
 }
 
 export interface AgentSettingsType {

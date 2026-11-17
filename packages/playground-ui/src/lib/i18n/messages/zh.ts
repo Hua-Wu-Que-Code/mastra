@@ -1,6 +1,23 @@
 import type { en } from './en';
 
 export const zh = {
+  Auto: '自动',
+  'Agent teamwork': '智能体团队协作',
+  'Enable agent teamwork': '启用智能体团队协作',
+  'Allow this agent to delegate tasks to its configured sub-agents. Teamwork can use more tokens. Existing conversations are kept when disabled.':
+    '允许此智能体将任务委派给已配置的子智能体。团队协作会增加 Token 用量，关闭后保留已有对话。',
+  'Manage memory for this agent.': '管理此智能体的记忆。',
+  'Remember important information from conversations for future replies.': '记住对话中的重要信息，让后续回答更贴合你。',
+  'Keep lasting notes, preferences, and agreements across conversations.':
+    '记录有长期价值的信息、偏好和约定，在后续对话中沿用。',
+  'Extract and organize observations from conversation history.': '从对话历史中提取观察结果，自动整理和更新。',
+  'Auto follows the context budget and compression policy. Set a limit to keep fewer recent messages; 0 disables history.':
+    '自动模式按上下文预算保留近期消息并压缩旧内容。也可限制最近消息条数，0 表示不读取历史消息。',
+  'Recent message limit': '最近消息条数',
+  'View and edit the memory used by this conversation.': '查看和编辑此对话使用的记忆。',
+  'Memory appears after the first conversation.': '开始对话后即可查看记忆。',
+  'Unable to load agents.': '无法加载智能体。',
+  'No agents available.': '暂无智能体。',
   px: 'px',
   'Font size': '字号大小',
   'Only affects conversation content.': '仅影响会话内容的字号',

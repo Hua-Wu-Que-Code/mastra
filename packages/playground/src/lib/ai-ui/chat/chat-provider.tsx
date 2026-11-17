@@ -42,6 +42,7 @@ import type { ReactNode } from 'react';
 import { useChatSendHandler } from './use-chat-send-handler';
 import { useObservationalMemoryContext } from '@/domains/agents/context';
 import { useWorkingMemory } from '@/domains/agents/context/agent-working-memory-context';
+import { resolveMemoryOptions, useAgentMemoryPreferences } from '@/domains/agents/context/agent-memory-preferences';
 import { usePlaygroundModelOptional } from '@/domains/agents/context/playground-model-context';
 import { getCanSendWhileStreaming } from '@/services/mastra-runtime-state';
 import type { ChatProps } from '@/types';
@@ -78,6 +79,8 @@ export function ChatProvider({
   const [threadSignalsUnsupported, setThreadSignalsUnsupported] = useState(false);
   const threadSignalsUnsupportedRef = useRef(false);
   const modelSettings = settings?.modelSettings ?? {};
+  const [memoryPreferences] = useAgentMemoryPreferences(agentId);
+  const memoryOptions = resolveMemoryOptions(memoryPreferences);
   const threadSignalsEnabled =
     window.MASTRA_AGENT_SIGNALS !== 'false' && supportsMemory !== false && !modelSettings.chatWithLegacyStream;
 
@@ -144,8 +147,12 @@ export function ChatProvider({
   });
   const omConfig = memoryConfigData?.config?.observationalMemory as unknown;
   const isOMEnabled =
-    omConfig === true ||
-    (typeof omConfig === 'object' && omConfig !== null && (!('enabled' in omConfig) || omConfig.enabled !== false));
+    memoryPreferences.enabled !== false &&
+    (memoryPreferences.observationalMemory ??
+      (omConfig === true ||
+        (typeof omConfig === 'object' &&
+          omConfig !== null &&
+          (!('enabled' in omConfig) || omConfig.enabled !== false))));
   const {
     setIsObservingFromStream,
     setIsReflectingFromStream,
@@ -293,6 +300,8 @@ export function ChatProvider({
     agentVersionId,
     threadId,
     modelSettingsArgs,
+    memoryOptions,
+    disableSubAgents: !modelSettings.teamwork,
     model: modelOverride,
     chatWithNetwork,
     chatWithGenerate,

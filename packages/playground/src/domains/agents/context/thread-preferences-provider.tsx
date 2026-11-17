@@ -78,6 +78,8 @@ function ThreadPreferencesState({
       : undefined,
   );
 
+  settings.modelSettings.teamwork = preferences.modelSettings?.teamwork ?? false;
+
   return (
     <PlaygroundModelContext.Provider
       value={{

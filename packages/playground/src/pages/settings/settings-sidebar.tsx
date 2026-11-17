@@ -1,6 +1,7 @@
 import { Sidebar, useSidebar } from '@mastra/playground-ui/components/Sidebar';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
+import { MemoryIcon } from '@mastra/playground-ui/icons/MemoryIcon';
 import { IconSettingsGear5 } from '@mastra/playground-ui/icons/central/IconSettingsGear5';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Link, useLocation } from 'react-router';
@@ -44,11 +45,21 @@ export function SettingsSidebar() {
         <Sidebar.NavList>
           <Sidebar.NavLink
             link={{ name: studioT('General'), url: '/settings' }}
-            isActive
+            isActive={location.pathname === '/settings'}
             render={
               <Link to="/settings" state={{ returnTo }}>
                 <IconSettingsGear5 />
                 <Sidebar.NavLabel>{studioT('General')}</Sidebar.NavLabel>
+              </Link>
+            }
+          />
+          <Sidebar.NavLink
+            link={{ name: studioT('Memory'), url: '/settings/memory' }}
+            isActive={location.pathname === '/settings/memory'}
+            render={
+              <Link to="/settings/memory" state={{ returnTo }}>
+                <MemoryIcon />
+                <Sidebar.NavLabel>{studioT('Memory')}</Sidebar.NavLabel>
               </Link>
             }
           />

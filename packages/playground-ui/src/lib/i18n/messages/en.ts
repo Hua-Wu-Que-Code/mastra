@@ -1,4 +1,23 @@
 export const en = {
+  Auto: 'Auto',
+  'Agent teamwork': 'Agent teamwork',
+  'Enable agent teamwork': 'Enable agent teamwork',
+  'Allow this agent to delegate tasks to its configured sub-agents. Teamwork can use more tokens. Existing conversations are kept when disabled.':
+    'Allow this agent to delegate tasks to its configured sub-agents. Teamwork can use more tokens. Existing conversations are kept when disabled.',
+  'Manage memory for this agent.': 'Manage memory for this agent.',
+  'Remember important information from conversations for future replies.':
+    'Remember important information from conversations for future replies.',
+  'Keep lasting notes, preferences, and agreements across conversations.':
+    'Keep lasting notes, preferences, and agreements across conversations.',
+  'Extract and organize observations from conversation history.':
+    'Extract and organize observations from conversation history.',
+  'Auto follows the context budget and compression policy. Set a limit to keep fewer recent messages; 0 disables history.':
+    'Auto follows the context budget and compression policy. Set a limit to keep fewer recent messages; 0 disables history.',
+  'Recent message limit': 'Recent message limit',
+  'View and edit the memory used by this conversation.': 'View and edit the memory used by this conversation.',
+  'Memory appears after the first conversation.': 'Memory appears after the first conversation.',
+  'Unable to load agents.': 'Unable to load agents.',
+  'No agents available.': 'No agents available.',
   px: 'px',
   'Font size': 'Font size',
   'Only affects conversation content.': 'Only affects conversation content.',

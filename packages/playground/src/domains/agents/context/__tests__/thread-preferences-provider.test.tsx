@@ -253,7 +253,7 @@ describe('ThreadPreferencesProvider', () => {
         expect(screen.getByText(`${locked ? 'gpt-5-mini' : 'gpt-4o'}:default`)).toBeTruthy();
         expect(screen.queryByText(/is no longer allowed by admin policy/)).toBeNull();
         if (locked) {
-          expect((await screen.findByTestId('composer-model-locked')).textContent).toContain('openai/gpt-5-mini');
+          expect(await screen.findByRole('button', { name: /Model:.*GPT-5 Mini/i })).toBeTruthy();
         }
         fireEvent.click(screen.getByText('Send'));
         await waitFor(() => expect(sent).toHaveBeenCalledOnce());

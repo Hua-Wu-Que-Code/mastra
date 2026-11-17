@@ -519,6 +519,7 @@ describe('ChatProvider', () => {
   });
 
   it('streams via the agent stream endpoint and forwards the modelSettings', async () => {
+    localStorage.setItem('mastra-memory-preferences-local-agent-1', JSON.stringify({ enabled: false }));
     const captured: Captured[] = [];
     server.use(
       ...baseHandlers(captured),
@@ -549,6 +550,9 @@ describe('ChatProvider', () => {
 
     expect(captured).toHaveLength(1);
     expect(captured[0].body.maxSteps).toBe(7);
+    expect(captured[0].body.disableSubAgents).toBe(true);
+    expect(captured[0].body.memory).toMatchObject({ thread: 'thread-1', options: { lastMessages: false, semanticRecall: false, workingMemory: { enabled: false }, observationalMemory: false } });
+    localStorage.removeItem('mastra-memory-preferences-local-agent-1');
     const modelSettings = captured[0].body.modelSettings;
     expect(isRecord(modelSettings) ? modelSettings.temperature : undefined).toBe(0.4);
     const serialized = JSON.stringify(captured[0].body.messages ?? []);

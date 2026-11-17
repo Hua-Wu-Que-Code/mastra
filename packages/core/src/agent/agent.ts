@@ -7518,6 +7518,7 @@ export class Agent<
     autoResumeSuspendedTools?: boolean;
     hooks?: ToolHooks;
     delegation?: DelegationConfig;
+    disableSubAgents?: boolean;
     methodType?: AgentMethodType;
     backgroundTaskEnabled?: boolean;
     backgroundTaskPolicy?: AgentExecutionOptionsBase<any>['backgroundTaskPolicy'];
@@ -7558,6 +7559,7 @@ export class Agent<
       // Use the deep-merged delegation so default callbacks (e.g. messageFilter)
       // survive when callers pass a partial per-call delegation override.
       delegation: mergedOptions.delegation,
+      disableSubAgents: mergedOptions.disableSubAgents,
       hooks: mergedOptions.hooks,
       methodType: options.methodType ?? 'stream',
       backgroundTaskEnabled: options.backgroundTaskEnabled,
@@ -7583,6 +7585,7 @@ export class Agent<
     memoryConfig,
     autoResumeSuspendedTools,
     delegation,
+    disableSubAgents,
     backgroundTaskEnabled,
     backgroundTaskPolicy,
     inputProcessors,
@@ -7602,6 +7605,7 @@ export class Agent<
     memoryConfig?: MemoryConfigInternal;
     autoResumeSuspendedTools?: boolean;
     delegation?: DelegationConfig;
+    disableSubAgents?: boolean;
     backgroundTaskEnabled?: boolean;
     backgroundTaskPolicy?: {
       allowToolDispatch: boolean;
@@ -7732,20 +7736,22 @@ export class Agent<
         }
       }
 
-      const agentTools = await traced('agents', () =>
-        this.listAgentTools({
-          runId,
-          resourceId,
-          threadId,
-          requestContext,
-          methodType,
-          ...observabilityContext,
-          autoResumeSuspendedTools,
-          delegation,
-          backgroundTaskEnabled: backgroundTaskPolicy?.allowDelegationDispatch ?? backgroundTaskEnabled,
-          getModel: getResolvedModel,
-        }),
-      );
+      const agentTools = disableSubAgents
+        ? {}
+        : await traced('agents', () =>
+            this.listAgentTools({
+              runId,
+              resourceId,
+              threadId,
+              requestContext,
+              methodType,
+              ...observabilityContext,
+              autoResumeSuspendedTools,
+              delegation,
+              backgroundTaskEnabled: backgroundTaskPolicy?.allowDelegationDispatch ?? backgroundTaskEnabled,
+              getModel: getResolvedModel,
+            }),
+          );
 
       const workflowTools = await traced('workflows', () =>
         this.listWorkflowTools({

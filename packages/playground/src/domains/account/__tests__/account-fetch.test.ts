@@ -82,6 +82,60 @@ describe('Account fetch', () => {
       expect(response.status).toBe(200);
     });
   });
+  describe('when a managed account changes conversation preferences', () => {
+    it.each(['stream', 'send-message', 'queue-message'])(
+      'preserves bounded preferences on %s and binds ownership',
+      async endpoint => {
+        const target = url.replace('/stream', '/' + endpoint);
+        const preferences = {
+          disableSubAgents: true,
+          memory: {
+            thread: 'forged-thread',
+            resource: 'forged-owner',
+            options: {
+              lastMessages: 12,
+              workingMemory: { enabled: false },
+              observationalMemory: false,
+            },
+          },
+          model: 'forged-model',
+        };
+        let captured: unknown;
+        server.use(
+          http.post(target, async ({ request }) => {
+            captured = await request.json();
+            return HttpResponse.json({ ok: true });
+          }),
+        );
+        await createAccountFetch(creatorSession)(target, {
+          method: 'POST',
+          body: JSON.stringify(
+            endpoint === 'stream'
+              ? { messages: [], ...preferences }
+              : { message: { contents: [] }, threadId: 'owned-thread', ifIdle: { streamOptions: preferences } },
+          ),
+        });
+        const expected = {
+          disableSubAgents: true,
+          memory: {
+            thread: endpoint === 'stream' ? 'forged-thread' : 'owned-thread',
+            resource: creatorSession.resourceId,
+            options: preferences.memory.options,
+          },
+        };
+        expect(captured).toEqual(
+          endpoint === 'stream'
+            ? { messages: [], ...expected }
+            : {
+                message: { contents: [] },
+                threadId: 'owned-thread',
+                resourceId: creatorSession.resourceId,
+                ifIdle: { streamOptions: expected },
+              },
+        );
+      },
+    );
+  });
   describe('when an administrator sends a request', () => {
     it('preserves administrator configuration', async () => {
       const body = { messages: [], model: 'provider/model' };

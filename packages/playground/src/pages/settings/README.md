@@ -57,5 +57,31 @@ and does not cancel earlier pending submissions when another message is sent.
 
 Tool execution defaults to `requireToolApproval: false`. Explicit agent/tool
 approval rules still apply. Managed accounts use server execution defaults;
-the fetch adapter strips execution overrides from both message admission routes,
-and the server enforces thread ownership and rejects nested run configuration.
+the fetch adapter strips model, system prompt, tool and processor overrides from both
+message admission routes. It preserves bounded conversation memory choices and
+teamwork selection; the server independently validates those fields and thread ownership.
+
+`/settings/memory` contains an agent selector, a master memory switch, independent
+working/observational memory switches, and the recent-message limit. Memory content
+and observation analysis now live here, rather than over the conversation list.
+Opening settings from a conversation retains its agent and thread through the
+existing return path. A direct visit selects the first agent and its latest thread.
+The working-memory editor and observation timeline retain their existing server APIs.
+
+Choices are saved per account and agent in this browser. They apply to the next
+submission, including idle and queued thread admissions. Memory off disables history,
+semantic recall, working memory and observations for that invocation; it keeps stored
+records available for inspection. It does not delete or erase conversations.
+An empty recent-message limit selects Auto; zero disables history and a positive
+integer caps its message count. DSH has no fixed recent-message-count setting: its
+compaction-basic package retains recent messages within a token budget. The local
+creator server uses that automatic budget/compaction policy; the optional count is
+an additional Studio control.
+
+The model menu follows DSH's `ui-agent-team/src/client/TeamModeToggle.tsx`: a team
+settings pane explains delegation and contains the switch. New conversations start
+with teamwork off; reopening a conversation restores its selection. A locked model
+still allows changing teamwork. Turning it off omits configured sub-agent delegation
+tools from subsequent executions and reconstructed tool sets; ordinary tools and
+existing child conversations remain available. It does not attach new agents or
+cancel running child tasks. The execution option is `disableSubAgents`.

@@ -142,7 +142,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     </AuthRequired>
   );
 
-  if (pathname === '/settings') return protectedPage;
+  if (pathname === '/settings' || pathname.startsWith('/settings/')) return protectedPage;
 
   return (
     <>

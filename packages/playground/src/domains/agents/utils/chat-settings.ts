@@ -18,6 +18,7 @@ export function resolveChatSettings(
     modelSettings: {
       ...defaultSettings.modelSettings,
       ...agentDefaults?.modelSettings,
+      teamwork: preferences?.modelSettings?.teamwork ?? agentDefaults?.modelSettings?.teamwork ?? false,
       ...(Object.keys(providerOptions).length ? { providerOptions } : {}),
       // Select the available streaming transport automatically, never from old browser flags.
       chatWithGenerateLegacy: false,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { ModelPickerPanel } from './model-picker-panel';
 import type { ModelPickerProvider, ModelPickerValue } from './model-picker-types';
+import { Switch } from '@/ds/components/Switch';
 import { Button } from '@/ds/components/Button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/ds/components/Popover';
 import { IconArrowLeft } from '@/ds/icons/central/IconArrowLeft';
@@ -13,10 +14,12 @@ import { formatModelName } from '@/utils/model';
 
 export interface ModelSettingsPickerProps {
   providers: ModelPickerProvider[];
+  modelLocked?: boolean;
   value?: ModelPickerValue;
   onValueChange: (value: ModelPickerValue) => void;
   defaultModel?: ModelPickerValue;
   reset?: { label: string; onClick: () => void };
+  teamwork?: { enabled: boolean; onChange: (enabled: boolean) => void };
   reasoning?: { levels: string[]; value: string; onChange: (level: string) => void };
 }
 
@@ -64,22 +67,24 @@ function focusPane(element: HTMLDivElement | null) {
 /** Click through model and reasoning panes, with no provider marks or hover menus. */
 export function ModelSettingsPicker({
   providers,
+  modelLocked = false,
   value,
   onValueChange,
   defaultModel,
   reset,
   reasoning,
+  teamwork,
 }: ModelSettingsPickerProps) {
   useLocale();
   const [open, setOpen] = useState(false);
-  const [pane, setPane] = useState<'root' | 'model' | 'reasoning'>('root');
+  const [pane, setPane] = useState<'root' | 'model' | 'reasoning' | 'teamwork'>('root');
   const selected = providers
     .find(provider => provider.id === value?.provider)
     ?.models.find(model => model.id === value?.model);
   const name = selected?.name ?? (value?.model ? formatModelName(value.model) : t('Select model'));
   const close = () => setOpen(false);
   const rowClass =
-    'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label hover:bg-accent focus-visible:bg-accent focus-visible:outline-hidden';
+    'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label hover:bg-accent focus-visible:bg-accent focus-visible:outline-hidden disabled:cursor-default disabled:opacity-60';
 
   return (
     <Popover
@@ -111,16 +116,24 @@ export function ModelSettingsPicker({
               type="button"
               className={rowClass}
               aria-label={`${t('Model')} ${name}`}
+              disabled={modelLocked}
               onClick={() => setPane('model')}
             >
               <span>{t('Model')}</span>
               <span className="ml-auto truncate text-muted-foreground">{name}</span>
               <IconChevronRightMedium aria-hidden className="size-icon-sm shrink-0" />
             </button>
-            {reasoning && (
+            {reasoning && !modelLocked && (
               <button type="button" className={rowClass} onClick={() => setPane('reasoning')}>
                 <span>{t('Reasoning level')}</span>
                 <span className="ml-auto text-muted-foreground">{levelName(reasoning.value)}</span>
+                <IconChevronRightMedium aria-hidden className="size-icon-sm shrink-0" />
+              </button>
+            )}
+            {teamwork && (
+              <button type="button" className={rowClass} onClick={() => setPane('teamwork')}>
+                <span>{t('Agent teamwork')}</span>
+                <span className="ml-auto text-muted-foreground">{teamwork.enabled ? t('On') : t('Off')}</span>
                 <IconChevronRightMedium aria-hidden className="size-icon-sm shrink-0" />
               </button>
             )}
@@ -135,9 +148,25 @@ export function ModelSettingsPicker({
               aria-label={t('Back to model settings')}
             >
               <IconArrowLeft aria-hidden />
-              {pane === 'model' ? t('Model') : t('Reasoning level')}
+              {pane === 'model' ? t('Model') : pane === 'teamwork' ? t('Agent teamwork') : t('Reasoning level')}
             </Button>
-            {pane === 'model' ? (
+            {pane === 'teamwork' && teamwork ? (
+              <div className="space-y-3 px-2.5 py-2">
+                <div className="flex items-center justify-between gap-3 text-ui-md">
+                  <span>{t('Enable agent teamwork')}</span>
+                  <Switch
+                    aria-label={t('Enable agent teamwork')}
+                    checked={teamwork.enabled}
+                    onCheckedChange={teamwork.onChange}
+                  />
+                </div>
+                <p className="text-ui-sm text-muted-foreground">
+                  {t(
+                    'Allow this agent to delegate tasks to its configured sub-agents. Teamwork can use more tokens. Existing conversations are kept when disabled.',
+                  )}
+                </p>
+              </div>
+            ) : pane === 'model' ? (
               <ModelPickerPanel
                 providers={providers}
                 value={value}

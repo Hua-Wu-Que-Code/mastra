@@ -88,9 +88,8 @@ describe('AgentCapabilitiesFooter', () => {
     // Once "Editor: Off" has rendered the gate has settled (versions query disabled), so no extra wait is needed.
     expect(onVersions).not.toHaveBeenCalled();
 
-    // Memory links to the canonical docs page (not the retired /en/ path).
-    const memoryRow = screen.getByRole('link', { name: 'Memory: On' });
-    expect(memoryRow.getAttribute('href')).toBe('https://mastra.ai/docs/memory/overview');
+    expect(screen.queryByRole('link', { name: /^Memory:/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /^Sub-agents:/ })).toBeNull();
   });
 
   it('enables the editor capability and fetches versions when CMS is available', async () => {
@@ -115,31 +114,16 @@ describe('AgentCapabilitiesFooter', () => {
     expect(onVersions).not.toHaveBeenCalled();
   });
 
-  it.each([
-    { label: 'gateway', memory: { result: true, memoryType: 'gateway' } as GetMemoryStatusResponse, status: 'Gateway' },
-    { label: 'loading', memory: 'loading' as const, status: 'Checking' },
-    { label: 'disabled', memory: { result: false } as GetMemoryStatusResponse, status: 'Off' },
-  ])('shows the memory status as "$status" ($label)', async ({ memory, status }) => {
-    registerFooterHandlers({ cmsEnabled: false, memory });
-
-    renderFooter();
-
-    fireEvent.click(await screen.findByTestId('agent-capabilities-footer'));
-    expect(await screen.findByRole('link', { name: `Memory: ${status}` })).not.toBeNull();
-  });
-
-  it('counts attached sub-agents and reflects them in the capability summary', async () => {
+  it('excludes sub-agent and memory capabilities after their controls move to settings', async () => {
     registerFooterHandlers({
       cmsEnabled: false,
       agent: { ...baseAgent, agents: { researcher: { id: 'researcher', name: 'Researcher' } } },
     });
     renderFooter();
-
-    // Memory (on) + Sub-agents (1) are the two enabled capabilities of six.
     const footer = await screen.findByTestId('agent-capabilities-footer');
-    await waitFor(() => expect(footer.textContent).toMatch(/2\/6/));
-
+    await waitFor(() => expect(footer.textContent).toMatch(/0\/4/));
     fireEvent.click(footer);
-    expect(await screen.findByRole('link', { name: 'Sub-agents: 1' })).not.toBeNull();
+    expect(screen.queryByRole('link', { name: /^Sub-agents:/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /^Memory:/ })).toBeNull();
   });
 });

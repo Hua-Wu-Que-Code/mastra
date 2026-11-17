@@ -685,6 +685,9 @@ export type AgentExecutionOptionsBase<OUTPUT> = {
   onAbort?: LoopConfig<OUTPUT>['onAbort'];
   /** Tools that are active for this execution */
   activeTools?: LoopOptions['activeTools'];
+
+  /** Omit delegation tools for this execution, without removing configured sub-agents. */
+  disableSubAgents?: boolean;
   /**
    * Signal to abort the streaming operation
    */

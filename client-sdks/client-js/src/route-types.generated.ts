@@ -389,6 +389,7 @@ type InputShared_Type_8 = {
     | undefined;
   modelSettings?: unknown | undefined;
   activeTools?: string[] | undefined;
+  disableSubAgents?: boolean | undefined;
   toolsets?:
     | {
         [key: string]: unknown;
@@ -5260,6 +5261,7 @@ export type PostAgentsAgentIdGenerate_Body = {
     | undefined;
   modelSettings?: unknown | undefined;
   activeTools?: string[] | undefined;
+  disableSubAgents?: boolean | undefined;
   toolsets?:
     | {
         [key: string]: unknown;
@@ -5418,6 +5420,7 @@ export type PostAgentsAgentIdStreamUntilIdle_Body = {
     | undefined;
   modelSettings?: unknown | undefined;
   activeTools?: string[] | undefined;
+  disableSubAgents?: boolean | undefined;
   toolsets?:
     | {
         [key: string]: unknown;
@@ -6165,6 +6168,7 @@ export type PostAgentsAgentIdResumeStream_Body = {
     | undefined;
   modelSettings?: unknown | undefined;
   activeTools?: string[] | undefined;
+  disableSubAgents?: boolean | undefined;
   toolsets?:
     | {
         [key: string]: unknown;
@@ -6456,6 +6460,7 @@ export type PostAgentsAgentIdResumeStreamUntilIdle_Body = {
     | undefined;
   modelSettings?: unknown | undefined;
   activeTools?: string[] | undefined;
+  disableSubAgents?: boolean | undefined;
   toolsets?:
     | {
         [key: string]: unknown;
@@ -15195,6 +15200,7 @@ export type PostAgentsAgentIdGenerateLegacy_Body = {
     | undefined;
   modelSettings?: unknown | undefined;
   activeTools?: string[] | undefined;
+  disableSubAgents?: boolean | undefined;
   toolsets?:
     | {
         [key: string]: unknown;

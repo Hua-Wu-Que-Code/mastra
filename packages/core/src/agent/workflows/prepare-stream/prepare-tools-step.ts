@@ -75,6 +75,7 @@ export function createPrepareToolsStep<OUTPUT = undefined>({
         memoryConfig: options.memory?.options,
         autoResumeSuspendedTools: options.autoResumeSuspendedTools,
         delegation: options.delegation,
+        disableSubAgents: options.disableSubAgents,
         backgroundTaskEnabled,
         backgroundTaskPolicy: options.backgroundTaskPolicy,
         inputProcessors: options.inputProcessors,

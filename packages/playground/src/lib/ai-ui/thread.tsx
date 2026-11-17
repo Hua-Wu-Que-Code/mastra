@@ -61,7 +61,6 @@ import { BracketOverlay } from './components/bracket-overlay';
 import { useComposerAutofocus } from './hooks/use-composer-autofocus';
 import { SuggestedPromptList } from './suggested-prompt-list';
 import { TaskPanel } from './task-panel';
-import { useAccount } from '@/domains/account/account-context';
 import { BrowserThumbnail, useBrowserSession } from '@/domains/agents';
 import { AgentChannelsCard } from '@/domains/agents/components/agent-channels/agent-channels-card';
 import { ChatMessagesLoadingSkeleton } from '@/domains/agents/components/agent-loading-skeletons';
@@ -394,7 +393,6 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
   const { attachments, toCoreUserMessages, clear, restore, isAddingAttachments } = useComposerAttachments();
   const { isRunning, canSendWhileStreaming, cancelRun } = useChatRunning();
   const [sendPulseKey, setSendPulseKey] = useState(0);
-  const account = useAccount();
   const { canExecute } = usePermissions();
   const canExecuteAgent = canExecute('agents');
   const inputDisabled = !canExecuteAgent || Boolean(draftStatus?.restoring);
@@ -402,8 +400,7 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
 
   const isEmpty = text.trim().length === 0 && attachments.length === 0 && annotations.length === 0;
   const sendBlocked = isRunning && !canSendWhileStreaming;
-  const canSelectModel = !account || account.user.role === 'admin';
-  const showModelSwitcher = Boolean(canSelectModel && agentId && !hasModelList && !hideModelSwitcher);
+  const showModelSwitcher = Boolean(agentId && !hasModelList && !hideModelSwitcher);
   const shownError = submitError || draftStatus?.error;
 
   const submit = async (accelerated = false) => {

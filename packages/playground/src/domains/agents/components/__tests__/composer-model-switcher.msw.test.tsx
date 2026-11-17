@@ -79,6 +79,20 @@ afterEach(() => {
 });
 
 describe('ComposerModelSwitcher', () => {
+  describe('when agent teamwork is enabled', () => {
+    it('restores the team selection after reopening the conversation', async () => {
+      mockProviderRequests(Promise.resolve(), openAiProviders);
+      renderSwitcher({ provider: 'openai', model: 'gpt-4o-mini' });
+      fireEvent.click(await screen.findByRole('button', { name: /Model:.*GPT-4o Mini/ }));
+      fireEvent.click(screen.getByRole('button', { name: /Agent teamwork/ }));
+      fireEvent.click(screen.getByRole('switch', { name: 'Enable agent teamwork' }));
+      expect(screen.getByTestId('settings').textContent).toContain('"teamwork":true');
+      cleanup();
+      renderSwitcher({ provider: 'openai', model: 'gpt-4o-mini' });
+      await waitFor(() => expect(screen.getByTestId('settings').textContent).toContain('"teamwork":true'));
+    });
+  });
+
   describe('when the providers request is still in flight', () => {
     it('reserves the picker footprint with a skeleton until providers resolve', async () => {
       const providersGate = createGate();

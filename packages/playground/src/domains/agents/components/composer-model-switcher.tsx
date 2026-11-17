@@ -1,10 +1,8 @@
-import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { ModelSettingsPicker, cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import type { ModelPickerProvider } from '@mastra/playground-ui/domains/llm';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
-import { IconLock } from '@mastra/playground-ui/icons/central/IconLock';
 
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
@@ -15,14 +13,17 @@ import { usePlaygroundModelOptional } from '../context/playground-model-context'
 import { useBuilderFilteredModels, useBuilderFilteredProviders, useBuilderModelPolicy } from '@/domains/agent-builder';
 import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-agent-builder-allowed-models';
 import { findProviderById } from '@/domains/llm';
+import { useAccount } from '@/domains/account/account-context';
 import { useAllModels } from '@/domains/llm/hooks/use-filtered-models';
 import { useFilteredProviders } from '@/domains/llm/hooks/use-filtered-providers';
 
 export const ComposerModelSwitcher = () => {
   useLocale();
+  const account = useAccount();
+  const managed = Boolean(account && account.user.role !== 'admin');
   const selection = usePlaygroundModelOptional();
   const { settings, setSettings } = useAgentSettings();
-  const { data: dataProviders, isLoading: providersLoading } = useLLMProviders();
+  const { data: dataProviders, isLoading: providersLoading } = useLLMProviders({ queryOptions: { enabled: !managed } });
   const policy = useBuilderModelPolicy();
   const allProviders = dataProviders?.providers || [];
   const sortedProviders = useFilteredProviders(useBuilderFilteredProviders(allProviders, policy), '', false);
@@ -55,15 +56,7 @@ export const ComposerModelSwitcher = () => {
 
   const { provider: selectedProvider, model: selectedModel, agentModel, resetModel, setModel } = selection;
 
-  // Admin locked the picker — surface a non-interactive chip instead.
-  if (policy.active && policy.pickerVisible === false) {
-    const lockedLabel = selectedProvider && selectedModel ? `${selectedProvider}/${selectedModel}` : 'Locked by admin';
-    return (
-      <Badge icon={<IconLock />} data-testid="composer-model-locked">
-        {lockedLabel}
-      </Badge>
-    );
-  }
+  const modelLocked = managed || (policy.active && policy.pickerVisible === false);
 
   // Resolve the full provider ID (handles gateway prefix, e.g., 'custom' -> 'acme/custom')
   const fullProviderId = resolveProviderId(selectedProvider);
@@ -90,6 +83,11 @@ export const ComposerModelSwitcher = () => {
 
   return (
     <ModelSettingsPicker
+      modelLocked={modelLocked}
+      teamwork={{
+        enabled: settings?.modelSettings.teamwork ?? false,
+        onChange: teamwork => setSettings?.({ modelSettings: { ...settings?.modelSettings, teamwork } }),
+      }}
       providers={pickerProviders}
       value={fullProviderId ? { provider: fullProviderId, model: selectedModel } : undefined}
       onValueChange={({ provider, model }) => {

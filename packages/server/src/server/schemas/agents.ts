@@ -439,6 +439,7 @@ export const agentExecutionBodySchema = z
 
     // Tool Configuration
     activeTools: z.array(z.string()).optional(),
+    disableSubAgents: z.boolean().optional(),
     // Tool entries contain execute functions and cannot be validated by zod.
     toolsets: typedPermissive<ToolsetsInput>(z.record(z.string(), z.unknown())).optional(),
     clientTools: typedPermissive<ToolsInput>(z.record(z.string(), z.unknown())).optional(),

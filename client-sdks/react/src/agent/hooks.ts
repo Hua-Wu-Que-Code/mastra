@@ -3,6 +3,7 @@ import { MastraClient } from '@mastra/client-js';
 import type { SendAgentSignalParams } from '@mastra/client-js';
 import type { AIV5Type, MastraDBMessage, MastraToolInvocationPart } from '@mastra/core/agent/message-list';
 import { AIV5Adapter } from '@mastra/core/agent/message-list';
+import type { MemoryConfigInternal } from '@mastra/core/memory';
 import type { CoreUserMessage } from '@mastra/core/llm';
 import type { TracingOptions } from '@mastra/core/observability';
 import type { RequestContext } from '@mastra/core/request-context';
@@ -158,6 +159,8 @@ const resolveInitialMessages = (messages: MastraDBMessage[]): MastraDBMessage[] 
     });
 
 type SignalContinuationOptions = {
+  memory?: { thread: string; resource: string; options?: MemoryConfigInternal };
+  disableSubAgents?: boolean;
   model?: string;
   maxSteps?: number;
   modelSettings?: {
@@ -213,6 +216,10 @@ export interface MastraChatProps {
 }
 
 interface SharedArgs {
+  /** Per-request memory overrides. Stored history is retained. */
+  memoryOptions?: MemoryConfigInternal;
+  /** Hide delegation tools for this execution. */
+  disableSubAgents?: boolean;
   coreUserMessages: CoreUserMessage[];
   model?: string;
   requestContext?: RequestContext;
@@ -798,6 +805,8 @@ export const useChat = ({
   }, [agentId, closeThreadSubscription, ensureThreadSubscription, resourceId, threadId, threadSignalsDisabled]);
 
   const generate = async ({
+    memoryOptions,
+    disableSubAgents,
     coreUserMessages,
     model,
     requestContext,
@@ -842,6 +851,7 @@ export const useChat = ({
     _currentRunId.current = runId;
 
     const response = await agent.generate(coreUserMessages, {
+      disableSubAgents,
       model,
       runId,
       maxSteps,
@@ -857,7 +867,7 @@ export const useChat = ({
       instructions,
       system,
       requestContext: resolvedRequestContext,
-      ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId } } : {}),
+      ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId, options: memoryOptions } } : {}),
       providerOptions,
       tracingOptions,
       requireToolApproval,
@@ -897,6 +907,8 @@ export const useChat = ({
   };
 
   const stream = async ({
+    memoryOptions,
+    disableSubAgents,
     coreUserMessages,
     model,
     requestContext,
@@ -930,6 +942,8 @@ export const useChat = ({
     const resolvedRequestContext = requestContext ?? propsRequestContext;
     const resolvedClientTools = clientTools ?? hookClientTools;
     const signalContinuationOptions: SignalContinuationOptions = {
+      disableSubAgents,
+      ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId, options: memoryOptions } } : {}),
       model,
       maxSteps,
       modelSettings: {
@@ -1002,6 +1016,7 @@ export const useChat = ({
       const runId = uuid();
       _currentRunId.current = runId;
       const response = await agent.stream(coreUserMessages, {
+        disableSubAgents,
         model,
         runId,
         maxSteps,
@@ -1018,7 +1033,7 @@ export const useChat = ({
         instructions,
         system,
         requestContext: resolvedRequestContext,
-        ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId } } : {}),
+        ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId, options: memoryOptions } } : {}),
         providerOptions,
         requireToolApproval,
         tracingOptions,
@@ -1059,6 +1074,8 @@ export const useChat = ({
     // index signature, so it isn't assignable to the generated `Record<string, unknown>` body type.
     const requestContextRecord = resolvedRequestContext as Record<string, unknown> | undefined;
     const streamOptions = {
+      disableSubAgents,
+      memory: { thread: threadId, resource: resourceId || agentId, options: memoryOptions },
       model,
       maxSteps,
       modelSettings: {
@@ -1185,6 +1202,7 @@ export const useChat = ({
   };
 
   const network = async ({
+    memoryOptions,
     coreUserMessages,
     model,
     requestContext,
@@ -1228,7 +1246,7 @@ export const useChat = ({
       },
       runId,
       requestContext: resolvedRequestContext,
-      ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId } } : {}),
+      ...(threadId ? { memory: { thread: threadId, resource: resourceId || agentId, options: memoryOptions } } : {}),
       tracingOptions,
     });
 
