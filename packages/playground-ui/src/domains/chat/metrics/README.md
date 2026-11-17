@@ -52,9 +52,13 @@ capacity for them. The ring is hidden until a matching request sample and its
 capacity are available.
 
 Context occupancy divides the latest main-loop request's actual input token count
-by that input limit, rather than using cumulative session tokens. The card shows
-exact input, output and capacity counts. It does not estimate system, tool or
-message composition from character lengths.
+by that input limit, rather than using cumulative session tokens. The DSH context card shows the actual input total and declared capacity in its
+header (full counts are exposed in its accessible meter label). Its grey, purple
+and blue legend identifies system prompts, tool definitions and conversation
+messages. ModelHub currently returns aggregate input usage only: each unavailable
+component count says "Not provided", and the occupancy bar uses a neutral fill
+until a measured breakdown is available. It does not estimate composition from
+character lengths or assign the aggregate to a single component.
 
 ## Message boundaries
 
@@ -65,3 +69,15 @@ up to the selected reply and excludes later messages.
 
 The adapted design and artwork are documented in
 [the third-party notice](../../../../notices/DeepSeek-Harness.md).
+
+## Work process
+
+Opening the turn header reveals the ordered reasoning and tool rows immediately
+(except Compact mode, which initially folds the inner group). Each row keeps its
+own disclosure state and full original content. Completed groups summarize their
+top three tool categories, ranked by distinct call count; streaming groups show
+the active operation. Reasoning previews use the first line, or the last completed
+paragraph while streaming. Tool previews use DSH's argument priority, starting
+with title and description. Expanded content, approval actions, errors and
+background-task controls retain their existing behavior. The process glyphs and
+chevrons use DSH's original regular SVG artwork.

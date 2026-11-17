@@ -131,3 +131,52 @@ export const branchedThread: CloneMemoryThreadResponse = {
   },
   clonedMessages: measuredConversation,
 };
+
+/** One persisted assistant step with alternating reasoning and different tool categories. */
+export const processConversation: ListMemoryThreadMessagesResponse['messages'] = [
+  measuredConversation[0]!,
+  {
+    id: 'process',
+    role: 'assistant',
+    createdAt: new Date('2026-11-16T07:54:00Z'),
+    content: {
+      format: 2,
+      metadata: { traceId: 'measured-run' },
+      parts: [
+        { type: 'reasoning', reasoning: 'Read the project first.\n\nThen inspect the implementation.' },
+        {
+          type: 'tool-invocation',
+          toolInvocation: {
+            state: 'result',
+            toolCallId: 'read-1',
+            toolName: 'read_file',
+            args: { path: '/workspace/README.md' },
+            result: 'Project documentation.',
+          },
+        },
+        { type: 'reasoning', reasoning: 'Load the relevant skill.' },
+        {
+          type: 'tool-invocation',
+          toolInvocation: {
+            state: 'result',
+            toolCallId: 'skill-1',
+            toolName: 'skill',
+            args: { name: 'dsh-doc' },
+            result: 'Skill instructions.',
+          },
+        },
+        {
+          type: 'tool-invocation',
+          toolInvocation: {
+            state: 'result',
+            toolCallId: 'command-1',
+            toolName: 'execute_command',
+            args: { command: 'git status --short', description: 'Check the working tree' },
+            result: 'Clean working tree.',
+          },
+        },
+      ],
+    },
+  },
+  measuredConversation[2]!,
+];

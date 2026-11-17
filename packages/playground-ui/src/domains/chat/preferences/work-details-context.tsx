@@ -10,7 +10,8 @@ import { useChatPreferences } from './chat-preferences-context';
 import { canFoldWork, finalReply, isWorkPart } from './work-details';
 import type { WorkDetailsPresentation } from './work-details';
 import { WorkDetailsContext, WorkDetailsControlContext } from './work-details-state';
-import { DisclosureChevron } from '@/ds/components/DisclosureChevron';
+import { DshChevronDown } from '@/ds/icons/dsh/DshChevronDown';
+import { DshChevronUp } from '@/ds/icons/dsh/DshChevronUp';
 import { t, useLocale } from '@/lib/i18n';
 
 /** Place after the user's message, before the assistant's work. */
@@ -106,7 +107,7 @@ export function WorkDetails({
       }}
     >
       <span aria-live="polite">{label}</span>
-      {foldable && <DisclosureChevron className="size-3.5" direction="down" open={expanded} />}
+      {foldable && <span className="[&_svg]:size-3.5">{expanded ? <DshChevronUp /> : <DshChevronDown />}</span>}
     </button>
   );
   return (

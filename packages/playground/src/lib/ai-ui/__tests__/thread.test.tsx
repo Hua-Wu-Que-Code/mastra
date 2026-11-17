@@ -20,6 +20,7 @@ import { emptyChannelPlatforms, emptyMcpServers, memoryDisabled, memoryEnabled, 
 import { attachmentMessages } from './fixtures/attachment-messages';
 import {
   measuredConversation,
+  processConversation,
   measuredTrace,
   measuredProviders,
   olderTrace,
@@ -1028,11 +1029,12 @@ describe('Thread', () => {
         }),
       );
       const read = FileReader.prototype.readAsArrayBuffer;
-      const probe = vi
-        .spyOn(FileReader.prototype, 'readAsArrayBuffer')
-        .mockImplementation(function (this: FileReader, blob) {
-          void pending.then(() => read.call(this, blob));
-        });
+      const probe = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (
+        this: FileReader,
+        blob,
+      ) {
+        void pending.then(() => read.call(this, blob));
+      });
       try {
         await act(async () => {
           renderThread([]);
@@ -2088,10 +2090,36 @@ describe('Conversation process and accounting', () => {
       renderThread(measuredConversation);
       expect(await screen.findByText('Completed, took 3s')).toBeDefined();
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Analysis completed' }));
       fireEvent.click(screen.getByRole('button', { name: /^Reasoning/ }));
       expect(screen.getByRole('button', { name: /^Reasoning/ }).getAttribute('aria-expanded')).toBe('true');
       expect(screen.getAllByText('Compare the available tools.').length).toBeGreaterThan(0);
+    });
+    it('shows all process rows in order with DSH artwork and independent disclosures', async () => {
+      const { container } = renderThread(processConversation);
+      await screen.findByText('Completed, took 3s');
+      fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      const rows = Array.from(container.querySelectorAll('[data-process-row]'));
+      expect(rows.map(row => row.getAttribute('data-process-label'))).toEqual([
+        'Files read, tools called, commands executed',
+        'Reasoning',
+        'Read',
+        'Reasoning',
+        'Load skill',
+        'Run command',
+      ]);
+      expect(container.querySelector('svg[data-dsh-icon="think-outline"]')).toBeTruthy();
+      expect(container.querySelector('svg[data-dsh-icon="browse-outline"]')).toBeTruthy();
+      expect(container.querySelector('svg[data-dsh-icon="api-outline"]')).toBeTruthy();
+      expect(screen.getByText('/workspace/README.md')).toBeDefined();
+      expect(screen.getByText('dsh-doc')).toBeDefined();
+      expect(screen.getByText('Check the working tree')).toBeDefined();
+      expect(screen.queryByText('Project documentation.')).toBeNull();
+      fireEvent.click(screen.getByRole('button', { name: 'Read' }));
+      expect(await screen.findByText('Project documentation.')).toBeDefined();
+      fireEvent.click(screen.getAllByRole('button', { name: 'Reasoning' })[0]!);
+      expect(await screen.findByText('Then inspect the implementation.')).toBeDefined();
+      fireEvent.click(screen.getByRole('button', { name: 'Run command' }));
+      expect(await screen.findByText('Clean working tree.')).toBeDefined();
     });
     it('shows a single turn total and the provider breakdown without double counting spans', async () => {
       renderThread(measuredConversation);
@@ -2124,11 +2152,14 @@ describe('Conversation process and accounting', () => {
         </Wrapper>,
       );
       fireEvent.click(await screen.findByRole('button', { name: 'Context usage' }));
-      expect(await screen.findByText('Context used 30%')).toBeDefined();
+      expect(await screen.findByText('Context used')).toBeDefined();
       expect(screen.getByRole('meter').getAttribute('aria-valuenow')).toBe('30');
-      expect(screen.getByText('39,422 tok')).toBeDefined();
-      expect(screen.getByText('131,072 tok')).toBeDefined();
-      expect(screen.queryByText('System prompt')).toBeNull();
+      expect(screen.getByText('39.4K / 131K')).toBeDefined();
+      expect(screen.getByText('System prompt')).toBeDefined();
+      expect(screen.getByText('Tool definitions')).toBeDefined();
+      expect(screen.getByText('Conversation messages')).toBeDefined();
+      expect(screen.getAllByText('Not provided')).toHaveLength(3);
+      expect(screen.queryByText(/~39/)).toBeNull();
       fireEvent.keyDown(document, { key: 'Escape' });
       await waitFor(() => expect(screen.queryByRole('meter')).toBeNull());
     });
@@ -2156,7 +2187,7 @@ describe('Conversation process and accounting', () => {
         </Wrapper>,
       );
       fireEvent.click(await screen.findByRole('button', { name: 'Context usage' }));
-      expect(await screen.findByText('1,048,576 tok')).toBeDefined();
+      expect(await screen.findByText('39.4K / 1M')).toBeDefined();
       fireEvent.keyDown(document, { key: 'Escape' });
       fireEvent.click(screen.getByRole('button', { name: 'Select max' }));
       await waitFor(() => expect(screen.queryByRole('button', { name: 'Context usage' })).toBeNull());

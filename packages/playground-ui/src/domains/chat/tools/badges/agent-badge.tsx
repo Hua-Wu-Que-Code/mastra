@@ -8,11 +8,11 @@ import { SectionLabel } from '@/domains/chat/components/section-label';
 import { awaitsToolApproval } from '@/domains/chat/tools/badges/awaits-tool-approval';
 import type { ToolApprovalRequest } from '@/domains/chat/tools/badges/tool-approval-badge';
 import { ToolApprovalBadge } from '@/domains/chat/tools/badges/tool-approval-badge';
-import { agentGlyph } from '@/ds/components/AgentIndicator';
 import type { ActivityStatus } from '@/ds/components/ai/activity';
 import { ToolCallMono } from '@/ds/components/ai/tool-call';
 import { Button } from '@/ds/components/Button';
 import { CodeEditor } from '@/ds/components/CodeEditor';
+import { DshAgent } from '@/ds/icons/dsh/DshAgent';
 import { t as studioT, useLocale } from '@/lib/i18n';
 
 type TextMessage = {
@@ -31,7 +31,7 @@ type ToolMessage = {
 
 export type AgentMessage = TextMessage | ToolMessage;
 
-const DelegationIcon = agentGlyph('delegating');
+const DelegationIcon = DshAgent;
 
 export interface AgentBadgeProps extends Omit<ToolApprovalRequest, 'toolCalled'> {
   agentId: string;

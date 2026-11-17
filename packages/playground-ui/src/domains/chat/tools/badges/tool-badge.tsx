@@ -1,3 +1,5 @@
+import { presentProcessTool } from '../../preferences/process-presentation';
+import { useWorkDetails } from '../../preferences/work-details-state';
 import type { McpInputRequestPayload } from '../mcp-input-request';
 import { isDeferredCall } from '../tool-card-kind';
 import { BackgroundTaskMetadataDialogTrigger } from './background-task-metadata-dialog';
@@ -67,8 +69,11 @@ export const ToolBadge = ({
   mcpInputRequest,
 }: ToolBadgeProps) => {
   useLocale();
+  const process = useWorkDetails();
   const { pretty: argsPretty, parsed: argsObject } = formatArgs(args);
   const { icon: ToolIcon, label, detail, description } = presentTool(toolName, argsObject);
+  const processView = process ? presentProcessTool(toolName, argsObject) : undefined;
+  const ProcessIcon = processView?.icon ?? ToolIcon;
   const view: ToolCallView = {
     toolName,
     args: argsObject,
@@ -106,10 +111,10 @@ export const ToolBadge = ({
         isGenerateMode: metadata?.mode === 'generate',
       }}
       data-testid="tool-badge"
-      icon={<ToolIcon aria-hidden />}
-      title={toolLabel(label)}
-      detail={detail}
-      description={description}
+      icon={<ProcessIcon aria-hidden />}
+      title={processView?.label ?? toolLabel(label)}
+      detail={processView?.detail ?? detail}
+      description={process ? undefined : description}
       status={status}
       extraInfo={
         metadata?.mode === 'network' ? (

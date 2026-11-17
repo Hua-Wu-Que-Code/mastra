@@ -74,7 +74,6 @@ describe('Chat presentation', () => {
       expect(screen.getByText('The final story begins here.')).toBeDefined();
       expect(screen.queryByRole('group', { name: 'Reasoning' })).toBeNull();
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
-      fireEvent.click(within(screen.getByRole('group', { name: 'Work details: 2 steps' })).getByRole('button'));
       expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
       expect(screen.getByRole('button', { name: 'Hide work details' }).getAttribute('aria-expanded')).toBe('true');
     });
@@ -156,7 +155,6 @@ describe('Chat presentation', () => {
       await choose('Work details', 'Standard');
       const group = screen.getByRole('group', { name: 'Work details: 2 steps' });
       expect(group.textContent).toContain('story.txt');
-      fireEvent.click(within(group).getByRole('button'));
       const reasoning = screen.getByRole('group', { name: 'Reasoning' });
       expect(reasoning.textContent).toContain('Compare the two characters.');
       expect(reasoning.textContent).not.toContain('Keep their motives consistent.');

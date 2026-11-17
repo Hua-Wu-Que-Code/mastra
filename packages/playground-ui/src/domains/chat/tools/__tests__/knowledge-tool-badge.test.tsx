@@ -12,7 +12,6 @@ import { ChatRunningContext } from '@/domains/chat/context/chat-context';
 import { KnowledgeLinksProvider } from '@/domains/chat/knowledge/knowledge-links';
 import { toolCardKind } from '@/domains/chat/tools/tool-card-kind';
 import { foldsIntoGroup } from '@/domains/chat/tools/tool-groups';
-import { agentGlyph } from '@/ds/components/AgentIndicator';
 import type { LinkComponentProviderProps } from '@/lib/framework';
 import { LinkComponentProvider } from '@/lib/framework';
 
@@ -408,11 +407,7 @@ describe('Knowledge tool cards', () => {
         output: { page: refunds },
       });
       const badge = open();
-      const DeleteIcon = agentGlyph('deleting');
-      const expectedIcon = render(<DeleteIcon />)
-        .container.querySelector('[data-part=body]')
-        ?.getAttribute('d');
-      expect(badge.querySelector('[data-part=body]')?.getAttribute('d')).toBe(expectedIcon);
+      expect(badge.querySelector('svg[data-dsh-icon="edit-outline"]')).toBeTruthy();
       expect(badge.textContent).toContain('Deleted page');
       expect(badge.textContent).not.toContain('Updated page');
       expect(badge.textContent).toContain('Refunds');

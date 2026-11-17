@@ -3,6 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import type { Components, ExtraProps } from 'react-markdown';
 import { KnowledgePageLink } from '../../knowledge/knowledge-links';
 import { isRecord } from '../../messages/signal-data';
+import { presentProcessTool } from '../../preferences/process-presentation';
 import type { BodyExtent } from './knowledge-body-range';
 import { readExtent, writeExtent } from './knowledge-body-range';
 import type { MessageMetadata } from '@/domains/chat';
@@ -543,7 +544,7 @@ export const KnowledgeToolBadge = ({
   isNetwork,
   status = 'idle',
 }: KnowledgeToolBadgeProps) => {
-  const { icon: KnowledgeIcon } = presentTool(toolName, args);
+  const { icon: KnowledgeIcon } = presentProcessTool(toolName, args);
   return (
     <ToolApprovalBadge
       approval={{

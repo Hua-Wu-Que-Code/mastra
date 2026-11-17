@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { useChatRunning } from '../context/chat-context';
+import { ProcessRow } from '../preferences/process-row';
+import { useWorkDetails } from '../preferences/work-details-state';
 import {
   Activity,
   ActivityContent,
@@ -44,6 +46,7 @@ export const BadgeWrapper = ({
   status = 'idle',
   'data-testid': dataTestId,
 }: BadgeWrapperProps) => {
+  const process = useWorkDetails();
   const [open, setOpen] = useState(!initialCollapsed);
   const { isRunning } = useChatRunning();
   // A badge already on screen when the thread loaded was not just called.
@@ -59,6 +62,25 @@ export const BadgeWrapper = ({
 
   const hasBody = Boolean(children);
   const bodyOpen = !collapsible || open;
+
+  if (process && !headerOverride)
+    return (
+      <div data-testid={dataTestId}>
+        <ProcessRow
+          icon={icon}
+          label={title}
+          detail={description ?? detail}
+          open={bodyOpen}
+          onOpenChange={setOpen}
+          collapsible={collapsible}
+          status={status}
+          trailing={extraInfo}
+          badges={badges}
+        >
+          {children}
+        </ProcessRow>
+      </div>
+    );
 
   return (
     <Activity

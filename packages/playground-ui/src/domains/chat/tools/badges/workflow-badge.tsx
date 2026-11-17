@@ -21,16 +21,16 @@ import {
 import { WorkflowStepDetailContent } from '@/domains/workflows/components/workflow-step-detail';
 import { PlaygroundWorkflowRunProvider } from '@/domains/workflows/context/playground-workflow-run-provider';
 import type { WorkflowRunStreamResult } from '@/domains/workflows/context/workflow-run-context';
-import { agentGlyph } from '@/ds/components/AgentIndicator';
 import { ToolCallMono } from '@/ds/components/ai/tool-call';
 import { Button } from '@/ds/components/Button';
 import { CodeEditor } from '@/ds/components/CodeEditor';
 import { IconEyeOpen } from '@/ds/icons/central/IconEyeOpen';
+import { DshAgent } from '@/ds/icons/dsh/DshAgent';
 import { WorkflowIcon } from '@/ds/icons/WorkflowIcon';
 import { useLinkComponent } from '@/lib/framework';
 import { t as studioT, useLocale } from '@/lib/i18n';
 
-const WorkflowToolIcon = agentGlyph('workflow');
+const WorkflowToolIcon = DshAgent;
 
 export interface WorkflowBadgeProps extends Omit<ToolApprovalRequest, 'toolCalled'> {
   workflowId: string;
