@@ -98,7 +98,7 @@ function permitted(user: AltFlowUser, path: string, method: string) {
   if (method === 'GET' && /^\/agents\/(creator-agent|creatorAgent)$/.test(route)) return true;
   return (
     method === 'POST' &&
-    /^\/agents\/(creator-agent|creatorAgent)\/(generate|stream|send-message|queue-message|stream-until-idle|threads\/(abort|subscribe)|runs\/[^/]+\/abort)$/.test(
+    /^\/agents\/(creator-agent|creatorAgent)\/(generate|stream|send-message|queue-message|stream-until-idle|threads\/(abort|subscribe|signals\/cancel|queue\/update)|runs\/[^/]+\/abort)$/.test(
       route,
     )
   );
