@@ -22,7 +22,6 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
   const { preferences } = useChatPreferences();
   const metrics = useChatMetrics();
   const incomplete = usePartialMetrics();
-  if (!metrics.length) return null;
   const models = metrics.flatMap(metric => metric.models);
   const usage = groupModelUsage(models.map(model => ({ ...model, route: undefined })))[0];
   const total = totalTokens(models);
@@ -47,11 +46,11 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
   ];
   const uncached = usage && uncachedTokens(usage);
   const usageRows = [
-    ...(hit !== undefined ? [{ label: t('Cache hit'), value: `${hit}%` }] : []),
-    ...(uncached !== undefined && uncached >= 0 ? [{ label: t('Uncached input'), value: exactTokens(uncached) }] : []),
+    { label: t('Cache hit'), value: hit === undefined ? t('Not provided') : `${hit}%` },
+    { label: t('Uncached input'), value: uncached === undefined ? t('Not provided') : exactTokens(uncached) },
     ...(usage?.cacheRead !== undefined ? [{ label: t('Cache read'), value: exactTokens(usage.cacheRead) }] : []),
     ...(usage?.cacheWrite ? [{ label: t('Cache write'), value: exactTokens(usage.cacheWrite) }] : []),
-    ...(usage?.output !== undefined ? [{ label: t('Output tokens'), value: exactTokens(usage.output) }] : []),
+    { label: t('Output tokens'), value: usage?.output === undefined ? t('Not provided') : exactTokens(usage.output) },
   ];
   const latest = metrics
     .map(metric => metric.context)
@@ -67,7 +66,7 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
         label={
           <>
             {counts}
-            {speed !== undefined && <> · {t('{speed} tok/s', { speed })}</>}
+            <> · {t('{speed} tok/s', { speed: speed ?? '—' })}</>
           </>
         }
         title={t('Conversation statistics')}
@@ -84,26 +83,24 @@ export function ChatSessionStats({ contextWindow, route }: { contextWindow?: num
           <span className="text-caption text-muted-foreground">{t('Timing is not available for these requests.')}</span>
         )}
       </StatCard>
-      {total !== undefined && (
-        <StatCard
-          icon={<DshDatabase />}
-          label={
-            <>
-              {t('{tokens} tok', { tokens: compactTokens(total) })}
-              {hit !== undefined && ` · ${t('Cache hit {percent}%', { percent: hit })}`}
-            </>
-          }
-          title={t('Token usage')}
-          value={exactTokens(total)}
-          open={card === 'usage'}
-          onOpenChange={open => setCard(open ? 'usage' : undefined)}
-        >
-          {incomplete && (
-            <p className="mb-3 text-caption text-muted-foreground">{t('Statistics include only available records.')}</p>
-          )}
-          <StatRows rows={usageRows} />
-        </StatCard>
-      )}
+      <StatCard
+        icon={<DshDatabase />}
+        label={
+          <>
+            {t('{tokens} tok', { tokens: total === undefined ? '—' : compactTokens(total) })}
+            {` · ${t('Cache hit {percent}%', { percent: hit ?? '—' })}`}
+          </>
+        }
+        title={t('Token usage')}
+        value={total === undefined ? t('Not provided') : exactTokens(total)}
+        open={card === 'usage'}
+        onOpenChange={open => setCard(open ? 'usage' : undefined)}
+      >
+        {incomplete && (
+          <p className="mb-3 text-caption text-muted-foreground">{t('Statistics include only available records.')}</p>
+        )}
+        <StatRows rows={usageRows} />
+      </StatCard>
       {preferences.showContextUsage && (
         <ContextUsage
           reading={latest}

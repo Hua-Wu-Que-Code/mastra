@@ -2225,7 +2225,7 @@ describe('Conversation process and accounting', () => {
       fireEvent.keyDown(document, { key: 'Escape' });
       await waitFor(() => expect(screen.queryByRole('meter')).toBeNull());
     });
-    it('uses the selected reasoning route limit and hides unknown route capacities', async () => {
+    it('uses the selected reasoning route limit and keeps unknown route readings available', async () => {
       server.use(http.get(`${BASE_URL}/api/agents/providers`, () => HttpResponse.json(measuredProviders)));
       localStorage.setItem(
         'mastra-thread-preferences-["display-agent","display-thread"]',
@@ -2252,7 +2252,10 @@ describe('Conversation process and accounting', () => {
       expect(await screen.findByText('39.4K / 1M')).toBeDefined();
       fireEvent.keyDown(document, { key: 'Escape' });
       fireEvent.click(screen.getByRole('button', { name: 'Select max' }));
-      await waitFor(() => expect(screen.queryByRole('button', { name: 'Context usage' })).toBeNull());
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Context usage' }).textContent).toBe('—%'));
+      fireEvent.click(screen.getByRole('button', { name: 'Context usage' }));
+      expect(await screen.findByText('39.4K / —')).toBeDefined();
+      expect(screen.getByRole('progressbar').hasAttribute('aria-valuenow')).toBe(false);
     });
     it('includes older trace pages even when their messages are not loaded', async () => {
       server.use(

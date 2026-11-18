@@ -2,6 +2,10 @@
 
 Select the gauge, token count or context ring below the composer to open its
 statistics card. Select a reply's token count to inspect that turn by model.
+All three dock entries are available from the first render, including while the
+first request is streaming. Unknown readings display a dash until actual usage
+arrives; they are never treated as zero or replaced with estimates. The context
+entry still follows the user's context-usage visibility preference.
 Cards open on click, close on Escape or outside interaction, and use the shared
 Studio popover for keyboard focus and viewport collision handling.
 
@@ -48,8 +52,9 @@ Publish the gateway-declared input context limit, never a guessed local budget
 or the maximum output size. When reasoning levels route to different models,
 `modelReasoning[modelId].contextWindows` maps each level to its declared input
 limit. Missing levels remain unknown; Studio does not reuse the default route
-capacity for them. The ring is hidden until a matching request sample and its
-capacity are available.
+capacity for them. Until a matching request sample and its capacity are available,
+the ring stays visible with an unknown percentage and an empty track. Its card
+shows any known capacity without reusing a previous route's input count.
 
 Context occupancy divides the latest main-loop request's actual input token count
 by that input limit, rather than using cumulative session tokens. The DSH context card shows the actual input total and declared capacity in its

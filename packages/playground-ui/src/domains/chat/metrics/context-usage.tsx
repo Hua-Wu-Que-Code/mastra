@@ -20,10 +20,16 @@ export function ContextUsage({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  if (!reading || !capacity || !Number.isFinite(capacity) || capacity <= 0 || (route && reading.route !== route))
-    return null;
-  const occupied = Math.min(100, (reading.usedTokens / capacity) * 100);
-  const percent = Math.round(occupied);
+  // Keep the entry mounted before the first usage sample or while a model's
+  // capacity is loading. A sample for a previous route must never fill this ring.
+  const sample = route && reading?.route !== route ? undefined : reading;
+  const limit = capacity !== undefined && Number.isFinite(capacity) && capacity > 0 ? capacity : undefined;
+  const occupied = sample && limit ? Math.min(100, (sample.usedTokens / limit) * 100) : undefined;
+  const percent = occupied === undefined ? undefined : Math.round(occupied);
+  const percentText = `${percent ?? '—'}%`;
+  const usedText = sample ? compactTokens(sample.usedTokens) : '—';
+  const limitText = limit === undefined ? '—' : compactTokens(limit);
+  const exactReading = `${sample ? exactTokens(sample.usedTokens) : t('Not provided')} / ${limit === undefined ? t('Not provided') : exactTokens(limit)}`;
   // ModelHub reports aggregate input usage, not a token count for each request component.
   const rows = [
     { label: t('System prompt'), color: 'bg-[#adb2b8]' },
@@ -48,11 +54,11 @@ export function ContextUsage({
             strokeWidth="2"
             strokeLinecap="round"
             strokeDasharray={`${circumference} ${circumference}`}
-            strokeDashoffset={circumference * (1 - occupied / 100)}
+            strokeDashoffset={circumference * (1 - (occupied ?? 0) / 100)}
             transform="rotate(-90 7 7)"
           />
         </svg>
-        <span>{percent}%</span>
+        <span>{percentText}</span>
       </PopoverTrigger>
       <PopoverContent
         side="top"
@@ -63,21 +69,21 @@ export function ContextUsage({
       >
         <div className="flex items-center gap-1.5 whitespace-nowrap tabular-nums">
           <span className="text-muted-foreground">{t('Context used')}</span>
-          <span>{percent}%</span>
-          <span className="ml-auto" aria-label={`${exactTokens(reading.usedTokens)} / ${exactTokens(capacity)}`}>
-            {compactTokens(reading.usedTokens)} / {compactTokens(capacity)}
+          <span>{percentText}</span>
+          <span className="ml-auto" aria-label={exactReading}>
+            {usedText} / {limitText}
           </span>
         </div>
         <div
           className="my-3 flex h-1 overflow-hidden rounded-full bg-fill"
-          role="meter"
+          role={percent === undefined ? 'progressbar' : 'meter'}
           aria-label={t('Context usage')}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}
-          aria-valuetext={`${exactTokens(reading.usedTokens)} / ${exactTokens(capacity)}`}
+          aria-valuetext={exactReading}
         >
-          <span className="h-full rounded-sm bg-[#adb2b8]" style={{ width: `${occupied}%` }} />
+          <span className="h-full rounded-sm bg-[#adb2b8]" style={{ width: `${occupied ?? 0}%` }} />
         </div>
         <dl className="space-y-1">
           {rows.map(row => (
