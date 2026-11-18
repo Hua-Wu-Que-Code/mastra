@@ -117,8 +117,6 @@ export interface ThreadProps {
   suggestedPrompts?: string[];
   hasModelList?: boolean;
   hideModelSwitcher?: boolean;
-  /** Extra run-scoped controls (request context, tracing options) rendered in the composer action row */
-  runOptionsSlot?: React.ReactNode;
   /**
    * True while the thread history is being fetched for the first time. The skeleton
    * only replaces the welcome screen; live messages that arrive earlier take precedence.
@@ -135,7 +133,6 @@ const ThreadContent = ({
   suggestedPrompts,
   hasModelList,
   hideModelSwitcher,
-  runOptionsSlot,
   isHistoryLoading,
   onLoadPrevious,
   isLoadingPrevious,
@@ -326,7 +323,6 @@ const ThreadContent = ({
                     threadId={threadId}
                     hasModelList={hasModelList}
                     hideModelSwitcher={hideModelSwitcher}
-                    runOptionsSlot={runOptionsSlot}
                   />
                 </div>
                 {!landingShown && <ConversationStats />}
@@ -373,10 +369,9 @@ interface AgentComposerProps {
   threadId?: string;
   hasModelList?: boolean;
   hideModelSwitcher?: boolean;
-  runOptionsSlot?: React.ReactNode;
 }
 
-const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, runOptionsSlot }: AgentComposerProps) => {
+const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher }: AgentComposerProps) => {
   useLocale();
   const { threadInput: text, setThreadInput, updateDraft, draftStatus } = useThreadInput(threadId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -540,7 +535,6 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher, run
                 <ComposerActionRow
                   canExecute={canExecuteAgent}
                   agentId={agentId}
-                  runOptionsSlot={runOptionsSlot}
                   showModelSwitcher={showModelSwitcher}
                   isEmpty={isEmpty}
                   isRunning={isRunning}
@@ -581,7 +575,6 @@ interface ComposerActionRowProps {
   canExecute?: boolean;
   agentId?: string;
   showModelSwitcher?: boolean;
-  runOptionsSlot?: React.ReactNode;
   isEmpty: boolean;
   isRunning: boolean;
   canSendWhileStreaming: boolean;
@@ -593,7 +586,6 @@ const ComposerActionRow = ({
   canExecute = true,
   agentId,
   showModelSwitcher,
-  runOptionsSlot,
   isEmpty,
   isRunning,
   canSendWhileStreaming,
@@ -602,10 +594,7 @@ const ComposerActionRow = ({
 }: ComposerActionRowProps) => {
   return (
     <>
-      <ComposerActionsStart>
-        {canExecute && <AttachFileMenu />}
-        {runOptionsSlot}
-      </ComposerActionsStart>
+      <ComposerActionsStart>{canExecute && <AttachFileMenu />}</ComposerActionsStart>
       <ComposerActionsEnd>
         {showModelSwitcher && agentId && <ComposerModelSwitcher />}
         {canExecute && <SpeechInput agentId={agentId} onTranscript={onSetText} />}

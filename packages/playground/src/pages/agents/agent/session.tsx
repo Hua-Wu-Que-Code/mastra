@@ -23,7 +23,6 @@ import { WorkingMemoryProvider } from '@/domains/agents/context/agent-working-me
 import { BrowserSessionProvider } from '@/domains/agents/context/browser-session-provider';
 import { buildAgentDefaultSettings } from '@/domains/agents/utils/agent-default-settings';
 import { ThreadInputProvider } from '@/domains/conversation/context/ThreadInputContext';
-import { AgentRunActions } from '@/domains/run-options/components/agent-run-actions';
 
 function AgentSession() {
   useLocale();
@@ -135,7 +134,6 @@ function AgentSession() {
                         messageId={messageId}
                         isNewThread={isNewThread}
                         hideModelSwitcher
-                        runOptionsSlot={<AgentRunActions agentId={agentId!} />}
                       />
                     </div>
                   </PageLayout>

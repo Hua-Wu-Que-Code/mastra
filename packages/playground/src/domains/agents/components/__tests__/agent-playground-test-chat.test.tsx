@@ -37,7 +37,7 @@ afterEach(() => {
 });
 
 describe('AgentPlaygroundTestChat', () => {
-  it('renders request context in the composer and mounts browser tooling with provider parity', async () => {
+  it('renders the composer without developer controls and mounts browser tooling with provider parity', async () => {
     const onBrowserProbe = vi.fn();
 
     server.use(
@@ -64,8 +64,10 @@ describe('AgentPlaygroundTestChat', () => {
 
     renderEditorTestChat();
 
-    const runOptionsTrigger = await screen.findByRole('button', { name: 'Request context' });
-    expect(runOptionsTrigger.closest('form')).not.toBeNull();
+    const textarea = await screen.findByPlaceholderText('Enter your message');
+    expect(textarea.closest('form')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Request context' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Run options' })).toBeNull();
     expect(screen.getByRole('dialog', { name: /browser view/i, hidden: true })).not.toBeNull();
 
     await waitFor(() => {
@@ -101,7 +103,7 @@ describe('AgentPlaygroundTestChat', () => {
 
     renderEditorTestChat();
 
-    await screen.findByRole('button', { name: 'Request context' });
+    await screen.findByPlaceholderText('Enter your message');
 
     await waitFor(() => {
       expect(onBrowserProbe).toHaveBeenCalled();
@@ -136,7 +138,7 @@ describe('AgentPlaygroundTestChat', () => {
 
     renderEditorTestChat();
 
-    await screen.findByRole('button', { name: 'Request context' });
+    await screen.findByPlaceholderText('Enter your message');
 
     // Give the probe a chance to fire if it (incorrectly) would.
     await act(async () => {

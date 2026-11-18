@@ -21,14 +21,12 @@ export const AgentChat = ({
   suggestedPrompts,
   isNewThread,
   hideModelSwitcher,
-  runOptionsSlot,
 }: Omit<ChatProps, 'initialMessages'> & {
   memory?: boolean;
   messageId?: string;
   suggestedPrompts?: string[];
   isNewThread?: boolean;
   hideModelSwitcher?: boolean;
-  runOptionsSlot?: React.ReactNode;
 }) => {
   const { settings } = useAgentSettings();
   const requestContext = useEntityRequestContext('agent', agentId)[0];
@@ -97,7 +95,6 @@ export const AgentChat = ({
         suggestedPrompts={suggestedPrompts}
         hasModelList={Boolean(modelList)}
         hideModelSwitcher={hideModelSwitcher}
-        runOptionsSlot={runOptionsSlot}
         isHistoryLoading={isMessagesLoading}
         onLoadPrevious={hasNextPage ? loadOlderMessages : undefined}
         isLoadingPrevious={isFetchingNextPage}

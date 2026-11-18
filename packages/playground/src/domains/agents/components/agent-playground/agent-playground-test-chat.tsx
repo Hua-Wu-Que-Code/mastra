@@ -19,7 +19,6 @@ import { buildAgentDefaultSettings } from '../../utils/agent-default-settings';
 import { AgentChat } from '../agent-chat';
 import { BrowserViewPanel } from '../browser-view/browser-view-panel';
 import { ThreadInputProvider } from '@/domains/conversation';
-import { AgentRunActions } from '@/domains/run-options/components/agent-run-actions';
 
 interface AgentPlaygroundTestChatProps {
   agentId: string;
@@ -120,7 +119,6 @@ export function AgentPlaygroundTestChat({
                       memory={hasMemory}
                       modelList={agent?.modelList}
                       isNewThread
-                      runOptionsSlot={<AgentRunActions agentId={agentId} />}
                     />
                   </div>
                 </div>

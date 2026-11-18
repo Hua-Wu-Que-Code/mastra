@@ -34,7 +34,6 @@ import { buildAgentDefaultSettings } from '@/domains/agents/utils/agent-default-
 import { getAgentSuggestedPrompts } from '@/domains/agents/utils/agent-suggested-prompts';
 import type { ThreadDraftHandle } from '@/domains/conversation/context/ThreadInputContext';
 import { ThreadInputProvider } from '@/domains/conversation/context/ThreadInputContext';
-import { AgentRunActions } from '@/domains/run-options/components/agent-run-actions';
 
 function AgentThread() {
   const account = useAccount();
@@ -189,7 +188,6 @@ function AgentThread() {
                             messageId={messageId}
                             suggestedPrompts={suggestedPrompts}
                             isNewThread={isNewThread}
-                            runOptionsSlot={<AgentRunActions agentId={agentId!} />}
                           />
                         </div>
                       </div>
