@@ -114,7 +114,7 @@ function AccessDeniedScreen() {
         />
         <div className="flex items-center gap-2">
           <Button render={<Link href="/agents" />} size="sm" icon={<IconArrowLeft />}>
-            {studioT('Back to Studio')}
+            {studioT('Back to Altflow')}
           </Button>
           {isImpersonating && (
             <Button variant="default" size="sm" onClick={stopImpersonation} icon={<IconEyeOpen />}>

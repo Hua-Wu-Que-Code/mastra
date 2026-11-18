@@ -10,7 +10,7 @@
  * Traces volume, Latency, Memory, Scores), so the tables render populated.
  */
 
-const AGENT = { id: 'studio-preview-agent', name: 'Studio Preview Agent' } as const;
+const AGENT = { id: 'studio-preview-agent', name: 'Altflow Preview Agent' } as const;
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -25,7 +25,7 @@ const MODELS = [
 const RESOURCES = ['web-session-anita', 'web-session-marco', 'api-key-acme', 'web-session-li'] as const;
 
 const PROMPTS = [
-  'Is the Studio shell healthy?',
+  'Is the Altflow shell healthy?',
   'Check the agent chat route.',
   'Are the API routes live?',
   'Summarize the Vercel deploy readiness.',
@@ -34,11 +34,11 @@ const PROMPTS = [
 ] as const;
 
 const REPLIES = [
-  'Studio static assets are served from the deployment root and routes fall back to index.html.',
+  'Altflow static assets are served from the deployment root and routes fall back to index.html.',
   'Agent chat is available at /agents/studio-preview-agent/chat/new.',
   'Mastra API routes are served under /api/*; the agent list is at /api/agents.',
-  'The Vercel deployer emits Build Output API v3 files and Studio assets are copied into the static output.',
-  'Everything reports ready — Studio, agent, API, and Vercel areas all green.',
+  'The Vercel deployer emits Build Output API v3 files and Altflow assets are copied into the static output.',
+  'Everything reports ready — Altflow, agent, API, and Vercel areas all green.',
   'Client-side routes fall back to index.html so deep links resolve correctly.',
 ] as const;
 
@@ -372,8 +372,8 @@ export function buildSeedData(now: number) {
   const datasets: SeedDataset[] = [
     {
       dataset: {
-        name: 'Studio QA eval set',
-        description: 'Prompts that exercise the Studio preview agent and its status tool.',
+        name: 'Altflow QA eval set',
+        description: 'Prompts that exercise the Altflow preview agent and its status tool.',
         targetType: 'agent',
         targetIds: [AGENT.id],
         scorerIds: ['answer-relevance', 'tone-quality'],

@@ -201,7 +201,7 @@ describe('AgentOverviewPanel', () => {
   });
 
   describe('model list editability', () => {
-    const READ_ONLY_NOTE = 'This model list is dynamically set and cannot be edited in Studio.';
+    const READ_ONLY_NOTE = 'This model list is dynamically set and cannot be edited in Altflow.';
 
     it('shows a function-valued model list without edit controls', async () => {
       installHandlers({ agent: { ...dynamicFallbackAgent, modelListEditable: false } });

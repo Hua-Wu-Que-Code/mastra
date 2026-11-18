@@ -11,7 +11,7 @@ test.describe('Agents list page', () => {
     test('shows the page header and renders the agent list', async ({ page }) => {
       await page.goto('/agents');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, 'Agents');
 
       // Verify agent list renders with at least one agent

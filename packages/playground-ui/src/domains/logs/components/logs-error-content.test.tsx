@@ -115,7 +115,7 @@ describe('when the current storage cannot list logs in Chinese', () => {
     expect(
       screen.getByText(
         t(
-          'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Studio.',
+          'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Altflow.',
         ),
       ),
     ).toBeTruthy();

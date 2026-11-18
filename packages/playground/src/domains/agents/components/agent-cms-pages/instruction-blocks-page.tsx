@@ -22,7 +22,7 @@ export function InstructionBlocksPage() {
         <Notice variant="info" title={studioT('Instructions are owned by code')}>
           <Notice.Message>
             {studioT(
-              'This code-defined agent has disabled instructions editing from Studio. Update the agent definition in code to change its instructions.',
+              'This code-defined agent has disabled instructions editing from Altflow. Update the agent definition in code to change its instructions.',
             )}
           </Notice.Message>
         </Notice>

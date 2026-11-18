@@ -248,6 +248,7 @@ const PLACEHOLDER_PROPER_NOUNS = [
   'Mastra Code',
   'Mastra',
   'Studio',
+  'Altflow',
   'Factory',
   'Factories',
   'MastraCode',

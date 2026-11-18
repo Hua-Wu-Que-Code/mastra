@@ -13,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The shared sent-attachment component used by Studio and Factory through UserFilePartRenderer. Sent cards and user messages share the same borderless surface, radius, and subtle elevation. Image previews add a light inner highlight and progressively blurred bands. The image itself is masked into the message surface beneath the caption, with no painted gradient. Only the outer card rounds and clips the square layers. Images, PDFs and text support previews; spreadsheets and other binary files use file entries. ComposerAttachment remains separate.',
+          'The shared sent-attachment component used by Altflow and Factory through UserFilePartRenderer. Sent cards and user messages share the same borderless surface, radius, and subtle elevation. Image previews add a light inner highlight and progressively blurred bands. The image itself is masked into the message surface beneath the caption, with no painted gradient. Only the outer card rounds and clips the square layers. Images, PDFs and text support previews; spreadsheets and other binary files use file entries. ComposerAttachment remains separate.',
       },
     },
   },

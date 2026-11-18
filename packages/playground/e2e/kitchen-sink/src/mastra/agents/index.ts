@@ -229,7 +229,7 @@ export const codeOverrideEditableAgent = new Agent({
 export const codeOverrideLockedAgent = new Agent({
   id: 'code-override-locked',
   name: 'Code Override Locked',
-  instructions: 'Locked code instructions that Studio cannot override.',
+  instructions: 'Locked code instructions that Altflow cannot override.',
   model: 'openai/gpt-4o-mini',
   editor: false,
 });

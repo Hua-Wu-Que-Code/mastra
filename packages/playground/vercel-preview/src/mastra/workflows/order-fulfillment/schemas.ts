@@ -6,7 +6,7 @@ export const orderItemSchema = z.object({
 });
 
 export const orderInputSchema = z.object({
-  customer: z.string().trim().min(1).max(80).default('Studio team'),
+  customer: z.string().trim().min(1).max(80).default('Altflow team'),
   approval: z.enum(['automatic', 'manual']).default('manual').describe('Manual pauses for your approval.'),
   failDispatch: z.boolean().default(false).describe('Enable to test a dispatch error after packing.'),
   items: z

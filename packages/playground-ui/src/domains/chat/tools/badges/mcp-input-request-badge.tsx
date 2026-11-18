@@ -27,7 +27,7 @@ export function ForegroundMcpInputRequest({
     <McpInputRequestTool
       payload={payload}
       readOnly={readOnly || isNetwork}
-      notice={isNetwork ? "Studio can't answer this request in a network run yet." : undefined}
+      notice={isNetwork ? "Altflow can't answer this request in a network run yet." : undefined}
       isSubmitting={isRunning || sent}
       error={error}
       onSubmit={async resumeData => {

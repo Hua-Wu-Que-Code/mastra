@@ -29,7 +29,7 @@ describe('@mastra/playground-ui/domains/metrics/components', () => {
     expect(exported.get(value)).toBe(name);
   });
 
-  it('exports what a page outside Studio needs to run the trace aggregate cards', () => {
+  it('exports what a page outside Altflow needs to run the trace aggregate cards', () => {
     expect(entry).toMatchObject({
       AggregateLimiterProvider: expect.any(Function),
       ChartCardError: expect.any(Function),

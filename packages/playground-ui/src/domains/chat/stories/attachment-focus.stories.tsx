@@ -14,7 +14,7 @@ function AttachmentFocusChat({ factory = false, hiddenPanel = false }: { factory
     <div className="flex h-dvh flex-col bg-background">
       <ChatShell className="flex-1">
         <ChatShell.Bar>
-          <header className="border-b px-4 py-3 text-body">{factory ? 'Factory' : 'Studio'} chat</header>
+          <header className="border-b px-4 py-3 text-body">{factory ? 'Factory' : 'Altflow'} chat</header>
         </ChatShell.Bar>
         <ChatShell.Stage>
           <ChatShell.Viewport>

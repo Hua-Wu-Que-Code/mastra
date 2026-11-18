@@ -10,7 +10,7 @@ export const NoWorkspacesInfo = () => {
       titleSlot={studioT('No Workspaces yet')}
       descriptionSlot={
         <>
-          {studioT('Add a workspace to your Mastra configuration to') + ' '}
+          {studioT('Add a workspace to your Altflow configuration to') + ' '}
           <br />
           {studioT('manage files, skills, and enable semantic search.')}
         </>

@@ -147,7 +147,7 @@ const MobileFrame = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-screen w-screen flex-col overflow-hidden bg-sidebar">
     <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-3">
       <Sidebar.MobileTrigger />
-      <span className="text-subheading text-foreground">Mastra Studio</span>
+      <span className="text-subheading text-foreground">Altflow</span>
     </header>
     {children}
     <div className="min-w-0 flex-1 p-4">
@@ -230,9 +230,7 @@ const StudioSidebarBody = () => {
           <span className="flex items-center justify-between pr-2 pl-3">
             <span className="flex min-w-0 flex-1 items-center gap-2">
               <LogoWithoutText className="size-[1.5rem] shrink-0" />
-              <span className="truncate font-display text-subheading tracking-tight whitespace-nowrap">
-                Mastra Studio
-              </span>
+              <span className="truncate font-display text-subheading tracking-tight whitespace-nowrap">Altflow</span>
               {!isMobile && <Sidebar.Trigger />}
             </span>
             <span className="size-7 rounded-full border border-border bg-muted" aria-label="Signed in" />
@@ -448,13 +446,13 @@ export const WithFooter: Story = {
 };
 
 export const FullSidebar: Story = {
-  name: 'Studio full sidebar',
+  name: 'Altflow full sidebar',
   decorators: [withProvider({ defaultWidth: 272, minWidth: 232, maxWidth: 420, collapseBelow: 200 })],
   parameters: {
     docs: {
       description: {
         story:
-          'Full Studio shell using the same sidebar composition pattern as `AppSidebar`: brand header, command search, Agent Builder link, primary sections, bottom links, and main content layout.',
+          'Full Altflow shell using the same sidebar composition pattern as `AppSidebar`: brand header, command search, Agent Builder link, primary sections, bottom links, and main content layout.',
       },
     },
   },

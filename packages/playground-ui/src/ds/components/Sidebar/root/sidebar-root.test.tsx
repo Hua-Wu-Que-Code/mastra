@@ -827,7 +827,7 @@ function SidebarStackFixture({ closeOnEscape }: { closeOnEscape?: boolean }) {
   return (
     <Sidebar>
       <Sidebar.Header>
-        <Sidebar.Brand logo={<span aria-label="Mastra logo">M</span>} title="Mastra" />
+        <Sidebar.Brand logo={<span aria-label="Mastra logo">M</span>} title="Altflow" />
       </Sidebar.Header>
       <Sidebar.Nav>
         <Sidebar.NavStack value={view} onValueChange={setView}>
@@ -860,7 +860,7 @@ describe('Sidebar', () => {
       </Sidebar.Provider>,
     );
 
-    expect(screen.getByRole('banner').textContent).toContain('Mastra');
+    expect(screen.getByRole('banner').textContent).toContain('Altflow');
     expect(screen.getByRole('navigation', { name: 'Main' }).textContent).toContain('Grouped navigation');
     expect(screen.getByRole('contentinfo').textContent).toContain('Open account settings');
   });

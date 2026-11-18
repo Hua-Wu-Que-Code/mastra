@@ -32,7 +32,7 @@ export function LogsErrorContent({ error, resource, errorTitle }: LogsErrorConte
       <EmptyState
         titleSlot={studioT('Observability storage is not available')}
         descriptionSlot={studioT(
-          'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Studio.',
+          'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Altflow.',
         )}
       />
     );
@@ -42,7 +42,7 @@ export function LogsErrorContent({ error, resource, errorTitle }: LogsErrorConte
       <EmptyState
         titleSlot={studioT('Logs are not available with your current storage')}
         descriptionSlot={studioT(
-          'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Studio.',
+          'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Altflow.',
         )}
       />
     );

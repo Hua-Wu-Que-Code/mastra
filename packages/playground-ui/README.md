@@ -1,6 +1,6 @@
 # @mastra/playground-ui
 
-Reusable React components, hooks, domains, and design tokens used by Mastra Studio. It provides the UI building blocks for logs, memory, metrics, traces, and agent management.
+Reusable React components, hooks, domains, and design tokens used by Altflow. It provides the UI building blocks for logs, memory, metrics, traces, and agent management.
 
 ## Installation
 

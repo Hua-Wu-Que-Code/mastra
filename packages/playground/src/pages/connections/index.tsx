@@ -101,7 +101,7 @@ export default function ConnectionsPage() {
         variant="fill"
         titleSlot={studioT('No end-user identity')}
         descriptionSlot={studioT(
-          'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so studio sessions resolve to a resource key.',
+          'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so Altflow sessions resolve to a resource key.',
         )}
         actionSlot={docsLink('Read the end-user connections docs')}
       />

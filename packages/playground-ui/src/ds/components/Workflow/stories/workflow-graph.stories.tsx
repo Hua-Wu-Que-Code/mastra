@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Studio uses this viewport and these card and edge renderers. These fixtures provide already-positioned nodes; workflow parsing, automatic layout, and live execution stay in Studio. Click a node to focus it, use the zoom controls, inspect edge data, or open the nested workflow.',
+          'Altflow uses this viewport and these card and edge renderers. These fixtures provide already-positioned nodes; workflow parsing, automatic layout, and live execution stay in Altflow. Click a node to focus it, use the zoom controls, inspect edge data, or open the nested workflow.',
       },
     },
   },

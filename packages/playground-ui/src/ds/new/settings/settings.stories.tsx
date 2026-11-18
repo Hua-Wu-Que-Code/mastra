@@ -31,7 +31,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Every settings page in Studio, Factory and Platform is built from these. `SettingsLayout` is the 640px column; each `SettingsGroup` is a `SettingsTitle` above one `SettingsContainer` card. A card holds `SettingsRow`s (a setting: label, description, control) or a list: a `SettingsListHeader` with a count and the list's action, then `SettingsItem`s. An empty list is one `SettingsEmptyRow` holding the empty text and that same action. The card owns all row spacing, so rows carry no padding of their own.",
+          "Every settings page in Altflow, Factory and Platform is built from these. `SettingsLayout` is the 640px column; each `SettingsGroup` is a `SettingsTitle` above one `SettingsContainer` card. A card holds `SettingsRow`s (a setting: label, description, control) or a list: a `SettingsListHeader` with a count and the list's action, then `SettingsItem`s. An empty list is one `SettingsEmptyRow` holding the empty text and that same action. The card owns all row spacing, so rows carry no padding of their own.",
       },
     },
   },
@@ -71,7 +71,7 @@ export const Page: Story = {
         <SettingsTitle>Organization</SettingsTitle>
         <SettingsContainer>
           <SettingsRow label="Organization name" description="Shown across Mastra and in invitations.">
-            <Input defaultValue="Mastra" />
+            <Input defaultValue="Altflow" />
           </SettingsRow>
           <SettingsRow
             label="Email domain access"

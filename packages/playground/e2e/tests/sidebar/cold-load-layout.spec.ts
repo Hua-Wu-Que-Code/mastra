@@ -68,7 +68,7 @@ async function gateAuth(page: Page, config: MockAuthConfig): Promise<() => void>
   return release;
 }
 
-test.describe('Studio Layout - Cold-Load Stability', () => {
+test.describe('Altflow Layout - Cold-Load Stability', () => {
   test.afterEach(async () => {
     await resetStorage();
   });

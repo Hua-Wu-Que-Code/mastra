@@ -110,7 +110,7 @@ describe('LoginPage UI parity for /login and /signup', () => {
     mockCapabilities(credentialsCapabilities);
     renderLogin();
 
-    expect(await screen.findByRole('heading', { name: 'Sign in to Mastra Studio' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Sign in to Altflow' })).toBeTruthy();
   });
 
   it('shows the create account heading on /signup', async () => {

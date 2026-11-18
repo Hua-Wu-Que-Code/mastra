@@ -10,7 +10,7 @@ export const NoToolsInfo = () => {
       titleSlot={studioT('No Tools yet')}
       descriptionSlot={
         <>
-          {studioT('Mastra tools are not configured yet.') + ' '}
+          {studioT('Altflow tools are not configured yet.') + ' '}
           <br />
           {studioT('More information in the documentation.')}
         </>

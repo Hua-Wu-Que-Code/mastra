@@ -5,7 +5,7 @@ import type { Product } from './product-identity';
 import { ProductAvatar } from './ProductAvatar';
 
 const products: [Product, string][] = [
-  ['studio', 'Studio'],
+  ['studio', 'Altflow'],
   ['server', 'Server'],
   ['observability', 'Observability'],
   ['factory', 'Factory'],

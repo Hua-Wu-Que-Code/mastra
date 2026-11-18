@@ -121,7 +121,7 @@ test.describe('CMS create agent page', () => {
     test('displays page title and header correctly', async ({ page }) => {
       await page.goto('/cms/agents/create');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, 'Create agent');
     });
 

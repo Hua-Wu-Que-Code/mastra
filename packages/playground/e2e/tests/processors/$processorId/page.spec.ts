@@ -11,7 +11,7 @@ test.describe('Processor detail page', () => {
     test('has breadcrumb navigation back to the processors list', async ({ page }) => {
       await page.goto('/processors/logging-processor');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
 
       await expectBreadcrumbLink(page, 'Processors', '/processors');
     });

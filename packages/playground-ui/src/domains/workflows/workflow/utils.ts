@@ -512,7 +512,7 @@ const getStepNodeAndEdge = ({
     };
   }
 
-  throw new Error('This workflow contains a step type that Studio does not support.');
+  throw new Error('This workflow contains a step type that Altflow does not support.');
 };
 
 export const constructNodesAndEdges = ({

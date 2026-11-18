@@ -10,7 +10,7 @@ test.describe('Agent detail page', () => {
     test('renders the layout, thread history, and links through to agent settings', async ({ page }) => {
       await page.goto('/agents/weather-agent/chat/1234');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
 
       // Thread history: either stored threads or the empty state on a fresh database
       const emptyHistory = page.getByText('Your conversations will appear here');

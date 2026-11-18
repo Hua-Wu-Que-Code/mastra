@@ -102,7 +102,7 @@ const renderSettingsPage = async () => {
     </QueryClientProvider>,
   );
 
-  await waitFor(() => expect(screen.getByRole('textbox', { name: 'Mastra instance URL' })).toBeDefined());
+  await waitFor(() => expect(screen.getByRole('textbox', { name: 'Altflow instance URL' })).toBeDefined());
   await act(async () => {});
 
   return { capabilityRequests, queryClient };

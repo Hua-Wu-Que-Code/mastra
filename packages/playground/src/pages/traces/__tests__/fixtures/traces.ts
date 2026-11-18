@@ -21,7 +21,7 @@ export const metricsUnavailableCapabilities: GetObservabilityCapabilitiesRespons
 const trace = {
   traceId: 'trace-a',
   spanId: 'span-a',
-  name: 'Studio preview agent',
+  name: 'Altflow preview agent',
   spanType: SpanType.AGENT_RUN,
   entityType: EntityType.AGENT,
   isEvent: false,

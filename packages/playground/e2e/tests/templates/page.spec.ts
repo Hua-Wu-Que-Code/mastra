@@ -11,7 +11,7 @@ test.describe('Templates list page', () => {
     test('shows the page title and breadcrumb', async ({ page }) => {
       await page.goto('/templates');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, 'Templates');
     });
 

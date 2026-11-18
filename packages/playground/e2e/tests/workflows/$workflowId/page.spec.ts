@@ -14,7 +14,7 @@ test.describe('Workflow graph detail page', () => {
 
   test.describe('when the complex-workflow graph is opened', () => {
     test('overall layout information', async ({ page }) => {
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       const breadcrumb = page.locator('header>nav');
       await expect(breadcrumb).toMatchAriaSnapshot();
 

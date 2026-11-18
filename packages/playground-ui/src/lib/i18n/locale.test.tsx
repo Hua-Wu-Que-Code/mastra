@@ -27,7 +27,7 @@ afterEach(() => {
   localStorage.clear();
 });
 
-describe('Studio locale', () => {
+describe('Altflow locale', () => {
   describe('when the user changes languages while writing', () => {
     it('updates labels without losing the draft or remounting the input', () => {
       render(<ConversationDraft />);

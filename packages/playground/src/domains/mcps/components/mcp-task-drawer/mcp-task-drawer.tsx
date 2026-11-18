@@ -207,7 +207,7 @@ function McpTaskInputRequest({
         <>
           <Txt tone="muted">
             <Trans
-              id="Studio can't answer a {part0} request; the client that started the task has to."
+              id="Altflow can't answer a {part0} request; the client that started the task has to."
               values={{ part0: request.method }}
             />
           </Txt>

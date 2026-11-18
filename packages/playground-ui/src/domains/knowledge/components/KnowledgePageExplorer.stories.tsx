@@ -49,12 +49,12 @@ const launch = page('launch', 'documents', {
   name: 'Launch plan',
   key: 'launch-plan',
   version: 4,
-  description: 'How the Knowledge explorer ships to Studio.',
-  body: '## Goals\n\nShip the explorer to every Studio project, then turn on importers for Linear and Notion.\n\nSee [[linear:lin_01M6M0HHKH3T8VAWTWZ13MKNCE#linear/document/roadmap]] for dates.',
+  description: 'How the Knowledge explorer ships to Altflow.',
+  body: '## Goals\n\nShip the explorer to every Altflow project, then turn on importers for Linear and Notion.\n\nSee [[linear:lin_01M6M0HHKH3T8VAWTWZ13MKNCE#linear/document/roadmap]] for dates.',
   updatedAt: HOURS_AGO(1),
 });
 const roadmap = page('roadmap', 'documents', { name: 'Roadmap', key: 'roadmap', position: 'a1' });
-const studio = page('studio', 'projects', { name: 'Studio in Platform', key: 'studio' });
+const studio = page('studio', 'projects', { name: 'Altflow in Platform', key: 'studio' });
 const gateway = page('gateway', 'projects', {
   name: 'Gateway BYOK connections and project routing for every environment',
   key: 'gateway',

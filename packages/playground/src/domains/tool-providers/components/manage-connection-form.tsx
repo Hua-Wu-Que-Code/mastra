@@ -142,7 +142,7 @@ export const ManageConnectionForm = ({
             <AlertDialog.Title>{studioT('Disconnect connection?')}</AlertDialog.Title>
             <AlertDialog.Description>
               {studioT(
-                'Disconnecting revokes this authorized account and removes it from Mastra. Agents using this connection will lose access. This can’t be undone.',
+                'Disconnecting revokes this authorized account and removes it from Altflow. Agents using this connection will lose access. This can’t be undone.',
               )}
             </AlertDialog.Description>
           </AlertDialog.Header>

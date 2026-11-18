@@ -14,9 +14,9 @@ test.describe('Trace query filtering', () => {
         return route.fulfill({ json: traceQueryPage });
       });
       await page.goto('/traces?filterEntityName=preview');
-      await expect(page.getByText('Studio preview agent', { exact: true })).toBeVisible();
+      await expect(page.getByText('Altflow preview agent', { exact: true })).toBeVisible();
       await page.reload();
-      await expect(page.getByText('Studio preview agent', { exact: true })).toBeVisible();
+      await expect(page.getByText('Altflow preview agent', { exact: true })).toBeVisible();
     });
   });
 
@@ -29,7 +29,7 @@ test.describe('Trace query filtering', () => {
         return route.fulfill({ json: traceQueryPage });
       });
       await page.goto('/traces');
-      await expect(page.getByText('Studio preview agent', { exact: true })).toBeVisible();
+      await expect(page.getByText('Altflow preview agent', { exact: true })).toBeVisible();
 
       const input = page.getByRole('combobox', { name: 'Add filter' });
       await input.click();
@@ -43,7 +43,7 @@ test.describe('Trace query filtering', () => {
       await expect
         .poll(() => JSON.stringify(bodies.at(-1)))
         .toContain(JSON.stringify({ op: 'gt', left: { path: 'durationMs' }, right: { literal: 2000 } }));
-      await expect(page.getByText('Studio preview agent', { exact: true })).toBeVisible();
+      await expect(page.getByText('Altflow preview agent', { exact: true })).toBeVisible();
     });
 
     test('hides the field when the server cannot filter on root duration', async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('Trace query filtering', () => {
           legacyRequests++;
       });
       await page.goto('/traces?filterServiceName=preview-service');
-      await expect(page.getByText('Studio preview agent', { exact: true })).toBeVisible();
+      await expect(page.getByText('Altflow preview agent', { exact: true })).toBeVisible();
       expect(legacyRequests).toBe(0);
     });
   });

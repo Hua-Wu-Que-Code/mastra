@@ -103,8 +103,8 @@ export function StudioConnectionForm({ initialConfig }: { initialConfig: StudioC
     <form onSubmit={save} onReset={discard} noValidate>
       <SettingsContainer>
         <SettingsRow
-          label={studioT('Mastra instance URL')}
-          description={studioT('The server this studio talks to.')}
+          label={studioT('Altflow instance URL')}
+          description={studioT('The server Altflow connects to.')}
           errorMsg={urlError}
         >
           <Input

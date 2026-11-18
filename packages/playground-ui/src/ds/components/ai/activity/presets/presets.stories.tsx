@@ -65,7 +65,7 @@ export const Transcript: Story = {
     docs: {
       description: {
         story:
-          'Every event row, in the order a run produces them: signals report on the run, then notifications arrive. Factory and Studio render the same rows.',
+          'Every event row, in the order a run produces them: signals report on the run, then notifications arrive. Factory and Altflow render the same rows.',
       },
     },
   },

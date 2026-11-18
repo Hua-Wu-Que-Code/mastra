@@ -74,7 +74,7 @@ export function AuthRequired({ children, loginUrl = '/login', signupUrl = '/sign
               {studioT('Authentication Required')}
             </Txt>
             <p className="max-w-sm text-muted-foreground">
-              {studioT('Add the authorization header that Studio needs to reach your Mastra server.')}
+              {studioT('Add the authorization header that Altflow needs to reach your Altflow server.')}
             </p>
           </div>
           <AuthHeadersForm />

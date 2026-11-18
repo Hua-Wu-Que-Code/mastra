@@ -58,7 +58,7 @@ describe('LiveKitRecordingReview', () => {
   });
 
   describe('when the recording route is configured for a voice call trace', () => {
-    it('loads the recording only after Review audio is clicked, using the trace ID and Studio authentication', async () => {
+    it('loads the recording only after Review audio is clicked, using the trace ID and Altflow authentication', async () => {
       server.use(http.get(`${BASE_URL}/api/system/packages`, () => HttpResponse.json(recordingEnabledPackages)));
       const requested = vi.fn();
       server.use(

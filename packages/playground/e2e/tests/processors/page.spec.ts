@@ -11,7 +11,7 @@ test.describe('Processors list page', () => {
     test('shows the page header', async ({ page }) => {
       await page.goto('/processors');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, 'Processors');
     });
   });

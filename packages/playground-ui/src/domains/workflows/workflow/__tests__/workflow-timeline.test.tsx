@@ -91,7 +91,7 @@ describe('WorkflowTimeline status fallback', () => {
 });
 
 describe('WorkflowTimeline unknown status', () => {
-  describe('when the server sends a status this Studio version does not know', () => {
+  describe('when the server sends a status this Altflow version does not know', () => {
     it.each(['future-status', '__proto__'])('keeps %s inspectable', async status => {
       renderTimeline({
         ...completedLoop,

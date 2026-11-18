@@ -297,8 +297,8 @@ describe('MCP event drawer', () => {
       server.use(
         http.post(`${EVENTS_URL}/ticket.created/emit`, async ({ request }) => {
           onEmit(await request.json());
-          stream.push(eventFrame('mastra-test-1', 'From Studio'));
-          return HttpResponse.json({ occurrence: occurrence('mastra-test-1', 'From Studio') });
+          stream.push(eventFrame('mastra-test-1', 'From Altflow'));
+          return HttpResponse.json({ occurrence: occurrence('mastra-test-1', 'From Altflow') });
         }),
       );
       renderDrawer();
@@ -308,10 +308,10 @@ describe('MCP event drawer', () => {
       await screen.findByText('Listening');
 
       const emitForm = screen.getByRole('region', { name: 'Send test event' });
-      fireEvent.change(within(emitForm).getByRole('textbox'), { target: { value: 'From Studio' } });
+      fireEvent.change(within(emitForm).getByRole('textbox'), { target: { value: 'From Altflow' } });
       fireEvent.click(within(emitForm).getByRole('button', { name: 'Send test event' }));
 
-      await waitFor(() => expect(onEmit).toHaveBeenCalledWith({ data: { title: 'From Studio' } }));
+      await waitFor(() => expect(onEmit).toHaveBeenCalledWith({ data: { title: 'From Altflow' } }));
       await waitFor(() => expect(occurrenceIds()).toHaveLength(1));
       expect(occurrenceIds()[0]).toContain('mastra-test-1');
       expect(occurrenceIds()[0]).toContain('test');

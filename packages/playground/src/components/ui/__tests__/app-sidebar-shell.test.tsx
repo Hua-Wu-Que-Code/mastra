@@ -40,7 +40,7 @@ describe('AppSidebar shell', () => {
 
       const aside = await screen.findByRole('complementary', { name: 'Sidebar' });
       expect(aside).toBeTruthy();
-      const shellHeader = screen.getAllByRole('banner').find(el => within(el).queryByText('Mastra Studio'));
+      const shellHeader = screen.getAllByRole('banner').find(el => within(el).queryByText('Altflow'));
       expect(shellHeader).toBeTruthy();
       expect(screen.getByRole('navigation', { name: 'Main' })).toBeTruthy();
       expect(screen.getByRole('contentinfo')).toBeTruthy();

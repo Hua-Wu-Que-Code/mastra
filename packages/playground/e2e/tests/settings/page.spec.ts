@@ -5,7 +5,7 @@ test.describe('Settings page', () => {
     test('shows the page title', async ({ page }) => {
       await page.goto('/settings');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible();
     });
 

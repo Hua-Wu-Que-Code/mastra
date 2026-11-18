@@ -33,7 +33,7 @@ afterEach(async () => {
   await deleteDB('mastra-composer-drafts');
 });
 
-describe('Studio sign-out', () => {
+describe('Altflow sign-out', () => {
   describe('when the user has a saved draft', () => {
     it('clears the draft only after the session has ended and still allows an external redirect', async () => {
       const { result } = mount();

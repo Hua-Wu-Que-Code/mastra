@@ -124,7 +124,7 @@ export const TabsWithCode: Story = {
           { label: 'Anthropic', value: 'anthropic' },
           { label: 'OpenAI', value: 'openai' },
           { label: 'LangChain', value: 'langchain' },
-          { label: 'Mastra', value: 'mastra' },
+          { label: 'Altflow', value: 'mastra' },
         ]}
         value={provider}
         onValueChange={setProvider}
@@ -159,7 +159,7 @@ export const Highlighted: Story = {
         options={[
           { label: 'OpenAI', value: 'openai' },
           { label: 'Anthropic', value: 'anthropic' },
-          { label: 'Mastra', value: 'mastra' },
+          { label: 'Altflow', value: 'mastra' },
         ]}
         value={provider}
         onValueChange={setProvider}

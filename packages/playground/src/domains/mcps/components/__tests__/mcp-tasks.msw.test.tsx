@@ -272,7 +272,7 @@ describe('MCPDetail tasks section', () => {
     });
   });
 
-  describe('when the Studio session is scoped to a resource', () => {
+  describe('when the Altflow session is scoped to a resource', () => {
     it('explains the list needs an unscoped session', async () => {
       server.use(
         http.get(`${TEST_BASE_URL}/api/mcp/:serverId/tools`, () => HttpResponse.json(reportTools)),
@@ -282,7 +282,7 @@ describe('MCPDetail tasks section', () => {
 
       expect(
         await within(await tasksSection()).findByText(
-          'The task list needs a Studio session that is not scoped to a resource.',
+          'The task list needs a Altflow session that is not scoped to a resource.',
         ),
       ).not.toBeNull();
     });
@@ -423,7 +423,7 @@ describe('MCP task drawer', () => {
     });
   });
 
-  describe('when the task is waiting for a request Studio cannot answer', () => {
+  describe('when the task is waiting for a request Altflow cannot answer', () => {
     it('shows the request read-only', async () => {
       useTasks(samplingTask);
       renderDrawer(samplingTask.taskKey);

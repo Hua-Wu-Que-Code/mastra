@@ -11,7 +11,7 @@ test.describe('Scorer detail page', () => {
     test('has breadcrumb navigation back to the scorers list', async ({ page }) => {
       await page.goto('/scorers/response-quality');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
 
       await expectBreadcrumbLink(page, 'Scorers', '/scorers');
     });

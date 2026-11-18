@@ -343,7 +343,7 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
         {!isCmsLoading && !isCmsAvailable && (
           <Notice variant="warning" title={studioT('Read-only')}>
             <Notice.Message>
-              {studioT('To edit the system prompt in Studio, add') + ' '}
+              {studioT('To edit the system prompt in Altflow, add') + ' '}
               <InlineCode>@mastra/editor</InlineCode> {' ' + studioT('to your project. See the')}{' '}
               <a
                 href="https://mastra.ai/docs/editor/overview"

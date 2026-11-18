@@ -100,7 +100,7 @@ export interface TraceDataPanelViewProps {
   entityType?: string | null;
   /**
    * Whether to render the "Evaluating traces and saving them as dataset items is
-   * available in Mastra Studio" info notice when neither `onEvaluateTrace` nor
+   * available in Altflow" info notice when neither `onEvaluateTrace` nor
    * `onSaveAsDatasetItem` is provided. Defaults to `true`. Pass `false` when this
    * panel is rendered inside Studio in a context that intentionally omits those
    * handlers (e.g. inline below an experiment result).
@@ -598,7 +598,7 @@ export function TraceDataPanelView({
                         <Notice variant="info" className="mb-6">
                           <Notice.Message>
                             {studioT(
-                              'Evaluating traces and saving them as dataset items is available in Mastra Studio (local or deployed).',
+                              'Evaluating traces and saving them as dataset items is available in Altflow (local or deployed).',
                             )}
                           </Notice.Message>
                         </Notice>

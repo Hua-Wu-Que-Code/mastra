@@ -69,7 +69,7 @@ export function AgentBuilderSidebar({ forceExpanded = false }: AgentBuilderSideb
   if (canUseFavorites) links.push(favoritesLink);
   links.push(libraryLink);
   const backToStudio = (
-    <Link href="/agents" aria-label={studioT('Back to Mastra Studio')}>
+    <Link href="/agents" aria-label={studioT('Back to Altflow')}>
       <LogoWithoutText className="size-6" />
     </Link>
   );
@@ -78,8 +78,8 @@ export function AgentBuilderSidebar({ forceExpanded = false }: AgentBuilderSideb
     <Sidebar className="h-full" mobileMode="drawer">
       {!forceExpanded && (
         <Sidebar.Header collapsedLogo={backToStudio} actions={isUserAuthenticated && <AuthStatus />}>
-          <Link href="/agents" aria-label={studioT('Back to Mastra Studio')} className="min-w-0 flex-1">
-            <Sidebar.Brand logo={<LogoWithoutText className="size-6" />} title="Mastra Studio" />
+          <Link href="/agents" aria-label={studioT('Back to Altflow')} className="min-w-0 flex-1">
+            <Sidebar.Brand logo={<LogoWithoutText className="size-6" />} title="Altflow" />
           </Link>
           {!isMobile && <Sidebar.Trigger />}
         </Sidebar.Header>

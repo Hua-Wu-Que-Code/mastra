@@ -27,7 +27,7 @@ describe('Account fetch', () => {
       ).toBe(200);
     });
   });
-  describe('when a creator sends a Studio chat request', () => {
+  describe('when a creator sends a Altflow chat request', () => {
     it('sends conversation data with the assigned resource and server configuration', async () => {
       server.use(
         http.post(url, async ({ request }) => {

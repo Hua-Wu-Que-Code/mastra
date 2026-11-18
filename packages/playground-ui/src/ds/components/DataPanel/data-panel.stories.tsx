@@ -34,7 +34,7 @@ const meta: Meta<typeof DataPanel> = {
           'height so `DataPanel.Content` can scroll.',
           '',
           'This is the pattern behind the observability trace / span / log detail views, shared by',
-          'both the local Studio and Cloud Studio. For a wide modal with a hidden close tab, see `Layout/SideDialog`.',
+          'both the local Altflow and Cloud Altflow. For a wide modal with a hidden close tab, see `Layout/SideDialog`.',
         ].join('\n'),
       },
     },

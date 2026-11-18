@@ -11,7 +11,7 @@ test.describe('MCP server detail page', () => {
     test('has breadcrumb navigation back to the servers list', async ({ page }) => {
       await page.goto('/mcps/simple-mcp-server');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
 
       await expectBreadcrumbLink(page, 'MCP Servers', '/mcps');
     });

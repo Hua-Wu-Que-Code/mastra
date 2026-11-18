@@ -5,7 +5,7 @@ import { resetStorage } from '../__utils__/reset-storage';
 /**
  * The whole app is wrapped in `RoutePermissionsGate`, which blocks the router
  * (including the Settings page) until `/api/auth/capabilities` resolves, and
- * shows a "Failed to load studio" screen if that request fails.
+ * shows a "Failed to load Altflow" screen if that request fails.
  *
  * After saving a custom API prefix / instance URL and reloading, the capabilities
  * request is re-issued against the newly-configured prefix/URL. The kitchen-sink
@@ -124,8 +124,8 @@ test.describe('Settings invalid API error state', () => {
       await page.unroute('**/auth/capabilities');
       await page.reload();
 
-      await expect(page.getByText('Failed to load studio')).toBeVisible({ timeout: 10000 });
-      await expect(page.getByRole('button', { name: 'Reset Studio configuration' })).toBeVisible();
+      await expect(page.getByText('Failed to load Altflow')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole('button', { name: 'Reset Altflow configuration' })).toBeVisible();
     });
   });
 });

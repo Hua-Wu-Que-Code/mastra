@@ -37,7 +37,7 @@ export function McpToolPlayground({ serverId, tool }: McpToolPlaygroundProps) {
       {isSuspendedResult(result) && (
         <Notice variant="warning">
           {studioT(
-            'This tool asked for more input, which Studio cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an',
+            'This tool asked for more input, which Altflow cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an',
           ) + ' '}
           <InlineCode>inputRequests</InlineCode> {' ' + studioT('handler to finish the request.')}
         </Notice>

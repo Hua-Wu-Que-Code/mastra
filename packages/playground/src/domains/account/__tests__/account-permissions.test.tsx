@@ -43,7 +43,7 @@ describe('Go account permissions', () => {
     });
   });
   describe('when Go returns an administrator', () => {
-    it('allows managing the assistant without native Studio RBAC', async () => {
+    it('allows managing the assistant without native Altflow RBAC', async () => {
       server.use(http.get(`${endpoint}/account/session`, () => HttpResponse.json(adminSession)));
       renderActions();
       expect(await screen.findByRole('button', { name: '编辑助手' })).toBeTruthy();

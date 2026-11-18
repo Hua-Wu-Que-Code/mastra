@@ -140,7 +140,7 @@ test.describe('CMS edit scorer page', () => {
 
       await goToEditPage(page, scorerId);
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, scorerName);
     });
 

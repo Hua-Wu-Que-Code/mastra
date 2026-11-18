@@ -34,7 +34,7 @@ export const mastra = new Mastra({
     askUserAgent,
   },
   logger: new PinoLogger({
-    name: 'Mastra',
+    name: 'Altflow',
     level: 'error',
   }),
   storage,

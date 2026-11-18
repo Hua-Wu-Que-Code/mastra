@@ -73,7 +73,7 @@ const codeTags = new Set([
 ]);
 // Names and protocol notation do not change with the interface language.
 const invariant =
-  /^(?:k|Mastra Studio|JSON|API|MCP|SDK|URL|ID|CSV|TypeScript|JavaScript|SQL|OAuth|UTF-8|Ctrl|CMD|GitHub|Discord|Slack|OpenAI|Anthropic|Google|CodeMirror|Mermaid|Markdown|npm|pnpm|npx|yarn|English)$/;
+  /^(?:k|Altflow|JSON|API|MCP|SDK|URL|ID|CSV|TypeScript|JavaScript|SQL|OAuth|UTF-8|Ctrl|CMD|GitHub|Discord|Slack|OpenAI|Anthropic|Google|CodeMirror|Mermaid|Markdown|npm|pnpm|npx|yarn|English)$/;
 const isCopy = text =>
   /[a-zA-Z]/.test(text.replace(/\{\w+\}/g, '').replace(/&(?:nbsp|amp|lt|gt|quot);/g, '')) &&
   !invariant.test(text.trim()) &&

@@ -48,7 +48,7 @@ function MobileNavbar() {
         <span className="flex min-w-0 items-center gap-2">
           <LogoWithoutText className="size-[1.5rem] shrink-0" />
           <Txt variant="body-sm" font="display" as="span" className="whitespace-nowrap">
-            Mastra Studio
+            Altflow
           </Txt>
         </span>
       </div>

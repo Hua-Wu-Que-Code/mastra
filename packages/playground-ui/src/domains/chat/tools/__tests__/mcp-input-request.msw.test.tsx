@@ -338,7 +338,7 @@ describe('a deferred call whose MCP task asks for input', () => {
   });
 });
 
-describe('a deferred call whose server asks for more than Studio shows', () => {
+describe('a deferred call whose server asks for more than Altflow shows', () => {
   const ask = (message: string): McpInputRequest => ({ method: 'elicitation/create', params: { message } });
   const requests = (count: number) =>
     Object.fromEntries(Array.from({ length: count }, (_, i) => [`q${i}`, ask(`Q${i}?`)]));
@@ -358,7 +358,7 @@ describe('a deferred call whose server asks for more than Studio shows', () => {
     renderWithProviders(<Shell props={deferredCall} />);
 
     const request = await screen.findByTestId('mcp-input-request');
-    expect(within(request).getByText('reports sent more than Studio can show here.')).toBeTruthy();
+    expect(within(request).getByText('reports sent more than Altflow can show here.')).toBeTruthy();
     expect(within(request).queryAllByRole('region')).toHaveLength(0);
     expect(within(request).queryByRole('button', { name: 'Accept' })).toBeNull();
 
@@ -375,7 +375,7 @@ describe('a deferred call whose server asks for more than Studio shows', () => {
 
     const request = await screen.findByTestId('mcp-input-request');
     expect(within(request).getByText('Q19?')).toBeTruthy();
-    expect(within(request).queryByText(/more than Studio can show/)).toBeNull();
+    expect(within(request).queryByText(/more than Altflow can show/)).toBeNull();
   });
 });
 
@@ -516,7 +516,7 @@ describe('a foreground call whose MCP task asks for input', () => {
 
     const request = await screen.findByTestId('mcp-input-request');
     expect(within(request).getByText('Include the draft figures in the Q3 report?')).toBeTruthy();
-    expect(within(request).getByText("Studio can't answer this request in a network run yet.")).toBeTruthy();
+    expect(within(request).getByText("Altflow can't answer this request in a network run yet.")).toBeTruthy();
     for (const name of ['Accept', 'Decline', 'Cancel']) {
       expect(within(request).queryByRole('button', { name })).toBeNull();
     }

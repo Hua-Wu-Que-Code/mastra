@@ -41,7 +41,7 @@ async function renderSettingsPage() {
   );
 
   await waitFor(() =>
-    expect(screen.getByRole('textbox', { name: 'Mastra instance URL' })).toHaveProperty('value', BASE_URL),
+    expect(screen.getByRole('textbox', { name: 'Altflow instance URL' })).toHaveProperty('value', BASE_URL),
   );
 }
 
@@ -142,7 +142,7 @@ describe('StudioSettingsPage', () => {
 
       expect(screen.getByRole('heading', { level: 1, name: 'General' })).toBeDefined();
       const main = within(screen.getByRole('main'));
-      expect(main.getByRole('textbox', { name: 'Mastra instance URL' })).toHaveProperty('value', BASE_URL);
+      expect(main.getByRole('textbox', { name: 'Altflow instance URL' })).toHaveProperty('value', BASE_URL);
       expect(main.getByRole('textbox', { name: 'API prefix' })).toHaveProperty('value', '/api');
       expect(main.getByRole('button', { name: 'Follow system' }).getAttribute('aria-pressed')).toBe('true');
     });
@@ -180,7 +180,7 @@ describe('StudioSettingsPage', () => {
   });
 });
 
-describe('Studio language settings', () => {
+describe('Altflow language settings', () => {
   describe('when Chinese is selected with unsaved connection edits', () => {
     it('translates the page and preserves those edits', async () => {
       await renderSettingsPage();

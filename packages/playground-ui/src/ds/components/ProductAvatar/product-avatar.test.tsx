@@ -12,7 +12,7 @@ afterEach(cleanup);
 describe('ProductAvatar', () => {
   it('keeps its compact size outside a group', () => {
     render(<ProductAvatar product="studio" />);
-    const avatar = screen.getByRole('img', { name: 'Studio' });
+    const avatar = screen.getByRole('img', { name: 'Altflow' });
     expect(avatar.classList.contains('size-5')).toBe(true);
     expect(avatar.hasAttribute('data-size')).toBe(false);
   });
@@ -36,7 +36,7 @@ describe('ProductAvatar', () => {
     const group = screen.getByLabelText('Products');
     const sizes = Array.from(group.querySelectorAll('[data-slot=avatar]'), avatar => avatar.getAttribute('data-size'));
     expect(sizes).toEqual(['md', 'md', 'lg']);
-    expect(screen.getByRole('img', { name: 'Studio' }).classList.contains('size-avatar-md')).toBe(true);
+    expect(screen.getByRole('img', { name: 'Altflow' }).classList.contains('size-avatar-md')).toBe(true);
   });
 
   it('fits a text row at the inline size', () => {
@@ -49,7 +49,7 @@ describe('ProductAvatar', () => {
     const group = screen.getByLabelText('Products');
     const sizes = Array.from(group.querySelectorAll('[data-slot=avatar]'), avatar => avatar.getAttribute('data-size'));
     expect(sizes).toEqual(['inline', 'inline']);
-    expect(screen.getByRole('img', { name: 'Studio' }).classList.contains('size-avatar-inline')).toBe(true);
+    expect(screen.getByRole('img', { name: 'Altflow' }).classList.contains('size-avatar-inline')).toBe(true);
   });
 
   it('does not open a hover hint inside a group', async () => {
@@ -58,7 +58,7 @@ describe('ProductAvatar', () => {
         <Avatar.Group size="md">
           <Tooltip>
             <TooltipTrigger render={<ProductAvatar product="studio" />} />
-            <TooltipContent>Studio project</TooltipContent>
+            <TooltipContent>Altflow project</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<ProductAvatar product="observability" />} />

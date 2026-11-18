@@ -128,7 +128,7 @@ function EditFormContent({
       {isEditorLocked ? (
         <div className="p-4">
           <Notice variant="info" title={studioT('Editing disabled')}>
-            <Notice.Message>{studioT('This code-defined agent has disabled Studio editing.')}</Notice.Message>
+            <Notice.Message>{studioT('This code-defined agent has disabled Altflow editing.')}</Notice.Message>
           </Notice>
         </div>
       ) : (

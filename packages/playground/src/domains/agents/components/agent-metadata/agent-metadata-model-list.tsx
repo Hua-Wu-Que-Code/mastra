@@ -125,7 +125,7 @@ const AgentMetadataReadOnlyModelList = ({
     <div className="flex flex-col gap-2">
       {showDynamicListNote && (
         <Txt variant="caption" tone="muted">
-          {studioT('This model list is dynamically set and cannot be edited in Studio.')}
+          {studioT('This model list is dynamically set and cannot be edited in Altflow.')}
         </Txt>
       )}
       {modelList.map(modelConfig => (

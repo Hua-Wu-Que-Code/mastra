@@ -68,7 +68,7 @@ export const traceQueryPage: TraceQueryKeysetTraceResponse = {
     {
       traceId: 'trace-a',
       rootSpanId: 'span-a',
-      name: 'Studio preview agent',
+      name: 'Altflow preview agent',
       createdAt: '2026-09-15T12:00:00.000Z',
       startedAt: '2026-09-15T12:00:00.000Z',
       endedAt: '2026-09-15T12:00:01.000Z',

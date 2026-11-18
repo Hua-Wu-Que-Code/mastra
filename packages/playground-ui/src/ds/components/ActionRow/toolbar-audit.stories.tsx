@@ -226,7 +226,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 export const AllToolbars: StoryObj = {
   render: () => (
     <div className="bg-surface1 min-h-screen px-8 pb-16">
-      <Group title="Studio">
+      <Group title="Altflow">
         <Case name="Traces, custom range" source="traces-page-content.tsx:15">
           <ActionRow>
             <ActionRow.Start>

@@ -209,7 +209,7 @@ export function ToolsPage() {
           <Notice variant="info" title={studioT('Tools are owned by code')}>
             <Notice.Message>
               {studioT(
-                'This code-defined agent has disabled tools editing from Studio. Update the agent definition in code to change its tools.',
+                'This code-defined agent has disabled tools editing from Altflow. Update the agent definition in code to change its tools.',
               )}
             </Notice.Message>
           </Notice>
@@ -218,7 +218,7 @@ export function ToolsPage() {
           <Notice variant="info" title={studioT('Tool membership is owned by code')}>
             <Notice.Message>
               {studioT(
-                'This code-defined agent only allows editing tool descriptions from Studio. Update the agent definition in code to add or remove tools.',
+                'This code-defined agent only allows editing tool descriptions from Altflow. Update the agent definition in code to add or remove tools.',
               )}
             </Notice.Message>
           </Notice>

@@ -21,7 +21,7 @@ Built two opt-in explorations:
 - **Open rows:** no frame or lines; subtle rounded hover and selection.
 - **Soft rows:** faint rounded backgrounds with small gaps.`;
 
-const FOLLOW_UP = `Opened the pull request with the approved styling for Factory and Studio.
+const FOLLOW_UP = `Opened the pull request with the approved styling for Factory and Altflow.
 
 128 tests and browser checks passed. Existing dependency issues still block the full typecheck and lint.`;
 
@@ -106,7 +106,7 @@ const meta: Meta<typeof TranscriptAnnotations> = {
     docs: {
       description: {
         component:
-          'Annotate parts of the transcript for the next message, the same way in Studio and Factory. Mount `ChatAnnotationsProvider` once per conversation, below whatever remounts when the thread changes. Inside a `ChatShell`, render `TranscriptAnnotations` in `ChatShell.Transcript` and `ComposerAnnotations` at the top of `ComposerBox`; adding an annotation focuses the `ComposerInput` in `ChatShell.Dock`. When sending, `takeAnnotations()` hands the waiting annotations to `formatAnnotatedMessage`, and `restoreAnnotations` puts them back if the message fails. In the transcript, Add to chat floats over text selected inside one message: a drag that runs past the message is trimmed back to it, and a selection that reaches a second message offers nothing. Each annotation gets a numbered comment bubble at the end of its passage and tints it; hovering a bubble deepens the tint, and clicking it opens a card to comment on the passage or remove it. The composer chip opens the numbered list, to find or remove each one. The agent receives a numbered Markdown list, each passage quoted with its comment, then the typed text.',
+          'Annotate parts of the transcript for the next message, the same way in Altflow and Factory. Mount `ChatAnnotationsProvider` once per conversation, below whatever remounts when the thread changes. Inside a `ChatShell`, render `TranscriptAnnotations` in `ChatShell.Transcript` and `ComposerAnnotations` at the top of `ComposerBox`; adding an annotation focuses the `ComposerInput` in `ChatShell.Dock`. When sending, `takeAnnotations()` hands the waiting annotations to `formatAnnotatedMessage`, and `restoreAnnotations` puts them back if the message fails. In the transcript, Add to chat floats over text selected inside one message: a drag that runs past the message is trimmed back to it, and a selection that reaches a second message offers nothing. Each annotation gets a numbered comment bubble at the end of its passage and tints it; hovering a bubble deepens the tint, and clicking it opens a card to comment on the passage or remove it. The composer chip opens the numbered list, to find or remove each one. The agent receives a numbered Markdown list, each passage quoted with its comment, then the typed text.',
       },
     },
   },

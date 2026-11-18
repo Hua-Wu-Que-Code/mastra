@@ -126,7 +126,7 @@ export function LoginPage({ redirectUri, onSuccess, initialMode = 'signin', erro
 
   return (
     <LoginLayout
-      title={isSignIn ? studioT('Sign in to Mastra Studio') : studioT('Create your account')}
+      title={isSignIn ? studioT('Sign in to Altflow') : studioT('Create your account')}
       description={description}
       errorBanner={errorBanner}
     >

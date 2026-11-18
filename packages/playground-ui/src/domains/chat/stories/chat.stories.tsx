@@ -17,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'An interactive conversation assembled from playground-ui components: ChatShell, message renderers, grouped tools, plan, edit, question, approvals, tasks, timeline, attachments, and Composer. Type / for fixture commands, send a message, or attach a local file. ComposerSuggestions and useComposerCommands provide the shared command interaction; command selection submits a fixture message. A deterministic fixture produces incoming chunks, and useRevealedParts paces the displayed text. Reset restores the selected scenario. Transport, persistence, model selection, and application-specific message wrappers remain owned by Studio and Factory.',
+          'An interactive conversation assembled from playground-ui components: ChatShell, message renderers, grouped tools, plan, edit, question, approvals, tasks, timeline, attachments, and Composer. Type / for fixture commands, send a message, or attach a local file. ComposerSuggestions and useComposerCommands provide the shared command interaction; command selection submits a fixture message. A deterministic fixture produces incoming chunks, and useRevealedParts paces the displayed text. Reset restores the selected scenario. Transport, persistence, model selection, and application-specific message wrappers remain owned by Altflow and Factory.',
       },
     },
   },

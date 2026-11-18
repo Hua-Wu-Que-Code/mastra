@@ -193,7 +193,7 @@ describe('McpAppViewer', () => {
     },
   );
 
-  it('opens web links the app asks for in a new tab, without giving the page a handle on Studio', async () => {
+  it('opens web links the app asks for in a new tab, without giving the page a handle on Altflow', async () => {
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
     const app = await renderApp();
 
@@ -227,7 +227,7 @@ describe('McpAppViewer', () => {
     ).rejects.toThrow('No handler for method: ui/update-model-context');
   });
 
-  describe("when Studio relays an app's tool call to the app's MCP server", () => {
+  describe("when Altflow relays an app's tool call to the app's MCP server", () => {
     /** The viewer as Studio mounts it: tool calls go to the server through Studio's API. */
     function StudioViewer({ serverId }: { serverId: string }) {
       const onToolCall = useMcpAppToolCall(serverId);

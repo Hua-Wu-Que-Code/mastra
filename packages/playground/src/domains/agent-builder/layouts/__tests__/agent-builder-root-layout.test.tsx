@@ -127,12 +127,12 @@ describe('AgentBuilderRootLayout', () => {
     expect(await screen.findByText('Login page')).toBeTruthy();
   });
 
-  describe('when an authenticated user without Agent Builder access uses a nested Studio base path', () => {
-    it('navigates back to the Studio agents page within the base path', async () => {
+  describe('when an authenticated user without Agent Builder access uses a nested Altflow base path', () => {
+    it('navigates back to the Altflow agents page within the base path', async () => {
       server.use(authHandler(authenticatedWithoutBuilderAccess));
 
       const router = renderAgentBuilderRoute('/studio/agent-builder/agents', '/studio');
-      fireEvent.click(await screen.findByRole('link', { name: 'Back to Studio' }));
+      fireEvent.click(await screen.findByRole('link', { name: 'Back to Altflow' }));
 
       await waitFor(() => expect(router.state.location.pathname).toBe('/studio/agents'));
       expect(await screen.findByText('Agents page')).toBeTruthy();

@@ -25,7 +25,7 @@ export const StudioSettingsPage = () => {
           <SettingsGroup>
             <SettingsTitle info={studioT('Stored in this browser.')}>{studioT('General')}</SettingsTitle>
             <SettingsContainer className="rounded-none border-y border-border bg-transparent px-0">
-              <SettingsRow label={studioT('Language')} description={studioT('Choose the language used in Studio.')}>
+              <SettingsRow label={studioT('Language')} description={studioT('Choose the language used in Altflow.')}>
                 <LanguageSelect />
               </SettingsRow>
               <AppearanceSettings />

@@ -71,7 +71,7 @@ const meta = {
     docs: {
       description: {
         component:
-          '`Activity` composed with the tool blocks from `components/ai/tool-call`, the way Studio and Factory each build a tool line. `ToolBlocksExample` exists only in this story; import `presentTool`, `ToolCallArguments`, `ToolCallCommand`, `ToolCallOutput` and `ToolCallGroup` instead. Apps normalize their tool data and choose which output to show; these blocks own presentation and copying. Results show in full, including successful edit results, and scroll inside their box. Approval actions are also shared; requests and lifecycle stay with each app.',
+          '`Activity` composed with the tool blocks from `components/ai/tool-call`, the way Altflow and Factory each build a tool line. `ToolBlocksExample` exists only in this story; import `presentTool`, `ToolCallArguments`, `ToolCallCommand`, `ToolCallOutput` and `ToolCallGroup` instead. Apps normalize their tool data and choose which output to show; these blocks own presentation and copying. Results show in full, including successful edit results, and scroll inside their box. Approval actions are also shared; requests and lifecycle stay with each app.',
       },
     },
   },
@@ -124,7 +124,9 @@ export const CommandWithAllArguments: Story = {
     args: { command: 'pnpm test', cwd: '/workspace', timeout: 30000 },
     output: 'Tests passed',
   },
-  parameters: { docs: { description: { story: 'Studio keeps every argument available for inspection and copying.' } } },
+  parameters: {
+    docs: { description: { story: 'Altflow keeps every argument available for inspection and copying.' } },
+  },
 };
 
 export const PartialArguments: Story = {

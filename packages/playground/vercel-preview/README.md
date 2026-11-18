@@ -1,6 +1,6 @@
 # Studio Preview
 
-This app is the Vercel target for PR previews of Mastra Studio. It deploys Studio and a minimal Mastra API together, so reviewers can test agents and workflows with populated demo data.
+This app is the Vercel target for PR previews of Altflow. It deploys Studio and a minimal Mastra API together, so reviewers can test agents and workflows with populated demo data.
 
 It lives inside `packages/playground` because previewing Studio is its whole point, but it is internal preview infrastructure, not part of the published package: its own `pnpm-workspace.yaml` makes this directory its own workspace root, so it keeps its own lockfile without ever being installed as part of the monorepo, and its monorepo-only patterns (`link:` dependencies, a root turbo build) must not be copied into user-facing examples. Edits here count as playground changes for turbo and the changeset-bot; that is accepted noise since the app rarely changes, and no changeset is needed for preview-only edits.
 

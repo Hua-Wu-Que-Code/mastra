@@ -38,7 +38,7 @@ export function WorkflowGraphBoundary({
                 {studioT('Graph unavailable')}
               </Txt>
               <Txt variant="caption" tone="muted">
-                {studioT('Studio could not display this workflow graph.')}
+                {studioT('Altflow could not display this workflow graph.')}
               </Txt>
               <Txt variant="meta" tone="muted" className="break-words">
                 {error.message}

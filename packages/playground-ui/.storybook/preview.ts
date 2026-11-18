@@ -33,7 +33,7 @@ const preview: Preview = {
   tags: ['autodocs'],
   globalTypes: {
     theme: {
-      description: 'Studio theme',
+      description: 'Altflow theme',
       toolbar: {
         title: 'Theme',
         icon: 'contrast',

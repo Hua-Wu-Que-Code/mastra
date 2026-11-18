@@ -12,7 +12,7 @@ describe('NotificationSignalNotice', () => {
     const signal = {
       type: 'notification',
       contents: [
-        { type: 'text', text: 'Studio crashes when I open a workflow' },
+        { type: 'text', text: 'Altflow crashes when I open a workflow' },
         { type: 'text', text: 'Opening any workflow shows a blank page.' },
       ],
       metadata: {
@@ -38,7 +38,7 @@ describe('NotificationSignalNotice', () => {
       fireEvent.click(screen.getByRole('button', { name: /github \/ issue-opened/ }));
 
       expect(
-        screen.getByText('Studio crashes when I open a workflow Opening any workflow shows a blank page.'),
+        screen.getByText('Altflow crashes when I open a workflow Opening any workflow shows a blank page.'),
       ).not.toBeNull();
     });
 

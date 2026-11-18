@@ -61,7 +61,7 @@ function Fields() {
         <Combobox
           options={[
             { value: 'platform', label: 'Platform team' },
-            { value: 'studio', label: 'Studio team' },
+            { value: 'studio', label: 'Altflow team' },
           ]}
           value={owner}
           onValueChange={setOwner}

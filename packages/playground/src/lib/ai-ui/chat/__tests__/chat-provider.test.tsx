@@ -473,7 +473,7 @@ describe('ChatProvider', () => {
     );
   });
 
-  describe('when Studio selects a request-scoped model', () => {
+  describe('when Altflow selects a request-scoped model', () => {
     it('only sends an explicit override without mutating the agent', async () => {
       const captured: Captured[] = [];
       const onMutation = vi.fn();
@@ -551,7 +551,15 @@ describe('ChatProvider', () => {
     expect(captured).toHaveLength(1);
     expect(captured[0].body.maxSteps).toBe(7);
     expect(captured[0].body.disableSubAgents).toBe(true);
-    expect(captured[0].body.memory).toMatchObject({ thread: 'thread-1', options: { lastMessages: false, semanticRecall: false, workingMemory: { enabled: false }, observationalMemory: false } });
+    expect(captured[0].body.memory).toMatchObject({
+      thread: 'thread-1',
+      options: {
+        lastMessages: false,
+        semanticRecall: false,
+        workingMemory: { enabled: false },
+        observationalMemory: false,
+      },
+    });
     localStorage.removeItem('mastra-memory-preferences-local-agent-1');
     const modelSettings = captured[0].body.modelSettings;
     expect(isRecord(modelSettings) ? modelSettings.temperature : undefined).toBe(0.4);
@@ -886,8 +894,7 @@ describe('ChatProvider', () => {
     const omPart = latestMessages
       .flatMap(message => (Array.isArray(message.content?.parts) ? message.content.parts : []))
       .find(part => (part as { toolCallId?: string }).toolCallId === 'om-buffering-cycle-reload') as
-      | { state?: string; output?: { omData?: Record<string, unknown> } }
-      | undefined;
+      { state?: string; output?: { omData?: Record<string, unknown> } } | undefined;
 
     expect(omPart?.state).toBe('output-available');
     expect(omPart?.output?.omData?.observations).toEqual(['remembered after reload']);

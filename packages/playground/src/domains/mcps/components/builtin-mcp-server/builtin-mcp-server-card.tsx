@@ -59,9 +59,9 @@ export function BuiltinMcpServerCard({ descriptor }: { descriptor: Descriptor })
 function BuiltinMcpServerFrame({ status, children }: { status?: ReactNode; children: ReactNode }) {
   useLocale();
   return (
-    <Card role="region" aria-label={studioT('Mastra (built-in) MCP server')}>
+    <Card role="region" aria-label={studioT('Altflow (built-in) MCP server')}>
       <CardHeader className="flex-row flex-wrap items-center gap-3 space-y-0 border-b border-border">
-        <CardTitle className="shrink-0">{studioT('Mastra (built-in)')}</CardTitle>
+        <CardTitle className="shrink-0">{studioT('Altflow (built-in)')}</CardTitle>
         {status}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">{children}</CardContent>

@@ -9,9 +9,9 @@ import { setupMockAuth } from '../tests/__utils__/auth';
  * BEHAVIOR UNDER TEST: A real Mastra server mounted at /studio serves the login
  * route selected by AuthRequired after credentials capabilities are returned.
  */
-test.describe('Studio base-path login flow', () => {
-  test.describe('when an unauthenticated user signs in from a protected Studio route', () => {
-    test('navigates to the login route within the Studio base path', async ({ page }) => {
+test.describe('Altflow base-path login flow', () => {
+  test.describe('when an unauthenticated user signs in from a protected Altflow route', () => {
+    test('navigates to the login route within the Altflow base path', async ({ page }) => {
       await setupMockAuth(page, {
         authenticated: false,
         loginType: 'credentials',
@@ -32,7 +32,7 @@ test.describe('Studio base-path login flow', () => {
 
       await page.getByRole('button', { name: 'Sign in' }).click();
 
-      await expect(page.getByRole('heading', { name: 'Sign in to Mastra Studio' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Sign in to Altflow' })).toBeVisible();
     });
   });
 });

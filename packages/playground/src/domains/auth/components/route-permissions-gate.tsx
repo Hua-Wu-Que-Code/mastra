@@ -79,7 +79,7 @@ interface GateInvalidBaseUrlProps {
 const GateInvalidBaseUrl = ({ error, baseUrl }: GateInvalidBaseUrlProps) => {
   useLocale();
   const messages = [
-    `Studio could not reach the Mastra server at ${baseUrl}. Check that the instance URL and API prefix in Settings are correct, and that the server is running.`,
+    `Altflow could not reach the Altflow server at ${baseUrl}. Check that the instance URL and API prefix in Settings are correct, and that the server is running.`,
     `Error: ${error.message}`,
   ];
 
@@ -92,11 +92,11 @@ const GateInvalidBaseUrl = ({ error, baseUrl }: GateInvalidBaseUrlProps) => {
     <div className="flex h-screen w-full items-center justify-center">
       <EmptyState
         tone="error"
-        titleSlot={studioT('Failed to load studio')}
+        titleSlot={studioT('Failed to load Altflow')}
         descriptionSlot={messages.join('\n\n')}
         actionSlot={
           <Button icon={<IconArrowRotateCounterClockwise />} onClick={handleReset}>
-            {studioT('Reset Studio configuration')}
+            {studioT('Reset Altflow configuration')}
           </Button>
         }
       />

@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Preset over `ActivityItem` for model reasoning, shared by Studio and Factory: a Markdown body, a busy line with no disclosure while it streams without text, and the provider redaction notice.',
+          'Preset over `ActivityItem` for model reasoning, shared by Altflow and Factory: a Markdown body, a busy line with no disclosure while it streams without text, and the provider redaction notice.',
       },
     },
   },

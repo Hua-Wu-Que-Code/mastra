@@ -182,8 +182,8 @@ export const zh = {
   '-y\n@modelcontextprotocol/server': '-y\n@modelcontextprotocol/server',
   '. Calling a mocked tool with non-matching args fails the item; unmocked tools run live.':
     '。使用不匹配的参数调用模拟工具会使该项失败；未模拟的工具将实际运行。',
-  ". Its settings are defined in code on the Mastra instance and can't be edited here.":
-    '。其设置在 Mastra 实例的代码中定义，无法在此处编辑。',
+  ". Its settings are defined in code on the Altflow instance and can't be edited here.":
+    '。其设置在 Altflow 实例的代码中定义，无法在此处编辑。',
   '... and': '... 和',
   '... and {part0} more': '... 还有 {part0} 项',
   '.json files containing an array of items, up to': '包含项目数组的 .json 文件，最多',
@@ -239,7 +239,7 @@ export const zh = {
     '向此工作区添加文件系统或技能，即可在此处浏览其文件。',
   'Add a message to describe the changes in this version.': '添加一条消息来描述此版本中的更改。',
   'Add a skill': '添加技能',
-  'Add a workspace to your Mastra configuration to': '将工作区添加到您的 Mastra 配置以',
+  'Add a workspace to your Altflow configuration to': '将工作区添加到您的 Altflow 配置以',
   'Add an item': '添加项目',
   'Add another header': '添加另一个标头',
   'Add attachment': '添加附件',
@@ -269,8 +269,8 @@ export const zh = {
   'Add skill': '添加技能',
   'Add step': '添加步骤',
   'Add tag': '添加标签',
-  'Add the authorization header that Studio needs to reach your Mastra server.':
-    '添加 Studio 访问您的 Mastra 服务器所需的授权标头。',
+  'Add the authorization header that Altflow needs to reach your Altflow server.':
+    '添加 Altflow 访问您的 Altflow 服务器所需的授权标头。',
   'Add the full trace to a dataset': '将完整调用追踪添加到数据集',
   'Add this agent to your library to connect': '将此智能体添加到您的库以连接',
   'Add this agent to your library?': '将此智能体添加到您的库？',
@@ -464,8 +464,7 @@ export const zh = {
   'Avg duration': '平均持续时间',
   'Avg score': '平均得分',
   Back: '返回',
-  'Back to Mastra Studio': '返回 Mastra Studio',
-  'Back to Studio': '返回 Studio',
+  'Back to Altflow': '返回 Altflow',
   'Back to connections': '返回连接',
   'Back to dataset': '返回数据集',
   'Back to datasets': '返回数据集',
@@ -593,7 +592,7 @@ export const zh = {
   'Choose level': '选择级别',
   'Choose service names': '选择服务名称',
   'Choose tags': '选择标签',
-  'Choose the language used in Studio.': '选择 Studio 中使用的语言。',
+  'Choose the language used in Altflow.': '选择 Altflow 中使用的语言。',
   'Choose where each optional link appears. Changes save automatically in this browser.':
     '选择每个可选链接出现的位置。更改将在此浏览器中自动保存。',
   'Choose {value0}': '选择{value0}',
@@ -1027,8 +1026,8 @@ export const zh = {
   'Disconnected agent': '已断开智能体连接',
   'Disconnected {value0}': '已断开 {value0}',
   'Disconnecting agent': '正在断开智能体连接',
-  'Disconnecting revokes this authorized account and removes it from Mastra. Agents using this connection will lose access. This can’t be undone.':
-    '断开连接将撤销此已授权账户并将其从 Mastra 中移除。使用此连接的智能体将失去访问权限。此操作无法撤销。',
+  'Disconnecting revokes this authorized account and removes it from Altflow. Agents using this connection will lose access. This can’t be undone.':
+    '断开连接将撤销此已授权账户并将其从 Altflow 中移除。使用此连接的智能体将失去访问权限。此操作无法撤销。',
   'Disconnecting…': '正在断开连接…',
   'Dismiss notice': '关闭通知',
   'Dismiss notification': '关闭通知',
@@ -1128,8 +1127,8 @@ export const zh = {
   'Enabling tools:': '正在启用的工具：',
   End: '结束',
   'End voice call': '结束语音通话',
-  'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so studio sessions resolve to a resource key.':
-    '终端用户连接需要已认证的用户。请配置 server.auth 的 mapUserToResourceId，以便 Studio 会话解析到资源键。',
+  'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so Altflow sessions resolve to a resource key.':
+    '终端用户连接需要已认证的用户。请配置 server.auth 的 mapUserToResourceId，以便 Altflow 会话解析到资源键。',
   Ended: '已结束',
   'Ended at': '结束于',
   Endpoint: '端点',
@@ -1178,8 +1177,8 @@ export const zh = {
   'Est. cost': '预估成本',
   'Estimated cost': '预估成本',
   'Estimated model spend.': '预估模型支出。',
-  'Evaluating traces and saving them as dataset items is available in Mastra Studio (local or deployed).':
-    '在 Mastra Studio（本地或已部署）中可评估调用追踪并将其保存为数据集条目。',
+  'Evaluating traces and saving them as dataset items is available in Altflow (local or deployed).':
+    '在 Altflow（本地或已部署）中可评估调用追踪并将其保存为数据集条目。',
   Evaluation: '评估',
   'Evaluation scorer': '评估评分器',
   'Event {value0} data': '事件 {value0} 数据',
@@ -1310,7 +1309,7 @@ export const zh = {
   'Failed to load skills': '加载技能失败',
   'Failed to load spans': '加载 span 失败',
   'Failed to load storage capabilities': '加载存储能力失败',
-  'Failed to load studio': '加载工作室失败',
+  'Failed to load Altflow': '加载 Altflow 失败',
   'Failed to load the library': '加载库失败',
   'Failed to load the page': '加载页面失败',
   'Failed to load threads': '加载对话失败',
@@ -1828,18 +1827,18 @@ export const zh = {
   'Mark reviewed': '标记已审核',
   'Marked notification read': '已将通知标记为已读',
   'Marking notification read': '正在将通知标记为已读',
-  Mastra: 'Mastra',
-  'Mastra (built-in)': 'Mastra（内置）',
-  'Mastra (built-in) MCP server': 'Mastra（内置）MCP 服务器',
-  'Mastra APIs': 'Mastra API',
-  'Mastra Studio Search': 'Mastra Studio 搜索',
-  'Mastra configuration to manage files, skills, and enable semantic search.':
-    '用于管理文件、技能并启用语义搜索的 Mastra 配置。',
-  'Mastra connection': 'Mastra 连接',
-  'Mastra instance URL': 'Mastra 实例 URL',
-  'Mastra tools are not configured yet.': '尚未配置 Mastra 工具。',
-  'Mastra workflows are not configured yet.': '尚未配置 Mastra 工作流。',
-  'Mastra {part0}': 'Mastra {part0}',
+  Altflow: 'Altflow',
+  'Altflow (built-in)': 'Altflow（内置）',
+  'Altflow (built-in) MCP server': 'Altflow（内置）MCP 服务器',
+  'Altflow APIs': 'Altflow API',
+  'Altflow Search': 'Altflow 搜索',
+  'Altflow configuration to manage files, skills, and enable semantic search.':
+    '用于管理文件、技能并启用语义搜索的 Altflow 配置。',
+  'Altflow connection': 'Altflow 连接',
+  'Altflow instance URL': 'Altflow 实例 URL',
+  'Altflow tools are not configured yet.': '尚未配置 Altflow 工具。',
+  'Altflow workflows are not configured yet.': '尚未配置 Altflow 工作流。',
+  'Altflow {part0}': 'Altflow {part0}',
   'Match all or any': '匹配全部或任一',
   'Matches your search in this span’s details': '在此 span 的详情中匹配您的搜索',
   Max: '最大',
@@ -1891,8 +1890,8 @@ export const zh = {
   'Metrics are not persisted': '指标不会持久化',
   'Metrics documentation': '指标文档',
   'Metrics filters': '指标筛选器',
-  'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Mastra configuration.':
-    '指标需要 ClickHouse、DuckDB、Postgres v-next、Spanner 或内存存储才能实现可观测性。其他关系数据库（LibSQL、MSSQL）和文档存储（MongoDB）不支持指标收集。要在现有项目上启用指标，请在 Mastra 配置中切换可观测性存储。',
+  'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Altflow configuration.':
+    '指标需要 ClickHouse、DuckDB、Postgres v-next、Spanner 或内存存储才能实现可观测性。其他关系数据库（LibSQL、MSSQL）和文档存储（MongoDB）不支持指标收集。要在现有项目上启用指标，请在 Altflow 配置中切换可观测性存储。',
   Min: '最小值',
   'Minimal page to verify the ToolProvider backend. Pick a provider and toolkit, then connect.':
     '用于验证 ToolProvider 后端的最小页面。选择一个提供商和工具包，然后连接。',
@@ -2560,8 +2559,8 @@ export const zh = {
   'Refresh recording': '刷新录制',
   'Refreshed checkout': '已刷新检出',
   'Refreshing checkout': '正在刷新检出',
-  'Register one on your Mastra instance with the knowledge option to browse it here.':
-    '在 Mastra 实例上通过 knowledge 选项注册一个，即可在此处浏览。',
+  'Register one on your Altflow instance with the knowledge option to browse it here.':
+    '在 Altflow 实例上通过 knowledge 选项注册一个，即可在此处浏览。',
   'Registered by': '注册者',
   'Registered memory': '已注册记忆',
   'Registered via the dynamic-workflows API': '通过动态工作流 API 注册',
@@ -2657,7 +2656,7 @@ export const zh = {
   'Research Supervisor': '研究主管',
   'Research notes': '研究笔记',
   Reset: '重置',
-  'Reset Studio configuration': '重置 Studio 配置',
+  'Reset Altflow configuration': '重置 Altflow 配置',
   'Reset time range': '重置时间范围',
   'Reset to actual size (100%)': '重置为实际大小（100%）',
   'Reset to defaults': '重置为默认值',
@@ -2751,8 +2750,8 @@ export const zh = {
   'Run this experiment again with the same configuration': '使用相同配置再次运行此实验',
   'Run workflow': '运行工作流',
   Running: '正在运行',
-  'Running Mastra Studio locally? Deploy to the cloud so your team can collaborate.':
-    '正在本地运行 Mastra Studio？部署到云端，让你的团队可以协作。',
+  'Running Altflow locally? Deploy to the cloud so your team can collaborate.':
+    '正在本地运行 Altflow？部署到云端，让你的团队可以协作。',
   'Running browser code': '运行浏览器代码',
   'Running code': '运行代码中',
   'Running schedule': '正在运行计划',
@@ -2761,8 +2760,8 @@ export const zh = {
   'Running...': '正在运行...',
   'Running…': '运行中…',
   Runs: '运行',
-  'Runs as a step of its parent workflow. Add it to the workflows of your Mastra instance to open, run, and inspect it on its own page.':
-    '作为其父工作流的一个步骤运行。将其添加到 Mastra 实例的工作流中，即可在独立页面打开、运行和检查它。',
+  'Runs as a step of its parent workflow. Add it to the workflows of your Altflow instance to open, run, and inspect it on its own page.':
+    '作为其父工作流的一个步骤运行。将其添加到 Altflow 实例的工作流中，即可在独立页面打开、运行和检查它。',
   'Runs as a task when the client asks for one': '当客户端请求时作为任务运行',
   'Runs at': '运行于',
   'Runs for every item. All items finish before the workflow continues.':
@@ -2858,8 +2857,8 @@ export const zh = {
   Search: '搜索',
   'Search MCP servers': '搜索 MCP 服务器',
   'Search Results': '搜索结果',
-  'Search Studio routes and runtime entities': '搜索 Studio 路由和运行时实体',
-  'Search Studio, agents, workflows, tools, paths': '搜索 Studio、智能体、工作流、工具、路径',
+  'Search Altflow routes and runtime entities': '搜索 Altflow 路由和运行时实体',
+  'Search Altflow, agents, workflows, tools, paths': '搜索 Altflow、智能体、工作流、工具、路径',
   'Search agents': '搜索智能体',
   'Search and install skills from the community registry': '从社区注册表搜索并安装技能',
   'Search and navigate': '搜索并导航',
@@ -3089,7 +3088,7 @@ export const zh = {
   'Showing {value0} of {value1} rows': '显示 {value0} 行，共 {value1} 行',
   Sidebar: '侧边栏',
   'Sign in': '登录',
-  'Sign in to Mastra Studio': '登录 Mastra Studio',
+  'Sign in to Altflow': '登录 Altflow',
   'Sign in to continue': '登录以继续',
   'Sign out': '退出登录',
   'Sign up': '注册',
@@ -3216,15 +3215,14 @@ export const zh = {
   String: '字符串',
   'Structured content (format 2 with parts)': '结构化内容（格式 2，带部分）',
   'Structured output (if any)': '结构化输出（如有）',
-  Studio: 'Studio',
-  "Studio can't answer a": 'Studio 无法回答',
-  "Studio can't answer a {part0} request.": 'Studio 无法响应 {part0} 请求。',
-  "Studio can't answer a {part0} request; the client that started the task has to.":
-    'Studio 无法响应 {part0} 请求；必须由启动该任务的客户端来响应。',
-  'Studio could not display this workflow graph.': 'Studio 无法显示此工作流图。',
-  'Studio layout': 'Studio 布局',
-  'Studio path': 'Studio 路径',
-  'Studio search': 'Studio 搜索',
+  "Altflow can't answer a": 'Altflow 无法回答',
+  "Altflow can't answer a {part0} request.": 'Altflow 无法响应 {part0} 请求。',
+  "Altflow can't answer a {part0} request; the client that started the task has to.":
+    'Altflow 无法响应 {part0} 请求；必须由启动该任务的客户端来响应。',
+  'Altflow could not display this workflow graph.': 'Altflow 无法显示此工作流图。',
+  'Altflow layout': 'Altflow 布局',
+  'Altflow path': 'Altflow 路径',
+  'Altflow search': 'Altflow 搜索',
   'Sub-Agents': '子智能体',
   'Sub-agents': '子智能体',
   Submit: '提交',
@@ -3292,8 +3290,8 @@ export const zh = {
   'Text preview': '文本预览',
   'Text response': '文本回复',
   The: '该',
-  'The Mastra instance the studio talks to, the path in front of its API routes, and the headers sent with every request.':
-    'Studio 所连接的 Mastra 实例、其 API 路由前的路径，以及每个请求发送的标头。',
+  'The Altflow instance the Altflow talks to, the path in front of its API routes, and the headers sent with every request.':
+    'Altflow 所连接的 Altflow 实例、其 API 路由前的路径，以及每个请求发送的标头。',
   'The audio could not be played. Refresh the recording to get a new playback link.':
     '音频无法播放。刷新录音以获取新的播放链接。',
   'The built-in MCP server is enabled, but it needs the': '内置 MCP 服务器已启用，但需要',
@@ -3301,8 +3299,8 @@ export const zh = {
     '内置 MCP 服务器已启用，但需要 {part0} 包。请安装并重启服务器。',
   'The built-in MCP server is turned off because': '内置 MCP 服务器已关闭，因为',
   'The built-in MCP server only runs under': '内置 MCP 服务器仅在以下环境运行',
-  'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Studio.':
-    '所配置的可观测性存储提供程序不支持列出日志。请切换到支持日志的存储提供程序，以在 Studio 中查看运行时日志。',
+  'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Altflow.':
+    '所配置的可观测性存储提供程序不支持列出日志。请切换到支持日志的存储提供程序，以在 Altflow 中查看运行时日志。',
   "The dataset's default scorers.": '数据集的默认评分器。',
   'The expected answer scorers compare against. JSON or plain text.': '评分器用于对比的预期答案。JSON 或纯文本。',
   'The expected args of {value0} must be a JSON object': '{value0} 的预期参数必须是 JSON 对象',
@@ -3315,10 +3313,10 @@ export const zh = {
   "The notes that make this mention aren't in the first page of notes. Open": '构成此提及的笔记不在第一页笔记中。打开',
   "The notes that make this mention aren't in the first page of notes. Open {part0} to read them all.":
     '构成此提及的笔记不在笔记第一页中。打开 {part0} 以阅读全部内容。',
-  'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Studio.':
-    '可观测性存储域已禁用或未配置。请在存储配置中启用它，以便在 Studio 中查看日志。',
+  'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Altflow.':
+    '可观测性存储域已禁用或未配置。请在存储配置中启用它，以便在 Altflow 中查看日志。',
   'The requested entity is unavailable in this project.': '此项目中无法使用所请求的实体。',
-  'The server this studio talks to.': '此 Studio 所连接的服务器。',
+  'The server Altflow connects to.': '此 Altflow 所连接的服务器。',
   'The step is asking': '该步骤正在询问',
   'The steps the target should take to produce its answer.': '目标为得出答案应采取的步骤。',
   'The tone the user expressed during the interaction.': '用户在交互过程中表达的语气。',
@@ -3352,13 +3350,13 @@ export const zh = {
   'This agent may have been renamed or removed. Reload to check again, or choose another agent.':
     '此智能体可能已被重命名或移除。请重新加载以再次检查，或选择其他智能体。',
   'This block is skipped at runtime until it is published.': '此块在发布前会在运行时被跳过。',
-  'This code-defined agent has disabled Studio editing.': '此代码定义的智能体已禁用 Studio 编辑。',
-  'This code-defined agent has disabled instructions editing from Studio. Update the agent definition in code to change its instructions.':
-    '此代码定义的智能体已禁用从 Studio 编辑指令。请在代码中更新智能体定义以更改其指令。',
-  'This code-defined agent has disabled tools editing from Studio. Update the agent definition in code to change its tools.':
-    '此代码定义的智能体已禁用从 Studio 编辑工具。请在代码中更新智能体定义以更改其工具。',
-  'This code-defined agent only allows editing tool descriptions from Studio. Update the agent definition in code to add or remove tools.':
-    '此代码定义的智能体仅允许从 Studio 编辑工具描述。请在代码中更新智能体定义以添加或移除工具。',
+  'This code-defined agent has disabled Altflow editing.': '此代码定义的智能体已禁用 Altflow 编辑。',
+  'This code-defined agent has disabled instructions editing from Altflow. Update the agent definition in code to change its instructions.':
+    '此代码定义的智能体已禁用从 Altflow 编辑指令。请在代码中更新智能体定义以更改其指令。',
+  'This code-defined agent has disabled tools editing from Altflow. Update the agent definition in code to change its tools.':
+    '此代码定义的智能体已禁用从 Altflow 编辑工具。请在代码中更新智能体定义以更改其工具。',
+  'This code-defined agent only allows editing tool descriptions from Altflow. Update the agent definition in code to add or remove tools.':
+    '此代码定义的智能体仅允许从 Altflow 编辑工具描述。请在代码中更新智能体定义以添加或移除工具。',
   "This dashboard can't be shown. {value0}": '无法显示此仪表板。{value0}',
   'This ensures safe installation with easy rollback if needed. Your main branch remains unchanged.':
     '这可以确保安全安装，并在需要时轻松回滚。你的主分支保持不变。',
@@ -3366,7 +3364,8 @@ export const zh = {
   'This filter is locked': '此筛选器已锁定',
   'This is a previous version': '这是之前的版本',
   'This may take some time...': '这可能需要一些时间……',
-  'This model list is dynamically set and cannot be edited in Studio.': '此模型列表为动态设置，无法在 Studio 中编辑。',
+  'This model list is dynamically set and cannot be edited in Altflow.':
+    '此模型列表为动态设置，无法在 Altflow 中编辑。',
   'This model will be used by the workflow to process and install the template': '工作流将使用此模型来处理和安装模板',
   'This permanently deletes "': '这将永久删除“',
   'This permanently deletes this feedback comment. This action cannot be undone.':
@@ -3382,8 +3381,8 @@ export const zh = {
   'This theme has no data in the selected snapshot.': '此主题在所选快照中没有数据。',
   'This theme is not present in the selected snapshot. Use the clear filter action above to return to the full flow.':
     '此主题不在所选快照中。请使用上方的清除筛选操作返回完整流程。',
-  'This tool asked for more input, which Studio cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an':
-    '此工具请求了更多输入，而 Studio 无法提供。下方的挂起负载显示了它所需的内容。请从 MCP 客户端调用它，并附带',
+  'This tool asked for more input, which Altflow cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an':
+    '此工具请求了更多输入，而 Altflow 无法提供。下方的挂起负载显示了它所需的内容。请从 MCP 客户端调用它，并附带',
   'This tool takes no input.': '此工具不接受输入。',
   'This tool takes no input. Run it as is.': '此工具不接受输入。直接运行即可。',
   'This trace was flagged as degenerate or looping.': '此调用追踪被标记为退化或循环。',
@@ -3416,7 +3415,7 @@ export const zh = {
   Timing: '计时',
   'Timing unavailable': '计时不可用',
   Title: '标题',
-  'To edit the system prompt in Studio, add': '如需在 Studio 中编辑系统提示，请添加',
+  'To edit the system prompt in Altflow, add': '如需在 Altflow 中编辑系统提示，请添加',
   'Toggle columns': '切换列',
   'Toggle sidebar': '切换侧边栏',
   'Token Limit Exceeded': '超出 Token 限制',
@@ -4190,7 +4189,7 @@ export const zh = {
   'selected options': '选择了选项',
   'selected)': '已选择)',
   send_email: 'send_email',
-  'sent more than Studio can show here.': '发送的内容超出 Studio 可显示范围。',
+  'sent more than Altflow can show here.': '发送的内容超出 Altflow 可显示范围。',
   'shared budget)': '共享预算）',
   signal: '信号',
   signals: '信号',
@@ -4330,7 +4329,7 @@ export const zh = {
   '{part0} paid from credits': '{part0} 已从积分中支付',
   '{part0} row {part1} will be skipped': '{part0} 行 {part1} 将被跳过',
   '{part0} rows will be imported': '将导入 {part0} 行',
-  '{part0} sent more than Studio can show here.': '{part0} 发送的内容超出了 Studio 可在此显示的范围。',
+  '{part0} sent more than Altflow can show here.': '{part0} 发送的内容超出了 Altflow 可在此显示的范围。',
   '{part0} tokens': '{part0} 个令牌',
   '{part0} vs previous': '{part0} 与之前相比',
   '{part0} {part1}, {part2} errors': '{part0} {part1}，{part2} 个错误',

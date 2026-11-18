@@ -9,7 +9,7 @@ export function RegisteredMemoryNotice({ memoryId }: { memoryId: string }) {
       <Notice.Message>
         {studioT('Uses registered memory') + ' '}
         <InlineCode>{memoryId}</InlineCode>
-        {studioT(". Its settings are defined in code on the Mastra instance and can't be edited here.")}
+        {studioT(". Its settings are defined in code on the Altflow instance and can't be edited here.")}
       </Notice.Message>
     </Notice>
   );

@@ -41,7 +41,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'One approval component for Factory and Studio. ToolApproval frames a standalone request in the shared activity layout with the tool argument preview. Tools that already have their own activity compose the parts instead: ToolApprovalStatus beside the tool name, ToolApprovalActions in the details. Pending requests stay expanded; a decision removes the actions and the status stays visible when Studio details are collapsed. Consumers own requests, errors, and status (including optimistic updates and rollback). Studio integration examples below use the real tool badge and routing provider with callback spies; transport behavior is covered by application tests.',
+          'One approval component for Factory and Altflow. ToolApproval frames a standalone request in the shared activity layout with the tool argument preview. Tools that already have their own activity compose the parts instead: ToolApprovalStatus beside the tool name, ToolApprovalActions in the details. Pending requests stay expanded; a decision removes the actions and the status stays visible when Altflow details are collapsed. Consumers own requests, errors, and status (including optimistic updates and rollback). Altflow integration examples below use the real tool badge and routing provider with callback spies; transport behavior is covered by application tests.',
       },
     },
   },
@@ -173,7 +173,7 @@ function StudioApproval({
 }
 
 export const EmbeddedInToolDetails: Story = {
-  name: 'Embedded in tool details (Studio)',
+  name: 'Embedded in tool details (Altflow)',
   render: args => <StudioApproval {...args} />,
   play: async context => {
     const canvas = within(context.canvasElement);

@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Real Studio text renderer at fixed points in a response. Studio and Factory consumer tests cover message ordering and reveal pacing.',
+          'Real Altflow text renderer at fixed points in a response. Altflow and Factory consumer tests cover message ordering and reveal pacing.',
       },
     },
   },

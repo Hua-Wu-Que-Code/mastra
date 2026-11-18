@@ -1,5 +1,5 @@
 export const productNames = {
-  studio: 'Studio',
+  studio: 'Altflow',
   server: 'Server',
   observability: 'Observability',
   factory: 'Factory',

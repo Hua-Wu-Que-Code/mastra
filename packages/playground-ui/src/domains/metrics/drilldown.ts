@@ -91,9 +91,9 @@ type BuildArgs = {
   dashboardFilter: MetricsDimensionalFilter;
   /** Per-card scoping applied on top of dashboard filters. */
   scope: DrilldownScope;
-  /** Override the Traces page base path. Defaults to `/traces` (mastra Studio). */
+  /** Override the Traces page base path. Defaults to `/traces` (Altflow). */
   tracesBasePath?: string;
-  /** Override the Logs page base path. Defaults to `/logs` (mastra Studio). */
+  /** Override the Logs page base path. Defaults to `/logs` (Altflow). */
   logsBasePath?: string;
 };
 

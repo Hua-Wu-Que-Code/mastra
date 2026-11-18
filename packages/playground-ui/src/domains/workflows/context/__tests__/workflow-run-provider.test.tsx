@@ -410,7 +410,7 @@ describe('WorkflowRunProvider', () => {
     });
   });
 
-  describe('when a run resumed outside Studio is observed', () => {
+  describe('when a run resumed outside Altflow is observed', () => {
     it('keeps the stored running state instead of the replayed suspension', async () => {
       const runId = completedLoop.runId;
       const start: StreamVNextChunkType = { ...runningChunk, runId };

@@ -97,7 +97,7 @@ const values: unknown[] = [
 ];
 
 describe('jsonSchemaToZodRuntime', () => {
-  describe('when given the schemas Studio receives', () => {
+  describe('when given the schemas Altflow receives', () => {
     it.each(Object.entries(schemas))(
       'accepts and rejects the same values as the evaluated schema for %s',
       (_name, jsonSchema) => {
@@ -170,7 +170,7 @@ describe('jsonSchemaToZodRuntime', () => {
   });
 
   describe('when building the schema', () => {
-    it('never compiles a string, so Studio does not need unsafe-eval', () => {
+    it('never compiles a string, so Altflow does not need unsafe-eval', () => {
       const originalFunction = globalThis.Function;
       const calls: unknown[] = [];
       // @ts-expect-error deliberately replacing the constructor for the assertion

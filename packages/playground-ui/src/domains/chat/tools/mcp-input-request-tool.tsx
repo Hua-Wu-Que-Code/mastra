@@ -158,7 +158,7 @@ export function McpInputRequestTool({
         {tooLarge ? (
           <>
             <Txt tone="muted">
-              <Trans id="{part0} sent more than Studio can show here." values={{ part0: payload.serverName }} />
+              <Trans id="{part0} sent more than Altflow can show here." values={{ part0: payload.serverName }} />
             </Txt>
             {!readOnly && (
               <div className="flex gap-2">
@@ -261,7 +261,7 @@ function InputRequest({
       ) : (
         <>
           <Txt tone="muted">
-            <Trans id="Studio can't answer a {part0} request." values={{ part0: request.method }} />
+            <Trans id="Altflow can't answer a {part0} request." values={{ part0: request.method }} />
           </Txt>
           <CodeEditor data={{ ...request }} />
           <div className="flex gap-2">{cancel}</div>

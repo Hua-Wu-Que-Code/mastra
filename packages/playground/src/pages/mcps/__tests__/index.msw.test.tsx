@@ -20,7 +20,7 @@ import { TestLinkProvider } from '@/test/link-provider';
 import { server } from '@/test/msw-server';
 import { renderWithProviders, TEST_BASE_URL } from '@/test/render';
 
-const CARD_NAME = 'Mastra (built-in) MCP server';
+const CARD_NAME = 'Altflow (built-in) MCP server';
 const DESCRIPTOR_ERROR = "Couldn't load the built-in MCP server. Try reloading the page.";
 
 const useServers = ({
@@ -201,7 +201,7 @@ describe('MCP servers page — built-in Mastra server', () => {
     });
   });
 
-  describe('when the Studio server URL is configured with a trailing slash', () => {
+  describe('when the Altflow server URL is configured with a trailing slash', () => {
     it('joins the endpoint and snippets with a single slash', async () => {
       useServers({ builtin: openDevServer });
       renderPage({ baseUrl: `${TEST_BASE_URL}/` });

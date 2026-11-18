@@ -6,7 +6,7 @@ import { WorkflowConditionCard } from '../cards/condition/workflow-condition-car
 afterEach(cleanup);
 
 describe('WorkflowConditionCard', () => {
-  describe('when used without Studio providers', () => {
+  describe('when used without Altflow providers', () => {
     it('shows the supplied expression inline with a copy action', () => {
       render(<WorkflowConditionCard conditions={[{ type: 'when', fnString: 'input.approved' }]} />);
 

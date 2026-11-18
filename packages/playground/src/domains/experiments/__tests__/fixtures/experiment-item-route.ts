@@ -63,7 +63,7 @@ export const experimentSpanDetailById: Record<string, GetSpanResponse> = {
     span: { ...experimentTraceRootSpan, input: { q: 'first question' }, output: { a: 'first answer' } },
   },
   [experimentTraceChildSpan.spanId]: {
-    span: { ...experimentTraceChildSpan, input: { query: 'Mastra' }, output: { found: true } },
+    span: { ...experimentTraceChildSpan, input: { query: 'Altflow' }, output: { found: true } },
   },
 };
 

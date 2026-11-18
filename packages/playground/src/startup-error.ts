@@ -28,13 +28,13 @@ export function renderStartupError(
     'min-height:100vh;background:#0b0d10;color:#f4f4f5;font-family:"Mona Sans Variable",ui-sans-serif,system-ui,sans-serif;padding:32px;box-sizing:border-box;';
 
   const title = document.createElement('h1');
-  title.textContent = 'Mastra Studio failed to start';
+  title.textContent = 'Altflow failed to start';
   title.style.cssText = 'font-size:20px;line-height:1.4;margin:0 0 8px;';
 
   const detail = document.createElement('p');
   detail.textContent = showDetails
     ? 'The startup module failed before React could render. Check the Vite terminal and browser console for the original request details.'
-    : 'The startup module failed before React could render. Run Studio in development mode to view detailed diagnostics.';
+    : 'The startup module failed before React could render. Run Altflow in development mode to view detailed diagnostics.';
   detail.style.cssText = 'color:#a1a1aa;max-width:760px;margin:0 0 20px;line-height:1.6;';
 
   wrapper.append(title, detail);

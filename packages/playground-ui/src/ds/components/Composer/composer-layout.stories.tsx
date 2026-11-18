@@ -134,7 +134,7 @@ const meta: Meta<typeof LayoutStory> = {
     docs: {
       description: {
         component:
-          'Shared composer layout for Studio and Factory: a right-aligned status row above the composer, an overlay header that never moves the transcript, the "+" attach menu on the left, and model, voice and the primary Send on the right. The model picker holds the thinking level and a link to connect a provider, and opens as a popover, or as a bottom sheet on small screens.',
+          'Shared composer layout for Altflow and Factory: a right-aligned status row above the composer, an overlay header that never moves the transcript, the "+" attach menu on the left, and model, voice and the primary Send on the right. The model picker holds the thinking level and a link to connect a provider, and opens as a popover, or as a bottom sheet on small screens.',
       },
     },
   },

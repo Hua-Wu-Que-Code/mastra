@@ -55,7 +55,7 @@ function getRouteValue(item: NavItem, sectionTitle?: string) {
 }
 
 function getRouteBadge(sectionTitle?: string) {
-  if (!sectionTitle || sectionTitle === 'Studio') return 'Path';
+  if (!sectionTitle || sectionTitle === 'Altflow') return 'Path';
   return sectionTitle;
 }
 
@@ -144,7 +144,7 @@ const CommandResults = ({
         }}
         icon={<IconSidebarSimpleLeftWide />}
         title={studioT('Toggle sidebar')}
-        subtitle={studioT('Studio layout')}
+        subtitle={studioT('Altflow layout')}
       />
     </CommandGroup>
   );
@@ -171,7 +171,7 @@ const PathSectionResults = ({
                 onSelect={() => handleSelect(item.url)}
                 icon={<Icon />}
                 title={item.name}
-                subtitle={studioT('Studio path')}
+                subtitle={studioT('Altflow path')}
                 path={item.url}
                 badge={getRouteBadge(section.title)}
               />
@@ -546,7 +546,7 @@ export const NavigationCommand = () => {
     ];
 
     if (studioItems.length === 0) return sections;
-    return [...sections, { key: 'studio', title: studioT('Studio'), items: studioItems }];
+    return [...sections, { key: 'studio', title: studioT('Altflow'), items: studioItems }];
   }, [filterNavItem, isMastraPlatform, studioLocale]);
 
   const pathCount = navigationSections.reduce((count, section) => count + section.items.length, 0);
@@ -565,7 +565,7 @@ export const NavigationCommand = () => {
     { id: 'tooling', label: studioT('Tooling'), icon: <IconLayersThree />, count: toolingCount },
     { id: 'evaluation', label: studioT('Evaluation'), icon: <IconGauge />, count: evaluationCount },
     { id: 'observability', label: studioT('Intelligence'), icon: <IconEyeOpen />, count: observabilityCount },
-    { id: 'settings', label: studioT('Studio'), icon: <IconSettingsSliderHor />, count: settingsCount },
+    { id: 'settings', label: studioT('Altflow'), icon: <IconSettingsSliderHor />, count: settingsCount },
   ];
 
   const showPaths = activeScope === 'all' || activeScope === 'paths';
@@ -598,15 +598,15 @@ export const NavigationCommand = () => {
     <CommandPaletteDialog
       open={open}
       onOpenChange={updateOpen}
-      title={studioT('Mastra Studio Search')}
-      description={studioT('Search Studio routes and runtime entities')}
+      title={studioT('Altflow Search')}
+      description={studioT('Search Altflow routes and runtime entities')}
     >
-      <CommandPaletteInput placeholder={studioT('Search Studio, agents, workflows, tools, paths')} />
+      <CommandPaletteInput placeholder={studioT('Search Altflow, agents, workflows, tools, paths')} />
       <CommandPaletteBody>
         <CommandRail scopeOptions={scopeOptions} activeScope={activeScope} onScopeChange={setActiveScope} />
         <CommandPaletteResults
           aria-label={studioT('Search results')}
-          footer={<CommandPaletteFooter label={studioT('Studio search')} />}
+          footer={<CommandPaletteFooter label={studioT('Altflow search')} />}
         >
           <CommandEmpty>{studioT('No matching results.')}</CommandEmpty>
           <CommandResults sidebar={sidebar} activeScope={activeScope} closeCommand={closeCommand} />

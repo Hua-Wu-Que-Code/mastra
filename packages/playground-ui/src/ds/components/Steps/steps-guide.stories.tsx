@@ -71,7 +71,7 @@ export const InProgress: Story = {
 export const ConditionalSteps: Story = {
   render: () => (
     <Steps>
-      <Steps.Step title="Deploy Studio" />
+      <Steps.Step title="Deploy Altflow" />
       {false ? <Steps.Step title="Skipped step" /> : null}
       <Steps.Step title="Deploy the server" description="Numbers follow the steps that render." />
     </Steps>

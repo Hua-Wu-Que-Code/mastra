@@ -167,7 +167,9 @@ export default function KnowledgePage() {
         <EmptyState
           variant="fill"
           titleSlot={studioT('No Knowledge instances')}
-          descriptionSlot={studioT('Register one on your Mastra instance with the knowledge option to browse it here.')}
+          descriptionSlot={studioT(
+            'Register one on your Altflow instance with the knowledge option to browse it here.',
+          )}
         />
       </Shell>
     );

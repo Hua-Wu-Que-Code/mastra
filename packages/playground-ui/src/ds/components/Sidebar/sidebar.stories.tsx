@@ -127,7 +127,7 @@ function SidebarStory({ header = 'default', version, variant = 'default' }: Side
                 logo={<LogoWithoutText className="size-6" />}
                 title={
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="truncate">Mastra</span>
+                    <span className="truncate">Altflow</span>
                     <Sidebar.Badge>Beta</Sidebar.Badge>
                   </span>
                 }
@@ -270,7 +270,7 @@ function SidebarStory({ header = 'default', version, variant = 'default' }: Side
                 Settings
               </DropdownMenu.Item>
               <DropdownMenu.Separator />
-              <div className="px-2 py-1 text-meta text-muted-foreground">Mastra</div>
+              <div className="px-2 py-1 text-meta text-muted-foreground">Altflow</div>
               <DropdownMenu.Item>
                 <IconUserDuo />
                 Organization settings

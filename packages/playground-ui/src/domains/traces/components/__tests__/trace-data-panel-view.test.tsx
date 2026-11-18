@@ -526,19 +526,19 @@ describe('TraceDataPanelView — the actions row', () => {
   it('explains where the missing actions live, when asked to', () => {
     render(<TraceDataPanelView {...baseProps} />);
 
-    expect(screen.getByText(/available in Mastra Studio/)).toBeTruthy();
+    expect(screen.getByText(/available in Altflow/)).toBeTruthy();
   });
 
   it('stays quiet about them when the caller asks it to', () => {
     render(<TraceDataPanelView {...baseProps} showUnavailableFeaturesMsg={false} />);
 
-    expect(screen.queryByText(/available in Mastra Studio/)).toBeNull();
+    expect(screen.queryByText(/available in Altflow/)).toBeNull();
   });
 
   it('drops the explanation as soon as any one action is available', () => {
     render(<TraceDataPanelView {...baseProps} onEvaluateTrace={vi.fn()} />);
 
-    expect(screen.queryByText(/available in Mastra Studio/)).toBeNull();
+    expect(screen.queryByText(/available in Altflow/)).toBeNull();
     expect(screen.getByRole('button', { name: /score trace/i })).toBeTruthy();
   });
 
@@ -546,7 +546,7 @@ describe('TraceDataPanelView — the actions row', () => {
     render(<TraceDataPanelView {...baseProps} placement="trace-page" onEvaluateTrace={vi.fn()} />);
 
     expect(screen.getByRole('button', { name: /score trace/i })).toBeTruthy();
-    expect(screen.queryByText(/available in Mastra Studio/)).toBeNull();
+    expect(screen.queryByText(/available in Altflow/)).toBeNull();
   });
 
   it('saves the dataset item against the root span it found', () => {

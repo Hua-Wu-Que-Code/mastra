@@ -7,7 +7,7 @@ describe('SettingsLayout', () => {
     const output = renderToStaticMarkup(
       <SettingsLayout
         title="Project settings"
-        titleAccessory={<span>Studio</span>}
+        titleAccessory={<span>Altflow</span>}
         action={<button type="button">Save</button>}
       >
         <section>General settings</section>
@@ -16,7 +16,7 @@ describe('SettingsLayout', () => {
 
     expect(output).toContain('<h1');
     expect(output).toContain('Project settings');
-    expect(output).toContain('<span>Studio</span>');
+    expect(output).toContain('<span>Altflow</span>');
     expect(output).toContain('<button type="button">Save</button>');
     expect(output).toContain('data-slot="settings-layout-content"');
     expect(output).toContain('General settings');

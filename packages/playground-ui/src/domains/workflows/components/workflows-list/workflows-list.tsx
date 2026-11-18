@@ -340,7 +340,7 @@ export function WorkflowsList({
                       </TooltipTrigger>
                       <TooltipContent className="max-w-72">
                         {studioT(
-                          'Runs as a step of its parent workflow. Add it to the workflows of your Mastra instance to open, run, and inspect it on its own page.',
+                          'Runs as a step of its parent workflow. Add it to the workflows of your Altflow instance to open, run, and inspect it on its own page.',
                         )}
                       </TooltipContent>
                     </Tooltip>

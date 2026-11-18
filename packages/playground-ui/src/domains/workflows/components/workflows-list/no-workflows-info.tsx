@@ -10,7 +10,7 @@ export const NoWorkflowsInfo = () => {
       titleSlot={studioT('No Workflows yet')}
       descriptionSlot={
         <>
-          {studioT('Mastra workflows are not configured yet.') + ' '}
+          {studioT('Altflow workflows are not configured yet.') + ' '}
           <br />
           {studioT('More information in the documentation.')}
         </>

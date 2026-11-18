@@ -192,7 +192,7 @@ describe('AuthRequired', () => {
 
     // The header form has no platform carve-out: a header-only auth provider
     // deadlocks the same way on Mastra platform, so the form must show there too.
-    describe('when Studio runs on Mastra platform', () => {
+    describe('when Altflow runs on Mastra platform', () => {
       it('shows the header form on the blocked screen', async () => {
         window.MASTRA_CLOUD_API_ENDPOINT = 'https://api.mastra.ai';
         useNoLoginMethodHandler();

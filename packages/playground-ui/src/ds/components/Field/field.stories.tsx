@@ -25,7 +25,7 @@ export const Default: Story = {
     <Field>
       <FieldLabel required>Email</FieldLabel>
       <Input type="email" placeholder="ada@example.com" />
-      <FieldDescription>Used to sign in to Studio.</FieldDescription>
+      <FieldDescription>Used to sign in to Altflow.</FieldDescription>
     </Field>
   ),
 };

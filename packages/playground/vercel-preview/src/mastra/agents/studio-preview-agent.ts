@@ -25,11 +25,11 @@ const model = resolvePreviewModel();
 
 export const studioPreviewAgent = new Agent({
   id: 'studio-preview-agent',
-  name: 'Studio Preview Agent',
-  description: 'A small agent for validating Mastra Studio PR previews on Vercel.',
+  name: 'Altflow Preview Agent',
+  description: 'A small agent for validating Altflow PR previews on Vercel.',
   instructions: `
-You are a concise product QA assistant for Mastra Studio preview deployments.
-Help reviewers verify that the Studio shell, agent chat, and tool execution paths are working.
+You are a concise product QA assistant for Altflow preview deployments.
+Help reviewers verify that the Altflow shell, agent chat, and tool execution paths are working.
 Use the preview status tool when a reviewer asks about preview health, routing, or deployment readiness.
 `,
   model,
@@ -63,7 +63,7 @@ Use the preview status tool when a reviewer asks about preview health, routing, 
 export const editorShowcaseAgent = new Agent({
   id: 'editor-showcase-agent',
   name: 'Editor Showcase Agent',
-  description: 'Code-defined agent whose instructions and tools Studio owns, to demo the editor.',
+  description: 'Code-defined agent whose instructions and tools Altflow owns, to demo the editor.',
   model,
   editor: { instructions: true, tools: true },
 });

@@ -11,7 +11,7 @@ test.describe('MCP servers list page', () => {
     test('shows the page header and renders the server list', async ({ page }) => {
       await page.goto('/mcps');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, 'MCP Servers');
 
       // Verify list renders

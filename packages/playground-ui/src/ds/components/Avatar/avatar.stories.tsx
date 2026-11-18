@@ -93,7 +93,7 @@ export const WithOrganization: Story = {
         <Avatar.Image src={people.alex.src} alt={people.alex.name} />
         <Avatar.Fallback>{people.alex.initials}</Avatar.Fallback>
         <Avatar.Badge>
-          <Avatar name="Mastra" src={mastraLogo} />
+          <Avatar name="Altflow" src={mastraLogo} />
         </Avatar.Badge>
       </Avatar>
       <Avatar size="md">
@@ -182,7 +182,7 @@ export const OnSurfaces: Story = {
             <Avatar.Image src={people.alex.src} alt={people.alex.name} />
             <Avatar.Fallback>{people.alex.initials}</Avatar.Fallback>
             <Avatar.Badge>
-              <Avatar name="Mastra" src={mastraLogo} />
+              <Avatar name="Altflow" src={mastraLogo} />
             </Avatar.Badge>
           </Avatar>
           <span className="text-caption text-muted-foreground">{label}</span>

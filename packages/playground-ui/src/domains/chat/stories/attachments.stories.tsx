@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Studio and Factory share message attachment previews. Image sources can be raw base64, data URLs, or remote URLs. Text files keep their names and readable content after reload; provider-only URIs remain file chips. Open previews with the keyboard; Escape closes the dialog.',
+          'Altflow and Factory share message attachment previews. Image sources can be raw base64, data URLs, or remote URLs. Text files keep their names and readable content after reload; provider-only URIs remain file chips. Open previews with the keyboard; Escape closes the dialog.',
       },
     },
   },

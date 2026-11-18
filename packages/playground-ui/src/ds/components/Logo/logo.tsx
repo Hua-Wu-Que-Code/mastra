@@ -30,7 +30,7 @@ function Logo({
   className,
   size = 'md',
   animateOnHover = false,
-  'aria-label': ariaLabel = studioT('Mastra'),
+  'aria-label': ariaLabel = studioT('Altflow'),
 }: LogoProps) {
   useLocale();
   const reactId = useId();

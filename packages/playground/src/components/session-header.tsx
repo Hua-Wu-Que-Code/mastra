@@ -7,7 +7,7 @@ export const SessionHeader = () => {
     <Header>
       <HeaderTitle>
         <LogoWithoutText className="h-5 w-8 shrink-0" />
-        Mastra Studio
+        Altflow
         <AuthStatus />
       </HeaderTitle>
     </Header>

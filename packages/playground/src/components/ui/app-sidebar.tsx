@@ -121,7 +121,7 @@ export function AppSidebar() {
         collapsedLogo={<LogoWithoutText className="size-6" />}
         actions={!account && isUserAuthenticated && <AuthStatus />}
       >
-        <Sidebar.Brand logo={<LogoWithoutText className="size-6" />} title="Mastra Studio" />
+        <Sidebar.Brand logo={<LogoWithoutText className="size-6" />} title="Altflow" />
         {!isMobile && (
           <Sidebar.SearchTrigger
             aria-label={studioT('Search and navigate')}

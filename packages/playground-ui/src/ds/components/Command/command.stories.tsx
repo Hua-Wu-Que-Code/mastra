@@ -132,7 +132,7 @@ export const InlineVercelStyle: Story = {
             <InlineResult
               icon={<IconSettingsGear5 className="size-3.5" />}
               title="Settings"
-              subtitle="Mastra"
+              subtitle="Altflow"
               value="settings mastra account billing"
             />
             <InlineResult

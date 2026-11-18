@@ -115,7 +115,7 @@ export function McpAppViewer({
   // hostInfo MUST be memoized — it is a dependency of the bridge creation effect
   // in AppRenderer. A new object reference triggers bridge recreation → sandbox
   // timeout → toolInput never delivered.
-  const hostInfo = useMemo(() => ({ name: 'Mastra Studio', version: '1.0.0' }), []);
+  const hostInfo = useMemo(() => ({ name: 'Altflow', version: '1.0.0' }), []);
   // Advertise only what this viewer handles; apps feature-detect these before calling.
   // Memoized for the same reason as hostInfo.
   const canCallTools = Boolean(onToolCall);
@@ -209,7 +209,7 @@ export function McpAppViewer({
     const protocol = URL.canParse(params.url) ? new URL(params.url).protocol : undefined;
     // Anything else (javascript:, data:, file:, ...) would run code or read local files, not open a page.
     if (protocol !== 'http:' && protocol !== 'https:') {
-      throw new McpError(ErrorCode.InvalidParams, 'Studio only opens http and https links from MCP Apps');
+      throw new McpError(ErrorCode.InvalidParams, 'Altflow only opens http and https links from MCP Apps');
     }
     window.open(params.url, '_blank', 'noopener,noreferrer');
     return {};

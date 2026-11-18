@@ -12,7 +12,7 @@ export const WorkspaceNotConfigured = () => {
         <>
           {studioT('No workspace is configured. Add a workspace to your') + ' '}
           <br />
-          {studioT('Mastra configuration to manage files, skills, and enable semantic search.')}
+          {studioT('Altflow configuration to manage files, skills, and enable semantic search.')}
         </>
       }
       actionSlot={

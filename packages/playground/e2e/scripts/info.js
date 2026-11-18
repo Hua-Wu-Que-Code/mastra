@@ -1,5 +1,5 @@
 console.log(`---------------------------------------------------------------------------------
-✅ E2E Tests For Studio ✅
+✅ E2E Tests For Altflow ✅
     
 In order to run the e2e tests, you need to build the entire monorepo first.
 

@@ -28,7 +28,7 @@ const meta: Meta<typeof Message> = {
     docs: {
       description: {
         component:
-          'Shared user/assistant message shell, actions, metadata, copy, and timestamp. The shell owns bubble appearance, width, spacing, and pending borders. Applications supply rendered parts, optional avatars, and footer content. MessageActions defaults to hover/focus visibility and stays visible on touch devices; use visibility="always" for persistent controls. Applications decide what text to copy and when a reply is complete. The previews mirror Factory and Studio footer arrangements without a chat provider or transport.',
+          'Shared user/assistant message shell, actions, metadata, copy, and timestamp. The shell owns bubble appearance, width, spacing, and pending borders. Applications supply rendered parts, optional avatars, and footer content. MessageActions defaults to hover/focus visibility and stays visible on touch devices; use visibility="always" for persistent controls. Applications decide what text to copy and when a reply is complete. The previews mirror Factory and Altflow footer arrangements without a chat provider or transport.',
       },
     },
   },

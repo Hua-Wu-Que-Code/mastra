@@ -70,7 +70,7 @@ describe('MCP tool drawer execution results', () => {
     await runTool();
 
     // Studio cannot answer the input request, so it explains that instead of presenting the payload as output.
-    await waitFor(() => expect(screen.getByText(/asked for more input, which Studio cannot provide/)).not.toBeNull());
+    await waitFor(() => expect(screen.getByText(/asked for more input, which Altflow cannot provide/)).not.toBeNull());
     // The suspend payload stays visible in the result panel.
     expect(document.body.textContent).toMatch(/"phase":\s*"confirm"/);
     await waitForMutationsIdle(queryClient);

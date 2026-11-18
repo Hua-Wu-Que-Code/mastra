@@ -886,7 +886,7 @@ describe('useAgentCmsForm — file-based agent', () => {
         { wrapper: makeWrapper() },
       );
 
-      editInstructions(result.current.form, 'First Studio draft');
+      editInstructions(result.current.form, 'First Altflow draft');
       await act(async () => {
         await result.current.handleSaveDraft();
       });
@@ -896,7 +896,7 @@ describe('useAgentCmsForm — file-based agent', () => {
         body: {
           id: fsAgent.id,
           autoPublish: false,
-          instructions: [{ type: 'prompt_block', content: 'First Studio draft' }],
+          instructions: [{ type: 'prompt_block', content: 'First Altflow draft' }],
         },
       });
     });
@@ -918,11 +918,11 @@ describe('useAgentCmsForm — file-based agent', () => {
         { wrapper: makeWrapper() },
       );
 
-      editInstructions(result.current.form, 'First Studio draft');
+      editInstructions(result.current.form, 'First Altflow draft');
       await act(async () => {
         await result.current.handleSaveDraft();
       });
-      editInstructions(result.current.form, 'Second Studio draft');
+      editInstructions(result.current.form, 'Second Altflow draft');
       await act(async () => {
         await result.current.handleSaveDraft();
       });
@@ -930,7 +930,7 @@ describe('useAgentCmsForm — file-based agent', () => {
       await waitFor(() => expect(saves).toHaveLength(2));
       expect(saves[1]).toMatchObject({
         method: 'PATCH',
-        body: { instructions: [{ type: 'prompt_block', content: 'Second Studio draft' }] },
+        body: { instructions: [{ type: 'prompt_block', content: 'Second Altflow draft' }] },
       });
     });
   });

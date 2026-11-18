@@ -11,7 +11,7 @@ test.describe('Traces page', () => {
     test('shows the page header', async ({ page }) => {
       await page.goto('/traces');
 
-      await expect(page).toHaveTitle(/Mastra Studio/);
+      await expect(page).toHaveTitle(/Altflow/);
       await expectCurrentBreadcrumb(page, 'Traces');
     });
 

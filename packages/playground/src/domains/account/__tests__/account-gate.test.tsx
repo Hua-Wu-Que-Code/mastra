@@ -19,7 +19,7 @@ function renderGate() {
     <MastraReactProvider baseUrl={endpoint}>
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
         <AccountGate endpoint={endpoint} apiPrefix="/api">
-          <div>Protected Studio</div>
+          <div>Protected Altflow</div>
           <Logout />
         </AccountGate>
       </QueryClientProvider>
@@ -30,30 +30,30 @@ afterEach(cleanup);
 
 describe('AccountGate', () => {
   describe('when the Go session is absent', () => {
-    it('shows the email login instead of Studio', async () => {
+    it('shows the email login instead of Altflow', async () => {
       server.use(http.get(`${endpoint}/account/session`, () => new HttpResponse(undefined, { status: 401 })));
       renderGate();
       expect(await screen.findByLabelText('Email')).toBeTruthy();
-      expect(screen.queryByText('Protected Studio')).toBeNull();
+      expect(screen.queryByText('Protected Altflow')).toBeNull();
     });
   });
   describe('when authentication is unavailable', () => {
-    it('keeps Studio blocked and offers retry', async () => {
+    it('keeps Altflow blocked and offers retry', async () => {
       server.use(http.get(`${endpoint}/account/session`, () => new HttpResponse(undefined, { status: 503 })));
       renderGate();
       expect(await screen.findByRole('button', { name: 'Retry' })).toBeTruthy();
-      expect(screen.queryByText('Protected Studio')).toBeNull();
+      expect(screen.queryByText('Protected Altflow')).toBeNull();
     });
   });
   describe('when the integration is not installed', () => {
-    it('leaves the original Studio authentication in control', async () => {
+    it('leaves the original Altflow authentication in control', async () => {
       server.use(http.get(`${endpoint}/account/session`, () => new HttpResponse(undefined, { status: 404 })));
       renderGate();
-      expect(await screen.findByText('Protected Studio')).toBeTruthy();
+      expect(await screen.findByText('Protected Altflow')).toBeTruthy();
     });
   });
   describe('when credentials are accepted by Go', () => {
-    it('opens Studio after the cookie login succeeds', async () => {
+    it('opens Altflow after the cookie login succeeds', async () => {
       server.use(
         http.get(`${endpoint}/account/session`, () => new HttpResponse(undefined, { status: 401 })),
         http.post(`${endpoint}/account/sign-in`, async ({ request }) => {
@@ -66,7 +66,7 @@ describe('AccountGate', () => {
       fireEvent.change(await screen.findByLabelText('Email'), { target: { value: 'alice@example.test' } });
       fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'example-password' } });
       fireEvent.submit(screen.getByRole('form', { name: 'Sign in' }));
-      expect(await screen.findByText('Protected Studio')).toBeTruthy();
+      expect(await screen.findByText('Protected Altflow')).toBeTruthy();
     });
   });
   describe('when Go rejects the credentials', () => {
@@ -80,7 +80,7 @@ describe('AccountGate', () => {
       fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrong' } });
       fireEvent.submit(screen.getByRole('form', { name: 'Sign in' }));
       expect((await screen.findByRole('alert')).textContent).toBe('邮箱或密码错误');
-      expect(screen.queryByText('Protected Studio')).toBeNull();
+      expect(screen.queryByText('Protected Altflow')).toBeNull();
     });
   });
   describe('when a signed in user logs out', () => {
@@ -92,7 +92,7 @@ describe('AccountGate', () => {
       renderGate();
       fireEvent.click(await screen.findByRole('button', { name: '退出测试' }));
       expect(await screen.findByLabelText('Email')).toBeTruthy();
-      expect(screen.queryByText('Protected Studio')).toBeNull();
+      expect(screen.queryByText('Protected Altflow')).toBeNull();
     });
   });
 });

@@ -187,8 +187,8 @@ export const en = {
   '-y\n@modelcontextprotocol/server': '-y\n@modelcontextprotocol/server',
   '. Calling a mocked tool with non-matching args fails the item; unmocked tools run live.':
     '. Calling a mocked tool with non-matching args fails the item; unmocked tools run live.',
-  ". Its settings are defined in code on the Mastra instance and can't be edited here.":
-    ". Its settings are defined in code on the Mastra instance and can't be edited here.",
+  ". Its settings are defined in code on the Altflow instance and can't be edited here.":
+    ". Its settings are defined in code on the Altflow instance and can't be edited here.",
   '... and': '... and',
   '... and {part0} more': '... and {part0} more',
   '.json files containing an array of items, up to': '.json files containing an array of items, up to',
@@ -245,7 +245,7 @@ export const en = {
     'Add a filesystem or skills to this workspace to browse its files here.',
   'Add a message to describe the changes in this version.': 'Add a message to describe the changes in this version.',
   'Add a skill': 'Add a skill',
-  'Add a workspace to your Mastra configuration to': 'Add a workspace to your Mastra configuration to',
+  'Add a workspace to your Altflow configuration to': 'Add a workspace to your Altflow configuration to',
   'Add an item': 'Add an item',
   'Add another header': 'Add another header',
   'Add attachment': 'Add attachment',
@@ -276,8 +276,8 @@ export const en = {
   'Add skill': 'Add skill',
   'Add step': 'Add step',
   'Add tag': 'Add tag',
-  'Add the authorization header that Studio needs to reach your Mastra server.':
-    'Add the authorization header that Studio needs to reach your Mastra server.',
+  'Add the authorization header that Altflow needs to reach your Altflow server.':
+    'Add the authorization header that Altflow needs to reach your Altflow server.',
   'Add the full trace to a dataset': 'Add the full trace to a dataset',
   'Add this agent to your library to connect': 'Add this agent to your library to connect',
   'Add this agent to your library?': 'Add this agent to your library?',
@@ -477,8 +477,7 @@ export const en = {
   'Avg duration': 'Avg duration',
   'Avg score': 'Avg score',
   Back: 'Back',
-  'Back to Mastra Studio': 'Back to Mastra Studio',
-  'Back to Studio': 'Back to Studio',
+  'Back to Altflow': 'Back to Altflow',
   'Back to connections': 'Back to connections',
   'Back to dataset': 'Back to dataset',
   'Back to datasets': 'Back to datasets',
@@ -607,7 +606,7 @@ export const en = {
   'Choose level': 'Choose level',
   'Choose service names': 'Choose service names',
   'Choose tags': 'Choose tags',
-  'Choose the language used in Studio.': 'Choose the language used in Studio.',
+  'Choose the language used in Altflow.': 'Choose the language used in Altflow.',
   'Choose where each optional link appears. Changes save automatically in this browser.':
     'Choose where each optional link appears. Changes save automatically in this browser.',
   'Choose {value0}': 'Choose {value0}',
@@ -1048,8 +1047,8 @@ export const en = {
   'Disconnected agent': 'Disconnected agent',
   'Disconnected {value0}': 'Disconnected {value0}',
   'Disconnecting agent': 'Disconnecting agent',
-  'Disconnecting revokes this authorized account and removes it from Mastra. Agents using this connection will lose access. This can’t be undone.':
-    'Disconnecting revokes this authorized account and removes it from Mastra. Agents using this connection will lose access. This can’t be undone.',
+  'Disconnecting revokes this authorized account and removes it from Altflow. Agents using this connection will lose access. This can’t be undone.':
+    'Disconnecting revokes this authorized account and removes it from Altflow. Agents using this connection will lose access. This can’t be undone.',
   'Disconnecting…': 'Disconnecting…',
   'Dismiss notice': 'Dismiss notice',
   'Dismiss notification': 'Dismiss notification',
@@ -1150,8 +1149,8 @@ export const en = {
   'Enabling tools:': 'Enabling tools:',
   End: 'End',
   'End voice call': 'End voice call',
-  'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so studio sessions resolve to a resource key.':
-    'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so studio sessions resolve to a resource key.',
+  'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so Altflow sessions resolve to a resource key.':
+    'End-user connections need an authenticated user. Configure server.auth with mapUserToResourceId so Altflow sessions resolve to a resource key.',
   Ended: 'Ended',
   'Ended at': 'Ended at',
   Endpoint: 'Endpoint',
@@ -1201,8 +1200,8 @@ export const en = {
   'Est. cost': 'Est. cost',
   'Estimated cost': 'Estimated cost',
   'Estimated model spend.': 'Estimated model spend.',
-  'Evaluating traces and saving them as dataset items is available in Mastra Studio (local or deployed).':
-    'Evaluating traces and saving them as dataset items is available in Mastra Studio (local or deployed).',
+  'Evaluating traces and saving them as dataset items is available in Altflow (local or deployed).':
+    'Evaluating traces and saving them as dataset items is available in Altflow (local or deployed).',
   Evaluation: 'Evaluation',
   'Evaluation scorer': 'Evaluation scorer',
   'Event {value0} data': 'Event {value0} data',
@@ -1333,7 +1332,7 @@ export const en = {
   'Failed to load skills': 'Failed to load skills',
   'Failed to load spans': 'Failed to load spans',
   'Failed to load storage capabilities': 'Failed to load storage capabilities',
-  'Failed to load studio': 'Failed to load studio',
+  'Failed to load Altflow': 'Failed to load Altflow',
   'Failed to load the library': 'Failed to load the library',
   'Failed to load the page': 'Failed to load the page',
   'Failed to load threads': 'Failed to load threads',
@@ -1855,18 +1854,18 @@ export const en = {
   'Mark reviewed': 'Mark reviewed',
   'Marked notification read': 'Marked notification read',
   'Marking notification read': 'Marking notification read',
-  Mastra: 'Mastra',
-  'Mastra (built-in)': 'Mastra (built-in)',
-  'Mastra (built-in) MCP server': 'Mastra (built-in) MCP server',
-  'Mastra APIs': 'Mastra APIs',
-  'Mastra Studio Search': 'Mastra Studio Search',
-  'Mastra configuration to manage files, skills, and enable semantic search.':
-    'Mastra configuration to manage files, skills, and enable semantic search.',
-  'Mastra connection': 'Mastra connection',
-  'Mastra instance URL': 'Mastra instance URL',
-  'Mastra tools are not configured yet.': 'Mastra tools are not configured yet.',
-  'Mastra workflows are not configured yet.': 'Mastra workflows are not configured yet.',
-  'Mastra {part0}': 'Mastra {part0}',
+  Altflow: 'Altflow',
+  'Altflow (built-in)': 'Altflow (built-in)',
+  'Altflow (built-in) MCP server': 'Altflow (built-in) MCP server',
+  'Altflow APIs': 'Altflow APIs',
+  'Altflow Search': 'Altflow Search',
+  'Altflow configuration to manage files, skills, and enable semantic search.':
+    'Altflow configuration to manage files, skills, and enable semantic search.',
+  'Altflow connection': 'Altflow connection',
+  'Altflow instance URL': 'Altflow instance URL',
+  'Altflow tools are not configured yet.': 'Altflow tools are not configured yet.',
+  'Altflow workflows are not configured yet.': 'Altflow workflows are not configured yet.',
+  'Altflow {part0}': 'Altflow {part0}',
   'Match all or any': 'Match all or any',
   'Matches your search in this span’s details': 'Matches your search in this span’s details',
   Max: 'Max',
@@ -1918,8 +1917,8 @@ export const en = {
   'Metrics are not persisted': 'Metrics are not persisted',
   'Metrics documentation': 'Metrics documentation',
   'Metrics filters': 'Metrics filters',
-  'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Mastra configuration.':
-    'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Mastra configuration.',
+  'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Altflow configuration.':
+    'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Altflow configuration.',
   Min: 'Min',
   'Minimal page to verify the ToolProvider backend. Pick a provider and toolkit, then connect.':
     'Minimal page to verify the ToolProvider backend. Pick a provider and toolkit, then connect.',
@@ -2600,8 +2599,8 @@ export const en = {
   'Refresh recording': 'Refresh recording',
   'Refreshed checkout': 'Refreshed checkout',
   'Refreshing checkout': 'Refreshing checkout',
-  'Register one on your Mastra instance with the knowledge option to browse it here.':
-    'Register one on your Mastra instance with the knowledge option to browse it here.',
+  'Register one on your Altflow instance with the knowledge option to browse it here.':
+    'Register one on your Altflow instance with the knowledge option to browse it here.',
   'Registered by': 'Registered by',
   'Registered memory': 'Registered memory',
   'Registered via the dynamic-workflows API': 'Registered via the dynamic-workflows API',
@@ -2698,7 +2697,7 @@ export const en = {
   'Research Supervisor': 'Research Supervisor',
   'Research notes': 'Research notes',
   Reset: 'Reset',
-  'Reset Studio configuration': 'Reset Studio configuration',
+  'Reset Altflow configuration': 'Reset Altflow configuration',
   'Reset time range': 'Reset time range',
   'Reset to actual size (100%)': 'Reset to actual size (100%)',
   'Reset to defaults': 'Reset to defaults',
@@ -2792,8 +2791,8 @@ export const en = {
   'Run this experiment again with the same configuration': 'Run this experiment again with the same configuration',
   'Run workflow': 'Run workflow',
   Running: 'Running',
-  'Running Mastra Studio locally? Deploy to the cloud so your team can collaborate.':
-    'Running Mastra Studio locally? Deploy to the cloud so your team can collaborate.',
+  'Running Altflow locally? Deploy to the cloud so your team can collaborate.':
+    'Running Altflow locally? Deploy to the cloud so your team can collaborate.',
   'Running browser code': 'Running browser code',
   'Running code': 'Running code',
   'Running schedule': 'Running schedule',
@@ -2802,8 +2801,8 @@ export const en = {
   'Running...': 'Running...',
   'Running…': 'Running…',
   Runs: 'Runs',
-  'Runs as a step of its parent workflow. Add it to the workflows of your Mastra instance to open, run, and inspect it on its own page.':
-    'Runs as a step of its parent workflow. Add it to the workflows of your Mastra instance to open, run, and inspect it on its own page.',
+  'Runs as a step of its parent workflow. Add it to the workflows of your Altflow instance to open, run, and inspect it on its own page.':
+    'Runs as a step of its parent workflow. Add it to the workflows of your Altflow instance to open, run, and inspect it on its own page.',
   'Runs as a task when the client asks for one': 'Runs as a task when the client asks for one',
   'Runs at': 'Runs at',
   'Runs for every item. All items finish before the workflow continues.':
@@ -2900,8 +2899,8 @@ export const en = {
   Search: 'Search',
   'Search MCP servers': 'Search MCP servers',
   'Search Results': 'Search Results',
-  'Search Studio routes and runtime entities': 'Search Studio routes and runtime entities',
-  'Search Studio, agents, workflows, tools, paths': 'Search Studio, agents, workflows, tools, paths',
+  'Search Altflow routes and runtime entities': 'Search Altflow routes and runtime entities',
+  'Search Altflow, agents, workflows, tools, paths': 'Search Altflow, agents, workflows, tools, paths',
   'Search agents': 'Search agents',
   'Search and install skills from the community registry': 'Search and install skills from the community registry',
   'Search and navigate': 'Search and navigate',
@@ -3134,7 +3133,7 @@ export const en = {
   'Showing {value0} of {value1} rows': 'Showing {value0} of {value1} rows',
   Sidebar: 'Sidebar',
   'Sign in': 'Sign in',
-  'Sign in to Mastra Studio': 'Sign in to Mastra Studio',
+  'Sign in to Altflow': 'Sign in to Altflow',
   'Sign in to continue': 'Sign in to continue',
   'Sign out': 'Sign out',
   'Sign up': 'Sign up',
@@ -3262,15 +3261,14 @@ export const en = {
   String: 'String',
   'Structured content (format 2 with parts)': 'Structured content (format 2 with parts)',
   'Structured output (if any)': 'Structured output (if any)',
-  Studio: 'Studio',
-  "Studio can't answer a": "Studio can't answer a",
-  "Studio can't answer a {part0} request.": "Studio can't answer a {part0} request.",
-  "Studio can't answer a {part0} request; the client that started the task has to.":
-    "Studio can't answer a {part0} request; the client that started the task has to.",
-  'Studio could not display this workflow graph.': 'Studio could not display this workflow graph.',
-  'Studio layout': 'Studio layout',
-  'Studio path': 'Studio path',
-  'Studio search': 'Studio search',
+  "Altflow can't answer a": "Altflow can't answer a",
+  "Altflow can't answer a {part0} request.": "Altflow can't answer a {part0} request.",
+  "Altflow can't answer a {part0} request; the client that started the task has to.":
+    "Altflow can't answer a {part0} request; the client that started the task has to.",
+  'Altflow could not display this workflow graph.': 'Altflow could not display this workflow graph.',
+  'Altflow layout': 'Altflow layout',
+  'Altflow path': 'Altflow path',
+  'Altflow search': 'Altflow search',
   'Sub-Agents': 'Sub-Agents',
   'Sub-agents': 'Sub-agents',
   Submit: 'Submit',
@@ -3338,8 +3336,8 @@ export const en = {
   'Text preview': 'Text preview',
   'Text response': 'Text response',
   The: 'The',
-  'The Mastra instance the studio talks to, the path in front of its API routes, and the headers sent with every request.':
-    'The Mastra instance the studio talks to, the path in front of its API routes, and the headers sent with every request.',
+  'The Altflow instance the Altflow talks to, the path in front of its API routes, and the headers sent with every request.':
+    'The Altflow instance the Altflow talks to, the path in front of its API routes, and the headers sent with every request.',
   'The audio could not be played. Refresh the recording to get a new playback link.':
     'The audio could not be played. Refresh the recording to get a new playback link.',
   'The built-in MCP server is enabled, but it needs the': 'The built-in MCP server is enabled, but it needs the',
@@ -3347,8 +3345,8 @@ export const en = {
     'The built-in MCP server is enabled, but it needs the {part0} package. Install it and restart the server.',
   'The built-in MCP server is turned off because': 'The built-in MCP server is turned off because',
   'The built-in MCP server only runs under': 'The built-in MCP server only runs under',
-  'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Studio.':
-    'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Studio.',
+  'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Altflow.':
+    'The configured observability storage provider does not support listing logs. Switch to a storage provider with logs support to view runtime logs in Altflow.',
   "The dataset's default scorers.": "The dataset's default scorers.",
   'The expected answer scorers compare against. JSON or plain text.':
     'The expected answer scorers compare against. JSON or plain text.',
@@ -3363,10 +3361,10 @@ export const en = {
     "The notes that make this mention aren't in the first page of notes. Open",
   "The notes that make this mention aren't in the first page of notes. Open {part0} to read them all.":
     "The notes that make this mention aren't in the first page of notes. Open {part0} to read them all.",
-  'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Studio.':
-    'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Studio.',
+  'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Altflow.':
+    'The observability storage domain is disabled or not configured. Enable it in your storage configuration to view logs in Altflow.',
   'The requested entity is unavailable in this project.': 'The requested entity is unavailable in this project.',
-  'The server this studio talks to.': 'The server this studio talks to.',
+  'The server Altflow connects to.': 'The server Altflow connects to.',
   'The step is asking': 'The step is asking',
   'The steps the target should take to produce its answer.': 'The steps the target should take to produce its answer.',
   'The tone the user expressed during the interaction.': 'The tone the user expressed during the interaction.',
@@ -3402,13 +3400,13 @@ export const en = {
   'This agent may have been renamed or removed. Reload to check again, or choose another agent.':
     'This agent may have been renamed or removed. Reload to check again, or choose another agent.',
   'This block is skipped at runtime until it is published.': 'This block is skipped at runtime until it is published.',
-  'This code-defined agent has disabled Studio editing.': 'This code-defined agent has disabled Studio editing.',
-  'This code-defined agent has disabled instructions editing from Studio. Update the agent definition in code to change its instructions.':
-    'This code-defined agent has disabled instructions editing from Studio. Update the agent definition in code to change its instructions.',
-  'This code-defined agent has disabled tools editing from Studio. Update the agent definition in code to change its tools.':
-    'This code-defined agent has disabled tools editing from Studio. Update the agent definition in code to change its tools.',
-  'This code-defined agent only allows editing tool descriptions from Studio. Update the agent definition in code to add or remove tools.':
-    'This code-defined agent only allows editing tool descriptions from Studio. Update the agent definition in code to add or remove tools.',
+  'This code-defined agent has disabled Altflow editing.': 'This code-defined agent has disabled Altflow editing.',
+  'This code-defined agent has disabled instructions editing from Altflow. Update the agent definition in code to change its instructions.':
+    'This code-defined agent has disabled instructions editing from Altflow. Update the agent definition in code to change its instructions.',
+  'This code-defined agent has disabled tools editing from Altflow. Update the agent definition in code to change its tools.':
+    'This code-defined agent has disabled tools editing from Altflow. Update the agent definition in code to change its tools.',
+  'This code-defined agent only allows editing tool descriptions from Altflow. Update the agent definition in code to add or remove tools.':
+    'This code-defined agent only allows editing tool descriptions from Altflow. Update the agent definition in code to add or remove tools.',
   "This dashboard can't be shown. {value0}": "This dashboard can't be shown. {value0}",
   'This ensures safe installation with easy rollback if needed. Your main branch remains unchanged.':
     'This ensures safe installation with easy rollback if needed. Your main branch remains unchanged.',
@@ -3416,8 +3414,8 @@ export const en = {
   'This filter is locked': 'This filter is locked',
   'This is a previous version': 'This is a previous version',
   'This may take some time...': 'This may take some time...',
-  'This model list is dynamically set and cannot be edited in Studio.':
-    'This model list is dynamically set and cannot be edited in Studio.',
+  'This model list is dynamically set and cannot be edited in Altflow.':
+    'This model list is dynamically set and cannot be edited in Altflow.',
   'This model will be used by the workflow to process and install the template':
     'This model will be used by the workflow to process and install the template',
   'This permanently deletes "': 'This permanently deletes "',
@@ -3434,8 +3432,8 @@ export const en = {
   'This theme has no data in the selected snapshot.': 'This theme has no data in the selected snapshot.',
   'This theme is not present in the selected snapshot. Use the clear filter action above to return to the full flow.':
     'This theme is not present in the selected snapshot. Use the clear filter action above to return to the full flow.',
-  'This tool asked for more input, which Studio cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an':
-    'This tool asked for more input, which Studio cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an',
+  'This tool asked for more input, which Altflow cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an':
+    'This tool asked for more input, which Altflow cannot provide. The suspend payload below shows what it needs. Call it from an MCP client with an',
   'This tool takes no input.': 'This tool takes no input.',
   'This tool takes no input. Run it as is.': 'This tool takes no input. Run it as is.',
   'This trace was flagged as degenerate or looping.': 'This trace was flagged as degenerate or looping.',
@@ -3468,7 +3466,7 @@ export const en = {
   Timing: 'Timing',
   'Timing unavailable': 'Timing unavailable',
   Title: 'Title',
-  'To edit the system prompt in Studio, add': 'To edit the system prompt in Studio, add',
+  'To edit the system prompt in Altflow, add': 'To edit the system prompt in Altflow, add',
   'Toggle columns': 'Toggle columns',
   'Toggle sidebar': 'Toggle sidebar',
   'Token Limit Exceeded': 'Token Limit Exceeded',
@@ -4257,7 +4255,7 @@ export const en = {
   'selected options': 'selected options',
   'selected)': 'selected)',
   send_email: 'send_email',
-  'sent more than Studio can show here.': 'sent more than Studio can show here.',
+  'sent more than Altflow can show here.': 'sent more than Altflow can show here.',
   'shared budget)': 'shared budget)',
   signal: 'signal',
   signals: 'signals',
@@ -4401,7 +4399,7 @@ export const en = {
   '{part0} paid from credits': '{part0} paid from credits',
   '{part0} row {part1} will be skipped': '{part0} row {part1} will be skipped',
   '{part0} rows will be imported': '{part0} rows will be imported',
-  '{part0} sent more than Studio can show here.': '{part0} sent more than Studio can show here.',
+  '{part0} sent more than Altflow can show here.': '{part0} sent more than Altflow can show here.',
   '{part0} tokens': '{part0} tokens',
   '{part0} vs previous': '{part0} vs previous',
   '{part0} {part1}, {part2} errors': '{part0} {part1}, {part2} errors',

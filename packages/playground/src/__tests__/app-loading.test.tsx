@@ -10,7 +10,7 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-describe('Studio cold load', () => {
+describe('Altflow cold load', () => {
   it('shows a loading spinner while the instance probe is in flight', async () => {
     server.use(
       // A generic Studio instance does not mount the optional Go account adapter.

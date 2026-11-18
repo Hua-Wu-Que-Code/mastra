@@ -55,7 +55,7 @@ export function MetricsStorageGate({ children }: { children: ReactNode }) {
       <EmptyState
         titleSlot={studioT('Metrics are not available with your current storage')}
         descriptionSlot={studioT(
-          'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Mastra configuration.',
+          'Metrics require ClickHouse, DuckDB, Postgres v-next, Spanner, or in-memory storage for observability. Other relational databases (LibSQL, MSSQL) and document stores (MongoDB) do not support metrics collection. To enable metrics on an existing project, switch the observability storage in the Altflow configuration.',
         )}
         actionSlot={
           <Button

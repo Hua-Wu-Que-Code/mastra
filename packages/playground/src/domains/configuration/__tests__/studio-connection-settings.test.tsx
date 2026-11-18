@@ -21,7 +21,7 @@ function storedConfig(): unknown {
   return JSON.parse(window.localStorage.getItem(MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY) ?? 'null');
 }
 
-const urlInput = () => screen.getByRole('textbox', { name: 'Mastra instance URL' });
+const urlInput = () => screen.getByRole('textbox', { name: 'Altflow instance URL' });
 const saveButton = () => screen.queryByRole('button', { name: 'Save changes' });
 const type = (name: string, value: string) =>
   fireEvent.change(screen.getByRole('textbox', { name }), { target: { value } });
@@ -62,7 +62,7 @@ describe('StudioConnectionSettings', () => {
   it('saves the URL, prefix and headers together and shows the saved values', async () => {
     await renderSettings();
 
-    type('Mastra instance URL', ' http://localhost:5000 ');
+    type('Altflow instance URL', ' http://localhost:5000 ');
     type('API prefix', '/v2');
     fireEvent.click(screen.getByRole('button', { name: 'Add header' }));
     const [, newName] = screen.getAllByRole('textbox', { name: 'Header name' });
@@ -108,7 +108,7 @@ describe('StudioConnectionSettings', () => {
   it('discards edits', async () => {
     await renderSettings();
 
-    type('Mastra instance URL', 'http://elsewhere');
+    type('Altflow instance URL', 'http://elsewhere');
     fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
 
     expect(urlInput()).toHaveProperty('value', config.baseUrl);
@@ -119,7 +119,7 @@ describe('StudioConnectionSettings', () => {
   it('asks for a URL instead of saving an empty one', async () => {
     await renderSettings();
 
-    type('Mastra instance URL', '');
+    type('Altflow instance URL', '');
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     expect(screen.getByText('Enter the server URL')).toBeTruthy();

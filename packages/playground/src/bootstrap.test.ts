@@ -22,7 +22,7 @@ describe('bootstrap', () => {
 
     await import('./bootstrap');
 
-    expect(consoleError).toHaveBeenCalledWith('Mastra Studio failed to start', startupError);
+    expect(consoleError).toHaveBeenCalledWith('Altflow failed to start', startupError);
     expect(renderStartupError).toHaveBeenCalledWith(startupError);
   });
 });

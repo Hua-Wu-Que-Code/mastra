@@ -60,7 +60,7 @@ export const StudioConfigForm = ({ initialConfig, onSave }: StudioConfigFormProp
   const connectionFields = [
     {
       name: 'url',
-      label: studioT('Mastra instance URL'),
+      label: studioT('Altflow instance URL'),
       placeholder: studioT('e.g: http://localhost:4111'),
       required: true,
       defaultValue: initialConfig?.baseUrl,

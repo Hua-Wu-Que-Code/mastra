@@ -91,7 +91,7 @@ export function PublishChannelContent({
             <>
               {studioT('Connected') + ' '}
               <span className="text-foreground">{platform.name}</span> {' ' + studioT('to')}{' '}
-              <span className="text-foreground">{studioT('Mastra')}</span>
+              <span className="text-foreground">{studioT('Altflow')}</span>
             </>
           ) : (
             copy.notConnected(platform.name)

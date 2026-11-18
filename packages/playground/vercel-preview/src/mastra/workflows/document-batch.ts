@@ -35,7 +35,7 @@ export const documentBatchInputSchema = z.object({
     .min(1)
     .max(10)
     .default([
-      { title: 'Getting started', text: 'Create a workflow, connect its steps, and inspect the output in Studio.' },
+      { title: 'Getting started', text: 'Create a workflow, connect its steps, and inspect the output in Altflow.' },
       { title: 'Human review', text: 'Suspend a run when a reviewer needs to approve a decision.' },
       { title: 'Batch processing', text: 'Use foreach to process each document with the same nested workflow.' },
     ]),

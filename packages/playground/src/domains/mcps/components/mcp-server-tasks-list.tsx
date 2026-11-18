@@ -40,7 +40,7 @@ const COLUMNS = 'minmax(0,1fr) auto auto auto auto auto auto auto';
 
 const UNAVAILABLE = {
   not_listable: "This server's task store can't be listed.",
-  resource_scoped: 'The task list needs a Studio session that is not scoped to a resource.',
+  resource_scoped: 'The task list needs a Altflow session that is not scoped to a resource.',
 } as const;
 
 const OPERATORS: FilterBarOperator[] = [

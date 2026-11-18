@@ -88,7 +88,7 @@ describe('Sidebar command header', () => {
       <Sidebar.Provider storageKey="sidebar-command-header-test">
         <Sidebar>
           <Sidebar.CommandHeader>
-            <Sidebar.Brand title="Mastra" />
+            <Sidebar.Brand title="Altflow" />
             <Sidebar.SearchTrigger aria-label="Search" shortcut="⌘ K" onClick={onSearch}>
               <IconMagnifyingGlass />
             </Sidebar.SearchTrigger>
@@ -108,7 +108,7 @@ describe('Sidebar command header', () => {
     expect(container.querySelector('[data-slot="sidebar-search-trigger"]')).not.toBeNull();
     expect(container.querySelector('[data-slot="sidebar-footer-meta"]')).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Search' })).toBeDefined();
-    expect(screen.getByText('Mastra')).toBeDefined();
+    expect(screen.getByText('Altflow')).toBeDefined();
     // The shortcut lives in the tooltip, not next to the icon
     expect(screen.queryByText('⌘ K')).toBeNull();
     expect(screen.getByText('Mastra v0.24.6')).toBeDefined();
@@ -128,7 +128,7 @@ describe('Sidebar command header', () => {
       <Sidebar.Provider storageKey="sidebar-command-header-without-search-test">
         <Sidebar>
           <Sidebar.CommandHeader>
-            <Sidebar.Brand title="Mastra" />
+            <Sidebar.Brand title="Altflow" />
           </Sidebar.CommandHeader>
           <Sidebar.Footer>
             <Sidebar.FooterMeta action={<Sidebar.Trigger />}>Mastra v0.24.6</Sidebar.FooterMeta>

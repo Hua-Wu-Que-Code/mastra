@@ -17,10 +17,10 @@ export function StudioConnectionSettings() {
     <SettingsGroup>
       <SettingsTitle
         info={studioT(
-          'The Mastra instance the studio talks to, the path in front of its API routes, and the headers sent with every request.',
+          'The Altflow instance the Altflow talks to, the path in front of its API routes, and the headers sent with every request.',
         )}
       >
-        {studioT('Mastra connection')}
+        {studioT('Altflow connection')}
       </SettingsTitle>
       <StudioConnectionForm key={configKey} initialConfig={{ baseUrl, apiPrefix, headers }} />
     </SettingsGroup>
