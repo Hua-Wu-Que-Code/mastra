@@ -76,3 +76,30 @@ export const approvalConversation: MastraDBMessage[] = [
     },
   },
 ];
+
+/** Successful bookkeeping calls are hidden by the transcript, alongside visible work. */
+export function conversationWithBookkeeping(toolName: string): MastraDBMessage[] {
+  return [
+    ...conversation,
+    {
+      id: 'bookkeeping',
+      role: 'assistant',
+      createdAt: new Date(),
+      content: {
+        format: 2,
+        parts: [
+          {
+            type: 'tool-invocation',
+            toolInvocation: {
+              toolCallId: 'bookkeeping-1',
+              toolName,
+              args: {},
+              state: 'result',
+              result: { success: true },
+            },
+          },
+        ],
+      },
+    },
+  ];
+}

@@ -3,7 +3,7 @@ import type { MessageFactoryPart } from '@mastra/react/ui';
 import { messageTextKind } from '../messages/renderers/message-text-kind';
 import { isToolPart, readToolPart } from '../messages/renderers/tool-part';
 import type { RunMetrics } from '../metrics/chat-metrics';
-import { isSettledState } from '../tools/tool-card-kind';
+import { isHiddenTool, isSettledState } from '../tools/tool-card-kind';
 import type { ToolCardContext } from '../tools/tool-card-kind';
 import { foldsIntoGroup } from '../tools/tool-groups';
 
@@ -24,7 +24,12 @@ export function canFoldWork(messages: MastraDBMessage[], context: ToolCardContex
       if (!isToolPart(part)) return true;
       const fields = readToolPart(part);
       if (fields.backgroundTaskStatus === 'running' || fields.backgroundTaskStatus === 'failed') return false;
-      return isSettledState(fields.state) && foldsIntoGroup(part, { ...context, metadata: message.content.metadata });
+      // Successful bookkeeping has no transcript card to fold. Do not let it
+      // disable the disclosure for the visible reasoning and tools in this turn.
+      return (
+        isSettledState(fields.state) &&
+        (isHiddenTool(fields.toolName) || foldsIntoGroup(part, { ...context, metadata: message.content.metadata }))
+      );
     });
   });
 }

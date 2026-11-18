@@ -1,5 +1,6 @@
 const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/;
 const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})[ \t]*$/;
+const MATH_FENCE = /^ {0,3}(\${2,})([^$]*)$/;
 const LIST_ITEM = /^ {0,3}(?:[-*+]|\d{1,9}[.)])(?:[ \t]|$)/;
 const INDENTED = /^(?:\t| {2,})/;
 const DEFINITION = /^ {0,3}\[[^\]]+\]:/;
@@ -15,7 +16,7 @@ const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 const ITEM_FENCE = /^ {0,3}(?:(`{3,})[^`]*|(~{3,}).*)$/;
 // A fence the item does not open itself, or raw HTML, here or behind a nested marker or quote: either can
 // hold a blank line the lines cannot place.
-const OPAQUE = /```|~~~|^(?:\s*(?:(?:[-*+]|\d{1,9}[.)])(?=\s)|>))*\s*</;
+const OPAQUE = /```|~~~|\${2,}|^(?:\s*(?:(?:[-*+]|\d{1,9}[.)])(?=\s)|>))*\s*</;
 
 function fenceOpenedBy(line: string): string | undefined {
   return FENCE_OPEN.exec(line)?.[1];
@@ -46,6 +47,7 @@ export function splitBlocks(markdown: string): string[] {
   const lines = markdown.split('\n');
   const starts = [0];
   let fence: string | undefined;
+  let mathFence = 0;
   let started = false;
   let broken = false;
   let inList = false;
@@ -53,6 +55,14 @@ export function splitBlocks(markdown: string): string[] {
   for (const [index, line] of lines.entries()) {
     if (fence) {
       if (closesFence(line, fence)) fence = undefined;
+      continue;
+    }
+
+    // A display formula may contain blank lines. Keep its whole source in one
+    // parser block, just as we do for fenced code, including an unfinished tail.
+    if (mathFence) {
+      const closing = MATH_FENCE.exec(line);
+      if ((closing?.[1]?.length ?? 0) >= mathFence && closing?.[2]?.trim() === '') mathFence = 0;
       continue;
     }
 
@@ -73,6 +83,7 @@ export function splitBlocks(markdown: string): string[] {
     started = true;
     broken = false;
     fence = fenceOpenedBy(line);
+    if (!fence) mathFence = MATH_FENCE.exec(line)?.[1]?.length ?? 0;
   }
 
   return starts.map((start, position) => {

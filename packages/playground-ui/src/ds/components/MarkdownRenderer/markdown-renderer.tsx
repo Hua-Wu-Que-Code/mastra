@@ -3,7 +3,9 @@ import { memo, useMemo } from 'react';
 import type { MouseEvent, MouseEventHandler, ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import type { Components, ExtraProps, Options } from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
 import remend from 'remend';
 
 import { rehypeArriving } from './arriving';
@@ -17,6 +19,7 @@ import { CodeBlock } from '@/ds/components/CodeBlock';
 import { useLocale, t as studioT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
+import 'katex/dist/katex.min.css';
 import './markdown-renderer.css';
 
 export type MarkdownExternalLinkTarget = 'tab' | 'window';
@@ -174,14 +177,19 @@ const MarkdownBlock = memo(function MarkdownBlock({
   extraRemarkPlugins?: RemarkPlugins;
 }) {
   const remarkPlugins = useMemo(() => {
-    const builtIn = tableActions && !streaming ? COPYABLE_REMARK_PLUGINS : REMARK_PLUGINS;
+    // Like DSH, parse TeX only after the reply finishes: incomplete streamed
+    // formulas remain readable instead of flashing KaTeX errors on every delta.
+    const builtIn = streaming ? REMARK_PLUGINS : tableActions ? COPYABLE_REMARK_PLUGINS : MATH_REMARK_PLUGINS;
     const plugins = extraRemarkPlugins ? [...builtIn, ...extraRemarkPlugins] : builtIn;
     return listItem === 'loose' ? [...plugins, remarkLooseList] : plugins;
   }, [tableActions, streaming, extraRemarkPlugins, listItem]);
   const rehypePlugins = useMemo(() => {
     const arriving = settledWords === undefined ? SETTLED : [rehypeArriving(settledWords)];
-    return listItem ? [rehypeListItem, ...arriving] : arriving;
-  }, [settledWords, listItem]);
+    const plugins = listItem ? [rehypeListItem, ...arriving] : arriving;
+    // Arrival handles code atomically before KaTeX replaces math code nodes, so
+    // word wrappers never enter the generated MathML or formula layout.
+    return streaming ? plugins : [...plugins, rehypeKatex];
+  }, [settledWords, listItem, streaming]);
 
   return (
     <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={components}>
@@ -235,10 +243,10 @@ function countWords(text: string): number {
   return text.match(/\S+/g)?.length ?? 0;
 }
 
-// Agent networks emit their text with literal `\n`. Only unescape when the text
-// has no real newline, otherwise a `"a\nb"` inside a code fence gets shredded.
+// Legacy network text can carry literal `\n`. Restrict this heuristic to plain
+// text: code and TeX own their backslashes (e.g. `\nu`, `\neq`, `\nabla`).
 function decodeEscapedNewlines(text: string): string {
-  return text.includes('\n') ? text : text.replace(/\\n/g, '\n');
+  return /[\n`$]/.test(text) ? text : text.replace(/\\n/g, '\n');
 }
 
 type MarkdownNode = NonNullable<ExtraProps['node']>;
@@ -319,11 +327,11 @@ function markdownLink(externalLinkTarget: MarkdownExternalLinkTarget): NonNullab
 }
 
 const REMARK_PLUGINS = [remarkGfm];
-const COPYABLE_REMARK_PLUGINS = [remarkGfm, remarkTableMarkdown];
+const MATH_REMARK_PLUGINS = [remarkGfm, remarkMath];
+const COPYABLE_REMARK_PLUGINS = [remarkGfm, remarkMath, remarkTableMarkdown];
 
 // Links stay text until their URL lands: remend's placeholder href would render
-// a live anchor to nowhere. No math is rendered here, so pairing `$$` would only
-// turn one literal into another.
+// a live anchor to nowhere. TeX stays literal until the stream finishes.
 const REMEND_OPTIONS = { katex: false, linkMode: 'text-only' } as const;
 
 // Elements are listed one by one: react-markdown also passes its `node`, which

@@ -35,6 +35,18 @@ To use Mastra's product fonts, Mona Sans for text and Commit Mono for code, add 
 @import '@mastra/playground-ui/fonts.css';
 ```
 
+### Chat work details and math
+
+Chat presentation preferences can collapse work details when a reply completes or when the next message is sent. Successful hidden memory and task bookkeeping calls do not prevent folding. Errors, unfinished calls, and pending approvals remain available.
+
+`MarkdownRenderer` typesets inline `$...$`, display `$$...$$`, and fenced `math` code with KaTeX once streaming finishes. Code examples remain literal. KaTeX styles and fonts are included with the renderer.
+
+```tsx
+import { MarkdownRenderer } from '@mastra/playground-ui/components/MarkdownRenderer';
+
+<MarkdownRenderer streaming={false}>{String.raw`设 $F:\mathbb{C}^n\to\mathbb{C}^n$。`}</MarkdownRenderer>;
+```
+
 ### Metadata
 
 Use separate elements for metadata fields. `Metadata` keeps a compact gap between fields, and `Metadata.Item` groups an icon with its label. Fields wrap as space narrows.

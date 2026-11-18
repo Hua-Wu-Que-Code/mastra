@@ -11,7 +11,12 @@ import { ChatPreferencesProvider } from '../chat-preferences-provider';
 import { ChatPreferencesSettings } from '../chat-preferences-settings';
 import { EditorPreferencesSettings } from '../editor-preferences-settings';
 import { WorkDetails, WorkDetailsToggle } from '../work-details-context';
-import { approvalConversation, conversation, failedConversation } from './fixtures/conversation';
+import {
+  approvalConversation,
+  conversation,
+  conversationWithBookkeeping,
+  failedConversation,
+} from './fixtures/conversation';
 import { server } from '@/test/msw-server';
 
 function tree({ running = false, latest = true, scope = 'alice', messages = conversation } = {}) {
@@ -98,6 +103,21 @@ describe('Chat presentation', () => {
     });
   });
   describe('when a running turn completes', () => {
+    it.each(['updateWorkingMemory', 'task_write', 'task_complete'])(
+      'collapses visible work after a successful hidden %s call',
+      toolName => {
+        const messages = conversationWithBookkeeping(toolName);
+        const view = render(tree({ messages, running: true }));
+        expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
+        view.rerender(tree({ messages, running: false }));
+        expect(screen.queryByRole('group', { name: 'Reasoning' })).toBeNull();
+        expect(screen.getByRole('button', { name: 'Show work details' }).getAttribute('aria-expanded')).toBe('false');
+        expect(screen.getByText('The final story begins here.')).toBeDefined();
+        fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+        expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
+      },
+    );
+
     it('collapses work and preserves the final reply', () => {
       const view = render(tree({ running: true }));
       expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
