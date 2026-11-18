@@ -32,6 +32,7 @@ const buildRouter = (initialEntry: string) =>
               { path: 'settings', loader: legacyAgentSettingsLoader },
             ],
           },
+          { path: '/agents/:agentId/traces', element: <div data-testid="agent-management" /> },
           { path: '/agents/:agentId/threads/:threadId', element: <div data-testid="thread-route" /> },
         ],
       },
@@ -45,10 +46,10 @@ const locationIs = (expected: string) =>
   waitFor(() => expect(screen.getByTestId('location-probe').textContent).toBe(expected));
 
 describe('agent landing redirects', () => {
-  it('redirects bare /agents/:agentId to the new-thread chat', async () => {
+  it('redirects bare /agents/:agentId to agent management', async () => {
     renderAt(`/agents/${AGENT_ID}`);
-    await locationIs(`/agents/${AGENT_ID}/threads/new`);
-    expect(screen.getByTestId('thread-route')).not.toBeNull();
+    await locationIs(`/agents/${AGENT_ID}/traces`);
+    expect(screen.getByTestId('agent-management')).not.toBeNull();
   });
 
   it('redirects the removed /overview route to the chat, keeping the query string', async () => {

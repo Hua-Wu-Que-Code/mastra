@@ -98,6 +98,16 @@ afterEach(() => {
 });
 
 describe('AgentPlayground — code agent editor lock', () => {
+  describe('when opening the agent management editor', () => {
+    it('shows configuration controls without a chat composer', async () => {
+      await renderWithEditorConfig(undefined);
+
+      expect(screen.queryByPlaceholderText('Enter your message')).toBeNull();
+      expect(screen.queryByRole('button', { name: /send/i })).toBeNull();
+      expect(screen.getByRole('button', { name: /Save to filesystem/ })).not.toBeNull();
+    });
+  });
+
   describe('when the editor config locks every editable field', () => {
     it('marks the editor read-only for `editor: { instructions: false, tools: false }`', async () => {
       await renderWithEditorConfig({ instructions: false, tools: false });

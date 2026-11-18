@@ -1,18 +1,12 @@
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 
-import { AgentLayout } from '../agent-layout';
 import { SidebarPanel } from '../sidebar-panel';
 import { AgentPlaygroundConfig } from './agent-playground-config';
-import { AgentPlaygroundTestChat } from './agent-playground-test-chat';
 import { AgentPlaygroundVersionBar } from './agent-playground-version-bar';
 
 interface AgentPlaygroundViewProps {
   agentId: string;
-  agentName?: string;
-  modelVersion?: string;
-  agentVersionId?: string;
-  hasMemory: boolean;
   activeVersionId?: string;
   selectedVersionId?: string;
   latestVersionId?: string;
@@ -33,7 +27,7 @@ interface AgentPlaygroundViewProps {
   isViewingPreviousVersion?: boolean;
 }
 
-function LeftPanel({
+export function AgentPlaygroundView({
   agentId,
   activeVersionId,
   selectedVersionId,
@@ -53,27 +47,7 @@ function LeftPanel({
   onDownloadJson,
   onOpenPr,
   isViewingPreviousVersion,
-}: {
-  agentId: string;
-  activeVersionId?: string;
-  selectedVersionId?: string;
-  latestVersionId?: string;
-  onVersionSelect: (versionId: string) => void;
-  isDirty: boolean;
-  isSavingDraft: boolean;
-  isPublishing: boolean;
-  hasDraft: boolean;
-  readOnly: boolean;
-  isCodeSourceAgent?: boolean;
-  showCodeModeActions?: boolean;
-  canOpenPr?: boolean;
-  openPrTitle?: string;
-  onSaveDraft: (changeMessage?: string) => Promise<void>;
-  onPublish: () => Promise<void>;
-  onDownloadJson?: () => Promise<void>;
-  onOpenPr?: () => Promise<void>;
-  isViewingPreviousVersion?: boolean;
-}) {
+}: AgentPlaygroundViewProps) {
   useLocale();
   const { versionSelector, actionBar } = AgentPlaygroundVersionBar({
     agentId,
@@ -116,70 +90,5 @@ function LeftPanel({
 
       {actionBar}
     </SidebarPanel>
-  );
-}
-
-export function AgentPlaygroundView({
-  agentId,
-  agentName,
-  modelVersion,
-  agentVersionId,
-  hasMemory,
-  activeVersionId,
-  selectedVersionId,
-  latestVersionId,
-  onVersionSelect,
-  isDirty,
-  isSavingDraft,
-  isPublishing,
-  hasDraft,
-  readOnly,
-  isCodeSourceAgent,
-  showCodeModeActions,
-  canOpenPr,
-  openPrTitle,
-  onSaveDraft,
-  onPublish,
-  onDownloadJson,
-  onOpenPr,
-  isViewingPreviousVersion,
-}: AgentPlaygroundViewProps) {
-  useLocale();
-  return (
-    <AgentLayout
-      agentId={agentId}
-      leftDrawerLabel={studioT('Open configuration')}
-      leftSlot={
-        <LeftPanel
-          agentId={agentId}
-          activeVersionId={activeVersionId}
-          selectedVersionId={selectedVersionId}
-          latestVersionId={latestVersionId}
-          onVersionSelect={onVersionSelect}
-          isDirty={isDirty}
-          isSavingDraft={isSavingDraft}
-          isPublishing={isPublishing}
-          hasDraft={hasDraft}
-          readOnly={readOnly}
-          isCodeSourceAgent={isCodeSourceAgent}
-          showCodeModeActions={showCodeModeActions}
-          canOpenPr={canOpenPr}
-          openPrTitle={openPrTitle}
-          onSaveDraft={onSaveDraft}
-          onPublish={onPublish}
-          onDownloadJson={onDownloadJson}
-          onOpenPr={onOpenPr}
-          isViewingPreviousVersion={isViewingPreviousVersion}
-        />
-      }
-    >
-      <AgentPlaygroundTestChat
-        agentId={agentId}
-        agentName={agentName}
-        modelVersion={modelVersion}
-        agentVersionId={agentVersionId}
-        hasMemory={hasMemory}
-      />
-    </AgentLayout>
   );
 }

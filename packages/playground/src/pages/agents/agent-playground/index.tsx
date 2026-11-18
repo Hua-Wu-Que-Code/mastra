@@ -8,7 +8,6 @@ import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-c
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useAgent, useAgentVersions, useAgentVersion, useStoredAgent } from '@mastra/react/hooks/agents';
-import { useMemory } from '@mastra/react/hooks/memory';
 import { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { AgentOverviewPanel } from '@/domains/agents/components/agent-overview-panel/agent-overview-panel';
@@ -33,11 +32,6 @@ function AgentPlayground() {
     isLoading: isLoadingCodeAgent,
     error,
   } = useAgent({
-    agentId: agentId!,
-    requestContext: useEntityRequestContext('agent', agentId!)[0],
-    queryOptions: { enabled: Boolean(agentId) },
-  });
-  const { data: memory } = useMemory({
     agentId: agentId!,
     requestContext: useEntityRequestContext('agent', agentId!)[0],
     queryOptions: { enabled: Boolean(agentId) },
@@ -67,7 +61,6 @@ function AgentPlayground() {
   const canOpenPr = showCodeModeActions && isMastraPlatform && !!mastraPlatformApiEndpoint && !!mastraPlatformProjectId;
   const openPrTitle = canOpenPr ? 'Open a pull request for these JSON changes' : undefined;
   const isLoading = isLoadingCodeAgent || isLoadingVersions || (hasVersions && isLoadingStoredAgent);
-  const hasMemory = Boolean(memory?.result);
 
   // Fetch version data when a specific version is selected
   const { data: versionData } = useAgentVersion({
@@ -178,10 +171,6 @@ function AgentPlayground() {
     >
       <AgentPlaygroundView
         agentId={agentId!}
-        agentName={codeAgent?.name}
-        modelVersion={codeAgent?.modelVersion}
-        agentVersionId={selectedVersionId ?? latestVersion?.id}
-        hasMemory={hasMemory}
         activeVersionId={activeVersionId}
         selectedVersionId={selectedVersionId ?? undefined}
         latestVersionId={latestVersion?.id}

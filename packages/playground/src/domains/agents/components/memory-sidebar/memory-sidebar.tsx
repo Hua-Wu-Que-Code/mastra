@@ -5,7 +5,6 @@ import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMemory } from '@mastra/react/hooks/memory';
-import { AgentCapabilitiesFooter } from './agent-capabilities-footer';
 import { ChatThreads } from '@/domains/agents/components/chat-threads';
 import { SidebarPanel } from '@/domains/agents/components/sidebar-panel';
 
@@ -78,7 +77,6 @@ export function MemorySidebarBody({
             />
           ))}
       </div>
-      <AgentCapabilitiesFooter agentId={agentId} />
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { Tab, TabList, Tabs } from '@mastra/playground-ui/components/Tabs';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { TRACE_PROPERTY_FILTER_PARAM_BY_FIELD } from '@mastra/playground-ui/domains/traces/trace-filters';
 import { IconBranch } from '@mastra/playground-ui/icons/central/IconBranch';
-import { IconChatBubble7 } from '@mastra/playground-ui/icons/central/IconChatBubble7';
 import { Icon } from '@mastra/playground-ui/icons/Icon';
 import { TraceIcon } from '@mastra/playground-ui/icons/TraceIcon';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
@@ -16,7 +15,7 @@ interface AgentPageTabsProps {
   agentId: string;
   /** `'none'` (or any non-tab value) leaves the bar unhighlighted. */
   activeTab: AgentPageTab | 'none';
-  /** The open conversation. Chat returns to it and Traces opens filtered to it. */
+  /** The open conversation, used to filter Traces on legacy thread routes. */
   threadId?: string;
   showPlayground?: boolean;
   showObservability?: boolean;
@@ -60,7 +59,6 @@ export function AgentPageTabs({
     <div className="flex min-w-0 items-center justify-between gap-2 p-1.5">
       <Tabs value={activeTab} defaultTab={activeTab} onValueChange={handleTabChange} className="min-w-0">
         <TabList variant="pill-ghost">
-          <AgentTab value="chat" icon={<IconChatBubble7 />} label={studioT('Chat')} />
           {showObservability && <AgentTab value="traces" icon={<TraceIcon />} label={studioT('Traces')} />}
           {showPlayground && <AgentTab value="versions" icon={<IconBranch />} label={studioT('Editor')} />}
         </TabList>

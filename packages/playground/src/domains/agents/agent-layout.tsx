@@ -49,7 +49,13 @@ function getConversationThreadId(activeTab: AgentPageTab | 'none', pathname: str
   return undefined;
 }
 
-export const AgentLayout = ({ children }: { children: React.ReactNode }) => {
+export const AgentLayout = ({
+  children,
+  mode = 'management',
+}: {
+  children: React.ReactNode;
+  mode?: 'management' | 'conversation';
+}) => {
   const { agentId } = useParams();
   const location = useLocation();
   const { isCmsAvailable } = useIsCmsAvailable();
@@ -84,28 +90,34 @@ export const AgentLayout = ({ children }: { children: React.ReactNode }) => {
       defaultModel={defaultModel}
     >
       <KeyboardScope>
-        <AgentShortcuts agentId={agentId!} />
-        <OverviewPanelShortcuts />
+        {mode === 'management' && <AgentShortcuts agentId={agentId!} />}
+        {mode === 'management' && <OverviewPanelShortcuts />}
         <ToolDrawer>
           <AgentToolDrawerBody agentId={agentId!} />
         </ToolDrawer>
 
-        <AgentConfigPanel agentId={agentId!} disabled={activeTab === 'versions'}>
+        <AgentConfigPanel agentId={agentId!} disabled={mode === 'conversation' || activeTab === 'versions'}>
           <PageLayout
             variant="fit"
-            breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}
-            headerActions={<AgentDetailHeaderActions agentId={agentId!} showConfig={activeTab !== 'versions'} />}
+            breadcrumbs={mode === 'management' ? <PageBreadcrumbs crumbs={crumbs} /> : undefined}
+            headerActions={
+              mode === 'management' ? (
+                <AgentDetailHeaderActions agentId={agentId!} showConfig={activeTab !== 'versions'} />
+              ) : undefined
+            }
           >
             <h1 className="sr-only">{agentId}</h1>
-            <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)]">
-              <AgentPageTabs
-                agentId={agentId!}
-                activeTab={activeTab}
-                threadId={threadId}
-                showPlayground={showPlayground}
-                showObservability={showObservability}
-              />
-              {children}
+            <div className="flex h-full min-h-0 flex-col">
+              {mode === 'management' && (
+                <AgentPageTabs
+                  agentId={agentId!}
+                  activeTab={activeTab}
+                  threadId={threadId}
+                  showPlayground={showPlayground}
+                  showObservability={showObservability}
+                />
+              )}
+              <div className="min-h-0 flex-1">{children}</div>
             </div>
           </PageLayout>
         </AgentConfigPanel>
