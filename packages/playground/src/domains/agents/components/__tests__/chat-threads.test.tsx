@@ -2,17 +2,25 @@ import type { CollapsiblePanelHandle } from '@mastra/playground-ui/resize/collap
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod/v4';
 import { ThreadsPanelProvider } from '../../context/threads-panel-context';
 import { useThreadsPanel } from '../../context/use-threads-panel';
 import { writeAllowedCapabilities, writeDeniedCapabilities } from '../../hooks/__tests__/fixtures/auth';
 import type { ChatThreadsProps } from '../chat-threads';
 import { ChatThreads } from '../chat-threads';
 import { namedThread, otherThread } from './fixtures/threads';
+import {
+  installOrganizationFixture,
+  emptyOrganization,
+} from '@/domains/navigation/__tests__/fixtures/conversation-projects';
 import { TestLinkProvider } from '@/test/link-provider';
 import { server } from '@/test/msw-server';
 import { renderWithProviders, TEST_BASE_URL } from '@/test/render';
 
+let organization: ReturnType<typeof installOrganizationFixture>;
+
 beforeEach(() => {
+  organization = installOrganizationFixture();
   // `usePermissions` inside ChatThreads fetches auth capabilities.
   server.use(http.get(`${TEST_BASE_URL}/api/auth/capabilities`, () => HttpResponse.json(writeAllowedCapabilities)));
 });
@@ -163,7 +171,7 @@ describe('ChatThreads — thread actions', () => {
 
       await openRenameDialog();
 
-      expect((screen.getByRole('textbox', { name: 'Title' }) as HTMLInputElement).value).toBe('Trip planning');
+      expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Title' }).value).toBe('Trip planning');
     });
 
     it('prefills the rename input with a default-titled thread title', async () => {
@@ -180,7 +188,7 @@ describe('ChatThreads — thread actions', () => {
 
       await openRenameDialog();
 
-      expect((screen.getByRole('textbox', { name: 'Title' }) as HTMLInputElement).value).toBe(
+      expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Title' }).value).toBe(
         'New Thread 2026-01-01T00:00:00.000Z',
       );
     });
@@ -189,7 +197,7 @@ describe('ChatThreads — thread actions', () => {
       const patched = vi.fn();
       server.use(
         http.patch(`${TEST_BASE_URL}/api/memory/threads/thread-1`, async ({ request }) => {
-          const body = (await request.json()) as { title: string };
+          const body = z.object({ title: z.string() }).parse(await request.json());
           patched(new URL(request.url).searchParams.get('agentId'), body.title);
           return HttpResponse.json({ ...namedThread, title: body.title });
         }),
@@ -208,7 +216,7 @@ describe('ChatThreads — thread actions', () => {
       renderWithThread();
 
       await openRenameDialog();
-      const save = screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement;
+      const save = screen.getByRole<HTMLButtonElement>('button', { name: 'Save' });
       expect(save.disabled).toBe(true);
 
       fireEvent.change(screen.getByRole('textbox', { name: 'Title' }), { target: { value: '   ' } });
@@ -257,7 +265,6 @@ describe('ChatThreads — thread actions', () => {
   });
 });
 
-const PIN_KEY = 'mastra:pinned-threads:agent:agent-1';
 const toThread = (t: typeof namedThread) => ({
   ...t,
   createdAt: new Date(t.createdAt),
@@ -316,15 +323,15 @@ describe('ChatThreads — pinning', () => {
       expect(within(recent).queryByText('Trip planning')).toBeNull();
     });
 
-    it('persists the pin in localStorage', async () => {
+    it('persists the pin on the server', async () => {
       await pinFirst();
 
-      await waitFor(() => expect(JSON.parse(localStorage.getItem(PIN_KEY) ?? '[]')).toEqual(['thread-1']));
+      await waitFor(() => expect(organization.state.pinned).toEqual(['thread-1']));
     });
   });
 
-  describe('when a pin is stored in localStorage', () => {
-    beforeEach(() => localStorage.setItem(PIN_KEY, JSON.stringify(['thread-2'])));
+  describe('when a pin is stored on the server', () => {
+    beforeEach(() => (organization = installOrganizationFixture({ ...emptyOrganization(), pinned: ['thread-2'] })));
 
     it('renders the Pinned section on mount', async () => {
       renderTwoThreads();
@@ -347,7 +354,7 @@ describe('ChatThreads — pinning', () => {
   });
 
   describe('when the user clicks Unpin', () => {
-    beforeEach(() => localStorage.setItem(PIN_KEY, JSON.stringify(['thread-2'])));
+    beforeEach(() => (organization = installOrganizationFixture({ ...emptyOrganization(), pinned: ['thread-2'] })));
 
     const unpinFromMenu = async () => {
       const section = await screen.findByRole('region', { name: 'Pinned' });
@@ -364,17 +371,17 @@ describe('ChatThreads — pinning', () => {
       expect(within(screen.getByTestId('thread-list')).getByText('Budget review')).toBeTruthy();
     });
 
-    it('removes the pin from localStorage', async () => {
+    it('removes the pin on the server', async () => {
       renderTwoThreads();
 
       await unpinFromMenu();
 
-      await waitFor(() => expect(JSON.parse(localStorage.getItem(PIN_KEY) ?? '[]')).toEqual([]));
+      await waitFor(() => expect(organization.state.pinned).toEqual([]));
     });
   });
 
   describe('when the user renames a pinned thread', () => {
-    beforeEach(() => localStorage.setItem(PIN_KEY, JSON.stringify(['thread-2'])));
+    beforeEach(() => (organization = installOrganizationFixture({ ...emptyOrganization(), pinned: ['thread-2'] })));
 
     it('opens the rename dialog prefilled with the pinned thread title', async () => {
       renderTwoThreads();
@@ -384,12 +391,12 @@ describe('ChatThreads — pinning', () => {
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Rename' }));
 
       await screen.findByRole('dialog', { name: 'Rename thread' });
-      expect((screen.getByRole('textbox', { name: 'Title' }) as HTMLInputElement).value).toBe('Budget review');
+      expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Title' }).value).toBe('Budget review');
     });
   });
 
   describe('when the user deletes a pinned thread', () => {
-    beforeEach(() => localStorage.setItem(PIN_KEY, JSON.stringify(['thread-2'])));
+    beforeEach(() => (organization = installOrganizationFixture({ ...emptyOrganization(), pinned: ['thread-2'] })));
 
     const deleteFromMenu = async () => {
       const section = await screen.findByRole('region', { name: 'Pinned' });
@@ -407,17 +414,19 @@ describe('ChatThreads — pinning', () => {
       expect(onDelete).toHaveBeenCalledWith('thread-2');
     });
 
-    it('removes the pin from localStorage', async () => {
+    it('removes the pin on the server', async () => {
       renderTwoThreads();
 
       await deleteFromMenu();
 
-      await waitFor(() => expect(JSON.parse(localStorage.getItem(PIN_KEY) ?? '[]')).toEqual([]));
+      await waitFor(() => expect(organization.state.pinned).toEqual([]));
     });
   });
 
   describe('when the stored pin references a thread that no longer exists', () => {
-    beforeEach(() => localStorage.setItem(PIN_KEY, JSON.stringify(['deleted-thread'])));
+    beforeEach(
+      () => (organization = installOrganizationFixture({ ...emptyOrganization(), pinned: ['deleted-thread'] })),
+    );
 
     it('renders no Pinned section', async () => {
       renderTwoThreads();
@@ -433,7 +442,7 @@ const COLLAPSED_KEY = 'mastra:thread-sections-collapsed';
 describe('ChatThreads — collapsible sections', () => {
   beforeEach(() => {
     localStorage.clear();
-    localStorage.setItem(PIN_KEY, JSON.stringify(['thread-2']));
+    organization = installOrganizationFixture({ ...emptyOrganization(), pinned: ['thread-2'] });
   });
 
   describe('when the user collapses the Pinned section', () => {

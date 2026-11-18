@@ -49,7 +49,7 @@ import { useReadAloud } from '@mastra/react/hooks/voice';
 import type { MessageFactoryPart } from '@mastra/react/ui';
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { AttachFileMenu } from './attachments/attach-file-menu';
 import { ComposerAttachments as ChatComposerAttachments } from './attachments/attachment';
@@ -124,6 +124,9 @@ export interface ThreadProps {
   isHistoryLoading?: boolean;
   onLoadPrevious?: () => void | Promise<void>;
   isLoadingPrevious?: boolean;
+  landingHeader?: ReactNode;
+  landingContent?: ReactNode;
+  composerPlaceholder?: string;
 }
 
 const ThreadContent = ({
@@ -136,6 +139,9 @@ const ThreadContent = ({
   isHistoryLoading,
   onLoadPrevious,
   isLoadingPrevious,
+  landingHeader,
+  landingContent,
+  composerPlaceholder,
 }: ThreadProps) => {
   useLocale();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -302,14 +308,20 @@ const ThreadContent = ({
             </ChatShell.Content>
             <ChatShell.Dock
               data-testid={landingShown ? 'thread-landing' : undefined}
-              className={landingShown ? 'static flex flex-1 flex-col justify-center py-12 before:hidden' : undefined}
+              className={
+                landingShown
+                  ? landingHeader
+                    ? 'static flex flex-1 flex-col justify-start py-12 before:hidden'
+                    : 'static flex flex-1 flex-col justify-center py-12 before:hidden'
+                  : undefined
+              }
             >
               {landingShown ? null : <ChatShell.ScrollButton />}
               <ChatShell.Column className={landingShown ? 'gap-6 px-1 md:px-1' : 'gap-2 px-1 md:px-1'}>
                 {landingShown ? (
                   <>
-                    <ThreadWelcome />
-                    {agentId ? <AgentChannelsCard agentId={agentId} /> : null}
+                    {landingHeader ?? <ThreadWelcome />}
+                    {!landingHeader && agentId ? <AgentChannelsCard agentId={agentId} /> : null}
                   </>
                 ) : (
                   <>
@@ -323,10 +335,13 @@ const ThreadContent = ({
                     threadId={threadId}
                     hasModelList={hasModelList}
                     hideModelSwitcher={hideModelSwitcher}
+                    composerPlaceholder={composerPlaceholder}
                   />
                 </div>
                 {!landingShown && <ConversationStats />}
-                {landingShown ? <SuggestedPromptList prompts={suggestedPrompts ?? EMPTY_SUGGESTED_PROMPTS} /> : null}
+                {landingShown
+                  ? (landingContent ?? <SuggestedPromptList prompts={suggestedPrompts ?? EMPTY_SUGGESTED_PROMPTS} />)
+                  : null}
               </ChatShell.Column>
             </ChatShell.Dock>
           </ChatShell.Viewport>
@@ -369,9 +384,16 @@ interface AgentComposerProps {
   threadId?: string;
   hasModelList?: boolean;
   hideModelSwitcher?: boolean;
+  composerPlaceholder?: string;
 }
 
-const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher }: AgentComposerProps) => {
+const AgentComposer = ({
+  agentId,
+  threadId,
+  hasModelList,
+  hideModelSwitcher,
+  composerPlaceholder,
+}: AgentComposerProps) => {
   useLocale();
   const { threadInput: text, setThreadInput, updateDraft, draftStatus } = useThreadInput(threadId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -400,7 +422,7 @@ const AgentComposer = ({ agentId, threadId, hasModelList, hideModelSwitcher }: A
   const showModelSwitcher = Boolean(agentId && !hasModelList && !hideModelSwitcher);
   const shownError = submitError || draftStatus?.error;
   const placeholder = canExecuteAgent
-    ? studioT('Enter your message')
+    ? (composerPlaceholder ?? studioT('Enter your message'))
     : studioT("You don't have permission to execute agents");
 
   const onComposerKeyDown = (event: KeyboardEvent<HTMLElement>) => {

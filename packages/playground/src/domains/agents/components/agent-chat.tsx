@@ -1,7 +1,11 @@
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+import { t } from '@mastra/playground-ui/lib/i18n';
 import { useAgentMessages } from '@mastra/react/hooks/agents';
 import { useEffect, useRef } from 'react';
 import { useAgentSettings } from '../context/agent-context';
+import { ConversationWorkspace } from '@/domains/conversation/files/conversation-workspace';
+import { ProjectLandingHeader, ProjectLandingContent } from '@/domains/navigation/components/project-landing';
+import type { ConversationProject } from '@/domains/navigation/use-conversation-projects';
 import { ChatProvider } from '@/lib/ai-ui/chat/chat-provider';
 import { Thread } from '@/lib/ai-ui/thread';
 
@@ -21,12 +25,16 @@ export const AgentChat = ({
   suggestedPrompts,
   isNewThread,
   hideModelSwitcher,
+  workspaceScope,
+  project,
 }: Omit<ChatProps, 'initialMessages'> & {
   memory?: boolean;
   messageId?: string;
   suggestedPrompts?: string[];
   isNewThread?: boolean;
   hideModelSwitcher?: boolean;
+  workspaceScope?: string;
+  project?: ConversationProject;
 }) => {
   const { settings } = useAgentSettings();
   const requestContext = useEntityRequestContext('agent', agentId)[0];
@@ -75,6 +83,23 @@ export const AgentChat = ({
     if (!isFetchingNextPage) void fetchNextPage();
   };
 
+  const thread = (
+    <Thread
+      agentName={agentName ?? ''}
+      agentId={agentId}
+      threadId={threadId}
+      suggestedPrompts={suggestedPrompts}
+      hasModelList={Boolean(modelList)}
+      hideModelSwitcher={hideModelSwitcher}
+      isHistoryLoading={isMessagesLoading}
+      onLoadPrevious={hasNextPage ? loadOlderMessages : undefined}
+      isLoadingPrevious={isFetchingNextPage}
+      landingHeader={project ? <ProjectLandingHeader project={project} agentId={agentId} /> : undefined}
+      landingContent={project ? <ProjectLandingContent project={project} /> : undefined}
+      composerPlaceholder={project ? t('New chat in {name}', { name: project.name }) : undefined}
+    />
+  );
+
   return (
     <ChatProvider
       agentId={agentId}
@@ -88,17 +113,19 @@ export const AgentChat = ({
       settings={settings}
       requestContext={requestContext}
     >
-      <Thread
-        agentName={agentName ?? ''}
-        agentId={agentId}
-        threadId={threadId}
-        suggestedPrompts={suggestedPrompts}
-        hasModelList={Boolean(modelList)}
-        hideModelSwitcher={hideModelSwitcher}
-        isHistoryLoading={isMessagesLoading}
-        onLoadPrevious={hasNextPage ? loadOlderMessages : undefined}
-        isLoadingPrevious={isFetchingNextPage}
-      />
+      {workspaceScope ? (
+        <ConversationWorkspace
+          key={workspaceScope}
+          agentId={agentId}
+          scope={workspaceScope}
+          threadId={isNewThread || !memory ? undefined : threadId}
+          requestContext={requestContext}
+        >
+          {thread}
+        </ConversationWorkspace>
+      ) : (
+        thread
+      )}
     </ChatProvider>
   );
 };

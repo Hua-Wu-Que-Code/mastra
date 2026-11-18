@@ -6,7 +6,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 export const agentThreadsIndexLoader = ({ params }: LoaderFunctionArgs) =>
   redirect(`/agents/${params.agentId}/threads/new`);
 
-export const agentIndexLoader = ({ params }: LoaderFunctionArgs) => redirect(`/agents/${params.agentId}/threads/new`);
+export const agentIndexLoader = ({ params }: LoaderFunctionArgs) => redirect(`/agents/${params.agentId}/traces`);
 
 export const legacyAgentChatLoader = ({ params, request }: LoaderFunctionArgs) => {
   const search = new URL(request.url).search;
@@ -45,17 +45,17 @@ export function workspaceSkillFileLink(workspaceId?: string, skillPath?: string 
 }
 
 export const paths: LinkComponentProviderProps['paths'] = {
-  agentLink: (agentId: string) => `/agents/${agentId}/threads/new`,
+  agentLink: (agentId: string) => `/agents/${agentId}/traces`,
   agentToolLink: (agentId: string, toolId: string, threadId?: string) =>
     `/agents/${agentId}/threads/${threadId ?? 'new'}${toolSearch(toolId)}`,
   agentSkillLink: (_agentId: string, _skillName: string, skillPath?: string, workspaceId?: string) =>
     workspaceSkillFileLink(workspaceId, skillPath),
   agentsLink: () => `/agents`,
-  agentNewThreadLink: (agentId: string) => `/agents/${agentId}/threads/new`,
+  agentNewThreadLink: (agentId: string) => `/chat/${agentId}/threads/new`,
   agentThreadLink: (agentId: string, threadId: string, messageId?: string) =>
     messageId
-      ? `/agents/${agentId}/threads/${threadId}?messageId=${messageId}`
-      : `/agents/${agentId}/threads/${threadId}`,
+      ? `/chat/${agentId}/threads/${threadId}?messageId=${messageId}`
+      : `/chat/${agentId}/threads/${threadId}`,
   workflowsLink: () => `/workflows`,
   workflowLink: (workflowId: string) => `/workflows/${workflowId}`,
   schedulesLink: () => `/workflows/schedules`,

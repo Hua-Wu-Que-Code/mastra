@@ -77,6 +77,7 @@ import PromptBlocks from './pages/prompt-blocks';
 import Scorers from './pages/scorers';
 import Scorer from './pages/scorers/scorer';
 import { StudioSettingsPage } from './pages/settings';
+import { ArchivedChatsSettingsPage } from './pages/settings/archived-chats';
 import { MemorySettingsPage } from './pages/settings/memory-settings';
 import { StorageSettingsPage } from './pages/settings/storage-settings';
 import { SignUp } from './pages/signup';
@@ -296,6 +297,7 @@ export const routes: RouteObject[] = [
         ? []
         : [
             { path: '/settings', element: <StudioSettingsPage /> },
+            { path: '/settings/archived-chats', element: <ArchivedChatsSettingsPage /> },
             { path: '/settings/memory', element: <MemorySettingsPage /> },
             { path: '/settings/storage', element: <StorageSettingsPage /> },
             {
@@ -348,6 +350,22 @@ export const routes: RouteObject[] = [
         loader: ({ request }: LoaderFunctionArgs) => redirect(`/traces${new URL(request.url).search}`),
       },
       { path: '/agents', element: <Agents /> },
+      {
+        path: '/chat/:agentId/projects/:projectId',
+        element: (
+          <AgentLayout mode="conversation">
+            <AgentThread />
+          </AgentLayout>
+        ),
+      },
+      {
+        path: '/chat/:agentId/threads/:threadId',
+        element: (
+          <AgentLayout mode="conversation">
+            <AgentThread />
+          </AgentLayout>
+        ),
+      },
       {
         path: '/cms/agents/create',
         element: <CreateLayoutWrapper />,

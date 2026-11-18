@@ -7,15 +7,15 @@ import { SessionExpired } from '@mastra/playground-ui/domains/auth/components/se
 import { cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { useLocale, t as studioT } from '@mastra/playground-ui/lib/i18n';
-
 import { is401UnauthorizedError, is403ForbiddenError, is404NotFoundError } from '@mastra/playground-ui/utils/errors';
 import { useMastraClient } from '@mastra/react';
+
 import { useAgent } from '@mastra/react/hooks/agents';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
 import { useMemory, useThreads } from '@mastra/react/hooks/memory';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLayoutEffect, useMemo, useRef } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useAccount } from '@/domains/account/account-context';
 import { AgentChat } from '@/domains/agents/components/agent-chat';
 import { AgentLayout } from '@/domains/agents/components/agent-layout';
@@ -34,11 +34,13 @@ import { buildAgentDefaultSettings } from '@/domains/agents/utils/agent-default-
 import { getAgentSuggestedPrompts } from '@/domains/agents/utils/agent-suggested-prompts';
 import type { ThreadDraftHandle } from '@/domains/conversation/context/ThreadInputContext';
 import { ThreadInputProvider } from '@/domains/conversation/context/ThreadInputContext';
+import { useConversationProjects } from '@/domains/navigation/use-conversation-projects';
+import { useConversationScope } from '@/domains/navigation/use-conversation-scope';
 
 function AgentThread() {
   const account = useAccount();
   useLocale();
-  const { agentId, threadId } = useParams();
+  const { agentId, threadId, projectId } = useParams();
   const client = useMastraClient();
   const queryClient = useQueryClient();
   const { data: auth, error: authError } = useAuthCapabilities();
@@ -46,8 +48,14 @@ function AgentThread() {
   const userId = account?.user.id ?? (signedIn ? auth.user.id : undefined);
   const canPersistDraft = !!account || auth?.enabled === false || Boolean(signedIn);
   const draftScope = [client.options.baseUrl, client.options.apiPrefix, userId, agentId];
-  const draftKey = JSON.stringify([...draftScope, threadId ?? 'new']);
   const [searchParams] = useSearchParams();
+  const organization = useConversationProjects(useConversationScope());
+  const selectedProjectId = projectId ?? (threadId === 'new' ? (searchParams.get('project') ?? undefined) : undefined);
+  const project = organization.projects.find(project => project.id === selectedProjectId);
+  const draftKey = JSON.stringify([
+    ...draftScope,
+    selectedProjectId ? `project:${selectedProjectId}:new` : (threadId ?? 'new'),
+  ]);
   const {
     data: agent,
     isLoading: isAgentLoading,
@@ -63,11 +71,12 @@ function AgentThread() {
     queryOptions: { enabled: Boolean(agentId) },
   });
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const draftHandle = useRef<ThreadDraftHandle>(null);
-  const isNewThread = threadId === 'new';
+  const isNewThread = threadId === 'new' || Boolean(projectId);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- threadId is intentional: we need a new UUID per thread
-  const newThreadId = useMemo(() => uuid(), [threadId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- each thread or project entry needs its own new-chat UUID
+  const newThreadId = useMemo(() => uuid(), [threadId, selectedProjectId]);
   const newThreadKey = JSON.stringify([...draftScope, newThreadId]);
   const activeNewThread = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
@@ -134,18 +143,41 @@ function AgentThread() {
     return <AgentUnavailable />;
   }
 
+  if (selectedProjectId && organization.isLoading) return <AgentLandingLoadingSkeleton />;
+  if (selectedProjectId && organization.error)
+    return (
+      <EmptyState
+        tone="error"
+        titleSlot={studioT('Failed to load projects')}
+        descriptionSlot={organization.error.message}
+      />
+    );
+  if (selectedProjectId && !project) return <EmptyState titleSlot={studioT('Project not found')} />;
+
   const actualThreadId = isNewThread ? newThreadId : (threadId ?? newThreadId);
   const handleRefreshThreadList = async () => {
+    if (isNewThread && project) {
+      try {
+        await organization.move(newThreadId, project.id);
+      } catch {
+        // The organization mutation reports the error. Keep this draft and project context for retry.
+        return;
+      }
+    }
     if (isNewThread && activeNewThread.current === newThreadKey) {
       const currentDraft = draftHandle.current;
       if (canPersistDraft) await currentDraft?.move(newThreadKey);
       if (activeNewThread.current === newThreadKey && currentDraft === draftHandle.current) {
-        void navigate(`/agents/${agentId}/threads/${newThreadId}`, { replace: true });
+        void navigate(`${pathname.startsWith('/chat/') ? '/chat' : '/agents'}/${agentId}/threads/${newThreadId}`, {
+          replace: true,
+        });
       }
     }
     await Promise.all([
       refreshThreads(),
       queryClient.invalidateQueries({ queryKey: ['memory', 'threads', 'sidebar'] }),
+      queryClient.invalidateQueries({ queryKey: ['account-storage'] }),
+      queryClient.invalidateQueries({ queryKey: ['conversation-file-paths'] }),
     ]);
   };
 
@@ -173,10 +205,14 @@ function AgentThread() {
               <ObservationalMemoryProvider>
                 <MemoryTimelineProvider key={`memory-timeline-${agentId}-${actualThreadId}`}>
                   <ActivatedSkillsProvider key={`${agentId}-${actualThreadId}`}>
-                    <AgentLayout agentId={agentId!}>
+                    <div className="h-full min-h-0">
                       <div key={actualThreadId} className="relative flex h-full min-h-0 flex-col">
                         <div className="relative grid min-h-0 flex-1">
                           <AgentChat
+                            workspaceScope={
+                              project && isNewThread ? undefined : JSON.stringify([...draftScope, actualThreadId])
+                            }
+                            project={project}
                             agentId={agentId!}
                             agentName={agent?.name}
                             modelVersion={agent?.modelVersion}
@@ -191,7 +227,7 @@ function AgentThread() {
                           />
                         </div>
                       </div>
-                    </AgentLayout>
+                    </div>
                   </ActivatedSkillsProvider>
                 </MemoryTimelineProvider>
               </ObservationalMemoryProvider>

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import 'fake-indexeddb/auto';
+import { Sidebar } from '@mastra/playground-ui/components/Sidebar';
 import { LinkComponentProvider } from '@mastra/playground-ui/lib/framework';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -34,6 +35,9 @@ import { generatedTitleChunk, titleMemoryConfig } from './fixtures/thread-title'
 import { emptyThreadTracesList } from './fixtures/thread-traces';
 import { AgentLayout } from '@/domains/agents/agent-layout';
 import { readThreadDraft } from '@/domains/conversation/context/thread-draft-storage';
+import { installPreferenceFixture } from '@/domains/account/__tests__/fixtures/preferences';
+import { installOrganizationFixture } from '@/domains/navigation/__tests__/fixtures/conversation-projects';
+import { SidebarConversations } from '@/domains/navigation/components/sidebar-conversations';
 import { agentIndexLoader, agentThreadsIndexLoader, legacyAgentChatLoader, paths } from '@/lib/app-routing';
 import { Link } from '@/lib/link';
 import { server } from '@/test/msw-server';
@@ -145,37 +149,65 @@ vi.mock('react-resizable-panels', async () => {
   return { ...actual, Group, Panel, Separator };
 });
 
-// CollapsiblePanel keeps its content mounted but marks the wrapper `hidden` once
-// collapsed, so "gone" means an ancestor carries the hidden attribute.
-const isHiddenFromUser = (element: HTMLElement) => element.closest('[hidden]') !== null;
-
 const LocationProbe = () => {
   const location = useLocation();
   return <div data-testid="location-probe">{`${location.pathname}${location.search}`}</div>;
 };
 
+const AppShell = () => (
+  <Sidebar.Provider>
+    <SidebarConversations />
+    <Outlet />
+  </Sidebar.Provider>
+);
+
 const buildRouter = (initialEntry: string) =>
   createMemoryRouter(
     [
-      { path: '/agents', element: <LocationProbe /> },
       {
-        // Mirrors App.tsx: the thread page is a child of the agent tabs layout.
-        path: '/agents/:agentId',
-        element: (
-          <>
-            <LocationProbe />
-            <AgentLayout>
-              <Outlet />
-            </AgentLayout>
-          </>
-        ),
+        element: <AppShell />,
         children: [
-          { index: true, loader: agentIndexLoader },
-          { path: 'chat', loader: legacyAgentChatLoader },
-          { path: 'chat/:threadId', loader: legacyAgentChatLoader },
-          { path: 'threads', loader: agentThreadsIndexLoader },
-          { path: 'threads/:threadId', element: <AgentThread /> },
-          { path: 'session/:threadId', element: <AgentSession /> },
+          { path: '/agents', element: <LocationProbe /> },
+          {
+            path: '/chat/:agentId/projects/:projectId',
+            element: (
+              <AgentLayout mode="conversation">
+                <AgentThread />
+              </AgentLayout>
+            ),
+          },
+          {
+            path: '/chat/:agentId/threads/:threadId',
+            element: (
+              <>
+                <LocationProbe />
+                <AgentLayout mode="conversation">
+                  <AgentThread />
+                </AgentLayout>
+              </>
+            ),
+          },
+          {
+            // Mirrors App.tsx: the thread page is a child of the agent tabs layout.
+            path: '/agents/:agentId',
+            element: (
+              <>
+                <LocationProbe />
+                <AgentLayout>
+                  <Outlet />
+                </AgentLayout>
+              </>
+            ),
+            children: [
+              { index: true, loader: agentIndexLoader },
+              { path: 'traces', element: <div data-testid="agent-management" /> },
+              { path: 'chat', loader: legacyAgentChatLoader },
+              { path: 'chat/:threadId', loader: legacyAgentChatLoader },
+              { path: 'threads', loader: agentThreadsIndexLoader },
+              { path: 'threads/:threadId', element: <AgentThread /> },
+              { path: 'session/:threadId', element: <AgentSession /> },
+            ],
+          },
         ],
       },
     ],
@@ -238,20 +270,17 @@ const threadsResponse = {
 
 const onTracesRequest = vi.fn<(threadId: string | null) => void>();
 
-/** Without observability the tab bar renders a single disabled "Traces" placeholder, never an aside toggle. */
-function expectOnlyDisabledTracesButton() {
-  const tracesButtons = screen.getAllByRole('button', { name: /traces/i });
-  expect(tracesButtons).toHaveLength(1);
-  expect(tracesButtons[0]?.getAttribute('aria-disabled')).toBe('true');
-}
-
 function installHandlers(baseUrl = BASE_URL) {
+  installOrganizationFixture();
+  installPreferenceFixture();
   const emptyTraces = ({ request }: { request: Request }) => {
     onTracesRequest(new URL(request.url).searchParams.get('threadId'));
     return HttpResponse.json(emptyThreadTracesList);
   };
   server.use(
     http.get(`${baseUrl}/api/auth/capabilities`, () => HttpResponse.json({ enabled: false })),
+    http.get(`${baseUrl}/api/agents`, () => HttpResponse.json({ [AGENT_ID]: agentResponse })),
+    http.get(`${baseUrl}/api/channels/platforms`, () => HttpResponse.json([])),
     http.get(`${baseUrl}/api/mcp/v0/servers`, () => HttpResponse.json(draftMcpServers)),
     http.get(`${baseUrl}/api/observability/feedback`, () => HttpResponse.json(draftFeedback)),
     http.get(`${baseUrl}/api/agents/:agentId/voice/speakers`, () => HttpResponse.json([])),
@@ -311,6 +340,67 @@ async function composerInput(placeholder = 'Enter your message') {
 }
 
 describe('Standalone thread page', () => {
+  describe('when starting a chat from a project homepage', () => {
+    it('sends through the real composer and saves the resulting conversation in that project', async () => {
+      installHandlers();
+      const scope = JSON.stringify([BASE_URL, undefined, 'local']);
+      const storageKey = `mastra:conversation-projects:${scope}`;
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          projects: [{ id: 'writing', name: 'My writing', agentId: AGENT_ID, threads: [] }],
+          pinned: [],
+          collapsed: [],
+        }),
+      );
+      let createdThreadId: string | undefined;
+      server.use(
+        http.post(`${BASE_URL}/api/agents/${AGENT_ID}/stream`, async ({ request }) => {
+          const body = await request.json();
+          createdThreadId = body.memory.thread;
+          return new HttpResponse('data: {"type":"finish","payload":{}}\n\n', {
+            headers: { 'Content-Type': 'text/event-stream' },
+          });
+        }),
+      );
+      const organization = installOrganizationFixture();
+      const router = renderAt(`/chat/${AGENT_ID}/projects/writing`);
+      await screen.findByRole('heading', { name: 'My writing' });
+      expect(await screen.findByRole('tab', { name: 'Sources' })).toBeTruthy();
+      const input = await composerInput('New chat in My writing');
+      fireEvent.change(input, { target: { value: 'Write an opening' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      await waitFor(() => expect(createdThreadId).toBeTruthy());
+      await waitFor(() => expect(router.state.location.pathname).toBe(`/chat/${AGENT_ID}/threads/${createdThreadId}`));
+      expect(organization.state.projects[0].threads).toContain(createdThreadId);
+      expect(localStorage.getItem(storageKey)).toBeNull();
+    });
+
+    it('keeps unsent drafts separate between projects and regular new chats', async () => {
+      installHandlers();
+      const scope = JSON.stringify([BASE_URL, undefined, 'local']);
+      localStorage.setItem(
+        `mastra:conversation-projects:${scope}`,
+        JSON.stringify({
+          projects: [
+            { id: 'writing', name: 'My writing', threads: [] },
+            { id: 'research', name: 'Research', threads: [] },
+          ],
+          pinned: [],
+          collapsed: [],
+        }),
+      );
+      installOrganizationFixture();
+      const router = renderAt(`/chat/${AGENT_ID}/projects/writing`);
+      fireEvent.change(await composerInput('New chat in My writing'), { target: { value: 'Writing draft' } });
+      await act(() => router.navigate(`/chat/${AGENT_ID}/projects/research`));
+      expect((await composerInput('New chat in Research')).value).toBe('');
+      await act(() => router.navigate(`/chat/${AGENT_ID}/threads/new`));
+      expect((await composerInput()).value).toBe('');
+      await act(() => router.navigate(`/chat/${AGENT_ID}/projects/writing`));
+      expect((await composerInput('New chat in My writing')).value).toBe('Writing draft');
+    });
+  });
   describe('when automatic titles are configured by the agent', () => {
     it('requests the persisted-title event on the reply stream', async () => {
       installHandlers();
@@ -798,11 +888,13 @@ describe('Standalone thread page', () => {
           await screen.findByRole('button', { name: 'Preview leads.csv' }, ATTACHMENT_TIMEOUT);
           const originalRead = FileReader.prototype.readAsText;
           let finishReading = () => {};
-          const reader = vi
-            .spyOn(FileReader.prototype, 'readAsText')
-            .mockImplementationOnce(function (this: FileReader, file, encoding) {
-              finishReading = () => originalRead.call(this, file, encoding);
-            });
+          const reader = vi.spyOn(FileReader.prototype, 'readAsText').mockImplementationOnce(function (
+            this: FileReader,
+            file,
+            encoding,
+          ) {
+            finishReading = () => originalRead.call(this, file, encoding);
+          });
           fireEvent.keyDown(input, { key: 'Enter' });
           if (editWhilePreparing) {
             fireEvent.change(input, { target: { value: 'Keep the next question' } });
@@ -1013,79 +1105,14 @@ describe('Standalone thread page', () => {
     expect(await screen.findByText('Sushi ideas')).not.toBeNull();
   });
 
-  it('lets the user hide the threads panel and bring it back from the page edge', async () => {
+  it('does not add a second threads panel or capability footer to conversations', async () => {
     installHandlers();
-    renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
-
-    // Given the thread list is visible next to the chat
+    renderAt(`/chat/${AGENT_ID}/threads/${THREAD_ID}`);
     await screen.findByText('Sushi ideas');
-    expect(screen.queryByRole('button', { name: 'Expand panel' })).toBeNull();
-
-    // When I hide the threads panel
-    fireEvent.click(screen.getByRole('button', { name: 'Hide threads panel' }));
-
-    // Then the list is gone and only the restore affordance remains
-    await waitFor(() => expect(isHiddenFromUser(screen.getByText('Sushi ideas'))).toBe(true));
+    expect(screen.getAllByRole('region', { name: 'Recent' })).toHaveLength(1);
     expect(screen.queryByRole('button', { name: 'Hide threads panel' })).toBeNull();
-
-    // And the collapsed state is remembered for this agent
-    await waitFor(() => {
-      const layout = window.localStorage.getItem(`react-resizable-panels:agent-layout-v6-${AGENT_ID}`);
-      expect(layout).not.toBeNull();
-      expect(JSON.parse(layout!)['left-slot']).toBe(0);
-    });
-
-    // When I expand it again from the page edge
-    fireEvent.click(await screen.findByRole('button', { name: 'Expand panel' }));
-
-    // Then the thread list is back
-    await waitFor(() => expect(isHiddenFromUser(screen.getByText('Sushi ideas'))).toBe(false));
-    expect(screen.getByRole('button', { name: 'Hide threads panel' })).not.toBeNull();
-    expect(screen.queryByRole('button', { name: 'Expand panel' })).toBeNull();
-  });
-
-  it('does not carry a hidden threads panel over to another agent', async () => {
-    installHandlers();
-    const OTHER_AGENT_ID = 'sommelier-agent';
-    server.use(
-      http.get(`${BASE_URL}/api/agents/${OTHER_AGENT_ID}`, () =>
-        HttpResponse.json({ ...agentResponse, id: OTHER_AGENT_ID, name: 'Sommelier Agent' }),
-      ),
-      http.get(`${BASE_URL}/api/memory/threads`, ({ request }) => {
-        const agentId = new URL(request.url).searchParams.get('agentId');
-        if (agentId === OTHER_AGENT_ID) {
-          return HttpResponse.json({
-            threads: [
-              {
-                id: 'wine-1',
-                resourceId: OTHER_AGENT_ID,
-                title: 'Wine pairing',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            ],
-          });
-        }
-        return HttpResponse.json(threadsResponse);
-      }),
-    );
-    const router = renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
-
-    // Given I hid the threads panel for the first agent
-    await screen.findByText('Sushi ideas');
-    fireEvent.click(screen.getByRole('button', { name: 'Hide threads panel' }));
-    await screen.findByRole('button', { name: 'Expand panel' });
-
-    // When I switch to another agent without leaving the page
-    await act(() => router.navigate(`/agents/${OTHER_AGENT_ID}/threads/new`));
-
-    // Then its threads panel is visible and its own layout is not marked collapsed
-    const otherThread = await screen.findByText('Wine pairing');
-    await waitFor(() => expect(isHiddenFromUser(otherThread)).toBe(false));
-    expect(screen.getByRole('button', { name: 'Hide threads panel' })).not.toBeNull();
-    expect(screen.queryByRole('button', { name: 'Expand panel' })).toBeNull();
-    const otherLayout = window.localStorage.getItem(`react-resizable-panels:agent-layout-v6-${OTHER_AGENT_ID}`);
-    expect(otherLayout === null || JSON.parse(otherLayout)['left-slot'] !== 0).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Show capability details' })).toBeNull();
+    expect(screen.queryByRole('tablist')).toBeNull();
   });
 
   describe('when the thread list is still loading', () => {
@@ -1103,7 +1130,7 @@ describe('Standalone thread page', () => {
       renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
 
       expect(await screen.findByRole('link', { name: /New Thread/ })).not.toBeNull();
-      expect(screen.getByRole('button', { name: 'Hide threads panel' })).not.toBeNull();
+      expect(screen.queryByRole('button', { name: 'Hide threads panel' })).toBeNull();
       expect(screen.queryByTestId('agent-route-sidebar-skeleton')).toBeNull();
       expect(screen.queryByText(/Your conversations will appear here/)).toBeNull();
 
@@ -1113,7 +1140,7 @@ describe('Standalone thread page', () => {
   });
 
   describe('when the agent is still loading', () => {
-    it('keeps the threads panel in place next to the chat skeleton', async () => {
+    it('keeps global recent conversations available next to the chat skeleton', async () => {
       installHandlers();
       let releaseAgent!: () => void;
       const gate = new Promise<void>(resolve => (releaseAgent = resolve));
@@ -1127,15 +1154,15 @@ describe('Standalone thread page', () => {
       renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
 
       expect(await screen.findByTestId('agent-thread-skeleton')).not.toBeNull();
-      expect(screen.getByRole('link', { name: /New Thread/ })).not.toBeNull();
+      expect(await screen.findByRole('link', { name: /New Thread/ })).not.toBeNull();
 
       releaseAgent();
       expect(await screen.findByText('Sushi ideas')).not.toBeNull();
     });
   });
 
-  describe('when the user reloads an agent without threads after opening its threads panel', () => {
-    it('keeps the threads panel open', async () => {
+  describe('when the user reloads an agent without threads with a legacy panel preference', () => {
+    it('shows global recent conversations without restoring an extra panel', async () => {
       installHandlers();
       server.use(
         http.get(`${BASE_URL}/api/memory/threads`, () =>
@@ -1149,27 +1176,27 @@ describe('Standalone thread page', () => {
 
       renderAt(`/agents/${AGENT_ID}/threads/new`);
 
-      expect(await screen.findByText(/Your conversations will appear here/)).not.toBeNull();
-      expect(screen.getByRole('button', { name: 'Hide threads panel' })).not.toBeNull();
+      expect(await screen.findByText('No recent conversations')).not.toBeNull();
+      expect(screen.queryByRole('button', { name: 'Hide threads panel' })).toBeNull();
       expect(screen.queryByRole('button', { name: 'Expand panel' })).toBeNull();
     });
   });
 
-  it('highlights the Chat tab in the agent tab bar', async () => {
+  it('keeps the Chat tab out of the agent management bar', async () => {
     installHandlers();
     renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
 
     await screen.findByText('Tonight we cook carbonara.');
-    expect(screen.getByRole('tab', { name: 'Chat' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByRole('tab', { name: 'Chat' })).toBeNull();
     expect(screen.queryByRole('tab', { name: 'Overview' })).toBeNull();
   });
 
-  it('highlights the Chat tab on /threads/new', async () => {
+  it('keeps the Chat tab out of legacy /threads/new', async () => {
     installHandlers();
     renderAt(`/agents/${AGENT_ID}/threads/new`);
 
     await screen.findByText('Sushi ideas');
-    expect(screen.getByRole('tab', { name: 'Chat' }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByRole('tab', { name: 'Chat' })).toBeNull();
   });
 
   it('navigates to another thread when clicked in the list', async () => {
@@ -1180,7 +1207,7 @@ describe('Standalone thread page', () => {
     fireEvent.click(otherThread);
 
     await waitFor(() =>
-      expect(screen.getByTestId('location-probe').textContent).toBe(`/agents/${AGENT_ID}/threads/thread-2`),
+      expect(screen.getByTestId('location-probe').textContent).toBe(`/chat/${AGENT_ID}/threads/thread-2`),
     );
   });
 
@@ -1193,13 +1220,11 @@ describe('Standalone thread page', () => {
     );
   });
 
-  it('redirects bare /agents/:agentId to the new-thread chat', async () => {
+  it('redirects bare /agents/:agentId to management', async () => {
     installHandlers();
     renderAt(`/agents/${AGENT_ID}`);
 
-    await waitFor(() =>
-      expect(screen.getByTestId('location-probe').textContent).toBe(`/agents/${AGENT_ID}/threads/new`),
-    );
+    await waitFor(() => expect(screen.getByTestId('location-probe').textContent).toBe(`/agents/${AGENT_ID}/traces`));
   });
 
   it('redirects the legacy chat URL to /threads/:threadId preserving ?messageId=', async () => {
@@ -1222,23 +1247,13 @@ describe('Standalone thread page', () => {
     );
   });
 
-  it('does not fetch traces nor render a traces aside in the chat view', async () => {
+  it.each([THREAD_ID, 'new'])('shows chat %s without management controls or global trace queries', async threadId => {
     installHandlers();
-    renderAt(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
-
-    await screen.findByText('Tonight we cook carbonara.');
-    expectOnlyDisabledTracesButton();
-    expect(screen.queryByRole('complementary')).toBeNull();
-    expect(onTracesRequest).not.toHaveBeenCalled();
-  });
-
-  it('does not fetch traces on /new', async () => {
-    installHandlers();
-    renderAt(`/agents/${AGENT_ID}/threads/new`);
-
-    await screen.findByText('Sushi ideas');
-    expectOnlyDisabledTracesButton();
-    expect(onTracesRequest).not.toHaveBeenCalled();
+    renderAt(`/chat/${AGENT_ID}/threads/${threadId}`);
+    await composerInput();
+    expect(screen.queryByRole('tablist')).toBeNull();
+    expect(screen.queryByText('Config')).toBeNull();
+    expect(onTracesRequest).not.toHaveBeenCalledWith(null);
   });
 
   it('shows the session expired screen on a 401', async () => {
@@ -1318,7 +1333,7 @@ describe('Standalone thread page', () => {
       fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
 
       await waitFor(() =>
-        expect(screen.getByTestId('location-probe').textContent).toBe(`/agents/${AGENT_ID}/threads/new`),
+        expect(screen.getByTestId('location-probe').textContent).toBe(`/chat/${AGENT_ID}/threads/new`),
       );
     });
 
@@ -1595,11 +1610,40 @@ describe('Standalone thread page', () => {
 
 describe('thread link builders', () => {
   it('point to the standalone thread routes', () => {
-    expect(paths.agentLink(AGENT_ID)).toBe(`/agents/${AGENT_ID}/threads/new`);
-    expect(paths.agentNewThreadLink(AGENT_ID)).toBe(`/agents/${AGENT_ID}/threads/new`);
-    expect(paths.agentThreadLink(AGENT_ID, THREAD_ID)).toBe(`/agents/${AGENT_ID}/threads/${THREAD_ID}`);
+    expect(paths.agentLink(AGENT_ID)).toBe(`/agents/${AGENT_ID}/traces`);
+    expect(paths.agentNewThreadLink(AGENT_ID)).toBe(`/chat/${AGENT_ID}/threads/new`);
+    expect(paths.agentThreadLink(AGENT_ID, THREAD_ID)).toBe(`/chat/${AGENT_ID}/threads/${THREAD_ID}`);
     expect(paths.agentThreadLink(AGENT_ID, THREAD_ID, 'msg-1')).toBe(
-      `/agents/${AGENT_ID}/threads/${THREAD_ID}?messageId=msg-1`,
+      `/chat/${AGENT_ID}/threads/${THREAD_ID}?messageId=msg-1`,
     );
+  });
+});
+
+describe('Standalone conversation navigation', () => {
+  describe('when sending the first message', () => {
+    it('stays in the clean chat route after persistence and reload', async () => {
+      installHandlers();
+      const response = draftStream();
+      server.use(
+        http.post(
+          `${BASE_URL}/api/agents/${AGENT_ID}/stream`,
+          () => new HttpResponse(response.stream, { headers: { 'content-type': 'text/event-stream' } }),
+        ),
+      );
+      const router = renderAt(`/chat/${AGENT_ID}/threads/new`);
+      const input = await composerInput();
+      fireEvent.change(input, { target: { value: 'Standalone chat question' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      await act(async () => response.finish());
+      await waitFor(() => expect(router.state.location.pathname).not.toContain('/threads/new'));
+      const path = router.state.location.pathname;
+      expect(path).toMatch(/^\/chat\//);
+      expect(screen.queryByRole('tablist')).toBeNull();
+      cleanup();
+      renderAt(path);
+      await composerInput();
+      expect(screen.queryByRole('navigation', { name: 'Breadcrumb' })).toBeNull();
+      expect(screen.queryByRole('tablist')).toBeNull();
+    });
   });
 });
