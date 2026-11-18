@@ -74,6 +74,36 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('Chat presentation', () => {
+  describe('whole-turn control geometry (DSH TurnProcessNodeView)', () => {
+    it('is 33px tall at the body size with an 8px pad and a hairline rule', () => {
+      render(tree());
+      const control = screen.getByRole('button', { name: 'Show work details' });
+      expect(control.className).toContain('h-[calc(33px+var(--dsh-content-font-delta,0px))]');
+      expect(control.className).toContain('pb-2');
+      expect(control.className).toContain('border-b-[0.5px]');
+      expect(control.className).toContain('text-body');
+      expect(control.className).not.toContain('pb-3');
+      expect(control.style.getPropertyValue('--dsh-content-font-delta')).toBe('0px');
+    });
+    it('puts one 14px chevron 4px after the label and rotates it instead of swapping', () => {
+      render(tree());
+      const control = screen.getByRole('button', { name: 'Show work details' });
+      const chevron = control.querySelector('[data-process-turn-chevron]')?.getAttribute('class');
+      expect(chevron).toContain('ml-1');
+      expect(chevron).toContain('[&_svg]:size-3.5');
+      expect(chevron).toContain('transition-transform');
+      expect(chevron).toContain('duration-100');
+      expect(chevron).not.toContain('rotate-180');
+      fireEvent.click(control);
+      expect(
+        screen
+          .getByRole('button', { name: 'Hide work details' })
+          .querySelector('[data-process-turn-chevron]')
+          ?.getAttribute('class'),
+      ).toContain('rotate-180');
+    });
+  });
+
   describe('when a completed turn is folded', () => {
     it('keeps every reply by default and reveals work on demand', async () => {
       render(tree());

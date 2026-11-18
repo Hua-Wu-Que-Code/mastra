@@ -6,13 +6,14 @@ import { isToolPart, readToolPart } from '../messages/renderers/tool-part';
 import { useTurnMetrics } from '../metrics/chat-metrics-context';
 import { runDurationLabel } from '../metrics/run-duration';
 import { isSettledState } from '../tools/tool-card-kind';
+import { chatContentStyle } from './chat-content-style';
 import { useChatPreferences } from './chat-preferences-context';
 import { canFoldWork, finalReply, isWorkPart } from './work-details';
 import type { WorkDetailsPresentation } from './work-details';
 import { WorkDetailsContext, WorkDetailsControlContext } from './work-details-state';
 import { DshChevronDown } from '@/ds/icons/dsh/DshChevronDown';
-import { DshChevronUp } from '@/ds/icons/dsh/DshChevronUp';
 import { t, useLocale } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 /** Place after the user's message, before the assistant's work. */
 export function WorkDetailsToggle() {
@@ -97,7 +98,8 @@ export function WorkDetails({
     <button
       ref={trigger}
       type="button"
-      className="flex w-full items-center gap-1.5 border-b border-border pb-3 text-left text-caption text-muted-foreground focus-visible:outline-border-focus enabled:cursor-pointer enabled:hover:text-foreground"
+      style={chatContentStyle(preferences.fontSize)}
+      className="box-border flex h-[calc(33px+var(--dsh-content-font-delta,0px))] w-full items-center border-b-[0.5px] border-border pb-2 text-left text-body text-muted-foreground transition-colors duration-100 focus-visible:outline-border-focus motion-reduce:transition-none enabled:cursor-pointer enabled:hover:text-foreground"
       disabled={!foldable}
       aria-label={foldable ? (expanded ? t('Hide work details') : t('Show work details')) : label}
       aria-expanded={foldable ? expanded : undefined}
@@ -106,8 +108,20 @@ export function WorkDetails({
         setManual({ mode: preferences.workDetails, expanded: !expanded });
       }}
     >
-      <span aria-live="polite">{label}</span>
-      {foldable && <span className="[&_svg]:size-3.5">{expanded ? <DshChevronUp /> : <DshChevronDown />}</span>}
+      <span aria-live="polite" className="min-w-0 truncate tabular-nums">
+        {label}
+      </span>
+      {foldable && (
+        <span
+          data-process-turn-chevron=""
+          className={cn(
+            'ml-1 flex shrink-0 transition-transform duration-100 motion-reduce:transition-none [&_svg]:size-3.5',
+            expanded && 'rotate-180',
+          )}
+        >
+          <DshChevronDown />
+        </span>
+      )}
     </button>
   );
   return (
