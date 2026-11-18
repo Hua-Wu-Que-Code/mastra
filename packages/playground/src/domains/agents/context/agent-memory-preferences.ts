@@ -1,5 +1,5 @@
 import type { MemoryConfigInternal } from '@mastra/core/memory';
-import { useLocalStorageState } from '@mastra/playground-ui/hooks/use-local-storage-state';
+import { useServerPreference } from '@mastra/playground-ui/hooks/use-server-preference';
 import { z } from 'zod/v4';
 import { useAccount } from '@/domains/account/account-context';
 
@@ -11,14 +11,19 @@ export const agentMemoryPreferencesSchema = z.object({
 });
 export type AgentMemoryPreferences = z.infer<typeof agentMemoryPreferencesSchema>;
 
-/** Agent-local choices; omitting a field preserves the server's memory configuration. */
+// Legacy per-feature fields remain readable so existing master choices survive migration.
+/** One account-scoped switch; enabled requests use the complete server memory policy. */
 export function useAgentMemoryPreferences(agentId: string) {
   const account = useAccount();
-  return useLocalStorageState({
-    initialKey: `mastra-memory-preferences-${account?.user.id ?? 'local'}-${agentId}`,
+  const preference = useServerPreference({
+    kind: 'memory',
+    id: agentId,
+    accountId: account?.user.id,
+    legacyKey: account ? `mastra-memory-preferences-${account.user.id}-${agentId}` : undefined,
     defaultValue: {},
-    schema: agentMemoryPreferencesSchema,
+    schema: agentMemoryPreferencesSchema.pick({ enabled: true }),
   });
+  return [preference.value, preference.setValue, preference] as const;
 }
 
 export function resolveMemoryOptions(preferences: AgentMemoryPreferences): MemoryConfigInternal | undefined {
@@ -30,9 +35,6 @@ export function resolveMemoryOptions(preferences: AgentMemoryPreferences): Memor
       observationalMemory: false,
     };
   }
-  const options: MemoryConfigInternal = {};
-  if (preferences.workingMemory !== undefined) options.workingMemory = { enabled: preferences.workingMemory };
-  if (preferences.observationalMemory !== undefined) options.observationalMemory = preferences.observationalMemory;
-  if (typeof preferences.lastMessages === 'number') options.lastMessages = preferences.lastMessages || false;
-  return Object.keys(options).length ? options : undefined;
+  // Retired per-feature overrides must not silently disable memory after their controls are removed.
+  return undefined;
 }

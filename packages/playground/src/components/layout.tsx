@@ -6,14 +6,14 @@ import { ThemeProvider } from '@mastra/playground-ui/components/ThemeProvider';
 import { Toaster } from '@mastra/playground-ui/components/Toaster';
 import { TooltipProvider } from '@mastra/playground-ui/components/Tooltip';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-import { ChatPreferencesProvider } from '@mastra/playground-ui/domains/chat';
+import { BrowserDraftScopeContext } from '@mastra/playground-ui/hooks/browser-draft-scope';
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
 import { IconMagnifyingGlass } from '@mastra/playground-ui/icons/central/IconMagnifyingGlass';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
-
 import { AppShell, MainCard } from '@mastra/playground-ui/new/layout/app-shell';
 import { CollapsiblePanel } from '@mastra/playground-ui/resize/collapsible-panel';
+
 import { PanelGroup } from '@mastra/playground-ui/resize/panel-group';
 import { PanelSeparator } from '@mastra/playground-ui/resize/separator';
 import { useAuthCapabilities, isAuthenticated } from '@mastra/react/hooks/auth';
@@ -21,12 +21,14 @@ import type { CSSProperties } from 'react';
 import { Panel, useDefaultLayout } from 'react-resizable-panels';
 import { useLocation } from 'react-router';
 import { AppSidebar } from './ui/app-sidebar';
+import { AccountChatPreferences } from '@/domains/account/account-chat-preferences';
 import { useAccount } from '@/domains/account/account-context';
 import { AuthRequired } from '@/domains/auth/components/auth-required';
 import { ExperimentalUIProvider } from '@/domains/experimental-ui/experimental-ui-context';
 import { UI_EXPERIMENTS } from '@/domains/experimental-ui/experiments';
 import { useExperimentalUIEnabled } from '@/domains/experimental-ui/use-experimental-ui-enabled';
 import { SidebarShortcuts } from '@/domains/navigation/components/sidebar-shortcuts';
+import { useConversationScope } from '@/domains/navigation/use-conversation-scope';
 import { NavigationCommand, useNavigationCommand } from '@/lib/command';
 import { RouteSidePanelProvider, RouteSidePanelSlot, useRouteSidePanel } from '@/lib/route-side-panel';
 import { cn } from '@/lib/utils';
@@ -162,6 +164,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   const account = useAccount();
+  const draftScope = useConversationScope();
   const preferencesScope = account?.user.id ?? 'local';
   const { experimentalUIEnabled } = useExperimentalUIEnabled();
   const { Link } = useLinkComponent();
@@ -174,9 +177,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           <ExperimentalUIProvider experiments={experimentalUIEnabled ? UI_EXPERIMENTS : []}>
             <Sidebar.Provider LinkComponent={Link}>
               <RouteSidePanelProvider>
-                <ChatPreferencesProvider key={preferencesScope} scope={preferencesScope}>
-                  <LayoutContent>{children}</LayoutContent>
-                </ChatPreferencesProvider>
+                <BrowserDraftScopeContext.Provider value={draftScope}>
+                  <AccountChatPreferences key={preferencesScope} scope={preferencesScope}>
+                    <LayoutContent>{children}</LayoutContent>
+                  </AccountChatPreferences>
+                </BrowserDraftScopeContext.Provider>
               </RouteSidePanelProvider>
             </Sidebar.Provider>
           </ExperimentalUIProvider>

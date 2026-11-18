@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
+import { z } from 'zod/v4';
 import { useMastraInstanceStatus } from '../hooks/use-mastra-instance-status';
 
 import type { StudioConfig } from '../types';
@@ -33,9 +34,27 @@ const removeUrlAuthHeader = () => {
 };
 
 const getPersistentConfig = (config: StudioConfig): StudioConfig => {
-  const { [AUTH_HEADER_NAME]: _authorization, ...headers } = config.headers;
-  return { ...config, headers };
+  // Custom header names can carry credentials too. Keep every header in memory only.
+  return { baseUrl: config.baseUrl, apiPrefix: config.apiPrefix, headers: {} };
 };
+
+const storedConnectionSchema = z.object({
+  baseUrl: z.string(),
+  headers: z.record(z.string(), z.string()).default({}),
+  apiPrefix: z.string().optional(),
+});
+function readStoredConnection() {
+  try {
+    const raw = localStorage.getItem(MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY);
+    if (!raw) return undefined;
+    const parsed = storedConnectionSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return undefined;
+    localStorage.setItem(MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY, JSON.stringify(getPersistentConfig(parsed.data)));
+    return parsed.data;
+  } catch {
+    return undefined;
+  }
+}
 
 const NativeStudioConfigProvider = ({
   children,
@@ -69,25 +88,14 @@ const NativeStudioConfigProvider = ({
     // Don't run the effect during the fetch request
     if (!instanceStatus?.status) return;
 
-    const storedConfig = localStorage.getItem(MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY);
-    if (storedConfig) {
-      const parsedConfig = JSON.parse(storedConfig);
-
-      if (typeof parsedConfig === 'object' && parsedConfig !== null) {
-        // Use stored apiPrefix if set, otherwise fall back to CLI default for back-compat
-        const normalizedConfig = {
-          ...parsedConfig,
-          headers: { ...(parsedConfig.headers ?? {}), ...urlHeaders },
-          apiPrefix: parsedConfig.apiPrefix ?? defaultApiPrefix,
-        };
-        if (hasUrlHeaders) {
-          localStorage.setItem(
-            MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY,
-            JSON.stringify(getPersistentConfig(normalizedConfig)),
-          );
-        }
-        return setConfig({ ...normalizedConfig, isLoading: false });
-      }
+    const parsedConfig = readStoredConnection();
+    if (parsedConfig) {
+      const normalizedConfig = {
+        ...parsedConfig,
+        headers: { ...parsedConfig.headers, ...urlHeaders },
+        apiPrefix: parsedConfig.apiPrefix ?? defaultApiPrefix,
+      };
+      return setConfig({ ...normalizedConfig, isLoading: false });
     }
 
     if (instanceStatus.status === 'active') {
@@ -104,7 +112,7 @@ const NativeStudioConfigProvider = ({
   const doSetConfig = (partialNewConfig: Partial<StudioConfig>) => {
     setConfig(prev => {
       const nextConfig = { ...prev, ...partialNewConfig };
-      const persistentConfig = hasUrlHeaders ? getPersistentConfig(nextConfig) : nextConfig;
+      const persistentConfig = getPersistentConfig(nextConfig);
       localStorage.setItem(MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY, JSON.stringify(persistentConfig));
       return nextConfig;
     });
@@ -121,6 +129,9 @@ const NativeStudioConfigProvider = ({
 // A native Studio connection saved by an earlier user must not replace it.
 export const StudioConfigProvider = (props: StudioConfigProviderProps) => {
   const account = useAccount();
+  useEffect(() => {
+    if (account) readStoredConnection();
+  }, [account]);
   if (!account) return <NativeStudioConfigProvider {...props} />;
   return (
     <StudioConfigContext.Provider

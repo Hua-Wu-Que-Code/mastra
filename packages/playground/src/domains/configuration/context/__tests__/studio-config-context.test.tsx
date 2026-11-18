@@ -88,7 +88,7 @@ describe('StudioConfigProvider auth header URL handoff', () => {
       const storedConfig = JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}');
       expect(storedConfig).toMatchObject({
         baseUrl: 'http://stored.example',
-        headers: { 'X-Trace': 'trace-1' },
+        headers: {},
         apiPrefix: '/stored-api',
       });
       expect(storedConfig.headers.Authorization).toBeUndefined();
@@ -161,7 +161,7 @@ describe('StudioConfigProvider managed accounts', () => {
         LOCAL_STORAGE_KEY,
         JSON.stringify({
           baseUrl: 'http://old.example',
-          headers: { Authorization: 'Bearer old-account' },
+          headers: { Authorization: 'Bearer old-account', authorization: 'Bearer lower-case', 'X-Api-Key': 'old-key' },
           apiPrefix: '/old-api',
         }),
       );
@@ -178,6 +178,7 @@ describe('StudioConfigProvider managed accounts', () => {
       await waitFor(() => expect(readConfig().isLoading).toBe(false));
       expect(readConfig()).toMatchObject({ baseUrl: BASE_URL, apiPrefix: '/api', headers: {} });
       expect(readConfig().headers.Authorization).toBeUndefined();
+      await waitFor(() => expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}').headers).toEqual({}));
     });
   });
 });

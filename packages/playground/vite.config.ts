@@ -301,6 +301,15 @@ export default defineConfig(({ mode }) => {
             target: `http://${targetHost}:${targetPort}`,
             changeOrigin: true,
           },
+          '/account-preferences': { target: 'http://127.0.0.1:4111', changeOrigin: false },
+          '/altflow': {
+            target: `http://${targetHost}:${targetPort}`,
+            changeOrigin: false,
+          },
+          '/conversation-projects': {
+            target: `http://${targetHost}:${targetPort}`,
+            changeOrigin: true,
+          },
           '/storage': {
             target: `http://${targetHost}:${targetPort}`,
             changeOrigin: true,

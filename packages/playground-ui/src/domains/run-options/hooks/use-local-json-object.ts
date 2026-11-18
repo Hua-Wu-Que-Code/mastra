@@ -1,5 +1,6 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useContext, useSyncExternalStore } from 'react';
 import { z } from 'zod/v4';
+import { BrowserDraftScopeContext, scopedDraftKey } from '@/hooks/browser-draft-scope';
 
 export type JsonObject = Record<string, any>;
 
@@ -71,7 +72,8 @@ export const writeJsonObject = (key: string, value: JsonObject) => {
 };
 
 /** Per-key localStorage-backed JSON object shared by every component reading the same key. */
-export function useLocalJsonObject(key: string): [JsonObject, (next: JsonObject) => void] {
+export function useLocalJsonObject(storageKey: string): [JsonObject, (next: JsonObject) => void] {
+  const key = scopedDraftKey(storageKey, useContext(BrowserDraftScopeContext));
   const value = useSyncExternalStore(
     useCallback(listener => subscribe(key, listener), [key]),
     () => getSnapshot(key),

@@ -69,13 +69,13 @@ describe('StudioConnectionSettings', () => {
     fireEvent.change(newName, { target: { value: 'X-Team' } });
     type('Value of X-Team', 'design');
 
-    expect(storedConfig()).toEqual(config);
+    expect(storedConfig()).toEqual({ ...config, headers: {} });
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     expect(storedConfig()).toMatchObject({
       baseUrl: 'http://localhost:5000',
       apiPrefix: '/v2',
-      headers: { Authorization: 'Bearer test', 'X-Team': 'design' },
+      headers: {},
     });
     expect(urlInput()).toHaveProperty('value', 'http://localhost:5000');
     expect(screen.getByRole('textbox', { name: 'Value of X-Team' })).toHaveProperty('value', 'design');
@@ -89,7 +89,7 @@ describe('StudioConnectionSettings', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add header' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
-    expect(storedConfig()).toMatchObject({ baseUrl: BASE_URL, headers: config.headers });
+    expect(storedConfig()).toMatchObject({ baseUrl: BASE_URL, headers: {} });
     expect(storedConfig()).not.toHaveProperty('apiPrefix');
     expect(screen.getByRole('textbox', { name: 'API prefix' })).toHaveProperty('value', '');
     expect(screen.getAllByRole('textbox', { name: 'Header name' })).toHaveLength(1);
@@ -113,7 +113,7 @@ describe('StudioConnectionSettings', () => {
 
     expect(urlInput()).toHaveProperty('value', config.baseUrl);
     expect(saveButton()).toBeNull();
-    expect(storedConfig()).toEqual(config);
+    expect(storedConfig()).toEqual({ ...config, headers: {} });
   });
 
   it('asks for a URL instead of saving an empty one', async () => {
@@ -123,6 +123,6 @@ describe('StudioConnectionSettings', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
     expect(screen.getByText('Enter the server URL')).toBeTruthy();
-    expect(storedConfig()).toEqual(config);
+    expect(storedConfig()).toEqual({ ...config, headers: {} });
   });
 });

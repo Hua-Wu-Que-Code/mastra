@@ -1,4 +1,5 @@
 export * from './components';
+export { chatPreferencesSchema } from './preferences/chat-preferences';
 export { useChatPreferences } from './preferences/chat-preferences-context';
 export * from './preferences/chat-preferences-provider';
 export * from './preferences/chat-preferences-settings';

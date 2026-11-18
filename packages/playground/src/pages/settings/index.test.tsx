@@ -14,12 +14,18 @@ import {
   MASTRA_STUDIO_CONFIG_LOCAL_STORAGE_KEY,
   StudioConfigProvider,
 } from '@/domains/configuration/context/studio-config-context';
+import { v2Agent } from '@/domains/agents/components/__tests__/fixtures/composer-model-settings';
 import { server } from '@/test/msw-server';
+import { installPreferenceFixture } from '@/domains/account/__tests__/fixtures/preferences';
 
 const BASE_URL = 'http://localhost:4111';
 
 async function renderSettingsPage() {
-  server.use(http.get(`${BASE_URL}/api/auth/capabilities`, () => HttpResponse.json(authDisabledCapabilities)));
+  server.use(
+    http.get(`${BASE_URL}/api/auth/capabilities`, () => HttpResponse.json(authDisabledCapabilities)),
+    http.get(`${BASE_URL}/api/agents`, () => HttpResponse.json({ chef: { ...v2Agent, id: 'chef' } })),
+    http.get(`${BASE_URL}/api/memory/status`, () => HttpResponse.json({ result: true })),
+  );
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(
@@ -141,6 +147,7 @@ describe('StudioSettingsPage', () => {
       await renderSettingsPage();
 
       expect(screen.getByRole('heading', { level: 1, name: 'General' })).toBeDefined();
+      expect(screen.queryByRole('heading', { level: 2, name: 'General' })).toBeNull();
       const main = within(screen.getByRole('main'));
       expect(main.getByRole('textbox', { name: 'Altflow instance URL' })).toHaveProperty('value', BASE_URL);
       expect(main.getByRole('textbox', { name: 'API prefix' })).toHaveProperty('value', '/api');
@@ -193,6 +200,32 @@ describe('Altflow language settings', () => {
       expect(screen.getByRole('heading', { level: 1, name: '通用' })).toBeDefined();
       expect(prefix).toHaveProperty('value', '/unsaved-api');
       expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('zh');
+    });
+  });
+});
+
+describe('General memory preference', () => {
+  describe('when opening settings', () => {
+    it('puts General first and exposes only the master memory switch', async () => {
+      await renderSettingsPage();
+      expect(await screen.findByRole('switch', { name: 'Enable memory' })).toBeTruthy();
+      const links = within(screen.getByRole('navigation', { name: 'Settings' })).getAllByRole('link');
+      expect(links.map(link => link.textContent)).toEqual(['Back to app', 'General', 'Archived chats', 'Storage']);
+      expect(screen.queryByRole('combobox', { name: 'Agent' })).toBeNull();
+      expect(screen.queryByRole('switch', { name: 'Working Memory' })).toBeNull();
+      expect(screen.queryByRole('switch', { name: 'Observational Memory' })).toBeNull();
+      expect(screen.queryByRole('combobox', { name: 'Conversation' })).toBeNull();
+    });
+    it('restores the master switch after reopening General', async () => {
+      installPreferenceFixture();
+      await renderSettingsPage();
+      const toggle = await screen.findByRole('switch', { name: 'Enable memory' });
+      await waitFor(() => expect(toggle).toHaveProperty('disabled', false));
+      fireEvent.click(toggle);
+      await waitFor(() => expect(toggle.getAttribute('aria-checked')).toBe('false'));
+      cleanup();
+      await renderSettingsPage();
+      expect((await screen.findByRole('switch', { name: 'Enable memory' })).getAttribute('aria-checked')).toBe('false');
     });
   });
 });

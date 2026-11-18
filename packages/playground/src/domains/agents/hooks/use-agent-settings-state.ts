@@ -1,7 +1,8 @@
-import { useLocalStorageState } from '@mastra/playground-ui/hooks/use-local-storage-state';
-import { threadPreferencesSchema, serializeThreadPreferences } from '../context/thread-preferences';
+import { useServerPreference } from '@mastra/playground-ui/hooks/use-server-preference';
+import { threadPreferencesSchema } from '../context/thread-preferences';
 import { resolveChatSettings } from '../utils/chat-settings';
 export { defaultSettings } from '../utils/chat-settings';
+import { useAccount } from '@/domains/account/account-context';
 import type { AgentSettingsType as AgentSettings } from '@/types';
 
 export interface AgentSettingsStateProps {
@@ -10,11 +11,13 @@ export interface AgentSettingsStateProps {
 }
 
 export function useAgentSettingsState({ agentId, defaultSettings }: AgentSettingsStateProps) {
-  const [preferences, setPreferences] = useLocalStorageState({
-    initialKey: `mastra-agent-store-${agentId}`,
+  const account = useAccount();
+  const { value: preferences, setValue: setPreferences } = useServerPreference({
+    kind: 'agent',
+    id: agentId,
+    accountId: account?.user.id,
     defaultValue: {},
     schema: threadPreferencesSchema,
-    serialize: serializeThreadPreferences,
   });
   return {
     settings: resolveChatSettings(

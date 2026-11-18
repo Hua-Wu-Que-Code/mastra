@@ -12,6 +12,21 @@ export const defaultSystemPackages: GetSystemPackagesResponse = {
 };
 
 export const defaultHandlers: HttpHandler[] = [
+  http.get('*/altflow/subagents', () =>
+    HttpResponse.json({
+      title: '',
+      children: [],
+      messages: [],
+      hasMore: false,
+      page: 0,
+      teamEnabled: false,
+      tasks: [],
+    }),
+  ),
+  http.get('*/account-preferences', () => HttpResponse.json({ value: {}, revision: 0 })),
+  http.get('*/conversation-projects', () =>
+    HttpResponse.json({ projects: [], projectPins: [], pinned: [], collapsed: [], revision: 0 }),
+  ),
   http.get('*/api/stored/skills', () =>
     HttpResponse.json({ skills: [], total: 0, page: 1, perPage: 50, hasMore: false }),
   ),

@@ -1,3 +1,4 @@
+import { z } from 'zod/v4';
 import { createLocalStorageStore } from '@/hooks/use-local-storage-store';
 
 export const CHAT_FONT_SIZE_MIN = 10;
@@ -51,6 +52,8 @@ function parsePreferences(stored: unknown): ChatPreferences {
     foldedReplies: 'foldedReplies' in stored && stored.foldedReplies === 'final' ? 'final' : 'all',
   };
 }
+
+export const chatPreferencesSchema = z.record(z.string(), z.unknown()).transform(parsePreferences);
 
 /** Composer and presentation preferences stay separate from stored messages. Each account has its own browser-local scope. */
 export function createChatPreferencesStore(scope: string) {

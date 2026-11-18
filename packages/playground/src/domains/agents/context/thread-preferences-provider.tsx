@@ -1,9 +1,13 @@
+import { Button } from '@mastra/playground-ui/components/Button';
+import { Txt } from '@mastra/playground-ui/components/Txt';
 import { cleanProviderId } from '@mastra/playground-ui/domains/llm';
-import { useLocalStorageState } from '@mastra/playground-ui/hooks/use-local-storage-state';
+import { useServerPreference } from '@mastra/playground-ui/hooks/use-server-preference';
+import { t } from '@mastra/playground-ui/lib/i18n';
 import type { ReactNode } from 'react';
 import { AgentSettingsContext } from './agent-context';
 import { PlaygroundModelContext } from './playground-model-context';
-import { threadPreferencesSchema, serializeThreadPreferences } from './thread-preferences';
+import { threadPreferencesSchema } from './thread-preferences';
+import { useAccount } from '@/domains/account/account-context';
 import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-agent-builder-allowed-models';
 import { useBuilderSettings } from '@/domains/agent-builder/hooks/use-builder-settings';
 import { resolveChatSettings } from '@/domains/agents/utils/chat-settings';
@@ -29,13 +33,20 @@ function ThreadPreferencesState({
   defaultModel,
   defaultSettings,
   storageKey,
+  agentId,
+  threadId,
 }: ThreadPreferencesProviderProps & { storageKey: string }) {
-  const [preferences, setPreferences] = useLocalStorageState({
-    initialKey: storageKey,
+  const account = useAccount();
+  const saved = useServerPreference({
+    kind: 'thread',
+    id: JSON.stringify([agentId, threadId]),
+    accountId: account?.user.id,
+    legacyKey: storageKey,
     defaultValue: {},
     schema: threadPreferencesSchema,
-    serialize: serializeThreadPreferences,
   });
+  const preferences = saved.value;
+  const setPreferences = saved.setValue;
 
   const { data: builderSettings, isError: policyError } = useBuilderSettings();
   const policy = builderSettings?.modelPolicy;
@@ -79,6 +90,9 @@ function ThreadPreferencesState({
   );
 
   settings.modelSettings.teamwork = preferences.modelSettings?.teamwork ?? false;
+
+  if (saved.isLoading) return <Txt tone="muted">{t('Loading...')}</Txt>;
+  if (saved.error) return <Button onClick={saved.retry}>{t('Retry')}</Button>;
 
   return (
     <PlaygroundModelContext.Provider
