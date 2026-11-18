@@ -1,5 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "//": "Base config for packages to extend. It is never meant to be compiled directly: without an explicit input set TypeScript would default to **/* and pull every file in the monorepo into one program.",
+  "files": [],
   "compilerOptions": {
     "noEmit": false,
     "emitDeclarationOnly": true,

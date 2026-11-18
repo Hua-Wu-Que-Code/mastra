@@ -67,9 +67,22 @@ const componentEntries = (directory: string, prefix: string) => {
 const toPosix = (path: string) => path.replace(/\\/g, '/');
 const toImportPath = (path: string) => (path.startsWith('.') ? path : `./${path}`);
 
+// Resolve the local binary so a build started outside a pnpm script (where
+// node_modules/.bin is not on PATH) still uses the workspace compiler.
+const localTscBin = resolve(__dirname, '../../node_modules/.bin/tsc');
+const tscCommand = existsSync(localTscBin) ? localTscBin : 'tsc';
+
+// `cwd` is pinned to this package: tsc resolves `-p` against the caller's
+// directory, so a build launched from the repo root would otherwise pick up the
+// root tsconfig.build.json (a base config with no `include`, which makes tsc
+// compile every file in the monorepo).
 const runTsc = (args: string[]) =>
   new Promise<number>(resolveExit => {
-    const child = spawn('tsc', args, { stdio: 'inherit', shell: process.platform === 'win32' });
+    const child = spawn(tscCommand, args, {
+      cwd: __dirname,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+    });
     child.on('error', error => {
       console.error(`Failed to run tsc: ${error.message}`);
       resolveExit(1);
@@ -110,22 +123,37 @@ const dtsSrcDir = resolve(distDir, 'src');
 const typeDeclarations = (): Plugin => {
   let entries: Record<string, string> = {};
   let tsc: Promise<number> | undefined;
+  let isWatch = false;
+
+  const startTsc = () =>
+    (tsc ??= rm(dtsTempDir, { recursive: true, force: true }).then(() =>
+      runTsc(['-p', resolve(__dirname, 'tsconfig.build.json'), '--declarationDir', dtsTempDir]),
+    ));
 
   return {
     name: 'playground-ui:dts',
     configResolved(config) {
       if (config.build.lib) entries = config.build.lib.entry as Record<string, string>;
+      isWatch = Boolean(config.build.watch);
     },
     // Rolldown runs buildStart once per output format but closeBundle once, so start tsc only once.
     buildStart() {
-      tsc ??= rm(dtsTempDir, { recursive: true, force: true }).then(() =>
-        runTsc(['-p', 'tsconfig.build.json', '--declarationDir', dtsTempDir]),
-      );
+      startTsc();
     },
     async closeBundle() {
+      // A build that never reached buildStart used to leave `tsc` undefined, and
+      // `await undefined` !== 0 surfaced as "tsc found type errors" without the
+      // compiler ever running. Start it here instead of reporting a fake failure.
+      if (!tsc) {
+        console.warn('[playground-ui:dts] buildStart did not run; starting tsc from closeBundle.');
+        startTsc();
+      }
       const exitCode = await tsc;
-      tsc = undefined;
-      if (exitCode !== 0) throw new Error('tsc found type errors; see log above.');
+      // Watch rebuilds need a fresh compiler run; one-shot builds must not rerun
+      // it when closeBundle fires more than once.
+      if (isWatch) tsc = undefined;
+      if (exitCode === undefined) throw new Error('playground-ui:dts could not start tsc.');
+      if (exitCode !== 0) throw new Error(`tsc exited with code ${exitCode}; see its output above.`);
 
       await rm(dtsSrcDir, { recursive: true, force: true });
       await rename(resolve(dtsTempDir, 'src'), dtsSrcDir);
