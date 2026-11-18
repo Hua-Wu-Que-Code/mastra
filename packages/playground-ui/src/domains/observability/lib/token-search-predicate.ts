@@ -1,9 +1,9 @@
-import { t as studioT } from '@/lib/i18n';
 import type { TraceQueryScalarPredicate, TraceQueryTokenField } from '@mastra/core/storage';
 import type { TraceFilterNode } from '@/domains/traces/trace-query-filters';
 import type { FilterBarField } from '@/ds/components/FilterBar/types';
 import { IconExclamationTriangle } from '@/ds/icons/central/IconExclamationTriangle';
 import { IconMagnifyingGlass } from '@/ds/icons/central/IconMagnifyingGlass';
+import { t as studioT } from '@/lib/i18n';
 
 // Keep Core's Node-only storage barrel out of browser bundles; the boundary test checks parity.
 const TRACE_QUERY_TOKEN_SEARCH_MAX_LENGTH = 256;
@@ -46,7 +46,7 @@ export function withTokenSearchFields(fields: FilterBarField[], enabled: boolean
         prefix === 'spans.'
           ? path === 'all'
             ? studioT('Any span content')
-            : studioT('Span {value0}', { value0: studioT(label) })
+            : studioT('Span {value0}', { value0: studioT(label).toLowerCase() })
           : studioT(label),
       icon:
         path === 'error' || path === 'errorPreview' ? IconExclamationTriangle : (existing?.icon ?? IconMagnifyingGlass),

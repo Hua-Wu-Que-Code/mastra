@@ -4569,4 +4569,5 @@ export const en = {
   'Tool definitions': 'Tool definitions',
   'Conversation messages': 'Conversation messages',
   'Not provided': 'Not provided',
+  'Enter the server URL': 'Enter the server URL',
 } as const;

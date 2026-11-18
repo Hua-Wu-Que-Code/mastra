@@ -134,6 +134,7 @@ export function SidebarConversationRow({
               disabled={deletion.isPending}
               onClick={event => {
                 event.preventDefault();
+                event.preventBaseUIHandler();
                 void remove();
               }}
             >

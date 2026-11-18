@@ -125,11 +125,13 @@ describe('Sidebar conversations', () => {
     it('keeps the row if deletion fails and allows retrying', async () => {
       let fail = true;
       let deleted = false;
+      let deleteAttempts = 0;
       server.use(
         http.get(`${TEST_BASE_URL}/api/memory/threads`, () =>
           HttpResponse.json({ ...sidebarThreads, threads: deleted ? [] : [sidebarThreads.threads[0]] }),
         ),
         http.delete(`${TEST_BASE_URL}/api/memory/threads/thread-1`, () => {
+          deleteAttempts += 1;
           if (fail) return new HttpResponse(null, { status: 500 });
           deleted = true;
           return HttpResponse.json({ success: true });
@@ -140,13 +142,14 @@ describe('Sidebar conversations', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Thread actions' }));
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
       fireEvent.click(await screen.findByRole('button', { name: 'Continue' }));
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: 'Continue' }).hasAttribute('disabled')).toBe(false),
-      );
-      expect(screen.getByRole('link', { name: 'Trip planning' })).toBeTruthy();
+      await waitFor(() => {
+        expect(deleteAttempts).toBe(1);
+        expect(screen.getByRole('button', { name: 'Continue' }).hasAttribute('disabled')).toBe(false);
+      });
+      expect(screen.getByRole('link', { name: 'Trip planning', hidden: true })).toBeTruthy();
       fail = false;
       fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-      await waitFor(() => expect(screen.queryByRole('link', { name: 'Trip planning' })).toBeNull());
+      await waitFor(() => expect(screen.queryByText('Trip planning')).toBeNull());
     });
   });
   describe('when the conversation list has another page', () => {
