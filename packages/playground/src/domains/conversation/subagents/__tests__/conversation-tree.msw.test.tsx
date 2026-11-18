@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -36,7 +36,7 @@ describe('Conversation tree', () => {
       fireEvent.click(screen.getByRole('button', { name: '1 sub-agents' }));
       fireEvent.click(await screen.findByRole('button', { name: /Research sources/ }));
       expect(await screen.findByText('Verified sources for the report.')).toBeTruthy();
-      expect(screen.getByText(/114K tok/)).toBeTruthy();
+      expect(within(screen.getByRole('region', { name: 'Sub-agent conversation' })).getByText(/114K tok/)).toBeTruthy();
       fireEvent.click(screen.getByRole('button', { name: 'Research report' }));
       expect(await screen.findByText('Root conversation')).toBeTruthy();
     });
