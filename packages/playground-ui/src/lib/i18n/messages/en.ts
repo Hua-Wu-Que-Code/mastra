@@ -1,4 +1,10 @@
 export const en = {
+  "Delivered files": "Delivered files",
+  "This file is no longer available.": "This file is no longer available.",
+  "File download failed. Please retry.": "File download failed. Please retry.",
+  "Enabled in conversation": "Enabled in conversation",
+  "Source: {value0}": "Source: {value0}",
+  "Runtime tools are used in conversations.": "Runtime tools are used in conversations.",
   Projects: 'Projects',
   'No projects': 'No projects',
   'New project': 'New project',

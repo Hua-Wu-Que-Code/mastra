@@ -9,8 +9,8 @@ import { sortBy } from '@mastra/playground-ui/sort/sort-by';
 import type { ListSort } from '@mastra/playground-ui/sort/sort-by';
 import { truncateString } from '@mastra/playground-ui/utils/truncate-string';
 import { useMemo } from 'react';
+import type { ToolCatalogEntry } from '@/domains/tools/hooks/use-altflow-tool-catalog';
 import { prepareToolsTable } from '@/domains/tools/utils/prepareToolsTable';
-import type { ToolWithAgents } from '@/domains/tools/utils/prepareToolsTable';
 
 export type ToolsSortKey = 'name' | 'agents';
 export type ToolsSort = ListSort<ToolsSortKey>;
@@ -19,6 +19,7 @@ export interface ToolsListProps {
   tools: Record<string, GetToolResponse>;
   agents: Record<string, GetAgentResponse>;
   isLoading: boolean;
+  catalog?: ToolCatalogEntry[];
   search?: string;
   sort?: ToolsSort;
   onSortChange?: (direction: DataListSort, key: ToolsSortKey) => void;
@@ -26,15 +27,24 @@ export interface ToolsListProps {
   selectedToolId?: string;
 }
 
+interface ListItem {
+  id: string;
+  description?: string;
+  agentCount: number;
+  catalog?: ToolCatalogEntry;
+}
 const sortAccessors = {
-  name: (tool: ToolWithAgents) => tool.id,
-  agents: (tool: ToolWithAgents) => tool.agents.length,
+  name: (tool: ListItem) => tool.id,
+  agents: (tool: ListItem) => tool.agentCount,
 };
+const requiresConversation = (tool: ListItem) =>
+  tool.catalog?.runtime || (tool.catalog && tool.catalog.status !== 'available');
 
 export function ToolsList({
   tools,
   agents,
   isLoading,
+  catalog,
   search = '',
   sort,
   onSortChange,
@@ -45,17 +55,31 @@ export function ToolsList({
 
   const toolData = useMemo(() => prepareToolsTable(tools, agents), [tools, agents]);
 
-  const filteredData = useMemo(
-    () =>
-      sortBy(
-        toolData.filter(tool => tool.id.toLowerCase().includes(search.toLowerCase())),
-        sort,
-        sortAccessors,
-      ),
-    [toolData, search, sort],
+  const combined = new Map<string, ListItem>(
+    toolData.map(tool => [
+      tool.id,
+      {
+        id: tool.id,
+        description: tool.description,
+        agentCount: tool.agents.length,
+      },
+    ]),
   );
-
-  const { containerRef, getRowProps } = useDataListKeyboard({ count: filteredData.length, global: true });
+  for (const entry of catalog ?? []) {
+    combined.set(entry.id, {
+      id: entry.id,
+      description: entry.description,
+      agentCount: entry.agents.length,
+      catalog: entry,
+    });
+  }
+  const filteredData = sortBy(
+    [...combined.values()].filter(tool => tool.id.toLowerCase().includes(search.toLowerCase())),
+    sort,
+    sortAccessors,
+  );
+  const interactive = filteredData.filter(tool => !requiresConversation(tool));
+  const { containerRef, getRowProps } = useDataListKeyboard({ count: interactive.length, global: true });
 
   if (isLoading) {
     return <DataListSkeleton columns="auto 1fr auto" />;
@@ -92,22 +116,47 @@ export function ToolsList({
         <DataList.NoMatch message={studioT('No Tools match your search')} />
       ) : null}
 
-      {filteredData.map((tool, index) => {
+      {filteredData.map(tool => {
         const name = truncateString(tool.id, 50);
+        const entry = tool.catalog;
+        const status =
+          entry?.status === 'unconfigured'
+            ? studioT('Not configured')
+            : entry?.status === 'conditional'
+              ? studioT('Enabled in conversation')
+              : studioT('Available');
         const description = truncateString(tool.description ?? '', 200);
-        const agentsCount = tool.agents.length;
-
+        const cells = (
+          <>
+            <DataList.NameCell>{name}</DataList.NameCell>
+            <DataList.DescriptionCell>
+              {description}
+              {entry && (
+                <span
+                  className="text-muted-foreground flex flex-wrap gap-x-3"
+                  title={
+                    entry.reason ?? (entry.runtime ? studioT('Runtime tools are used in conversations.') : undefined)
+                  }
+                >
+                  <span>{studioT('Source: {value0}', { value0: entry.source })}</span>
+                  <span>{status}</span>
+                  {entry.reason && <span>{entry.reason}</span>}
+                </span>
+              )}
+            </DataList.DescriptionCell>
+            <DataList.TextCell className="text-center">{tool.agentCount || ''}</DataList.TextCell>
+          </>
+        );
+        if (requiresConversation(tool)) return <DataList.RowStatic key={tool.id}>{cells}</DataList.RowStatic>;
         return (
           <DataList.RowLink
             key={tool.id}
             to={paths.toolLink(tool.id)}
             LinkComponent={Link}
             featured={tool.id === selectedToolId}
-            {...getRowProps(index)}
+            {...getRowProps(interactive.indexOf(tool))}
           >
-            <DataList.NameCell>{name}</DataList.NameCell>
-            <DataList.DescriptionCell>{description}</DataList.DescriptionCell>
-            <DataList.TextCell className="text-center">{agentsCount || ''}</DataList.TextCell>
+            {cells}
           </DataList.RowLink>
         );
       })}

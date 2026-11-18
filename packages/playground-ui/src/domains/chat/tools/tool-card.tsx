@@ -9,6 +9,7 @@ import { ToolBadge } from './badges/tool-badge';
 import { useDeferredInputRequest } from './badges/use-deferred-input-request';
 import { useWorkflowStream, WorkflowBadge } from './badges/workflow-badge';
 import { suspendedMcpInputRequest } from './mcp-input-request';
+import { PresentTool } from './present-tool';
 import { SubmitPlanTool } from './submit-plan-tool';
 import { ToolResultMedia } from './tool-result-media';
 import type { MessageMetadata } from '@/domains/chat';
@@ -150,6 +151,8 @@ export const ToolCardInner = ({
         return null;
       case 'observation':
         return <ObservationMarkerBadge toolName={toolName} omData={output?.omData ?? input} />;
+      case 'present':
+        return <PresentTool output={output} />;
       case 'ask_user':
         if (!readOnly) {
           return <AskUserTool toolName={toolName} toolCallId={toolCallId} output={output} metadata={metadata} />;

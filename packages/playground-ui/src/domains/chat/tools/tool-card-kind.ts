@@ -20,6 +20,7 @@ export type ToolCardKind =
   | 'ask_user'
   | 'connect_prompt'
   | 'submit_plan'
+  | 'present'
   | 'mcp_input_request'
   | 'background'
   | 'agent'
@@ -123,6 +124,7 @@ export function toolCardKind(
   if (isHiddenTool(toolName)) return 'hidden';
   // A question read back in history draws as a plain badge, but it is still a question: never folded away.
   if (toolName === 'ask_user') return 'ask_user';
+  if (toolName === 'present' && isSettledState(state) && isRecord(output) && Array.isArray(output.files)) return 'present';
   // Built-in `request_connection` tool from `@mastra/connect`: the run pauses on it with
   // the prompt as its suspend payload, and the settled call keeps it as its result. Both
   // render the connect card; a call with neither falls back to a plain badge.

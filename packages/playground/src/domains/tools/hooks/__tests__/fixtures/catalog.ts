@@ -1,0 +1,40 @@
+import type { ToolCatalogEntry } from '../../use-altflow-tool-catalog';
+export const runtimeCatalog: ToolCatalogEntry[] = [
+  {
+    id: 'count-text',
+    name: 'countText',
+    description: 'Count characters.',
+    source: 'Altflow',
+    status: 'available',
+    agents: ['creator-agent'],
+    runtime: false,
+  },
+  {
+    id: 'mastra_workspace_read_file',
+    name: 'mastra_workspace_read_file',
+    description: 'Read the current account workspace.',
+    source: '工作区',
+    status: 'available',
+    agents: ['creator-agent'],
+    runtime: true,
+  },
+  {
+    id: 'web_search',
+    name: 'web_search',
+    description: 'Search the web.',
+    source: 'Altflow',
+    status: 'unconfigured',
+    reason: 'Configure a search provider.',
+    agents: ['creator-agent'],
+    runtime: true,
+  },
+  {
+    id: 'agent-researcher',
+    name: 'agent-researcher',
+    description: 'Research assistant.',
+    source: '子智能体',
+    status: 'conditional',
+    agents: ['creator-agent'],
+    runtime: true,
+  },
+];

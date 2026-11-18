@@ -5,6 +5,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Keep shared UI contexts on this checkout when dependencies are linked from another worktree.
+      '@mastra/playground-ui/lib/framework': path.resolve(__dirname, '../playground-ui/dist/lib/framework.es.js'),
+      '@mastra/playground-ui/lib/i18n': path.resolve(__dirname, '../playground-ui/dist/lib/i18n.es.js'),
       // Force a single React instance across all workspace packages (e.g.
       // @mastra/react, @mastra/playground-ui) so hooks share the same
       // internals.  Without this, pnpm may resolve different patch versions

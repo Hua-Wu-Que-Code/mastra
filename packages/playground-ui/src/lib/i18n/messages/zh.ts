@@ -1,6 +1,12 @@
 import type { en } from './en';
 
 export const zh = {
+  "Delivered files": "已交付文件",
+  "This file is no longer available.": "此文件已不可用。",
+  "File download failed. Please retry.": "文件下载失败，请重试。",
+  "Enabled in conversation": "按会话启用",
+  "Source: {value0}": "来源：{value0}",
+  "Runtime tools are used in conversations.": "运行时工具请在会话中使用。",
   Projects: '项目',
   'No projects': '没有项目',
   'New project': '新建项目',

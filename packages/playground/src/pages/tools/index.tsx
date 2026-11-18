@@ -17,6 +17,7 @@ import { ToolsPageDrawerBody } from '@/domains/tools/components/tool-drawer/tool
 import { NoToolsInfo } from '@/domains/tools/components/tools-list/no-tools-info';
 import { ToolsList } from '@/domains/tools/components/tools-list/tools-list';
 import type { ToolsSort } from '@/domains/tools/components/tools-list/tools-list';
+import { useAltflowToolCatalog } from '@/domains/tools/hooks/use-altflow-tool-catalog';
 import { useToolDrawerParam } from '@/domains/tools/hooks/use-tool-drawer-param';
 
 const crumbs = [navCrumb('/tools')];
@@ -25,12 +26,13 @@ export default function Tools() {
   useLocale();
   const { data: agentsRecord = {}, isLoading: isLoadingAgents, error: agentsError } = useAgents();
   const { data: tools = {}, isLoading: isLoadingTools, error: toolsError } = useTools();
+  const catalog = useAltflowToolCatalog();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<ToolsSort>();
   const { toolId: openToolId } = useToolDrawerParam();
 
-  const isLoading = isLoadingAgents || isLoadingTools;
-  const error = toolsError || agentsError;
+  const isLoading = isLoadingAgents || isLoadingTools || catalog.isLoading;
+  const error = toolsError || agentsError || catalog.error;
 
   if (error && is401UnauthorizedError(error)) {
     return (
@@ -64,7 +66,7 @@ export default function Tools() {
     );
   }
 
-  if (Object.keys(tools).length === 0 && !isLoading) {
+  if (Object.keys(tools).length === 0 && !catalog.data?.length && !isLoading) {
     return (
       <PageLayout breadcrumbs={<PageBreadcrumbs crumbs={crumbs} />}>
         <h1 className="sr-only">{studioT('Tools')}</h1>
@@ -94,6 +96,7 @@ export default function Tools() {
       <h1 className="sr-only">{studioT('Tools')}</h1>
       <ToolsList
         tools={tools}
+        catalog={catalog.data ?? undefined}
         agents={agentsRecord}
         isLoading={isLoading}
         search={search}
