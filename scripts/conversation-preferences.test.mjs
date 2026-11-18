@@ -23,12 +23,12 @@ async function authorized(body, endpoint = "send-message") {
     get: () => requestContext,
   });
 }
-test("managed users can send bounded memory choices and teamwork through message admission", async () => {
+test("managed users can disable memory and choose teamwork through message admission", async () => {
   const memory = {
     thread: "owned-thread",
     resource: "altflow:test-owner",
     options: {
-      lastMessages: 12,
+      lastMessages: false,
       workingMemory: { enabled: false },
       observationalMemory: false,
     },
@@ -61,14 +61,16 @@ test("managed users cannot smuggle agent configuration through conversation pref
     },
     { memory: { options: { observationalMemory: { model: "other/model" } } } },
     { memory: { options: { lastMessages: -1 } } },
+    { memory: { options: { lastMessages: 20 } } },
+    { memory: { options: { observationalMemory: true } } },
   ]) {
-    assert.equal(
-      await authorized({
-        threadId: "owned-thread",
-        message: {},
-        ifIdle: { streamOptions: override },
-      }),
-      false,
-    );
+    for (const endpoint of ['send-message', 'stream']) {
+      assert.equal(
+        await authorized(endpoint === 'send-message'
+          ? { threadId: 'owned-thread', message: {}, ifIdle: { streamOptions: override } }
+          : { messages: [], ...override }, endpoint),
+        false,
+      );
+    }
   }
 });

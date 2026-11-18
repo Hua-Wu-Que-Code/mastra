@@ -4,6 +4,10 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Agent } from '@mastra/core/agent';
+import { RequestContext, MASTRA_NORMALIZED_USER_KEY } from '@mastra/core/request-context';
+import { AccountPreferences } from '../src/mastra/services/account-preferences.ts';
+import { accountMemory } from '../src/mastra/services/account-memory.ts';
+import { DisabledRecallMemory } from '../src/mastra/agents/disabled-recall-memory.ts';
 import { Mastra } from '@mastra/core/mastra';
 import { SpanType, TracingEventType } from '@mastra/core/observability';
 import { Observability } from '@mastra/observability';
@@ -14,12 +18,13 @@ import { LibSQLStore } from '@mastra/libsql';
 import { z } from 'zod';
 import { ContextCompaction } from '../src/mastra/context-compaction.ts';
 import { contextPolicy } from '../src/mastra/context-policy.ts';
+import { CONTEXT_MEMORY_OPTIONS } from '../src/mastra/context-memory.ts';
 import { ModelHubGateway } from '../src/mastra/modelhub-gateway.ts';
 import { modelHubFixture } from './modelhub-fixture.mjs';
 
 const isSummary = request =>
   request.body.messages.at(-1)?.content?.includes('You are now acting as a compaction engine');
-async function setup(t, trace = false) {
+async function setup(t, trace = false, persistedOptOut = false) {
   const events = [];
   const observability = trace
     ? new Observability({
@@ -59,6 +64,10 @@ async function setup(t, trace = false) {
       metadata: { unrelated: 'keep' },
     },
   });
+  const preferences = new AccountPreferences(`file:${join(dir, 'preferences.db')}`, store);
+  await preferences.init();
+  if (persistedOptOut) await preferences.write('owner', 'owner', { kind: 'memory', id: 'creator-agent', patch: { enabled: false } });
+  t.after(() => preferences.close());
   const gateway = new ModelHubGateway({ apiKey: 'test', baseURL: hub.baseURL });
   t.after(async () => {
     await hub.close();
@@ -72,21 +81,26 @@ async function setup(t, trace = false) {
       name: 'test',
       instructions: 'Preserve the original system instructions.',
       model: await gateway.resolveLanguageModel({ modelId }),
-      memory: new Memory({
+      memory: accountMemory(preferences, new Memory({
         storage,
         options: {
-          lastMessages: Number.MAX_SAFE_INTEGER,
+          ...CONTEXT_MEMORY_OPTIONS,
           semanticRecall: false,
           generateTitle: false,
           ...memoryOptions,
         },
-      }),
+      }), new DisabledRecallMemory({ storage, options: { generateTitle: false } })),
       inputProcessors: [compaction],
       outputProcessors: [compaction],
       errorProcessors: [compaction],
       tools,
     });
-    if (observability) new Mastra({ agents: { test: instance }, storage, observability });
+    new Mastra({
+      agents: { test: instance },
+      storage,
+      gateways: { altflow: gateway },
+      ...(observability ? { observability } : {}),
+    });
     return instance;
   };
   const seed = async (count = 18, size = 18000) => {
@@ -126,9 +140,41 @@ test('DSH pressure policy reserves output, headroom and recent verbatim history'
 });
 
 for (const mode of ['generate', 'stream'])
+  test(`${mode}: resumes more than twenty original messages without using retired observations`, async t => {
+    const { hub, store, agent, seed } = await setup(t);
+    await seed(40, 64);
+    const observation = await store.initializeObservationalMemory({
+      threadId: 'thread',
+      resourceId: 'owner',
+      scope: 'thread',
+      config: {},
+    });
+    await store.updateActiveObservations({
+      id: observation.id,
+      observations: 'RETIRED_OBSERVATION_SUMMARY',
+      tokenCount: 10,
+      lastObservedAt: new Date(Date.UTC(2026, 0, 1, 0, 0, 30)),
+    });
+    for (const prompt of ['Continue the original conversation', 'Continue after rebuilding the Agent']) {
+      const result = await (await agent())[mode](prompt, options);
+      if (mode === 'stream') await result.consumeStream();
+      assert.equal(await result.text, 'verified');
+      const request = JSON.stringify(hub.state.requests.at(-1).body);
+      assert.doesNotMatch(request, /RETIRED_OBSERVATION_SUMMARY/);
+      for (let i = 0; i < 40; i++)
+        assert.ok(request.includes(`old-${i}: original fact`), `original message ${i} reaches the model`);
+    }
+    assert.equal(hub.state.requests.filter(isSummary).length, 0, 'short history stays verbatim');
+    assert.equal(
+      (await store.getObservationalMemory('thread', 'owner')).activeObservations,
+      'RETIRED_OBSERVATION_SUMMARY',
+    );
+  });
+
+for (const mode of ['generate', 'stream'])
   test(`${mode}: compacts old history and reloads its durable checkpoint`, async t => {
     const { hub, store, agent, seed } = await setup(t);
-    await seed();
+    await seed(40, 9000);
     const first = await (await agent())[mode]('CURRENT TASK: finish the original work', options);
     if (mode === 'stream') await first.consumeStream();
     assert.equal(await first.text, 'verified');
@@ -136,7 +182,7 @@ for (const mode of ['generate', 'stream'])
     const main = hub.state.requests.filter(request => !isSummary(request)).at(-1).body;
     assert.match(JSON.stringify(main.messages), /<compacted-summary>/);
     assert.match(JSON.stringify(main.messages), /CURRENT TASK: finish the original work/);
-    assert.match(JSON.stringify(main.messages), /old-17: original fact/);
+    assert.match(JSON.stringify(main.messages), /old-39: original fact/);
     assert.doesNotMatch(JSON.stringify(main.messages), /old-0: original fact/);
     assert.match(JSON.stringify(main.messages), /Preserve the original system instructions/);
     const saved = await store.getThreadById({
@@ -177,6 +223,9 @@ test('compaction stays billable but is explicitly separated from the main model 
   assert.equal(auxiliary.attributes.usage.inputTokens, 100);
   assert.equal(auxiliary.attributes.usage.inputDetails.cacheRead, 80);
   assert.equal(auxiliary.attributes.usage.outputTokens, 1);
+  const step = spans.find(span => span.type === SpanType.MODEL_STEP);
+  assert.equal(step.metadata.contextBreakdown.method, 'mastra-token-counter');
+  assert.ok(step.metadata.contextBreakdown.messages < 57344, 'counts the compacted projection, not the stored original history');
 });
 
 test('long tool output is pruned only on the model projection and retains its complete tool pair', async t => {
@@ -304,3 +353,44 @@ test('memory off excludes stored history, working notes and observations while r
   const stored = await store.listMessages({ threadId: 'thread', resourceId: 'owner', perPage: 100 });
   assert.ok(stored.messages.some(message => message.id === 'old-0'));
 });
+
+for (const mode of ['generate', 'stream'])
+  test(`${mode}: persists Mastra context estimates alongside the main model step`, async t => {
+    const { agent, events } = await setup(t, true);
+    const tool = createTool({
+      id: 'countText', description: 'Count supplied text',
+      inputSchema: z.object({ text: z.string() }),
+      execute: async () => ({ count: 1 }),
+    });
+    const result = await (await agent({ countText: tool }))[mode]('Count this Chinese text: 你好世界', options);
+    if (mode === 'stream') await result.consumeStream();
+    const steps = events.filter(event => event.type === TracingEventType.SPAN_ENDED)
+      .map(event => event.exportedSpan).filter(span => span.type === SpanType.MODEL_STEP);
+    assert.ok(steps.length);
+    const breakdown = steps.at(-1).metadata?.contextBreakdown;
+    assert.equal(breakdown?.method, 'mastra-token-counter');
+    assert.ok(breakdown.system > 0);
+    assert.ok(breakdown.tools > 0);
+    assert.ok(breakdown.messages > 0);
+    const call = events.filter(event => event.type === TracingEventType.SPAN_ENDED)
+      .map(event => event.exportedSpan).find(span => span.type === SpanType.MODEL_INFERENCE);
+    assert.equal(call.attributes.usage.inputDetails.text, 1);
+  });
+
+for (const mode of ['generate', 'stream'])
+  test(`${mode}: persisted memory opt-out excludes history without frontend overrides`, async t => {
+    const { hub, store, agent, seed } = await setup(t, false, true);
+    await seed(4, 64);
+    await store.saveResource({ resource: { id: 'owner', workingMemory: 'PRIVATE_WORKING_NOTE', createdAt: new Date(), updatedAt: new Date() } });
+    const instance = await agent({}, 'deepseek-v4-pro', { workingMemory: { enabled: true, scope: 'resource' } });
+    const result = await instance[mode]('CURRENT TASK ONLY', {
+      ...options, requestContext: new RequestContext([[MASTRA_NORMALIZED_USER_KEY, { id: 'owner' }]]),
+      // Even a stale client requesting recall cannot override the saved opt-out.
+      memory: { ...options.memory, options: { lastMessages: 20, workingMemory: { enabled: true } } },
+    });
+    if (mode === 'stream') await result.consumeStream();
+    const request = hub.state.requests.filter(request => !isSummary(request)).at(-1).body;
+    assert.doesNotMatch(JSON.stringify(request), /PRIVATE_WORKING_NOTE|old-0: original fact|updateWorkingMemory/);
+    assert.match(JSON.stringify(request.messages), /CURRENT TASK ONLY/);
+    assert.ok((await store.listMessages({ threadId: 'thread', resourceId: 'owner', perPage: 100 })).messages.some(message => message.id === 'old-0'));
+  });

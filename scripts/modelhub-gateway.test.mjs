@@ -3,6 +3,34 @@ import { test } from 'node:test';
 import { ModelHubGateway } from '../src/mastra/modelhub-gateway.ts';
 import { modelHubFixture } from './modelhub-fixture.mjs';
 
+test('streaming chat retains input, output and cache usage after switching product models', async (t) => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  hub.state.usage = {
+    prompt_tokens: 100,
+    completion_tokens: 5,
+    total_tokens: 105,
+    prompt_tokens_details: { cached_tokens: 80 },
+  };
+  const gateway = new ModelHubGateway({ apiKey: 'test', baseURL: hub.baseURL });
+  for (const modelId of ['deepseek-v4-pro', 'qwen3.8-max']) {
+    const model = await gateway.resolveLanguageModel({ modelId });
+    const options = {
+      prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+    };
+    const result = await model.doStream(options);
+    const chunks = [];
+    for await (const chunk of result.stream) chunks.push(chunk);
+    const finish = chunks.find((chunk) => chunk.type === 'finish');
+    assert.equal(finish?.usage.inputTokens.total, 100, `${modelId} streaming input usage`);
+    assert.equal(finish.usage.inputTokens.cacheRead, 80);
+    assert.equal(finish.usage.inputTokens.noCache, 20);
+    assert.equal(finish.usage.outputTokens.total, 5);
+    const generated = await model.doGenerate(options);
+    assert.deepEqual(generated.usage, finish.usage);
+  }
+});
+
 test('ModelHub catalog drives listing and real SDK request routing, including cached instances', async (t) => {
   const hub = await modelHubFixture();
   t.after(hub.close);

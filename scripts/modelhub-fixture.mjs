@@ -97,9 +97,9 @@ export async function modelHubFixture() {
           }
         : { role: 'assistant', content: summarizing ? state.summaryText : 'verified' };
       const finishReason = summarizing ? state.summaryFinish : callTool ? 'tool_calls' : 'stop';
-      const usage = summarizing
+      const usage = state.usage ?? (summarizing
         ? { prompt_tokens: 100, completion_tokens: 1, total_tokens: 101, prompt_tokens_details: { cached_tokens: 80 } }
-        : { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
+        : { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 });
       if (body.stream) {
         response.writeHead(200, { 'Content-Type': 'text/event-stream' });
         const chunk = (delta) => ({
@@ -121,7 +121,7 @@ export async function modelHubFixture() {
             JSON.stringify({
               ...chunk({}),
               choices: [{ index: 0, delta: {}, finish_reason: finishReason }],
-              usage,
+              ...(body.stream_options?.include_usage ? { usage } : {}),
             }) +
             '\n\n',
         );

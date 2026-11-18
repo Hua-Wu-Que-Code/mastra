@@ -200,6 +200,7 @@ export class ModelHubGateway extends MastraModelGateway {
       name: this.id,
       apiKey: this.#apiKey,
       baseURL: this.#baseURL,
+      includeUsage: true,
       supportsStructuredOutputs: true,
       fetch: async (url, init) => {
         if (String(url) !== `${this.#baseURL}/chat/completions` || typeof init?.body !== 'string') {

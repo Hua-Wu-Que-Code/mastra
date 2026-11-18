@@ -2,6 +2,8 @@
 // Full transcript stays in memory storage; only the provider prompt is projected.
 // See THIRD_PARTY_NOTICES.md for attribution and license.
 import { createHash } from 'node:crypto';
+import { convertMessages } from '@mastra/core/agent/message-list';
+import { TokenCounter } from '@mastra/memory/processors';
 import type {
   Processor,
   ProcessInputStepArgs,
@@ -409,6 +411,19 @@ export class ContextCompaction implements Processor {
       throw new Error('Current request exceeds the context budget; shorten the current message or attachments');
     }
     args.state.contextEstimate = pricePrompt(prompt) + overhead;
+    // Count the projected request after pruning/compaction, using Mastra's shared
+    // text and multimodal estimator. Keep estimates distinct from provider usage.
+    const counter = new TokenCounter({ model: { provider: args.apiProviderId, modelId: route.modelId } });
+    const breakdown = {
+      method: 'mastra-token-counter',
+      system: prompt.filter(message => message.role === 'system')
+        .reduce((sum, message) => sum + counter.countString(message.content) + 4, 0),
+      tools: tools.length ? counter.countString(JSON.stringify(tools)) : 0,
+      messages: counter.countMessages(convertMessages(prompt.filter(message => message.role !== 'system')).to('Mastra.V2')),
+    };
+    // The processor span is a child of the current model step. Persist there so
+    // each inference can recover its own counts without copying prompt contents.
+    args.tracingContext?.currentSpan?.findParent(SpanType.MODEL_STEP)?.update({ metadata: { contextBreakdown: breakdown } });
     return { prompt };
   }
   async processOutputStep(args: ProcessOutputStepArgs) {
