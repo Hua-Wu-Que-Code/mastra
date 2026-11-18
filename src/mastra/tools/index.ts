@@ -1,0 +1,48 @@
+import {
+  createTavilyProvider,
+  createDeepSeekSearchProvider,
+  createWebSearchTool,
+  createSessionSearchTool,
+  createPresentTool,
+} from '@mastra/altflow-tools';
+import type { DeliveryService, SessionSearchService } from '@mastra/altflow-tools';
+import {
+  askUserTool,
+  webFetchTool,
+  submitPlanTool,
+  taskWriteTool,
+  taskUpdateTool,
+  taskCompleteTool,
+  taskCheckTool,
+} from '@mastra/core/tools';
+import type { ToolAction } from '@mastra/core/tools';
+
+export function createCreatorTools(options: {
+  countText: ToolAction<any, any>;
+  sessionSearch: SessionSearchService;
+  delivery: DeliveryService;
+  env?: Record<string, string | undefined>;
+}) {
+  const env = options.env ?? process.env;
+  const providerName = env.ALTFLOW_SEARCH_PROVIDER ?? 'tavily';
+  const provider =
+    providerName === 'tavily' && env.TAVILY_API_KEY
+      ? createTavilyProvider({ apiKey: env.TAVILY_API_KEY, baseURL: env.TAVILY_SEARCH_URL })
+      : providerName === 'deepseek' && env.DEEPSEEK_SEARCH_API_KEY
+        ? createDeepSeekSearchProvider({ apiKey: env.DEEPSEEK_SEARCH_API_KEY, baseURL: env.DEEPSEEK_SEARCH_URL })
+        : undefined;
+  const tools = {
+    countText: options.countText,
+    web_fetch: webFetchTool,
+    ask_user: askUserTool,
+    submit_plan: submitPlanTool,
+    task_write: taskWriteTool,
+    task_update: taskUpdateTool,
+    task_complete: taskCompleteTool,
+    task_check: taskCheckTool,
+    session_search: createSessionSearchTool({ service: options.sessionSearch }),
+    present: createPresentTool({ service: options.delivery }),
+    ...(provider ? { web_search: createWebSearchTool({ provider }) } : {}),
+  };
+  return { tools, providerConfigured: Boolean(provider), providerName };
+}

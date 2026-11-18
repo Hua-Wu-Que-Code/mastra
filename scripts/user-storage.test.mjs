@@ -238,3 +238,28 @@ test('legacy attachment recovery preserves text, is idempotent and never imports
   assert.equal((await store.read('alice', '/uploads/legacy-old-message-0/小说.txt')).toString(), '原始正文\n');
   assert.equal((await store.list('bob')).length, 0);
 });
+
+test('file delivery references the private ledger without duplicating quota and rejects missing or foreign files', async t => {
+  const { UserDeliveryService } = await import('../src/mastra/services/delivery.ts');
+  const { createPresentTool } = await import('@mastra/altflow-tools');
+  const { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } = await import('@mastra/core/request-context');
+  const fixture = await setup(t);
+  await fixture.store.write('alice', '/report.md', Buffer.from('# Final report'), { mimeType: 'text/markdown' });
+  const delivery = new UserDeliveryService(fixture.store);
+  const tool = createPresentTool({ service: delivery });
+  const context = user => {
+    const requestContext = new RequestContext();
+    requestContext.setRaw(MASTRA_NORMALIZED_USER_KEY, { id: user });
+    requestContext.set(MASTRA_RESOURCE_ID_KEY, `altflow:${user}`);
+    return { requestContext, agent: { agentId: 'creator-agent' } };
+  };
+  const before = await fixture.store.summary('alice');
+  const output = await tool.execute({ files: [{ path: '/report.md', description: 'Final report' }, { path: '/report.md' }] }, context('alice'));
+  assert.equal(output.files.length, 1);
+  assert.equal(output.files[0].downloadUrl, '/storage/download?path=%2Freport.md');
+  assert.equal((await fixture.store.summary('alice')).usedBytes, before.usedBytes);
+  await assert.rejects(tool.execute({ files: [{ path: '/report.md' }] }, context('bob')), /不存在/);
+  await assert.rejects(tool.execute({ files: [{ path: '/report.md' }] }, {}), { code: 'AUTHENTICATION_REQUIRED' });
+  await fixture.store.remove('alice', '/report.md');
+  await assert.rejects(delivery.present({ userId: 'alice' }, [{ path: '/report.md' }]), /不存在/);
+});
