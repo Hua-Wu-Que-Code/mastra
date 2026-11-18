@@ -25,13 +25,29 @@ export const pendingTrace: ChatTrace = trace([
 export const completedTrace: ChatTrace = trace([
   span(),
   span({
-    spanId: 'call',
+    spanId: 'step',
     parentSpanId: 'root',
+    spanType: 'model_step',
+    metadata: { contextBreakdown: { method: 'mastra-token-counter', system: 123, tools: 234, messages: 345 } },
+  }),
+  span({
+    spanId: 'call',
+    parentSpanId: 'step',
     spanType: 'model_inference',
     attributes: {
       provider: 'altflow.chat',
       model: 'model',
-      usage: { inputTokens: 1000, outputTokens: 200, inputDetails: { cacheRead: 800, cacheWrite: 0 } },
+      usage: { inputTokens: 1000, outputTokens: 200, inputDetails: { text: 200, cacheRead: 800 } },
     },
+  }),
+]);
+
+export const interruptedTrace: ChatTrace = trace([
+  ...completedTrace.spans,
+  span({
+    spanId: 'interrupted',
+    parentSpanId: 'root',
+    spanType: 'model_inference',
+    attributes: { provider: 'altflow.chat', model: 'model', finishReason: 'interrupted' },
   }),
 ]);

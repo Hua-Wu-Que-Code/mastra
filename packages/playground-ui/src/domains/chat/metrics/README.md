@@ -22,6 +22,11 @@ observability persistence delays. No calls are made to the model for these cards
 Accounting counts each provider inference once. Its generation and step ancestors
 can repeat the same usage and are excluded. Older traces with generation usage
 and no inference child remain supported. Unknown usage fields remain unknown.
+When an interrupted or failed call has no usage, the other calls' reported counts
+remain visible in both the dock and reply cards. These counts use `≥` and a partial
+statistics notice, since the missing request might still have consumed tokens.
+The cache-hit ratio stays unknown until all calls report input and cache usage.
+No ancestor aggregates are added to fill gaps or counted twice.
 
 The gauge card reports agent runs, model steps, model time, tool time, average
 time to first token and output tokens per second. Output speed excludes the wait

@@ -56,6 +56,41 @@ describe('durable conversation accounting', () => {
     expect(uncachedTokens({ input: 1000, cacheRead: 800 })).toBeUndefined();
     expect(uncachedTokens({ input: 1000, cacheRead: 800, cacheWrite: 0 })).toBe(200);
   });
+  it('reads provider uncached tokens even when cache-write usage is unavailable', () => {
+    const metrics = projectRunMetrics(
+      trace([
+        span(),
+        span({
+          spanId: 'call',
+          parentSpanId: 'root',
+          spanType: 'model_inference',
+          attributes: { usage: { inputTokens: 8345, outputTokens: 68, inputDetails: { text: 153, cacheRead: 8192 } } },
+        }),
+      ]),
+    );
+    expect(uncachedTokens(metrics.models[0])).toBe(153);
+    expect(metrics.models[0].cacheWrite).toBeUndefined();
+    expect(uncachedTokens(groupModelUsage([...metrics.models, ...metrics.models])[0])).toBe(306);
+  });
+  it('does not borrow another step or generation context estimate', () => {
+    const metrics = projectRunMetrics(
+      trace([
+        span(),
+        span({
+          spanId: 'generation',
+          parentSpanId: 'root',
+          spanType: 'model_generation',
+          metadata: {
+            agentMainLoop: true,
+            contextBreakdown: { method: 'mastra-token-counter', system: 1, tools: 2, messages: 3 },
+          },
+        }),
+        span({ spanId: 'step', parentSpanId: 'generation', spanType: 'model_step' }),
+        span({ spanId: 'call', parentSpanId: 'step', spanType: 'model_inference', attributes: { usage } }),
+      ]),
+    );
+    expect(metrics.context?.breakdown).toBeUndefined();
+  });
   it('uses logical outcomes instead of interpreting aborted runs as successful', () => {
     expect(projectRunMetrics(trace([span({ outcome: 'aborted' })])).outcome).toBe('aborted');
   });
@@ -65,7 +100,15 @@ describe('durable conversation accounting', () => {
       { route: 'a', input: 200, output: 6 },
     ]);
     expect(grouped).toEqual([
-      { route: 'a', input: 300, output: 11, cacheRead: undefined, cacheWrite: undefined, reasoning: undefined },
+      {
+        route: 'a',
+        input: 300,
+        output: 11,
+        uncached: undefined,
+        cacheRead: undefined,
+        cacheWrite: undefined,
+        reasoning: undefined,
+      },
     ]);
     expect(cacheHit(grouped)).toBeUndefined();
   });

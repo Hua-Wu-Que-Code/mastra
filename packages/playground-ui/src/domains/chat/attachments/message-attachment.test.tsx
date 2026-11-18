@@ -7,6 +7,21 @@ import { splitMessageAttachments } from './split-message-attachments';
 afterEach(cleanup);
 
 describe('sent attachment previews', () => {
+  it('shows the sent image without a visible filename or MIME footer and preserves preview', () => {
+    const { container } = render(
+      <MessageAttachment
+        type="image"
+        contentType="image/jpeg"
+        name="portrait.jpg"
+        src="https://example.com/portrait.jpg"
+      />,
+    );
+    expect(container.textContent).not.toContain('portrait.jpg');
+    expect(container.textContent).not.toContain('JPEG');
+    fireEvent.click(screen.getByRole('button', { name: 'Preview portrait.jpg' }));
+    expect(screen.getByRole('dialog')).toBeTruthy();
+  });
+
   it('normalizes a persisted base64 PDF into a browser preview without exposing its payload', () => {
     const { container } = render(
       <MessageAttachment type="document" contentType="application/pdf" name="proposal.pdf" data="JVBERi0xLjQ=" />,

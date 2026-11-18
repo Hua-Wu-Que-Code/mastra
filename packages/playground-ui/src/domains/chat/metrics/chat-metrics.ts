@@ -10,6 +10,7 @@ export interface ModelUsage {
   route?: string;
   input?: number;
   output?: number;
+  uncached?: number;
   cacheRead?: number;
   cacheWrite?: number;
   reasoning?: number;
@@ -20,6 +21,7 @@ export interface ContextReading {
   route?: string;
   usedTokens: number;
   outputTokens?: number;
+  breakdown?: { system: number; tools: number; messages: number };
 }
 
 export interface RunMetrics {
@@ -67,6 +69,7 @@ function modelUsage(span: ChatSpan): ModelUsage {
     route: provider && model ? `${provider}/${model}` : model,
     input: count(usage.inputTokens),
     output: count(usage.outputTokens),
+    uncached: count(inputDetails.text),
     cacheRead: count(inputDetails.cacheRead),
     cacheWrite: count(inputDetails.cacheWrite),
     reasoning: count(outputDetails.reasoning),
@@ -162,7 +165,7 @@ export function projectRunMetrics(trace: ChatTrace): RunMetrics {
     toolMs,
     ttftMs,
     ttftSteps,
-    context: contextReading(mainCalls),
+    context: contextReading(mainCalls, spans),
     decodeMs,
     decodeTokens,
   };
@@ -171,6 +174,12 @@ export function projectRunMetrics(trace: ChatTrace): RunMetrics {
 export function totalTokens(models: ModelUsage[]): number | undefined {
   if (!models.length || models.some(model => model.input === undefined || model.output === undefined)) return undefined;
   return models.reduce((sum, model) => sum + (model.input ?? 0) + (model.output ?? 0), 0);
+}
+
+/** Interrupted calls may never report usage. Keep known counts as a lower bound. */
+export function reportedModelUsage(models: ModelUsage[]) {
+  const reported = models.filter(model => model.input !== undefined && model.output !== undefined);
+  return { models: reported, partial: reported.length !== models.length };
 }
 
 export function cacheHit(models: ModelUsage[], decimalPlaces: 0 | 1 = 0): string | undefined {
@@ -189,11 +198,12 @@ export function compactTokens(value: number): string {
   return `${scaled(value / 1_000_000)}M`;
 }
 
-export function exactTokens(value: number): string {
-  return `${new Intl.NumberFormat('en').format(value)} tok`;
+export function exactTokens(value: number, minimum = false): string {
+  return `${minimum ? '≥ ' : ''}${new Intl.NumberFormat('en').format(value)} tok`;
 }
 
 export function uncachedTokens(usage: ModelUsage): number | undefined {
+  if (usage.uncached !== undefined) return count(usage.uncached);
   if (usage.input === undefined || usage.cacheRead === undefined || usage.cacheWrite === undefined) return undefined;
   return count(usage.input - usage.cacheRead - usage.cacheWrite);
 }
@@ -234,20 +244,39 @@ function mainLoopSpans(spans: ChatSpan[], root?: ChatSpan): Set<string> {
   );
 }
 
-/** Exact input occupancy from the latest main-loop provider request. Never estimate prompt components. */
-function contextReading(calls: ChatSpan[]): ContextReading | undefined {
+/** Provider occupancy and separately labelled server estimates for that same request. */
+function contextReading(calls: ChatSpan[], spans: ChatSpan[]): ContextReading | undefined {
   const latest = [...calls].sort((a, b) => (instant(b.startedAt) ?? 0) - (instant(a.startedAt) ?? 0))[0];
   if (!latest) return undefined;
   const usage = modelUsage(latest);
   const sampledAt = instant(latest.startedAt);
   if (sampledAt === undefined || usage.input === undefined) return undefined;
-  return { sampledAt, route: usage.route, usedTokens: usage.input, outputTokens: usage.output };
+  const byId = new Map(spans.map(span => [span.spanId, span]));
+  const visited = new Set<string>();
+  let current: ChatSpan | undefined = latest;
+  let breakdown: ContextReading['breakdown'];
+  while (current && !visited.has(current.spanId)) {
+    visited.add(current.spanId);
+    const value = isRecord(current.metadata) ? current.metadata.contextBreakdown : undefined;
+    if (isRecord(value) && value.method === 'mastra-token-counter') {
+      const system = count(value.system);
+      const tools = count(value.tools);
+      const messages = count(value.messages);
+      if (system !== undefined && tools !== undefined && messages !== undefined)
+        breakdown = { system, tools, messages };
+      break;
+    }
+    // Never borrow estimates from another request in this generation.
+    if (current.spanType === 'model_step') break;
+    current = current.parentSpanId ? byId.get(current.parentSpanId) : undefined;
+  }
+  return { sampledAt, route: usage.route, usedTokens: usage.input, outputTokens: usage.output, breakdown };
 }
 
 /** Preserve unknown fields when merging repeated calls to the same route. */
 export function groupModelUsage(models: ModelUsage[]): ModelUsage[] {
   const groups = new Map<string | undefined, ModelUsage>();
-  const fields = ['input', 'output', 'cacheRead', 'cacheWrite', 'reasoning'] as const;
+  const fields = ['input', 'output', 'uncached', 'cacheRead', 'cacheWrite', 'reasoning'] as const;
   for (const model of models) {
     const previous = groups.get(model.route);
     if (!previous) {

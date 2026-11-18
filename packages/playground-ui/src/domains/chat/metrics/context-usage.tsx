@@ -30,11 +30,11 @@ export function ContextUsage({
   const usedText = sample ? compactTokens(sample.usedTokens) : '—';
   const limitText = limit === undefined ? '—' : compactTokens(limit);
   const exactReading = `${sample ? exactTokens(sample.usedTokens) : t('Not provided')} / ${limit === undefined ? t('Not provided') : exactTokens(limit)}`;
-  // ModelHub reports aggregate input usage, not a token count for each request component.
+  // Server estimates describe this request; provider usage still controls the occupancy meter.
   const rows = [
-    { label: t('System prompt'), color: 'bg-[#adb2b8]' },
-    { label: t('Tool definitions'), color: 'bg-[#a78bfa]' },
-    { label: t('Conversation messages'), color: 'bg-[#4d93f8]' },
+    { label: t('System prompt'), color: 'bg-[#adb2b8]', tokens: sample?.breakdown?.system },
+    { label: t('Tool definitions'), color: 'bg-[#a78bfa]', tokens: sample?.breakdown?.tools },
+    { label: t('Conversation messages'), color: 'bg-[#4d93f8]', tokens: sample?.breakdown?.messages },
   ];
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -92,7 +92,9 @@ export function ContextUsage({
                 <span aria-hidden="true" className={`size-2 shrink-0 rounded-[2px] ${row.color}`} />
                 {row.label}
               </dt>
-              <dd className="m-0 tabular-nums">{t('Not provided')}</dd>
+              <dd className="m-0 tabular-nums">
+                {row.tokens === undefined ? t('Not provided') : `~${exactTokens(row.tokens)}`}
+              </dd>
             </div>
           ))}
         </dl>

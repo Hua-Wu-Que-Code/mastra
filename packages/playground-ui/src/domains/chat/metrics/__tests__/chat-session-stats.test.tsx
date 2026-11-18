@@ -5,9 +5,11 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ChatPreferencesProvider } from '../../preferences/chat-preferences-provider';
+import { projectRunMetrics } from '../chat-metrics';
 import { ChatMetricsProvider } from '../chat-metrics-provider';
 import { ChatSessionStats } from '../chat-session-stats';
-import { pendingTrace, completedTrace, streamingMessages } from './fixtures/session-stats';
+import { TurnUsage } from '../turn-usage';
+import { pendingTrace, completedTrace, interruptedTrace, streamingMessages } from './fixtures/session-stats';
 import { server } from '@/test/msw-server';
 
 const baseUrl = 'http://localhost:4111';
@@ -31,6 +33,26 @@ function setup({ streaming = false, route = 'altflow/model', capacity = 131072 }
 beforeEach(() => localStorage.clear());
 
 describe('Conversation statistics dock', () => {
+  it('keeps the reply usage action available when another call was interrupted', async () => {
+    render(<TurnUsage models={projectRunMetrics(interruptedTrace).models} />);
+    const button = screen.getByRole('button', { name: 'Turn usage' });
+    expect(button.textContent).toContain('Usage ≥ 1.2K tok');
+    fireEvent.click(button);
+    expect(await screen.findByText('≥ 800 tok')).toBeDefined();
+    expect(screen.getByText('Statistics include only available records.')).toBeDefined();
+    expect(screen.queryByText('80%')).toBeNull();
+  });
+  it('keeps reported usage visible when an interrupted call has no usage', async () => {
+    server.use(http.get(`${baseUrl}/api/observability/traces/run`, () => HttpResponse.json(interruptedTrace)));
+    const client = setup({ streaming: true });
+    await waitFor(() => expect(client.isFetching()).toBe(0));
+    expect(screen.getByRole('button', { name: 'Token usage' }).textContent).toContain('≥ 1.2K tok');
+    fireEvent.click(screen.getByRole('button', { name: 'Token usage' }));
+    expect(await screen.findByText('Statistics include only available records.')).toBeDefined();
+    expect(screen.getByText('Cache read').nextElementSibling?.textContent).toBe('≥ 800 tok');
+    expect(screen.getByText('Output tokens').nextElementSibling?.textContent).toBe('≥ 200 tok');
+    expect(screen.getByText('Cache hit').nextElementSibling?.textContent).toBe('Not provided');
+  });
   describe('when the first request has no usage yet', () => {
     it('keeps all three entries clickable without inventing zero usage', async () => {
       setup();
@@ -64,9 +86,15 @@ describe('Conversation statistics dock', () => {
         await client.invalidateQueries();
       });
       expect(await screen.findByText('1K / 131K')).toBeDefined();
+      expect(screen.getByText('~123 tok')).toBeDefined();
+      expect(screen.getByText('~234 tok')).toBeDefined();
+      expect(screen.getByText('~345 tok')).toBeDefined();
       expect(screen.getByRole('meter').getAttribute('aria-valuenow')).toBe('1');
       expect(screen.getByRole('button', { name: 'Token usage' }).textContent).toContain('1.2K tok');
       expect(screen.getByRole('button', { name: 'Token usage' }).textContent).toContain('80%');
+      fireEvent.click(screen.getByRole('button', { name: 'Token usage' }));
+      expect(await screen.findByText('Uncached input')).toBeDefined();
+      expect(screen.getByText('Uncached input').nextElementSibling?.textContent).toBe('200 tok');
     });
   });
 

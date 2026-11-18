@@ -11,6 +11,7 @@ export function MessageImageAttachment({ src, name, typeLabel }: { src: string; 
     <>
       <AttachmentCard
         buttonRef={triggerRef}
+        previewOnly
         name={name}
         typeLabel={failed ? `${typeLabel} (preview unavailable)` : typeLabel}
         icon={<IconImages1 className="size-icon-lg" />}

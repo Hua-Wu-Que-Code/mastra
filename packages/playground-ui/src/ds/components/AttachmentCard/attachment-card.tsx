@@ -11,12 +11,22 @@ export interface AttachmentCardProps {
   typeLabel: string;
   icon: ReactNode;
   preview?: ReactNode;
+  previewOnly?: boolean;
   onClick?: () => void;
   href?: string;
 }
 
 /** Sent-file presentation. Upload state and removal controls belong to the composer. */
-export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, buttonRef }: AttachmentCardProps) {
+export function AttachmentCard({
+  name,
+  typeLabel,
+  icon,
+  preview,
+  previewOnly = false,
+  onClick,
+  href,
+  buttonRef,
+}: AttachmentCardProps) {
   useLocale();
   const className = cn(
     messageSurfaceStyle,
@@ -26,22 +36,28 @@ export function AttachmentCard({ name, typeLabel, icon, preview, onClick, href, 
   );
   const content = (
     <>
-      {preview && <span className="block h-44 overflow-hidden border-b border-border bg-fill">{preview}</span>}
-      <span className="flex min-w-0 items-center gap-2.5 px-3 py-2.5">
-        {!preview && (
-          <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
-            {icon}
-          </span>
-        )}
-        <span className="min-w-0 flex-1">
-          <Txt aria-label={name} as="span" variant="body-sm" className="block truncate">
-            {name}
-          </Txt>
-          <Txt as="span" variant="meta" tone="muted" className="block truncate">
-            {typeLabel}
-          </Txt>
+      {preview && (
+        <span className={cn('block h-44 overflow-hidden bg-fill', !previewOnly && 'border-b border-border')}>
+          {preview}
         </span>
-      </span>
+      )}
+      {(!preview || !previewOnly) && (
+        <span className="flex min-w-0 items-center gap-2.5 px-3 py-2.5">
+          {!preview && (
+            <span className="flex size-5 shrink-0 items-center justify-center text-muted-foreground" aria-hidden="true">
+              {icon}
+            </span>
+          )}
+          <span className="min-w-0 flex-1">
+            <Txt aria-label={name} as="span" variant="body-sm" className="block truncate">
+              {name}
+            </Txt>
+            <Txt as="span" variant="meta" tone="muted" className="block truncate">
+              {typeLabel}
+            </Txt>
+          </span>
+        </span>
+      )}
     </>
   );
 
