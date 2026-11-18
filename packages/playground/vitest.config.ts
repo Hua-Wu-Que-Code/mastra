@@ -3,20 +3,30 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, './src') },
       // Keep shared UI contexts on this checkout when dependencies are linked from another worktree.
-      '@mastra/playground-ui/lib/i18n/trans': path.resolve(__dirname, '../playground-ui/dist/lib/i18n/trans.es.js'),
-      '@mastra/playground-ui/lib/framework': path.resolve(__dirname, '../playground-ui/dist/lib/framework.es.js'),
-      '@mastra/playground-ui/lib/i18n': path.resolve(__dirname, '../playground-ui/dist/lib/i18n.es.js'),
+      // Match only these modules so child paths such as i18n/language-select retain their package exports.
+      {
+        find: /^@mastra\/playground-ui\/lib\/i18n\/trans$/,
+        replacement: path.resolve(__dirname, '../playground-ui/dist/lib/i18n/trans.es.js'),
+      },
+      {
+        find: /^@mastra\/playground-ui\/lib\/framework$/,
+        replacement: path.resolve(__dirname, '../playground-ui/dist/lib/framework.es.js'),
+      },
+      {
+        find: /^@mastra\/playground-ui\/lib\/i18n$/,
+        replacement: path.resolve(__dirname, '../playground-ui/dist/lib/i18n.es.js'),
+      },
       // Force a single React instance across all workspace packages (e.g.
       // @mastra/react, @mastra/playground-ui) so hooks share the same
       // internals.  Without this, pnpm may resolve different patch versions
       // for devDependencies vs catalog entries, causing "Invalid hook call"
       // errors in jsdom tests.
-      react: path.resolve(__dirname, 'node_modules/react'),
-      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
-    },
+      { find: 'react', replacement: path.resolve(__dirname, 'node_modules/react') },
+      { find: 'react-dom', replacement: path.resolve(__dirname, 'node_modules/react-dom') },
+    ],
   },
   test: {
     name: 'unit:packages/playground',
