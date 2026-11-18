@@ -1,5 +1,6 @@
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { useChatMessages } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { ModelSettingsPicker, cleanProviderId } from '@mastra/playground-ui/domains/llm';
 import type { ModelPickerProvider } from '@mastra/playground-ui/domains/llm';
 import { IconExclamationTriangle } from '@mastra/playground-ui/icons/central/IconExclamationTriangle';
@@ -10,16 +11,17 @@ import { Trans } from '@mastra/playground-ui/lib/i18n/trans';
 import { useLLMProviders } from '@mastra/react/hooks/llm';
 import { useAgentSettings } from '../context/agent-context';
 import { usePlaygroundModelOptional } from '../context/playground-model-context';
+import { useAccount } from '@/domains/account/account-context';
 import { useBuilderFilteredModels, useBuilderFilteredProviders, useBuilderModelPolicy } from '@/domains/agent-builder';
 import { useAgentBuilderAllowedModels } from '@/domains/agent-builder/hooks/use-agent-builder-allowed-models';
 import { findProviderById } from '@/domains/llm';
-import { useAccount } from '@/domains/account/account-context';
 import { useAllModels } from '@/domains/llm/hooks/use-filtered-models';
 import { useFilteredProviders } from '@/domains/llm/hooks/use-filtered-providers';
 
 export const ComposerModelSwitcher = () => {
   useLocale();
   const account = useAccount();
+  const messages = useChatMessages();
   const managed = Boolean(account && account.user.role !== 'admin');
   const selection = usePlaygroundModelOptional();
   const { settings, setSettings } = useAgentSettings();
@@ -86,6 +88,7 @@ export const ComposerModelSwitcher = () => {
       modelLocked={modelLocked}
       teamwork={{
         enabled: settings?.modelSettings.teamwork ?? false,
+        hasMessages: messages.length > 0,
         onChange: teamwork => setSettings?.({ modelSettings: { ...settings?.modelSettings, teamwork } }),
       }}
       providers={pickerProviders}

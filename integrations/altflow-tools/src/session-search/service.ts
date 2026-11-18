@@ -47,7 +47,8 @@ export class LibSQLSessionSearch implements SessionSearchService {
           ELSE m.content END AS text
       FROM "${TABLE_MESSAGES}" m JOIN "${TABLE_THREADS}" t ON t.id = m.thread_id
       WHERE t."resourceId" = ? AND (m."resourceId" = ? OR m."resourceId" IS NULL)
-        AND m.role IN ('user', 'assistant')
+        AND (m.role IN ('user', 'assistant') OR
+          (m.role = 'signal' AND json_valid(m.content) AND json_extract(m.content, '$.metadata.signal.type') = 'user'))
     ), hits AS (
       SELECT *, instr(lower(text), lower(?)) AS position FROM authorized
     ), ranked AS (
@@ -70,15 +71,13 @@ export class LibSQLSessionSearch implements SessionSearchService {
       ]);
       signal?.throwIfAborted();
       return {
-        results: result.rows
-          .slice(0, limit)
-          .map(row => ({
-            threadId: String(row.thread_id),
-            title: String(row.title ?? ''),
-            messageId: String(row.id),
-            snippet: String(row.snippet),
-            createdAt: String(row.createdAt),
-          })),
+        results: result.rows.slice(0, limit).map(row => ({
+          threadId: String(row.thread_id),
+          title: String(row.title ?? ''),
+          messageId: String(row.id),
+          snippet: String(row.snippet),
+          createdAt: String(row.createdAt),
+        })),
         truncated: result.rows.length > limit,
       };
     } finally {

@@ -61,6 +61,18 @@ describe('LibSQL conversation search', () => {
           createdAt,
           content: { format: 2, parts: [{ type: 'text', text: '海上孤城 private' }] },
         },
+        ...(['user', 'notification'] as const).map(type => ({
+          id: `signal-${type}`,
+          threadId: 'old',
+          resourceId: 'alice',
+          role: 'signal' as const,
+          createdAt,
+          content: {
+            format: 2 as const,
+            parts: [{ type: 'text' as const, text: `signal-${type}-text` }],
+            metadata: { signal: { type } },
+          },
+        })),
         {
           id: 'tool',
           threadId: 'old',
@@ -87,6 +99,14 @@ describe('LibSQL conversation search', () => {
     expect(
       (await search.search({ resourceId: 'bob', query: '海上孤城', limit: 20 })).results.map(r => r.threadId),
     ).toEqual(['private']);
+    expect(
+      (await search.search({ resourceId: 'alice', query: 'signal-user-text', limit: 20 })).results.map(
+        row => row.messageId,
+      ),
+    ).toEqual(['signal-user']);
+    expect(
+      (await search.search({ resourceId: 'alice', query: 'signal-notification-text', limit: 20 })).results,
+    ).toEqual([]);
     for (const query of ['secret reasoning', 'secret tool result', "' OR 1=1 --", '%']) {
       expect((await search.search({ resourceId: 'alice', query, limit: 20 })).results).toEqual([]);
     }

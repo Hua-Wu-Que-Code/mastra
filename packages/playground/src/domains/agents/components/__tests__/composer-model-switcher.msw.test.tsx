@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { useAgentSettings } from '../../context/agent-context';
 import { ThreadPreferencesProvider } from '../../context/thread-preferences-provider';
 import { ComposerModelSwitcher } from '../composer-model-switcher';
+import { threadPreferenceHandlers } from './fixtures/thread-preferences';
 import { gatewayProviders, openAiProviders } from './fixtures/composer-model-switcher';
 import { server } from '@/test/msw-server';
 
@@ -30,6 +31,7 @@ const mockProviderRequests = (
   providers: ListAgentsModelProvidersResponse = { providers: [] },
 ) => {
   server.use(
+    ...threadPreferenceHandlers(BASE_URL),
     http.get(`${BASE_URL}/api/agents/providers`, async () => {
       await providersGate;
       return HttpResponse.json(providers);
@@ -85,8 +87,13 @@ describe('ComposerModelSwitcher', () => {
       renderSwitcher({ provider: 'openai', model: 'gpt-4o-mini' });
       fireEvent.click(await screen.findByRole('button', { name: /Model:.*GPT-4o Mini/ }));
       fireEvent.click(screen.getByRole('button', { name: /Agent teamwork/ }));
+      expect(
+        screen.getByText(
+          'Enable shared tasks and coordination instructions. Sub-agents remain available when disabled.',
+        ),
+      ).not.toBeNull();
       fireEvent.click(screen.getByRole('switch', { name: 'Enable agent teamwork' }));
-      expect(screen.getByTestId('settings').textContent).toContain('"teamwork":true');
+      await waitFor(() => expect(screen.getByTestId('settings').textContent).toContain('"teamwork":true'));
       cleanup();
       renderSwitcher({ provider: 'openai', model: 'gpt-4o-mini' });
       await waitFor(() => expect(screen.getByTestId('settings').textContent).toContain('"teamwork":true'));
@@ -197,10 +204,14 @@ describe('when the ModelHub catalog defines reasoning levels', () => {
     fireEvent.click(trigger);
     fireEvent.click(await screen.findByRole('button', { name: /Reasoning level/ }));
     fireEvent.click(await screen.findByRole('option', { name: 'High' }));
-    expect(JSON.parse(screen.getByTestId('settings').textContent ?? '{}').modelSettings.providerOptions).toEqual({
-      altflow: { reasoningLevel: 'high' },
-    });
-    expect(localStorage.getItem('mastra-thread-preferences-["test-agent","test-thread"]')).toContain('reasoningLevel');
+    await waitFor(() =>
+      expect(JSON.parse(screen.getByTestId('settings').textContent ?? '{}').modelSettings.providerOptions).toEqual({
+        altflow: { reasoningLevel: 'high' },
+      }),
+    );
+    cleanup();
+    renderSwitcher({ provider: 'altflow', model: 'seed-turbo' });
+    await waitFor(() => expect(screen.getByTestId('settings').textContent).toContain('\"reasoningLevel\":\"high\"'));
     fireEvent.click(screen.getByRole('button', { name: /Model:.*豆包 Seed 2.1 Turbo/ }));
     fireEvent.click(await screen.findByRole('button', { name: /^Model (?!settings)/ }));
     fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'DeepSeek' } });

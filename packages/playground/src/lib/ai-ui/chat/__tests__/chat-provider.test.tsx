@@ -1,3 +1,4 @@
+import { useAgentMemoryPreferences } from '@/domains/agents/context/agent-memory-preferences';
 import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import {
   useChatMessages,
@@ -162,6 +163,14 @@ const baseHandlers = (_captured: Captured[]) => [
       ),
   ),
 ];
+
+function SendWhenMemoryDisabled() {
+  const [preferences] = useAgentMemoryPreferences('agent-1');
+  const send = useChatSend();
+  return preferences.enabled === false ? (
+    <button onClick={() => send({ message: 'Hello agent' })}>Send with saved memory choice</button>
+  ) : null;
+}
 
 const Wrapper = ({ children }: { children: ReactNode }) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -519,10 +528,11 @@ describe('ChatProvider', () => {
   });
 
   it('streams via the agent stream endpoint and forwards the modelSettings', async () => {
-    localStorage.setItem('mastra-memory-preferences-local-agent-1', JSON.stringify({ enabled: false }));
     const captured: Captured[] = [];
     server.use(
       ...baseHandlers(captured),
+      http.get(`${BASE_URL}/api/auth/capabilities`, () => HttpResponse.json({ enabled: false, login: null })),
+      http.get(`${BASE_URL}/account-preferences`, () => HttpResponse.json({ value: { enabled: false }, revision: 1 })),
       http.post(`${BASE_URL}/api/agents/agent-1/stream`, async ({ request }) => {
         captured.push({ url: request.url, body: await captureBody(request) });
         return sseResponse();
@@ -538,7 +548,7 @@ describe('ChatProvider', () => {
             initialMessages={[]}
             settings={{ modelSettings: { maxSteps: 7, temperature: 0.4 } }}
           >
-            <SendOnMount text="Hello agent" />
+            <SendWhenMemoryDisabled />
           </ChatProvider>
         </Wrapper>,
       );
@@ -548,9 +558,10 @@ describe('ChatProvider', () => {
       await new Promise(resolve => setTimeout(resolve, 80));
     });
 
-    expect(captured).toHaveLength(1);
+    fireEvent.click(await screen.findByRole('button', { name: 'Send with saved memory choice' }));
+    await waitFor(() => expect(captured).toHaveLength(1));
     expect(captured[0].body.maxSteps).toBe(7);
-    expect(captured[0].body.disableSubAgents).toBe(true);
+    expect(captured[0].body.disableSubAgents).toBeUndefined();
     expect(captured[0].body.memory).toMatchObject({
       thread: 'thread-1',
       options: {
@@ -565,6 +576,35 @@ describe('ChatProvider', () => {
     expect(isRecord(modelSettings) ? modelSettings.temperature : undefined).toBe(0.4);
     const serialized = JSON.stringify(captured[0].body.messages ?? []);
     expect(serialized).toContain('Hello agent');
+  });
+
+  describe('when retired memory preferences are stored', () => {
+    it('submits without the old per-feature disabling overrides', async () => {
+      localStorage.setItem(
+        'mastra-memory-preferences-local-agent-1',
+        JSON.stringify({ enabled: true, workingMemory: false, observationalMemory: false, lastMessages: 0 }),
+      );
+      const captured: Captured[] = [];
+      server.use(
+        ...baseHandlers(captured),
+        http.post(`${BASE_URL}/api/agents/agent-1/stream`, async ({ request }) => {
+          captured.push({ url: request.url, body: await captureBody(request) });
+          return sseResponse();
+        }),
+      );
+      render(
+        <Wrapper>
+          <ChatProvider agentId="agent-1" threadId="thread-1" initialMessages={[]}>
+            <SendOnMount text="Use memory" />
+          </ChatProvider>
+        </Wrapper>,
+      );
+      await waitFor(() => expect(captured).toHaveLength(1));
+      expect(captured[0].body.memory).toMatchObject({ thread: 'thread-1' });
+      const memory = captured[0].body.memory;
+      expect(isRecord(memory) ? memory.options : undefined).toBeUndefined();
+      localStorage.removeItem('mastra-memory-preferences-local-agent-1');
+    });
   });
 
   describe('when an MCP App sets context for the next turn', () => {

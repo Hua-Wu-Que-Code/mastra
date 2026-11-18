@@ -156,11 +156,8 @@ export function ChatProvider({
   const omConfig = memoryConfigData?.config?.observationalMemory as unknown;
   const isOMEnabled =
     memoryPreferences.enabled !== false &&
-    (memoryPreferences.observationalMemory ??
-      (omConfig === true ||
-        (typeof omConfig === 'object' &&
-          omConfig !== null &&
-          (!('enabled' in omConfig) || omConfig.enabled !== false))));
+    (omConfig === true ||
+      (typeof omConfig === 'object' && omConfig !== null && (!('enabled' in omConfig) || omConfig.enabled !== false)));
   const {
     setIsObservingFromStream,
     setIsReflectingFromStream,
@@ -309,7 +306,6 @@ export function ChatProvider({
     threadId,
     modelSettingsArgs,
     memoryOptions,
-    disableSubAgents: !modelSettings.teamwork,
     model: modelOverride,
     chatWithNetwork,
     chatWithGenerate,

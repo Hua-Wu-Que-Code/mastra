@@ -687,3 +687,12 @@ export function LocalizedSaveButton() {
 Add every interface message to both `src/lib/i18n/messages/en.ts` and `zh.ts`. English source strings are typed message keys. Use named `{placeholders}` for dynamic values. For a sentence containing links or emphasis, use `Trans` from `@mastra/playground-ui/lib/i18n/trans` and supply React nodes through its `values` prop. It keeps sentences intact for translation and does not interpret HTML.
 
 Run `pnpm check:studio-i18n` from the repository root, or `pnpm check:i18n` in either Studio package. The check compares dictionary keys and placeholders and scans common JSX, form-label, configuration-label, and toast patterns for untranslated copy. Both packages also run it before type checking. It is a static check; new helpers that return interface strings still require review and locale-switch testing. The runtime falls back to English for missing Chinese entries; the type and parity checks prevent such omissions in checked-in dictionaries.
+
+
+### Conversation token readings
+
+Provider usage supplies total input, output, cache reads, and uncached input (`inputDetails.text`). A missing cache-write field does not hide an available uncached-input count. Unknown provider fields remain unknown.
+
+The context meter uses the latest main-agent request's reported input usage. Applications can attach `metadata.contextBreakdown` to that request's model-step span with `{ method: 'mastra-token-counter', system, tools, messages }`. These server estimates appear with `~` and a local-estimate label; they do not replace provider usage or imply exact billing. Older traces without component estimates retain missing-value labels.
+
+Sent image cards display the image without a visible filename/type footer. Accessible names, image preview, and failed-image fallback remain available. Other file cards retain their filename and type.
