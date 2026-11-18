@@ -1,8 +1,8 @@
-import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
 import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
 import { ThreadListItem } from '@mastra/playground-ui/components/ThreadList';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+import { IconArchive } from '@mastra/playground-ui/icons/central/IconArchive';
 import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
 import { IconFolder1 } from '@mastra/playground-ui/icons/central/IconFolder1';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
@@ -12,12 +12,12 @@ import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 import { t } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { toast } from '@mastra/playground-ui/utils/toast';
-import { useDeleteThread } from '@mastra/react/hooks/memory';
-import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import type { ConversationOrganization } from '../use-conversation-projects';
 import type { SidebarThread } from '../use-sidebar-threads';
+import { useThreadArchive } from '../use-thread-archive';
+import { ConversationDeleteDialog } from './conversation-delete-dialog';
 import { RenameThreadDialog } from '@/domains/agents/components/rename-thread-dialog';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
@@ -32,29 +32,27 @@ export function SidebarConversationRow({
 }) {
   const [dialog, setDialog] = useState<'rename' | 'delete'>();
   const [requestContext] = useEntityRequestContext('agent', thread.agentId);
-  const deletion = useDeleteThread({ requestContext });
-  const queryClient = useQueryClient();
+  const archive = useThreadArchive(requestContext);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { canEdit, canDelete } = usePermissions();
-  const url = `/agents/${encodeURIComponent(thread.agentId)}/threads/${encodeURIComponent(thread.id)}`;
+  const url = `/chat/${encodeURIComponent(thread.agentId)}/threads/${encodeURIComponent(thread.id)}`;
+  const isActive =
+    pathname === url ||
+    pathname === `/agents/${encodeURIComponent(thread.agentId)}/threads/${encodeURIComponent(thread.id)}`;
   const pinned = organization.pinned.includes(thread.id);
   const project = organization.projects.find(p => p.threads.includes(thread.id));
   const title =
     thread.title && !/^New Thread \d{4}-/.test(thread.title)
       ? thread.title
       : formatDate(new Date(thread.createdAt), 'date-time-seconds');
-  const remove = async () => {
+  const archiveThread = async () => {
     try {
-      await deletion.mutateAsync({ threadId: thread.id, agentId: thread.agentId });
-      organization.move(thread.id);
-      if (pinned) organization.pin(thread.id);
-      await queryClient.invalidateQueries({ queryKey: ['memory', 'threads', 'sidebar'] });
-      if (pathname === url) void navigate(`/agents/${encodeURIComponent(thread.agentId)}/threads/new`);
-      setDialog(undefined);
-      toast.success(t('Chat deleted successfully'));
+      await archive.mutateAsync({ thread, archived: true });
+      if (isActive) void navigate(`/chat/${encodeURIComponent(thread.agentId)}/threads/new`);
+      toast.success(t('Chat archived'));
     } catch {
-      toast.error(t('Failed to delete chat'));
+      toast.error(t('Failed to archive chat'));
     }
   };
   return (
@@ -62,7 +60,7 @@ export function SidebarConversationRow({
       <ThreadListItem
         as={Link}
         to={url}
-        isActive={pathname === url}
+        isActive={isActive}
         onClick={onNavigate}
         actions={
           <DropdownMenu>
@@ -70,7 +68,7 @@ export function SidebarConversationRow({
               <IconDotGrid1x3Vertical />
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end" finalFocus={false}>
-              <DropdownMenu.Item onClick={() => organization.pin(thread.id)}>
+              <DropdownMenu.Item onClick={() => void organization.pin(thread.id).catch(() => {})}>
                 {pinned ? <IconUnpin /> : <IconPin />}
                 {pinned ? t('Unpin') : t('Pin')}
               </DropdownMenu.Item>
@@ -83,14 +81,20 @@ export function SidebarConversationRow({
               {organization.projects
                 .filter(p => p.id !== project?.id)
                 .map(p => (
-                  <DropdownMenu.Item key={p.id} onClick={() => organization.move(thread.id, p.id)}>
+                  <DropdownMenu.Item key={p.id} onClick={() => void organization.move(thread.id, p.id).catch(() => {})}>
                     <IconFolder1 />
                     {p.name}
                   </DropdownMenu.Item>
                 ))}
               {project && (
-                <DropdownMenu.Item onClick={() => organization.move(thread.id)}>
+                <DropdownMenu.Item onClick={() => void organization.move(thread.id).catch(() => {})}>
                   {t('Move to recent')}
+                </DropdownMenu.Item>
+              )}
+              {canEdit('memory') && (
+                <DropdownMenu.Item disabled={archive.isPending} onClick={() => void archiveThread()}>
+                  <IconArchive />
+                  {t('Archive')}
                 </DropdownMenu.Item>
               )}
               {canDelete('memory') && (
@@ -118,31 +122,17 @@ export function SidebarConversationRow({
           onOpenChange={open => !open && setDialog(undefined)}
         />
       )}
-      <AlertDialog open={dialog === 'delete'} onOpenChange={open => !open && setDialog(undefined)}>
-        <AlertDialog.Content>
-          <AlertDialog.Header>
-            <AlertDialog.Title>{t('Are you absolutely sure?')}</AlertDialog.Title>
-            <AlertDialog.Description>
-              {t(
-                'This action cannot be undone. This will permanently delete your chat and remove it from our servers.',
-              )}
-            </AlertDialog.Description>
-          </AlertDialog.Header>
-          <AlertDialog.Footer>
-            <AlertDialog.Cancel disabled={deletion.isPending}>{t('Cancel')}</AlertDialog.Cancel>
-            <AlertDialog.Action
-              disabled={deletion.isPending}
-              onClick={event => {
-                event.preventDefault();
-                event.preventBaseUIHandler();
-                void remove();
-              }}
-            >
-              {t('Continue')}
-            </AlertDialog.Action>
-          </AlertDialog.Footer>
-        </AlertDialog.Content>
-      </AlertDialog>
+      {archive.isError && <Txt role="alert">{t('Failed to archive chat')}</Txt>}
+      {dialog === 'delete' && (
+        <ConversationDeleteDialog
+          thread={thread}
+          organization={organization}
+          onClose={() => setDialog(undefined)}
+          onDeleted={() => {
+            if (isActive) void navigate(`/chat/${encodeURIComponent(thread.agentId)}/threads/new`);
+          }}
+        />
+      )}
     </>
   );
 }

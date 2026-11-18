@@ -3,7 +3,7 @@
 `/settings` opens a dedicated settings workspace with its own sidebar. The main
 Studio navigation and rounded content frame are not rendered on this route.
 
-- General contains language, appearance, conversation display preferences, and an Editor section.
+- General is the first settings entry and contains language, appearance, the master memory switch, conversation display preferences, and an Editor section.
   Appearance offers Light, Dark, and Follow system choices, using the app theme
   provider. Old `?section=appearance` links open the same consolidated page.
 - Account and main sidebar links carry the current path, query and fragment in
@@ -73,30 +73,49 @@ the fetch adapter strips model, system prompt, tool and processor overrides from
 message admission routes. It preserves bounded conversation memory choices and
 teamwork selection; the server independently validates those fields and thread ownership.
 
-`/settings/memory` contains an agent selector, a master memory switch, independent
-working/observational memory switches, and the recent-message limit. Memory content
-and observation analysis now live here, rather than over the conversation list.
-Opening settings from a conversation retains its agent and thread through the
-existing return path. A direct visit selects the first agent and its latest thread.
-The working-memory editor and observation timeline retain their existing server APIs.
+General exposes a single **Enable memory** switch for the available Agent. There
+is no Agent selector, per-feature switch, history limit, or conversation memory
+inspector in settings. `/settings/memory` redirects to General while preserving
+the return path.
 
-Choices are saved per account and agent in this browser. They apply to the next
-submission, including idle and queued thread admissions. Memory off disables history,
-semantic recall, working memory and observations for that invocation; it keeps stored
-records available for inspection. It does not delete or erase conversations.
-An empty recent-message limit selects Auto; zero disables history and a positive
-integer caps its message count. DSH has no fixed recent-message-count setting: its
-compaction-basic package retains recent messages within a token budget. The local
-creator server uses that automatic budget/compaction policy; the optional count is
-an additional Studio control.
+The switch is saved per account and Agent in this browser and applies to the next
+submission, including idle and queued admissions. Off disables history, semantic
+recall, working memory and observations for that invocation without deleting saved
+records. On follows the complete server memory policy. Retired per-feature browser
+values are ignored, so a hidden old setting cannot continue disabling a feature.
+
+Chat and Agent management have separate route layouts. New and recent conversations
+use `/chat/:agentId/threads/:threadId`, including first-message persistence, reloads,
+message links and branches. These pages omit breadcrumbs, management tabs and the
+configuration panel. The Agents sidebar entry opens management: list/card links go
+to the Agent traces page, and management retains breadcrumbs, testing chat, traces,
+editor and configuration. Capability footers are removed from the global and legacy
+conversation sidebars. Thread data and APIs retain their original IDs and ownership.
 
 The model menu follows DSH's `ui-agent-team/src/client/TeamModeToggle.tsx`: a team
-settings pane explains delegation and contains the switch. New conversations start
-with teamwork off; reopening a conversation restores its selection. A locked model
-still allows changing teamwork. Turning it off omits configured sub-agent delegation
-tools from subsequent executions and reconstructed tool sets; ordinary tools and
-existing child conversations remain available. It does not attach new agents or
-cancel running child tasks. The execution option is `disableSubAgents`.
+settings pane controls shared team tasks and coordination instructions. New conversations start
+with teamwork off; reopening restores the server preference. Ordinary dynamic subagent
+creation, forking, messaging, waiting and interruption remain available in either mode.
+Disabling teamwork in a conversation with messages requires confirmation. Existing tasks,
+child conversations and running work are preserved. This switch does not set `disableSubAgents`.
+
+## Archived chats
+
+The conversation menu includes Archive. Archived chats disappear from both Recent
+and project lists without deleting their messages, pins, or project membership.
+Archiving the open conversation returns to New chat.
+
+`/settings/archived-chats` lists archived chats with Unarchive and Delete actions.
+Unarchive returns the chat to its original sidebar location. Delete uses the same
+permanent-deletion confirmation as the conversation menu; a failed request keeps
+the dialog open for retry. Loading failures expose Retry instead of an empty list.
+
+Archive state is stored in thread metadata as `altflowArchived`, through the
+existing authenticated memory API. It survives reloads and browser changes.
+Metadata is read immediately before updates to preserve other thread metadata.
+Viewing, archiving, and deleting use the existing memory read, update, and delete
+permissions. MSW tests cover persistence, restoration, deletion, errors, and
+read-only access in `archived-chats.test.tsx` and the sidebar conversation tests.
 
 ## Account file storage
 

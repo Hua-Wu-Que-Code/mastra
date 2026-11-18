@@ -1,5 +1,6 @@
 import type { ListMemoryThreadsResponse } from '@mastra/client-js';
 import { getRequestContextStorageKey } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
+import { scopedDraftKey } from '@mastra/playground-ui/hooks/browser-draft-scope';
 import { useMastraClient } from '@mastra/react';
 import { useAgents } from '@mastra/react/hooks/agents';
 import { useQueries } from '@tanstack/react-query';
@@ -7,10 +8,10 @@ import { z } from 'zod/v4';
 
 export type SidebarThread = ListMemoryThreadsResponse['threads'][number] & { agentId: string };
 const contextSchema = z.record(z.string(), z.unknown());
-function requestContextFor(agentId: string) {
+export function requestContextFor(agentId: string, scope?: string) {
   try {
     const parsed = contextSchema.safeParse(
-      JSON.parse(localStorage.getItem(getRequestContextStorageKey('agent', agentId)) ?? '{}'),
+      JSON.parse(localStorage.getItem(scopedDraftKey(getRequestContextStorageKey('agent', agentId), scope)) ?? '{}'),
     );
     return parsed.success ? parsed.data : {};
   } catch {
@@ -24,7 +25,7 @@ export function useSidebarThreads(scope: string) {
   const agents = useAgents();
   const queries = useQueries({
     queries: Object.keys(agents.data ?? {}).map(agentId => {
-      const requestContext = requestContextFor(agentId);
+      const requestContext = requestContextFor(agentId, scope);
       return {
         queryKey: ['memory', 'threads', 'sidebar', scope, agentId, requestContext],
         queryFn: async () => {

@@ -1,41 +1,37 @@
 import { Button } from '@mastra/playground-ui/components/Button';
-import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
 import { useSidebar } from '@mastra/playground-ui/components/Sidebar';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { ThreadListEmpty, ThreadListItems } from '@mastra/playground-ui/components/ThreadList';
-import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
 import { IconPlusMedium } from '@mastra/playground-ui/icons/central/IconPlusMedium';
 import { t, useLocale } from '@mastra/playground-ui/lib/i18n';
-import { useMastraClient } from '@mastra/react';
-import { isAuthenticated, useAuthCapabilities } from '@mastra/react/hooks/auth';
+import { useAgents } from '@mastra/react/hooks/agents';
 import { useState } from 'react';
-import { Link, matchPath, useLocation } from 'react-router';
+import { Link, matchPath, useLocation, useNavigate } from 'react-router';
 import { useConversationProjects } from '../use-conversation-projects';
 import type { ConversationProject } from '../use-conversation-projects';
+import { useConversationScope } from '../use-conversation-scope';
 import { useSidebarThreads } from '../use-sidebar-threads';
+import { isThreadArchived } from '../use-thread-archive';
 import { ConversationSection } from './conversation-section';
 import { ProjectNameDialog } from './project-name-dialog';
 import { SidebarConversationRow } from './sidebar-conversation-row';
-import { useAccount } from '@/domains/account/account-context';
-import { AgentCapabilitiesFooter } from '@/domains/agents/components/memory-sidebar/agent-capabilities-footer';
+import { SidebarProjectRow } from './sidebar-project-row';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
 export function SidebarConversations() {
-  const account = useAccount();
-  const { data: auth } = useAuthCapabilities();
+  const scope = useConversationScope();
   const { hasPermission, isLoading } = usePermissions();
-  const client = useMastraClient();
   const { state } = useSidebar();
   const { pathname } = useLocation();
-  const activeAgentId = matchPath('/agents/:agentId/*', pathname)?.params.agentId;
-  const userId = account?.user.id ?? (auth && isAuthenticated(auth) ? auth.user.id : 'local');
+  const { data: agents } = useAgents({ queryOptions: { enabled: !isLoading && hasPermission('agents:read') } });
+  const activeAgentId = (matchPath('/chat/:agentId/*', pathname) ?? matchPath('/agents/:agentId/*', pathname))?.params
+    .agentId;
+  const newAgentId = activeAgentId ?? Object.keys(agents ?? {})[0];
   if (state !== 'default' || isLoading || !hasPermission('agents:read')) return null;
-  const scope = JSON.stringify([client.options.baseUrl, client.options.apiPrefix, userId]);
   return (
     <>
-      {activeAgentId && <SidebarNewConversation agentId={activeAgentId} />}
-      {hasPermission('memory:read') && <SidebarConversationsBody key={scope} scope={scope} />}
-      {activeAgentId && <AgentCapabilitiesFooter agentId={activeAgentId} />}
+      {newAgentId && <SidebarNewConversation agentId={newAgentId} />}
+      {hasPermission('memory:read') && <SidebarConversationsBody key={scope} scope={scope} agentId={newAgentId} />}
     </>
   );
 }
@@ -49,7 +45,7 @@ function SidebarNewConversation({ agentId }: { agentId: string }) {
         variant="ghost"
         render={
           <Link
-            to={`/agents/${encodeURIComponent(agentId)}/threads/new`}
+            to={`/chat/${encodeURIComponent(agentId)}/threads/new`}
             onClick={() => isMobile && setOpenMobile(false)}
           />
         }
@@ -61,14 +57,13 @@ function SidebarNewConversation({ agentId }: { agentId: string }) {
   );
 }
 
-function SidebarConversationsBody({ scope }: { scope: string }) {
+function SidebarConversationsBody({ scope, agentId }: { scope: string; agentId?: string }) {
+  const navigate = useNavigate();
   useLocale();
   const { isMobile, setOpenMobile } = useSidebar();
   const organization = useConversationProjects(scope);
-  const { threads, isLoading, error, retry } = useSidebarThreads(scope);
-  const { pathname } = useLocation();
-  const activeAgentId = matchPath('/agents/:agentId/*', pathname)?.params.agentId;
-  const newAgentId = activeAgentId ? undefined : threads[0]?.agentId;
+  const { threads: allThreads, isLoading, error, retry } = useSidebarThreads(scope);
+  const threads = allThreads.filter(thread => !isThreadArchived(thread));
   const [editProject, setEditProject] = useState<ConversationProject | 'new'>();
   const groupedIds = new Set(organization.projects.flatMap(project => project.threads));
   const sorted = [...threads].sort(
@@ -88,49 +83,57 @@ function SidebarConversationsBody({ scope }: { scope: string }) {
   );
   return (
     <>
-      {newAgentId && <SidebarNewConversation agentId={newAgentId} />}
       <ConversationSection
         label={t('Projects')}
         collapsed={organization.collapsed.includes('projects')}
-        onToggle={() => organization.toggle('projects')}
+        onToggle={() => void organization.toggle('projects').catch(() => {})}
         actions={
-          <Button variant="ghost" size="icon-sm" aria-label={t('New project')} onClick={() => setEditProject('new')}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={!agentId || organization.isLoading || Boolean(organization.error)}
+            aria-label={t('New project')}
+            onClick={() => setEditProject('new')}
+          >
             <IconPlusMedium />
           </Button>
         }
       >
-        {organization.projects.length === 0 && <ThreadListEmpty>{t('No projects')}</ThreadListEmpty>}
-        {organization.projects.map(project => (
-          <ConversationSection
-            key={project.id}
-            label={project.name}
-            collapsed={organization.collapsed.includes(project.id)}
-            onToggle={() => organization.toggle(project.id)}
-            actions={
-              <DropdownMenu>
-                <DropdownMenu.Trigger variant="ghost" size="icon-sm" aria-label={t('Project actions')}>
-                  <IconDotGrid1x3Vertical />
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content align="end">
-                  <DropdownMenu.Item onClick={() => setEditProject(project)}>{t('Rename project')}</DropdownMenu.Item>
-                  <DropdownMenu.Item onClick={() => organization.remove(project.id)}>
-                    {t('Ungroup project')}
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu>
-            }
-          >
-            {rows(project.threads)}
-            {!threads.some(thread => project.threads.includes(thread.id)) && (
-              <ThreadListEmpty>{t('Move conversations here from their actions menu.')}</ThreadListEmpty>
-            )}
-          </ConversationSection>
-        ))}
+        {organization.error && (
+          <div role="alert">
+            <ThreadListEmpty>{t('Failed to load projects')}</ThreadListEmpty>
+            <Button size="sm" onClick={organization.retry}>
+              {t('Retry')}
+            </Button>
+          </div>
+        )}
+        {organization.isLoading && <Skeleton className="h-5 w-full" />}
+        {!organization.isLoading && !organization.error && organization.projects.length === 0 && (
+          <ThreadListEmpty>{t('No projects')}</ThreadListEmpty>
+        )}
+        {[...organization.projects]
+          .sort(
+            (a, b) => Number(organization.projectPins.includes(b.id)) - Number(organization.projectPins.includes(a.id)),
+          )
+          .map(project => (
+            <SidebarProjectRow
+              key={project.id}
+              project={project}
+              agentId={project.agentId ?? agentId ?? ''}
+              organization={organization}
+              onNavigate={onNavigate}
+            >
+              {rows(project.threads)}
+              {!threads.some(thread => project.threads.includes(thread.id)) && (
+                <ThreadListEmpty>{t('No chats yet')}</ThreadListEmpty>
+              )}
+            </SidebarProjectRow>
+          ))}
       </ConversationSection>
       <ConversationSection
         label={t('Recent')}
         collapsed={organization.collapsed.includes('recent')}
-        onToggle={() => organization.toggle('recent')}
+        onToggle={() => void organization.toggle('recent').catch(() => {})}
       >
         {isLoading && (
           <div className="space-y-2 px-3 py-2" aria-label={t('Loading conversations')}>
@@ -155,9 +158,14 @@ function SidebarConversationsBody({ scope }: { scope: string }) {
         <ProjectNameDialog
           initialName={editProject === 'new' ? undefined : editProject.name}
           onClose={() => setEditProject(undefined)}
-          onSave={name => {
-            if (editProject === 'new') organization.create(name);
-            else organization.rename(editProject.id, name);
+          onSave={async name => {
+            if (editProject === 'new') {
+              const project = await organization.create(name, agentId);
+              if (agentId) {
+                void navigate(`/chat/${encodeURIComponent(agentId)}/projects/${project.id}`);
+                onNavigate();
+              }
+            } else await organization.rename(editProject.id, name);
           }}
         />
       )}

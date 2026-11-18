@@ -1,17 +1,13 @@
-import { useLocalStorageState } from '@mastra/playground-ui/hooks/use-local-storage-state';
-import { z } from 'zod/v4';
+import { useConversationProjects } from '@/domains/navigation/use-conversation-projects';
+import { useConversationScope } from '@/domains/navigation/use-conversation-scope';
 
-const pinnedIdsSchema = z.array(z.string());
-
-export const usePinnedThreads = (resourceType: 'agent' | 'network', resourceId: string) => {
-  const [pinnedIds, setPinnedIds] = useLocalStorageState<string[]>({
-    initialKey: `mastra:pinned-threads:${resourceType}:${resourceId}`,
-    schema: pinnedIdsSchema,
-    defaultValue: [],
-  });
-
-  const pin = (id: string) => setPinnedIds(ids => [id, ...ids.filter(pinned => pinned !== id)]);
-  const unpin = (id: string) => setPinnedIds(ids => ids.filter(pinned => pinned !== id));
-
-  return { pinnedIds, pin, unpin };
+export const usePinnedThreads = (_resourceType: 'agent' | 'network', _resourceId: string) => {
+  const organization = useConversationProjects(useConversationScope());
+  const pin = (id: string) => {
+    void organization.setPinned(id, true).catch(() => {});
+  };
+  const unpin = (id: string) => {
+    void organization.setPinned(id, false).catch(() => {});
+  };
+  return { pinnedIds: organization.pinned, pin, unpin };
 };

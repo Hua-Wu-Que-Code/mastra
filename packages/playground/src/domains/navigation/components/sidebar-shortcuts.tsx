@@ -14,7 +14,7 @@ export const SidebarShortcuts = () => {
     {
       '[': toggleSidebar,
       '{': () => {
-        if (/^\/agents\/[^/]+\/threads\//.test(pathname)) toggleSidebar();
+        if (/^\/(?:agents|chat)\/[^/]+\/threads\//.test(pathname)) toggleSidebar();
       },
     },
     { repeat: false },

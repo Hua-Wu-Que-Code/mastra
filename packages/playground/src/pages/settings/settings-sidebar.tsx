@@ -1,9 +1,9 @@
 import { Sidebar, useSidebar } from '@mastra/playground-ui/components/Sidebar';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { IconArchive } from '@mastra/playground-ui/icons/central/IconArchive';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
 import { IconFolder1 } from '@mastra/playground-ui/icons/central/IconFolder1';
 import { IconSettingsGear5 } from '@mastra/playground-ui/icons/central/IconSettingsGear5';
-import { MemoryIcon } from '@mastra/playground-ui/icons/MemoryIcon';
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { Link, useLocation } from 'react-router';
 
@@ -45,16 +45,6 @@ export function SettingsSidebar() {
         </Sidebar.NavList>
         <Sidebar.NavList>
           <Sidebar.NavLink
-            link={{ name: studioT('Storage'), url: '/settings/storage' }}
-            isActive={location.pathname === '/settings/storage'}
-            render={
-              <Link to="/settings/storage" state={{ returnTo }}>
-                <IconFolder1 />
-                <Sidebar.NavLabel>{studioT('Storage')}</Sidebar.NavLabel>
-              </Link>
-            }
-          />
-          <Sidebar.NavLink
             link={{ name: studioT('General'), url: '/settings' }}
             isActive={location.pathname === '/settings'}
             render={
@@ -65,12 +55,22 @@ export function SettingsSidebar() {
             }
           />
           <Sidebar.NavLink
-            link={{ name: studioT('Memory'), url: '/settings/memory' }}
-            isActive={location.pathname === '/settings/memory'}
+            link={{ name: studioT('Archived chats'), url: '/settings/archived-chats' }}
+            isActive={location.pathname === '/settings/archived-chats'}
             render={
-              <Link to="/settings/memory" state={{ returnTo }}>
-                <MemoryIcon />
-                <Sidebar.NavLabel>{studioT('Memory')}</Sidebar.NavLabel>
+              <Link to="/settings/archived-chats" state={{ returnTo }}>
+                <IconArchive />
+                <Sidebar.NavLabel>{studioT('Archived chats')}</Sidebar.NavLabel>
+              </Link>
+            }
+          />
+          <Sidebar.NavLink
+            link={{ name: studioT('Storage'), url: '/settings/storage' }}
+            isActive={location.pathname === '/settings/storage'}
+            render={
+              <Link to="/settings/storage" state={{ returnTo }}>
+                <IconFolder1 />
+                <Sidebar.NavLabel>{studioT('Storage')}</Sidebar.NavLabel>
               </Link>
             }
           />

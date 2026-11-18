@@ -69,3 +69,34 @@ export async function downloadStoredFile(target: Target, file: StoredFile) {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
+
+/** Bound previews even if the file grows after listing. Downloads remain unrestricted. */
+export const FILE_PREVIEW_LIMIT = 10 * 1024 * 1024;
+export async function readStoredFile(target: Target, file: StoredFile, signal?: AbortSignal) {
+  const tooLarge = () => new Error(t('This file is too large to preview. Download it to view.'));
+  if (file.size > FILE_PREVIEW_LIMIT) throw tooLarge();
+  const response = await storageRequest(target, '/download', { signal }, { path: file.path });
+  if (Number(response.headers.get('Content-Length')) > FILE_PREVIEW_LIMIT) {
+    await response.body?.cancel();
+    throw tooLarge();
+  }
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error(t('File storage is unavailable. Please retry.'));
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > FILE_PREVIEW_LIMIT) {
+        await reader.cancel();
+        throw tooLarge();
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return new Blob(chunks, { type: file.mimeType });
+}

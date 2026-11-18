@@ -79,11 +79,14 @@ describe('SidebarShortcuts', () => {
     expect(sidebarState()).toBe('default');
   });
 
-  it('preserves the conversation panel shortcut after moving the list', () => {
-    renderSidebar('/agents/creator-agent/threads/new');
-    fireEvent.keyDown(window, { key: '{', shiftKey: true });
-    expect(sidebarState()).toBe('collapsed');
-  });
+  it.each(['/agents/creator-agent/threads/new', '/chat/creator-agent/threads/new'])(
+    'preserves the conversation panel shortcut at %s',
+    path => {
+      renderSidebar(path);
+      fireEvent.keyDown(window, { key: '{', shiftKey: true });
+      expect(sidebarState()).toBe('collapsed');
+    },
+  );
 
   it('{ does not toggle the sidebar outside agent conversations', () => {
     renderSidebar();
