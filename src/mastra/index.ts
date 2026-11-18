@@ -1,15 +1,26 @@
+import { subagentRoutes } from './routes/subagents';
 import { Mastra } from '@mastra/core';
 import { Agent } from '@mastra/core/agent';
 import { Knowledge, knowledgeMemoryScopes } from '@mastra/core/knowledge';
 import { MastraCompositeStore } from '@mastra/core/storage';
-import { createTool } from '@mastra/core/tools';
+import { createTool, TaskStateProcessor } from '@mastra/core/tools';
+import { createClient } from '@libsql/client';
+import { LibSQLSessionSearch } from '@mastra/altflow-tools';
+import { createCreatorTools } from './tools';
+import { UserDeliveryService } from './services/delivery';
+import { createPrivateWorkspace } from './agents/private-workspace';
+import { createAgentTree } from './subagents/agents';
+import { SubagentStore } from './subagents/store';
+import { toolCatalogRoute } from './routes/tool-catalog';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { LocalFilesystem, Workspace } from '@mastra/core/workspace';
 import { DuckDBStore } from '@mastra/duckdb';
 import { MastraEditor } from '@mastra/editor';
 import { LibSQLStore, LibSQLVector } from '@mastra/libsql';
 import { MCPServer } from '@mastra/mcp';
-import { Memory } from '@mastra/memory';
+import { executionPolicy } from './agents/execution-policy';
+import { HistoryMemory } from './agents/history-memory';
+import { DisabledRecallMemory } from './agents/disabled-recall-memory';
 import { Observability, MastraStorageExporter } from '@mastra/observability';
 import { KNOWLEDGE_ROUTES } from '@mastra/server/server-adapter';
 import { resolve } from 'node:path';
@@ -20,9 +31,14 @@ import { localEmbedder } from './embedding';
 import { createAltFlowAuth } from './altflow-auth';
 import { ModelHubGateway } from './modelhub-gateway';
 import { ContextCompaction } from './context-compaction';
+import { CONTEXT_MEMORY_OPTIONS } from './context-memory';
 import { UserStorage } from './user-storage';
-import { UserFilesystem } from './user-filesystem';
 import { userStorageRoutes } from './user-storage-routes';
+import { ConversationProjects } from './services/conversation-projects';
+import { conversationProjectRoutes } from './routes/conversation-projects';
+import { AccountPreferences } from './services/account-preferences';
+import { accountPreferenceRoutes } from './routes/account-preferences';
+import { accountMemory } from './services/account-memory';
 
 const previewPath = (...parts: string[]) => resolve(process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(), ...parts);
 const accountsOrigins = (
@@ -49,6 +65,13 @@ const storage = new MastraCompositeStore({
       .observability,
   },
 });
+const projectMemory = await storage.getStore('memory');
+if (!projectMemory) throw new Error('Conversation storage is unavailable');
+await mkdir(previewPath('data'), { recursive: true });
+const conversationProjects = new ConversationProjects(`file:${previewPath('data/conversation-projects.db')}`, projectMemory);
+await conversationProjects.init();
+const accountPreferences = new AccountPreferences(`file:${previewPath('data/account-preferences.db')}`, projectMemory);
+await accountPreferences.init();
 const vector = new LibSQLVector({ id: 'creator-vectors', url: `file:${previewPath('data/vectors.db')}` });
 await mkdir(previewPath('data'), { recursive: true });
 const ossKey = process.env.ALTFLOW_OSS_ACCESS_KEY_ID;
@@ -155,32 +178,13 @@ const textReview = createWorkflow({
   .then(composeReport)
   .commit();
 const contextCompaction = new ContextCompaction({ gateway: modelHub, storage });
-const creatorAgent = new Agent({
-  id: 'creator-agent',
-  name: '创作者助手',
-  instructions:
-    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。工作区之外的文件和联网权限未提供，不要声称拥有。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取；生成的文件也写入该工作区。写入成功后提供下载链接，格式为 [下载文件](/storage/download?path=URL编码后的绝对文件路径)。',
-  model,
-  defaultOptions: { requireToolApproval: false },
-  workspace: async ({ user }) => {
-    if (!user?.id) return undefined;
-    const privateWorkspace = new Workspace({ id: `files-${user.id}`, name: '我的文件', filesystem: new UserFilesystem(userFiles, user.id) });
-    await privateWorkspace.init();
-    return privateWorkspace;
-  },
-  knowledge,
-  // Server auth supplies library access; do not grant every caller ownership.
-  scopes: ({ scopes }) => scopes,
-  memory: new Memory({
+const creatorMemory = new HistoryMemory({
     storage,
     vector,
     embedder: localEmbedder,
     options: {
-      // Register the shared engine so request-level preferences can control observations.
-      observationalMemory: { model },
-      // Auto leaves history to token-budget compaction; requests can impose a smaller count.
-      lastMessages: Number.MAX_SAFE_INTEGER,
-      semanticRecall: false,
+      ...CONTEXT_MEMORY_OPTIONS,
+      semanticRecall: true,
       workingMemory: {
         enabled: true,
         scope: 'resource',
@@ -188,11 +192,42 @@ const creatorAgent = new Agent({
       },
       generateTitle: { instructions: '根据首条用户消息生成简洁的中文对话标题，不超过 12 个汉字，只输出标题。' },
     },
-  }),
-  inputProcessors: [contextCompaction],
+  });
+const disabledRecallMemory = new DisabledRecallMemory({ storage, options: { generateTitle: true } });
+const sessionClient = createClient({ url: `file:${previewPath('src/mastra/public/preview.db')}` });
+const creatorToolBundle = createCreatorTools({ countText, sessionSearch: new LibSQLSessionSearch(sessionClient),
+  delivery: new UserDeliveryService(userFiles) });
+const privateWorkspace = createPrivateWorkspace(userFiles, previewPath('workspace/skills'));
+const subagentStore = new SubagentStore(`file:${previewPath('data/subagents.db')}`);
+await subagentStore.init();
+const childMemory = new HistoryMemory({ storage, options: { ...CONTEXT_MEMORY_OPTIONS, semanticRecall: false,
+  workingMemory: { enabled: false }, generateTitle: false } });
+const agentTree = createAgentTree({
+  store: subagentStore, memory: projectMemory, childMemory, model, tools: creatorToolBundle.tools,
+  getMastra: () => mastra, getRootAgent: () => creatorAgent,
+  teamEnabled: async actor => {
+    const preferences = await accountPreferences.read(actor.owner, actor.resourceId, { kind: 'thread', id: JSON.stringify(['creator-agent', actor.root]) });
+    return z.object({ modelSettings: z.object({ teamwork: z.boolean().optional() }).optional() }).parse(preferences.value).modelSettings?.teamwork === true;
+  },
+  childConfig: { inputProcessors: [contextCompaction], outputProcessors: [contextCompaction], errorProcessors: [contextCompaction], workspace: ({ user }) => user?.id ? privateWorkspace(user.id) : undefined, knowledge, scopes: ({ scopes }) => scopes },
+});
+const creatorTools = { ...creatorToolBundle.tools, ...agentTree.tools };
+const creatorAgent = new Agent({
+  id: 'creator-agent',
+  name: '创作者助手',
+  instructions:
+    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。可按需使用 web_fetch 读取公开网页；web_search 仅在配置后可用。先检索事实再给引用，不声称执行未提供的工具。复杂任务维护 task 清单；需要用户选择时 ask_user；需要审批时写入 .mastracode/plans/*.md 后 submit_plan。历史设定用 session_search 字面检索，再用 recall 读取原文。可用 subagent 动态创建后台助手，用 subagent_fork 分叉已完成的上下文，用 send_message、wait_agent、list_agents、interrupt_agent 协作。团队开关只控制共享任务板和协作指令。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取；生成的文件也写入该工作区。写入成功后调用 present 交付文件，不编造文件路径。',
+  model,
+  defaultOptions: { requireToolApproval: false, ...executionPolicy().loop },
+  workspace: ({ user }) => user?.id ? privateWorkspace(user.id) : undefined,
+  knowledge,
+  // Server auth supplies library access; do not grant every caller ownership.
+  scopes: ({ scopes }) => scopes,
+  memory: accountMemory(accountPreferences, creatorMemory, disabledRecallMemory),
+  inputProcessors: [new TaskStateProcessor(), contextCompaction, agentTree.processor],
   outputProcessors: [contextCompaction],
   errorProcessors: [contextCompaction],
-  tools: { countText },
+  tools: creatorTools,
   workflows: { textReview },
 });
 const creatorMcp = new MCPServer({ id: 'creator-mcp', name: '创作工具服务', version: '1.0.0', tools: { countText } });
@@ -200,7 +235,7 @@ export const mastra = new Mastra({
   gateways: { altflow: modelHub },
   agents: { creatorAgent },
   workflows: { textReview },
-  tools: { countText },
+  tools: creatorTools,
   processors: { contextCompaction },
   workspace,
   knowledge: { creatorKnowledge: knowledge },
@@ -219,7 +254,16 @@ export const mastra = new Mastra({
     auth: accounts.auth,
     apiRoutes: [
       ...accounts.apiRoutes,
+      ...subagentRoutes(agentTree.runtime, accounts, accountsOrigins, () => creatorAgent, async actor => {
+        const saved = await accountPreferences.read(actor.owner, actor.resourceId, { kind: 'thread', id: JSON.stringify(['creator-agent', actor.root]) });
+        const options = z.object({ selection: z.object({ provider: z.string(), model: z.string() }).optional(), modelSettings: z.object({ reasoningLevel: z.string().optional() }).optional() }).parse(saved.value);
+        return { model: options.selection ? `${options.selection.provider}/${options.selection.model}` : undefined, reasoningLevel: options.modelSettings?.reasoningLevel };
+      }),
+      toolCatalogRoute({ accounts, origins: accountsOrigins, tools: creatorTools,
+        memory: creatorMemory, knowledge, workspace: privateWorkspace, providerConfigured: creatorToolBundle.providerConfigured }),
       ...userStorageRoutes(userFiles, accounts.authenticate, accountsOrigins),
+      ...conversationProjectRoutes(conversationProjects, accounts, accountsOrigins),
+      ...accountPreferenceRoutes(accountPreferences, accounts, accountsOrigins),
       ...KNOWLEDGE_ROUTES,
     ],
     cors: {

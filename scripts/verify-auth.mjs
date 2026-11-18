@@ -408,7 +408,7 @@ try {
     );
   }
   const config = await request('/api/memory/config?agentId=creator-agent', alice);
-  assert.equal(config.body.config.observationalMemory.enabled, true);
+  assert.equal(config.body.config.observationalMemory.enabled, false);
   checks.push(
     'thread listing, read, write, delete, clone, working memory, observation and private knowledge isolation',
   );

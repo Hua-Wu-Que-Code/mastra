@@ -1,9 +1,8 @@
-# DeepSeek Harness
+# Third-party notices
 
-The context policy, checkpoint prompt/framing, balanced retention, tool-result pruning
-and pressure/overflow workflow in `src/mastra/context-*.ts` and `compaction-prompt.ts`
-are adapted from DeepSeek Harness packages `compaction-basic`,
-`compaction-tool-result-pruner`, and `token-meter`.
+DeepSeek Harness execution-policy design and activation-slot reservation adapted from
+packages/subagent/subagent/src/{index,activation}.ts and packages/core/agent-loop/src/constants.ts.
+Upstream: https://github.com/deepseek-ai/deepseek-harness
 
 MIT License
 

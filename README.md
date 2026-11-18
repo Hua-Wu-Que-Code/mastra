@@ -21,6 +21,8 @@ Go 认证入口只用于本地开发，不启动项目任务恢复或业务后�
 
 选择器展示目录中的产品名称，点击后可分别切换模型和推理等级。档位来自每个模型的 `thinking_options`，切换模型时使用新模型的默认档位；选择保存在当前会话偏好中。实际调用由服务端验证所选档位，并根据该档位转换为 `target`、思考强度及预算，记录目录版本。默认 `altflow/deepseek-v4-pro`。目录缓存 60 秒，刷新失败保留上次有效目录；首次获取失败时不提供公共模型作为替代。这里沿用 DSH 的目录、档位选择和路由规则。
 
+ModelHub 适配器显式启用 `includeUsage`，流式请求携带 `stream_options.include_usage=true`，要求上游返回输入、输出和缓存用量。缓存是否命中由上游决定，本地 TokenCounter 只做上下文预算，不能测出供应商缓存命中。被中断的请求仍可能没有最终 usage，前端将其他已报告用量标为 `≥`，不把缺失值当成 0 或丢掉已有统计。
+
 ## 权限与数据
 
 - `admin` 角色显示管理入口；`creator`、旧 `user` 角色只能对话及读取获授权的知识。每次 API 请求向 Go 校验身份，角色变更、停用、退出立即生效。
@@ -68,3 +70,54 @@ Go 认证入口只用于本地开发，不启动项目任务恢复或业务后�
 - `npm test` 包含真实 OSS SDK 对接本地 HTTP 边界、真实临时 LibSQL、真实文件适配器和 HTTP 路由验证，覆盖并发配额、身份隔离、Origin、重启恢复、读取/生成、下载和失败删除。
 
 官方参考：[Mastra 文件系统](https://mastra.ai/docs/sandbox/filesystem)、[OSS Node.js SDK 初始化](https://www.alibabacloud.com/help/en/oss/initialization-10)。
+
+
+## 本地集成启动
+
+`npm start` 通过 `start-built.mjs` 编译后启动 4111 服务。它复用本项目当前安装的本地框架及工具包，不在输出目录重新安装公开包，以免覆盖本地框架实现。此入口没有热重载；修改运行代码后重新执行。Studio 开发入口仍为 5174，账号服务由 `npm run dev:auth` 提供。
+
+独立部署必须同时打包匹配的框架依赖；不能把此本地启动结果视为已验证公开 registry 依赖的独立部署。动态子智能体的契约、界面及验收边界见 [DSH-SUBAGENT-HANDOFF.md](./DSH-SUBAGENT-HANDOFF.md)。
+
+## Context component estimates
+
+`ContextCompaction.processLLMRequest` uses the exported Mastra `TokenCounter` from `@mastra/memory/processors` to count system instructions, converted conversation messages (including attachments), and tool definitions after pruning and checkpoint projection. The numeric estimates are persisted as `contextBreakdown` metadata on each model-step span. The UI labels these with `~`; aggregate occupancy and uncached-input usage continue to use the provider's reported usage. Historical traces without this metadata cannot retroactively acquire exact component counts.
+
+DSH pressure pricing remains separate from these display estimates: trigger at `floor(min(W * 0.8, W - O - 65536))`, retain `floor((W - O) * 0.16)`, using a configured maximum window of 131072 and output reserve of 8192. Full original messages remain in memory storage.
+
+DSH checkpoint compaction is the only conversation compression mechanism. Mastra
+loads the complete stored history instead of its default recent-message count;
+observational memory is disabled so its observation cursor cannot hide original
+messages before DSH applies its checkpoint. Existing observation records remain
+stored but are not injected. Managed-user requests cannot re-enable observations or impose a
+message-count cap. At the default capacity, compaction starts at 57344 tokens and
+retains a recent verbatim tail budget of 19660 tokens. Checkpoints persist with the
+thread and reload when the Agent is rebuilt.
+
+## Master memory switch
+
+The creator Agent enables working memory, semantic recall, and DSH-managed
+conversation history on the server. General settings exposes one master
+switch. Disabling it sends an invocation override that disables those channels;
+saved conversations are retained. Retired per-feature browser preferences no longer
+override the server policy.
+
+## 项目与会话分组
+
+- `/conversation-projects` GET/POST 是服务端认证接口。项目名称、会话归属、项目/会话置顶和折叠状态按账号保存于 `data/conversation-projects.db`，不依赖浏览器保存业务状态。Studio 开发代理和正式反向代理需转发此根路径。
+- 写入使用创建、重命名、移动、置顶等命令，在写事务中读取最新状态并更新，避免多个页面用旧快照覆盖新数据。服务端从登录态确定账号；移动、置顶、迁移和删除都会验证会话归属。
+- 老浏览器仅导入当前账号精确作用域下的旧数据，成功后清理备份。服务端保留迁移指纹，已有服务端记录优先；相同旧数据不会重新创建已删除项目。
+- 删除项目的成员列表由服务端读取。删除部分失败时保留项目及未成功删除的会话，可重试；用户文件遵循原有生命周期，不随项目删除。
+- 部署必须持久化并备份此账本和会话库。多实例必须共用账本，不能各持一份独立 SQLite；该账本不修改 Go 账号库或 Mastra 会话库 schema。
+- `scripts/conversation-projects.test.mjs` 通过真实 HTTP 认证边界、路由和临时 LibSQL 验证跨账号隔离、重启恢复、并发修改、迁移及故障删除重试，不访问正常业务库。
+
+### Account preferences
+
+`/account-preferences` reads and patches memory, chat, agent editor and thread
+preferences for the Go-authenticated account. The independent ledger is
+`data/account-preferences.db`; keep it in server backups with the project and file
+ledgers. Writes validate a per-kind schema and merge fields in a write transaction.
+Cookie writes require an allowed Origin; response bodies never select an owner.
+Legacy thread imports require a pre-existing owned thread and never replace an
+existing server entry, including an explicit reset. The creator Agent resolves
+its memory policy from this ledger; a persisted opt-out blocks history, semantic
+and working-memory recall even when a client sends stale enabled options.

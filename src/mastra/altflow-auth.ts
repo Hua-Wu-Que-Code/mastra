@@ -1,4 +1,5 @@
 import { defineAuth, registerApiRoute } from '@mastra/core/server';
+import { ALTFLOW_ACCOUNT_RESOURCE_KEY } from '@mastra/altflow-tools';
 import { MASTRA_RESOURCE_ID_KEY, MASTRA_SCOPES_KEY } from '@mastra/core/request-context';
 import { encodeKnowledgeScopeId } from '@mastra/core/knowledge';
 import { z } from 'zod';
@@ -84,15 +85,10 @@ const conversationMemory = z
     resource: z.string().optional(),
     options: z
       .object({
-        lastMessages: z
-          .union([
-            z.literal(false),
-            z.number().int().min(0).max(10000),
-            z.literal(Number.MAX_SAFE_INTEGER),
-          ])
-          .optional(),
+        // History is either disabled by the master switch or budgeted by DSH.
+        lastMessages: z.union([z.literal(false), z.literal(Number.MAX_SAFE_INTEGER)]).optional(),
         workingMemory: z.object({ enabled: z.boolean() }).strict().optional(),
-        observationalMemory: z.boolean().optional(),
+        observationalMemory: z.literal(false).optional(),
         semanticRecall: z.literal(false).optional(),
       })
       .strict()
@@ -237,6 +233,7 @@ export function createAltFlowAuth(options: {
       }
       const requestContext = context.get('requestContext');
       requestContext.set(MASTRA_RESOURCE_ID_KEY, resourceFor(user));
+      requestContext.setRaw(ALTFLOW_ACCOUNT_RESOURCE_KEY, resourceFor(user));
       requestContext.set(MASTRA_SCOPES_KEY, [
         `resource:${resourceFor(user)}`,
         user.role === 'admin' ? 'library:creator' : 'audience:creators',

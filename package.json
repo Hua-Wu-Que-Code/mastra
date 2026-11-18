@@ -3,16 +3,19 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "node start-built.mjs",
     "dev": "node start-local.mjs",
     "typecheck": "tsc --noEmit",
     "verify": "node scripts/verify.mjs",
     "dev:auth": "node start-auth.mjs",
-    "test": "node --import tsx --test scripts/modelhub-gateway.test.mjs scripts/context-compaction.test.mjs scripts/user-storage.test.mjs"
+    "test": "node --import tsx --test scripts/modelhub-gateway.test.mjs scripts/context-compaction.test.mjs scripts/conversation-preferences.test.mjs scripts/user-storage.test.mjs scripts/conversation-projects.test.mjs scripts/account-preferences.test.mjs",
+    "test:tools": "node --import tsx --test scripts/tool-runtime.test.mjs scripts/subagents.test.mjs scripts/subagents-http.test.mjs scripts/user-storage.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "2.0.88",
     "@huggingface/transformers": "3.8.1",
     "@libsql/client": "^0.18.0",
+    "@mastra/altflow-tools": "file:../../../mastra/integrations/altflow-tools",
     "@mastra/core": "1.83.0",
     "@mastra/duckdb": "1.19.0",
     "@mastra/editor": "0.17.1",
