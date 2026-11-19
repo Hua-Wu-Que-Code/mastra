@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { test } from 'node:test';
 import { Hono } from 'hono';
 import { createAltFlowAuth } from '../src/mastra/altflow-auth.ts';
+import { conversationStatusRoute } from '../src/mastra/routes/conversation-status.ts';
 import { subagentRoutes } from '../src/mastra/routes/subagents.ts';
 import { AccountPreferences } from '../src/mastra/services/account-preferences.ts';
 import { fixture, runOptions, context } from './tool-fixture.mjs';
@@ -51,6 +52,12 @@ async function setup(t) {
     actor => preferences.conversationOptions(actor.owner, actor.resourceId, 'creator-agent', actor.root),
   ))
     app.on(route.method, route.path, route.handler);
+  const statusRoute = conversationStatusRoute(() => f.agent, accounts, ['http://studio.test']);
+  app.on(statusRoute.method, statusRoute.path, statusRoute.handler);
+  const statusRequest = (owner, origin) =>
+    app.request('/altflow/conversations/status', {
+      headers: { ...(owner ? { authorization: `Bearer ${owner}` } : {}), ...(origin ? { origin } : {}) },
+    });
   const request = (owner, child, action, headers = {}, root = 'alice-thread') =>
     app.request(`/altflow/subagents?${new URLSearchParams({ root, ...(child ? { child } : {}) })}`, {
       method: action ? 'POST' : 'GET',
@@ -60,7 +67,7 @@ async function setup(t) {
       },
       body: action ? JSON.stringify(action) : undefined,
     });
-  return { ...f, request, preferences };
+  return { ...f, request, statusRequest, preferences };
 }
 test('opening a saved tree restores the conversation reasoning level for subsequent children', async t => {
   const f = await setup(t);
@@ -176,4 +183,45 @@ test('child HTTP continuation works with teamwork off and remains ownership chec
     ).status,
     400,
   );
+});
+
+test('sidebar status follows real root execution and never exposes another account', async t => {
+  const f = await setup(t);
+  assert.equal((await f.statusRequest()).status, 401);
+  assert.equal((await f.statusRequest('alice', 'http://other.test')).status, 403);
+  let release;
+  let started;
+  const waiting = new Promise(resolve => {
+    release = resolve;
+  });
+  const active = new Promise(resolve => {
+    started = resolve;
+  });
+  f.setHandler(async () => {
+    started();
+    await waiting;
+    return { text: 'Finished.' };
+  });
+  const output = await f.agent.stream('A long answer', runOptions());
+  const done = output.consumeStream();
+  try {
+    await active;
+    assert.deepEqual(await (await f.statusRequest('alice')).json(), { running: ['alice-thread'] });
+    assert.deepEqual(await (await f.statusRequest('bob')).json(), { running: [] });
+  } finally {
+    release();
+  }
+  await done;
+  await until(async () => (await (await f.statusRequest('alice')).json()).running.length === 0);
+});
+
+test('sidebar does not show a generating spinner while a question is waiting for the user', async t => {
+  const f = await setup(t);
+  f.responses.push({
+    calls: [{ name: 'ask_user', args: { question: 'Which topic?', options: [{ label: 'A' }, { label: 'B' }] } }],
+  });
+  const output = await f.agent.stream('Ask before continuing.', runOptions());
+  await output.consumeStream();
+  assert.equal(output.status, 'suspended');
+  assert.deepEqual(await (await f.statusRequest('alice')).json(), { running: [] });
 });

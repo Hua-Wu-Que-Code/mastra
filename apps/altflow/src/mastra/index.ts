@@ -28,6 +28,7 @@ import { localEmbedder } from './embedding';
 import { ModelHubGateway } from './modelhub-gateway';
 import { accountPreferenceRoutes } from './routes/account-preferences';
 import { conversationProjectRoutes } from './routes/conversation-projects';
+import { conversationStatusRoute } from './routes/conversation-status';
 import { subagentRoutes } from './routes/subagents';
 import { toolCatalogRoute } from './routes/tool-catalog';
 import { accountMemory } from './services/account-memory';
@@ -307,6 +308,7 @@ export const mastra = new Mastra({
     auth: accounts.auth,
     apiRoutes: [
       ...accounts.apiRoutes,
+      conversationStatusRoute(() => creatorAgent, accounts, accountsOrigins),
       ...subagentRoutes(
         agentTree.runtime,
         accounts,
