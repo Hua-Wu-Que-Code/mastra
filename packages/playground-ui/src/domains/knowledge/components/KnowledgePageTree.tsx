@@ -253,8 +253,8 @@ export function KnowledgePageTree({
                   tabIndex={-1}
                   aria-label={
                     row.expanded
-                      ? studioT('Collapse {value0}', { value0: row.page.name })
-                      : studioT('Expand {value0}', { value0: row.page.name })
+                      ? studioT('Collapse {value0}', { value0: scopeTitle(row.page) })
+                      : studioT('Expand {value0}', { value0: scopeTitle(row.page) })
                   }
                   className="flex size-3 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
                   onClick={event => {
@@ -270,7 +270,7 @@ export function KnowledgePageTree({
               <span className="flex shrink-0 items-center text-muted-foreground [&>svg]:size-icon-sm" aria-hidden>
                 {scopeSource(row.page)?.icon ? (
                   <KnowledgeSourceIcon page={row.page} />
-                ) : row.hasChildren ? (
+                ) : row.page.isScope || row.hasChildren ? (
                   <IconFolder1 />
                 ) : (
                   <IconFileText />
@@ -291,7 +291,7 @@ export function KnowledgePageTree({
               {pinned.has(row.page.id) ? (
                 <IconPin className="shrink-0 text-badge-amber-indicator" aria-label={studioT('Pinned')} />
               ) : null}
-              {row.page.isScope && row.page.address && row.page.address !== row.page.name ? (
+              {row.page.isScope && row.page.address && row.page.address !== scopeTitle(row.page) ? (
                 <span
                   data-testid="knowledge-tree-address"
                   className="max-w-1/2 min-w-0 truncate text-caption text-muted-foreground"

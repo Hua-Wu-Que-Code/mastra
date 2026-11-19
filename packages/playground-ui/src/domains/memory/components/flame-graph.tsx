@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { ScatterShapeProps } from 'recharts';
 import { Button } from '../../../ds/components/Button';
 import { Txt } from '../../../ds/components/Txt';
 
@@ -163,7 +164,7 @@ function EventRow({ label, data, color, height = 32, domain, zoomDomain }: Event
               data={data}
               fill={color}
               isAnimationActive={false}
-              shape={props => {
+              shape={(props: ScatterShapeProps) => {
                 const cx = props.cx ?? 0;
                 return (
                   <g>

@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { Mastra } from '@mastra/core/mastra';
 import {
   InMemoryStore,
   KnowledgeConflictError,
@@ -6,7 +7,7 @@ import {
   KnowledgeUnsupportedCapabilityError,
 } from '@mastra/core/storage';
 import type { KnowledgeStorage } from '@mastra/core/storage';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, expect, it, onTestFinished, vi } from 'vitest';
 import { PlatformKnowledge } from './index';
 
 const servers: ReturnType<typeof createServer>[] = [];
@@ -251,6 +252,9 @@ it("authenticates with the deploy's Knowledge-only token before the general Plat
   const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
   try {
     for (const key of keys) delete process.env[key];
+    expect(() => new PlatformKnowledge({ instanceId: 'kn_1', accessToken: '' })).toThrow(
+      'PlatformKnowledge requires a Knowledge token or Platform access token, and a Knowledge instance ID',
+    );
     const list = async (options = {}) =>
       (await new PlatformKnowledge({ instanceId: 'kn_1', ...options }).getStorage()).listPages({ read: 'all' });
     // Only the Knowledge token is set.
@@ -280,4 +284,31 @@ it("authenticates with the deploy's Knowledge-only token before the general Plat
     'Bearer platform-token',
     'Bearer platform-token',
   ]);
+});
+
+it('names the env var when no Knowledge instance ID is given', () => {
+  vi.stubEnv('MASTRA_KNOWLEDGE_INSTANCE_ID', '');
+  onTestFinished(() => vi.unstubAllEnvs());
+  expect(() => new PlatformKnowledge({ apiUrl: 'http://localhost', accessToken: 'token' })).toThrow(
+    'PlatformKnowledge requires a Knowledge instance ID: set MASTRA_KNOWLEDGE_INSTANCE_ID or pass instanceId',
+  );
+});
+
+it('takes the instance ID from MASTRA_KNOWLEDGE_INSTANCE_ID and registers under the same id on every boot', () => {
+  vi.stubEnv('MASTRA_KNOWLEDGE_INSTANCE_ID', 'kn_env');
+  onTestFinished(() => vi.unstubAllEnvs());
+  const options = { apiUrl: 'http://localhost', accessToken: 'token' };
+  expect(new PlatformKnowledge(options).id).toBe('platform-knowledge-kn_env');
+  expect(new PlatformKnowledge({ ...options, id: 'team' }).id).toBe('team');
+});
+
+it('registers two default PlatformKnowledge instances side by side when their instance IDs differ', () => {
+  const options = { apiUrl: 'http://localhost', accessToken: 'token' };
+  const mastra = new Mastra({ logger: false });
+  mastra.addKnowledge(new PlatformKnowledge({ ...options, instanceId: 'kn_a' }));
+  mastra.addKnowledge(new PlatformKnowledge({ ...options, instanceId: 'kn_b' }));
+  expect(Object.keys(mastra.listKnowledge())).toEqual(['platform-knowledge-kn_a', 'platform-knowledge-kn_b']);
+  expect(() => mastra.addKnowledge(new PlatformKnowledge({ ...options, instanceId: 'kn_a' }))).toThrow(
+    expect.objectContaining({ id: 'MASTRA_ADD_KNOWLEDGE_DUPLICATE_KEY' }),
+  );
 });

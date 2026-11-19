@@ -6263,6 +6263,7 @@ export class AgentThreadStreamRuntime {
     return queue;
   }
 
+  /** Resolves `'reserved'` when this call reserved the thread for `runId`. The caller then owns the reservation. */
   async waitForCrossAgentThreadRun(
     agent: Agent<any, any, any, any>,
     options: {
@@ -6277,7 +6278,7 @@ export class AgentThreadStreamRuntime {
       untilSuspended?: boolean;
     },
     pubsub?: PubSub,
-  ): Promise<'suspended' | undefined> {
+  ): Promise<'suspended' | 'reserved' | undefined> {
     const { threadId, resourceId } = this.#getThreadTarget(options);
     if (!threadId) return;
 
@@ -6316,6 +6317,7 @@ export class AgentThreadStreamRuntime {
           if (options.runId) {
             state.activeThreadRunIds.set(key, options.runId);
             state.threadKeysByRunId.set(options.runId, key);
+            return 'reserved';
           }
           return;
         }
