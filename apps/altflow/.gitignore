@@ -1,0 +1,11 @@
+node_modules/
+.mastra/
+.env
+*.db*
+
+data/
+.cache/
+
+.env.*
+!.env.example
+workspace/

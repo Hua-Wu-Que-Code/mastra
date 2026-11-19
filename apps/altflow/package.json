@@ -1,0 +1,37 @@
+{
+  "name": "altflow-mastra-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node start-built.mjs",
+    "dev": "node start-local.mjs",
+    "typecheck": "tsc --noEmit",
+    "verify": "node scripts/verify.mjs",
+    "dev:auth": "node start-auth.mjs",
+    "test": "node --import tsx --test scripts/modelhub-gateway.test.mjs scripts/context-compaction.test.mjs scripts/conversation-preferences.test.mjs scripts/user-storage.test.mjs scripts/conversation-projects.test.mjs scripts/account-preferences.test.mjs",
+    "test:tools": "node --import tsx --test scripts/tool-runtime.test.mjs scripts/subagents.test.mjs scripts/subagents-http.test.mjs scripts/user-storage.test.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "2.0.88",
+    "@huggingface/transformers": "3.8.1",
+    "@libsql/client": "^0.18.0",
+    "@mastra/altflow-tools": "file:../../../mastra/integrations/altflow-tools",
+    "@mastra/core": "1.83.0",
+    "@mastra/duckdb": "1.19.0",
+    "@mastra/editor": "0.17.1",
+    "@mastra/libsql": "1.30.0",
+    "@mastra/mcp": "2.9.0",
+    "@mastra/memory": "1.41.1",
+    "@mastra/observability": "1.24.0",
+    "@mastra/server": "1.83.0",
+    "ali-oss": "^6.23.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/ali-oss": "^6.23.4",
+    "@types/node": "^24.10.9",
+    "mastra": "1.39.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
