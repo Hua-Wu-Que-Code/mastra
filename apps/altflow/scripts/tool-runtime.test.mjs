@@ -231,6 +231,8 @@ test('authenticated tool catalog exposes real runtime capabilities, not schedule
       );
     assert.equal(entries.find(entry => entry.id === 'web_search').status, 'unconfigured');
     assert.equal(entries.find(entry => entry.id === 'team_task_create').status, 'conditional');
+    for (const name of ['subagent', 'subagent_fork', 'list_agents', 'send_message', 'wait_agent', 'interrupt_agent'])
+      assert.equal(entries.find(entry => entry.id === name).status, 'available');
     assert.equal(
       entries.some(entry => entry.id.startsWith('schedule')),
       false,

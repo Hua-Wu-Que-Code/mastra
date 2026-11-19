@@ -33,12 +33,12 @@ import { toolCatalogRoute } from './routes/tool-catalog';
 import { accountMemory } from './services/account-memory';
 import { AccountPreferences } from './services/account-preferences';
 import { ConversationProjects } from './services/conversation-projects';
-import { OfficeReader } from './services/office';
-import { createDocumentTools } from './tools/read-document';
 import { UserDeliveryService } from './services/delivery';
+import { OfficeReader } from './services/office';
 import { createAgentTree } from './subagents/agents';
 import { SubagentStore } from './subagents/store';
 import { createCreatorTools } from './tools';
+import { createDocumentTools } from './tools/read-document';
 import { UserStorage } from './user-storage';
 import { userStorageRoutes } from './user-storage-routes';
 
@@ -253,7 +253,7 @@ const creatorAgent = new Agent({
   id: 'creator-agent',
   name: '创作者助手',
   instructions:
-    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。可按需使用 web_fetch 读取公开网页；web_search 仅在配置后可用。先检索事实再给引用，不声称执行未提供的工具。复杂任务维护 task 清单；需要用户选择时 ask_user；需要审批时写入 .mastracode/plans/*.md 后 submit_plan。历史设定用 session_search 字面检索，再用 recall 读取原文。可用 subagent 动态创建后台助手，用 subagent_fork 分叉已完成的上下文，用 send_message、wait_agent、list_agents、interrupt_agent 协作。仅在团队协作开启时可创建或继续子智能体。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取，Office 和 PDF 正文调用 read_document（使用 DSH LibreOffice Kit），不要依据旧记忆声称无法读取；生成的文件也写入该工作区。写入成功后调用 present 交付文件，不编造文件路径。',
+    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。可按需使用 web_fetch 读取公开网页；web_search 仅在配置后可用。先检索事实再给引用，不声称执行未提供的工具。复杂任务维护 task 清单；需要用户选择时 ask_user；需要审批时写入 .mastracode/plans/*.md 后 submit_plan。历史设定用 session_search 字面检索，再用 recall 读取原文。可用 subagent 动态创建后台助手，用 subagent_fork 分叉已完成的上下文，用 send_message、wait_agent、list_agents、interrupt_agent 协作。团队开关只控制共享任务板和团队协作指令，普通子智能体独立可用。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取，Office 和 PDF 正文调用 read_document（使用 DSH LibreOffice Kit），不要依据旧记忆声称无法读取；生成的文件也写入该工作区。写入成功后调用 present 交付文件，不编造文件路径。',
   model,
   defaultOptions: { requireToolApproval: false, ...executionPolicy().loop },
   workspace: ({ user }) => (user?.id ? privateWorkspace(user.id) : undefined),

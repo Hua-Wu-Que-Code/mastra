@@ -124,8 +124,9 @@ test('tree HTTP exposes actual child messages and usage only to the owning root 
   );
   assert.equal((await f.request('alice', id)).headers.get('Cache-Control'), 'no-store');
 });
-test('child HTTP continuation and interruption are ownership checked and CSRF protected', async t => {
+test('child HTTP continuation works with teamwork off and remains ownership checked and CSRF protected', async t => {
   const f = await setup(t);
+  f.setTeamEnabled(false);
   const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
   await f.tree.runtime.spawn(actor, {
     name: 'worker',

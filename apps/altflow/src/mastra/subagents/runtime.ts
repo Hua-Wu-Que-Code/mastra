@@ -137,17 +137,12 @@ export class SubagentRuntime {
     if (active >= (this.options.maxActive ?? 8))
       throw new SubagentError('ACTIVATION_LIMIT_REACHED', 'Wait for an active child to finish.');
   }
-  private async requireTeamwork(actor: Actor) {
-    if (!(await this.teamEnabled(actor)))
-      throw new SubagentError('TEAM_DISABLED', 'Enable agent teamwork before creating or continuing subagents.');
-  }
   async spawn(
     actor: Actor,
     input: { name?: string; description: string; prompt: string },
     fork: readonly MastraDBMessage[] = [],
     model?: string,
   ) {
-    await this.requireTeamwork(actor);
     if (actor.self !== actor.root) throw new SubagentError('MAX_DEPTH_REACHED', 'Maximum subagent depth is 1.');
     const child = await this.store.edit(actor.owner, actor.root, tree => {
       this.checkCapacity(tree);
@@ -229,7 +224,6 @@ export class SubagentRuntime {
     return this.enqueue(actor, name, contents);
   }
   private async enqueue(actor: Actor, name: string, contents: string, persistInput?: () => Promise<unknown>) {
-    await this.requireTeamwork(actor);
     const mail = await this.store.edit(actor.owner, actor.root, async tree => {
       const target = this.resolve(tree, actor, name);
       if (target === actor.self) throw new SubagentError('INVALID_TARGET', 'Send to another agent.');
@@ -557,7 +551,6 @@ export class SubagentRuntime {
     };
   }
   async promptChild(actor: Actor, id: string, prompt: string) {
-    await this.requireTeamwork(actor);
     const tree = await this.store.read(actor.owner, actor.root);
     const child = tree.children.find(child => child.id === id);
     if (!child) throw new SubagentError('UNAUTHORIZED', 'Child is outside this conversation tree.');

@@ -1,6 +1,6 @@
 # DSH 子智能体机制：合并复审与补齐
 
-更新：2026-11-18。此前暂停记录已结束；用户要求合并同事分支并补齐 DSH 机制。
+更新：2026-11-19。此前暂停记录已结束；用户要求合并同事分支并补齐 DSH 机制。
 
 同事交付的固定 researcher/editor 前台委派不满足动态创建要求。生产入口已替换为 `subagents/agents.ts`，删除固定助手实现与旧委派容量池，仅保留统一执行策略。
 
@@ -27,6 +27,8 @@
 ## 参考与验证边界
 
 参考源码：DeepSeek Harness 的 `packages/subagent`、`packages/team`、`packages/client/ui-subagent`、`packages/client/ui-agent-team`。
+
+2026-11-19 复核：`tool-agent-team/src/index.ts` 只按开关注册四个共享任务工具和团队策略；`tool-subagent` 与 `tool-subagent-control` 独立注册普通子智能体工具。`ui-agent-team/src/client/locales.ts` 明确关闭只停止共享任务工具和协作指令。Altflow 因此不在创建、续跑、HTTP 发消息或子对话输入框上校验团队开关；账号与会话树归属校验仍由后端执行。回归覆盖关闭状态下的创建、分叉、消息续跑和 HTTP/UI 发送，以及重新开启后原任务仍可读取。
 
 自动测试使用真实 Agent、LibSQL、HTTP、文件适配器和 UI hooks；付费模型与外部 OSS/Go 认证服务的网络边界使用协议样本。覆盖动态 9 次工具调用、身份隔离、并发容量、异常恢复、用户插话、中断继续、冷恢复、任务 revision 与 UI 导航。冷恢复测试创建新的运行管理器；不是实际杀进程故障注入。
 

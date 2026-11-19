@@ -1,9 +1,9 @@
-import { standardSchemaToJSONSchema, toStandardSchema } from '@mastra/schema-compat/schema';
 import type { Knowledge } from '@mastra/core/knowledge';
 import { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } from '@mastra/core/request-context';
 import { registerApiRoute } from '@mastra/core/server';
 import { createWorkspaceTools, createSkillTools } from '@mastra/core/workspace';
 import type { Workspace } from '@mastra/core/workspace';
+import { standardSchemaToJSONSchema, toStandardSchema } from '@mastra/schema-compat/schema';
 import type { HistoryMemory } from '../agents/history-memory';
 import { AuthUpstreamError } from '../altflow-auth';
 import type { createAltFlowAuth, AltFlowUser } from '../altflow-auth';
@@ -102,12 +102,7 @@ export function toolCatalogRoute(options: {
         runtime: true,
       });
       for (const entry of entries.values())
-        if (
-          entry.name.startsWith('team_task_') ||
-          ['subagent', 'subagent_fork', 'send_message', 'list_agents', 'wait_agent', 'interrupt_agent'].includes(
-            entry.name,
-          )
-        ) {
+        if (entry.name.startsWith('team_task_')) {
           entry.source = '团队协作';
           entry.status = 'conditional';
           entry.reason = '开启智能体团队协作后可用';

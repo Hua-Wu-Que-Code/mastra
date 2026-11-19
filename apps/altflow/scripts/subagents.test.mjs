@@ -2,26 +2,23 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fixture, runOptions } from './tool-fixture.mjs';
 
-test('disabled teamwork removes delegation tools and rejects direct backend activation', async t => {
+test('disabled teamwork hides only shared tasks and keeps ordinary subagent tools and identity', async t => {
   const f = await fixture(t);
   f.setTeamEnabled(false);
   await f.agent.generate('Work independently.', { ...runOptions(), disableSubAgents: true });
-  const names = f.requests.at(-1).tools.map(tool => tool.function.name);
-  for (const name of [
-    'subagent',
-    'subagent_fork',
-    'list_agents',
-    'send_message',
-    'wait_agent',
-    'interrupt_agent',
-    'team_task_create',
-  ])
-    assert.ok(!names.includes(name), `${name} must be unavailable`);
-  const { context } = await import('./tool-fixture.mjs');
-  const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
-  await assert.rejects(f.tree.runtime.spawn(actor, { description: 'Disabled', prompt: 'Work' }), /TEAM_DISABLED/);
-  await assert.rejects(f.tree.runtime.promptChild(actor, 'any-child', 'Continue'), /TEAM_DISABLED/);
-  assert.equal((await f.treeStore.read('alice', actor.root)).children.length, 0);
+  const request = f.requests.at(-1);
+  const names = request.tools.map(tool => tool.function.name);
+  for (const name of ['subagent', 'subagent_fork', 'list_agents', 'send_message', 'wait_agent', 'interrupt_agent'])
+    assert.ok(names.includes(name), `${name} remains available without teamwork`);
+  for (const name of ['team_task_create', 'team_task_get', 'team_task_list', 'team_task_update'])
+    assert.ok(!names.includes(name), `${name} requires teamwork`);
+  const system = request.messages
+    .filter(message => message.role === 'system')
+    .map(message => message.content)
+    .join('\n');
+  assert.ok(system.includes('Your name is lead.'));
+  assert.ok(!system.includes('claim with the latest revision'));
+  assert.ok(!system.includes('Do not create, fork, delegate'));
 });
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -62,8 +59,9 @@ test('a child finishing after parent deletion does not recreate the deleted conv
   assert.equal(f.requests.filter(body => !childRequest(body)).length, 1);
 });
 
-test('dynamic background child completes nine tools and notifies the actual parent run', async t => {
+test('dynamic background child completes nine tools with teamwork off and notifies the actual parent run', async t => {
   const f = await fixture(t);
+  f.setTeamEnabled(false);
   let rootSteps = 0,
     childSteps = 0;
   f.setHandler(body => {
@@ -109,8 +107,9 @@ test('dynamic background child completes nine tools and notifies the actual pare
   );
 });
 
-test('fork excludes the current user turn and uses private durable child history', async t => {
+test('fork works with teamwork off and excludes the current user turn from private durable history', async t => {
   const f = await fixture(t);
+  f.setTeamEnabled(false);
   f.responses.push({ text: 'PRIOR-ANSWER' });
   await f.agent.generate('PRIOR-QUESTION', runOptions());
   f.responses.push({
@@ -211,7 +210,9 @@ test('team tasks enforce revision ownership and dependencies and survive switchi
   assert.equal((await f.treeStore.read('alice', 'alice-thread')).tasks.length, 2);
   await f.agent.generate('Disable team tools.', runOptions());
   assert.ok(!f.requests.at(-1).tools.some(tool => tool.function.name.startsWith('team_task_')));
-  assert.ok(!f.requests.at(-1).tools.some(tool => tool.function.name === 'subagent'));
+  assert.ok(f.requests.at(-1).tools.some(tool => tool.function.name === 'subagent'));
+  f.setTeamEnabled(true);
+  assert.equal((await board.list(actor, {})).tasks.length, 2);
 });
 
 test('interrupt preserves history and a message resumes a child without opening another tree', async t => {
@@ -259,8 +260,6 @@ test('interrupt preserves history and a message resumes a child without opening 
   f.setTeamEnabled(false);
   await f.tree.runtime.interrupt(actor, 'worker');
   await until(() => closed);
-  await assert.rejects(f.tree.runtime.message(actor, 'worker', 'Blocked'), /TEAM_DISABLED/);
-  f.setTeamEnabled(true);
   await f.tree.runtime.message(actor, 'worker', 'CONTINUE-WITH-NEW-DETAIL');
   await until(async () => (await f.treeStore.read('alice', 'alice-thread')).children[0]?.state === 'completed');
   child = (await f.treeStore.read('alice', 'alice-thread')).children[0];

@@ -51,7 +51,7 @@ export function ChildConversation({ root, id, child }: { root: string; id: strin
   const active = child && ['preparing', 'queued', 'running'].includes(child.state);
   const messages = childMessages(history.data);
   const turns = groupTurns(messages, { key: message => message.id, opensTurn: message => message.role === 'user' });
-  const canSend = history.data?.teamEnabled === true;
+  const canSend = Boolean(history.data) && !history.isError;
   const send = () => {
     if (canSend && prompt.trim() && !mutation.isPending) mutation.mutate({ action: 'prompt', prompt: prompt.trim() });
   };

@@ -45,15 +45,11 @@ describe('Conversation tree', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Research report' }));
       expect(await screen.findByText('Root conversation')).toBeTruthy();
     });
-    it('posts child instructions through the authenticated tree endpoint', async () => {
+    it('posts child instructions with teamwork off through the authenticated tree endpoint', async () => {
       let submitted: unknown;
       server.use(
         http.get(`${baseUrl}/altflow/subagents`, ({ request }) =>
-          HttpResponse.json(
-            new URL(request.url).searchParams.has('child')
-              ? { ...childTree, teamEnabled: true }
-              : { ...tree, teamEnabled: true },
-          ),
+          HttpResponse.json(new URL(request.url).searchParams.has('child') ? childTree : tree),
         ),
         http.post(`${baseUrl}/altflow/subagents`, async ({ request }) => {
           submitted = { url: request.url, body: await request.json() };
@@ -76,7 +72,7 @@ describe('Conversation tree', () => {
     });
   });
   describe('when teamwork is disabled', () => {
-    it('preserves the saved child transcript and disables new child instructions', async () => {
+    it('preserves the saved child transcript and allows new child instructions', async () => {
       server.use(
         http.get(`${baseUrl}/altflow/subagents`, ({ request }) =>
           HttpResponse.json(new URL(request.url).searchParams.has('child') ? childTree : tree),
@@ -86,7 +82,7 @@ describe('Conversation tree', () => {
       fireEvent.click(await screen.findByRole('button', { name: '1 sub-agents' }));
       fireEvent.click(await screen.findByRole('button', { name: /Research sources/ }));
       expect(await screen.findByText('Verified sources for the report.')).toBeTruthy();
-      expect(screen.getByRole('textbox', { name: 'Message sub-agent' }).hasAttribute('disabled')).toBe(true);
+      expect(screen.getByRole('textbox', { name: 'Message sub-agent' }).hasAttribute('disabled')).toBe(false);
       expect(screen.getByRole('button', { name: 'Send message' }).hasAttribute('disabled')).toBe(true);
       expect(document.querySelector('[data-slot="composer-box"]')).toBeTruthy();
     });
