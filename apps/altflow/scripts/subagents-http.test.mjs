@@ -109,6 +109,11 @@ test('tree HTTP exposes actual child messages and usage only to the owning root 
   assert.equal(snapshot.children[0].totalTokens, 15);
   assert.ok(snapshot.children[0].elapsedMs >= 0);
   assert.ok(snapshot.messages.some(message => message.text === 'ACTUAL-CHILD-RESULT'));
+  assert.ok(
+    snapshot.messages.some(message =>
+      message.content.parts.some(part => part.type === 'text' && part.text === 'ACTUAL-CHILD-RESULT'),
+    ),
+  );
   assert.equal((await f.request('bob', id)).status, 404);
   assert.equal((await f.request(undefined, id)).status, 401);
   assert.equal((await f.request('alice', 'foreign-child')).status, 404);

@@ -74,6 +74,14 @@ ModelHub 适配器显式启用 `includeUsage`，流式请求携带 `stream_optio
 
 ## 用户文件与 512 MB 配额
 
+### Office 正文读取
+
+`read_document` 使用 DSH 同版本的 `@deepseek-ai/libreoffice-kit@0.2.3`，支持 Word（DOC/DOCX/ODT）、Excel（XLS/XLSX/ODS）、PowerPoint（PPT/PPTX/ODP）及有文字层的 PDF。Word 导出正文；表格和演示文稿先渲染为 PDF，再提取页面文字。现有 `read_file` 的文本读取也会转入此解析器，原始文件不变。
+
+解析前检查账号文件权限；临时文件随请求清理。沿用 DSH 的 50 MB 输入、60 秒转换、2 个并发和 8 个排队请求限制。正文按行分页返回，单次最多 80,000 字符。扫描件 OCR 不在此能力内；没有文字层时明确报错。运行此功能的主机需安装锁文件中对应平台的 LibreOffice Kit 原生依赖。
+
+`pnpm --filter @internal/altflow test:tools` 使用真实 Office 引擎、合成文档和隔离文件账本，验证正文、原文件不变、跨账号拒绝及 Agent 文件工具链路。
+
 - 文件内容使用阿里云 OSS 官方 Node.js SDK、V4 签名和 HTTPS，写入私有桶 `altflow-harness`。对象键为 `users/<用户ID的SHA256>/objects/<UUID>`；文件名和权限由服务端账本管理，不接受前端传入的用户 ID。密钥只在服务端环境中配置。
 - `data/user-files.db` 保存路径、文件大小、来源、摘要、配额预留和失败清理记录。它是新建的专用文件账本，不修改账号/会话库 schema。部署时必须同时持久化、备份该账本与 OSS 对象；多实例须使用同一个账本，不能各自用本地 SQLite。
 - 每个账号 `512 × 1024 × 1024` 字节。上传和 Agent 写文件共用事务配额预留，并发上传不能超额。相同上传 ID 与内容可安全重试；覆盖只计算新旧文件的大小差额。删除 OSS 成功后才释放容量；失败保留文件及容量。覆盖产生的旧对象清理失败会持久化记录，启动时和每 10 分钟重试。

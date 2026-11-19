@@ -37,7 +37,7 @@ export function createSubagentTools(runtime: SubagentRuntime) {
   const start = (fork: boolean) =>
     createTool({
       id: fork ? 'subagent_fork' : 'subagent',
-      description: `${fork ? 'Fork completed conversation turns into' : 'Start'} a dynamically created background subagent. Returns its name immediately. Use send_message, list_agents, wait_agent and interrupt_agent to coordinate. Subagents remain available when teamwork is off. Maximum depth is 1.`,
+      description: `${fork ? 'Fork completed conversation turns into' : 'Start'} a dynamically created background subagent. Returns its name immediately. Use send_message, list_agents, wait_agent and interrupt_agent to coordinate. Requires agent teamwork to be enabled. Maximum depth is 1.`,
       inputSchema: startSchema,
       outputSchema: z.object({
         kind: z.literal('activation'),

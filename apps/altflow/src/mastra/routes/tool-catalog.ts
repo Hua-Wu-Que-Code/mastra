@@ -1,3 +1,4 @@
+import { standardSchemaToJSONSchema, toStandardSchema } from '@mastra/schema-compat/schema';
 import type { Knowledge } from '@mastra/core/knowledge';
 import { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } from '@mastra/core/request-context';
 import { registerApiRoute } from '@mastra/core/server';
@@ -6,6 +7,21 @@ import type { Workspace } from '@mastra/core/workspace';
 import type { HistoryMemory } from '../agents/history-memory';
 import { AuthUpstreamError } from '../altflow-auth';
 import type { createAltFlowAuth, AltFlowUser } from '../altflow-auth';
+
+type CatalogTool = {
+  id: string;
+  description?: string;
+  inputSchema?: unknown;
+  outputSchema?: unknown;
+  requestContextSchema?: unknown;
+};
+function jsonSchema(schema: unknown, io: 'input' | 'output' = 'input') {
+  if (!schema) return undefined;
+  return standardSchemaToJSONSchema(toStandardSchema(schema as Parameters<typeof toStandardSchema>[0]), {
+    io,
+    target: 'draft-2020-12',
+  });
+}
 
 interface CatalogEntry {
   id: string;
@@ -16,11 +32,14 @@ interface CatalogEntry {
   reason?: string;
   agents: string[];
   runtime: boolean;
+  inputSchema?: unknown;
+  outputSchema?: unknown;
+  requestContextSchema?: unknown;
 }
 export function toolCatalogRoute(options: {
   accounts: ReturnType<typeof createAltFlowAuth>;
   origins: string[];
-  tools: Record<string, { id: string; description?: string }>;
+  tools: Record<string, CatalogTool>;
   memory: HistoryMemory;
   knowledge: Knowledge;
   workspace: (userId: string) => Promise<Workspace>;
@@ -50,11 +69,7 @@ export function toolCatalogRoute(options: {
       requestContext.set(MASTRA_RESOURCE_ID_KEY, options.accounts.session(user).resourceId);
       const workspace = await options.workspace(user.id);
       const entries = new Map<string, CatalogEntry>();
-      const collect = (
-        tools: Record<string, { id: string; description?: string }>,
-        source: string,
-        runtime: boolean,
-      ) => {
+      const collect = (tools: Record<string, CatalogTool>, source: string, runtime: boolean) => {
         for (const [name, tool] of Object.entries(tools)) {
           entries.set(tool.id, {
             id: tool.id,
@@ -64,6 +79,9 @@ export function toolCatalogRoute(options: {
             status: 'available',
             agents: ['creator-agent'],
             runtime,
+            inputSchema: jsonSchema(tool.inputSchema),
+            outputSchema: jsonSchema(tool.outputSchema, 'output'),
+            requestContextSchema: jsonSchema(tool.requestContextSchema),
           });
         }
       };
@@ -84,10 +102,15 @@ export function toolCatalogRoute(options: {
         runtime: true,
       });
       for (const entry of entries.values())
-        if (entry.name.startsWith('team_task_')) {
+        if (
+          entry.name.startsWith('team_task_') ||
+          ['subagent', 'subagent_fork', 'send_message', 'list_agents', 'wait_agent', 'interrupt_agent'].includes(
+            entry.name,
+          )
+        ) {
           entry.source = '团队协作';
           entry.status = 'conditional';
-          entry.reason = '开启团队协作后可用；普通子智能体始终可用';
+          entry.reason = '开启智能体团队协作后可用';
         }
       if (!options.providerConfigured)
         entries.set('web_search', {

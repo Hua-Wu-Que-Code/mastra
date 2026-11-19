@@ -161,7 +161,7 @@ export async function fixture(t) {
   const memoryStore = await storage.getStore('memory');
   const treeStore = new SubagentStore(`file:${join(dir, 'subagents.db')}`);
   await treeStore.init();
-  let teamEnabled = false;
+  let teamEnabled = true;
   const tree = createAgentTree({
     store: treeStore,
     memory: memoryStore,
