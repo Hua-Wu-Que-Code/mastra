@@ -10,6 +10,7 @@ import { Link, matchPath, useLocation, useNavigate } from 'react-router';
 import { useConversationProjects } from '../use-conversation-projects';
 import type { ConversationProject } from '../use-conversation-projects';
 import { useConversationScope } from '../use-conversation-scope';
+import { useConversationStatus } from '../use-conversation-status';
 import { useSidebarThreads } from '../use-sidebar-threads';
 import { isThreadArchived } from '../use-thread-archive';
 import { ConversationSection } from './conversation-section';
@@ -63,6 +64,7 @@ function SidebarConversationsBody({ scope, agentId }: { scope: string; agentId?:
   const { isMobile, setOpenMobile } = useSidebar();
   const organization = useConversationProjects(scope);
   const { threads: allThreads, isLoading, error, retry } = useSidebarThreads(scope);
+  const status = useConversationStatus(scope);
   const threads = allThreads.filter(thread => !isThreadArchived(thread));
   const [editProject, setEditProject] = useState<ConversationProject | 'new'>();
   const groupedIds = new Set(organization.projects.flatMap(project => project.threads));
@@ -77,7 +79,13 @@ function SidebarConversationsBody({ scope, agentId }: { scope: string; agentId?:
       {sorted
         .filter(thread => (ids ? ids.includes(thread.id) : !groupedIds.has(thread.id)))
         .map(thread => (
-          <SidebarConversationRow key={thread.id} thread={thread} organization={organization} onNavigate={onNavigate} />
+          <SidebarConversationRow
+            key={thread.id}
+            thread={thread}
+            organization={organization}
+            onNavigate={onNavigate}
+            running={!status.isError && Boolean(status.data?.running.includes(thread.id))}
+          />
         ))}
     </ThreadListItems>
   );

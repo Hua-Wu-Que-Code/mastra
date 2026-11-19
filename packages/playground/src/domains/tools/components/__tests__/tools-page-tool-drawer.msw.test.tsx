@@ -91,7 +91,7 @@ describe('Tools page tool drawer', () => {
         ),
       );
       renderDrawer('ask_user');
-      expect(await screen.findByText('Ask the user a question.')).toBeTruthy();
+      expect(await screen.findByText('Ask a question and wait for your answer.')).toBeTruthy();
       expect(screen.getByText('question')).toBeTruthy();
       expect(screen.getByRole('tab', { name: 'Playground' }).getAttribute('aria-disabled')).toBe('true');
     });

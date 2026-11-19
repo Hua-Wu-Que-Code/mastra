@@ -10,6 +10,7 @@ export interface ToolStyle {
 
 const TOOL_STYLES: Record<string, ToolStyle> = {
   read_file: { pose: 'reading', label: 'Read', detailKeys: ['path', 'file_path'] },
+  read_document: { pose: 'reading', label: 'Read', detailKeys: ['path', 'file_path'] },
   write_file: { pose: 'writing', label: 'Write', detailKeys: ['path', 'file_path'] },
   edit_file: { pose: 'editing', label: 'Edit', detailKeys: ['path', 'file_path'] },
   execute_command: { pose: 'running', label: 'Run', detailKeys: ['command'], isCommand: true },

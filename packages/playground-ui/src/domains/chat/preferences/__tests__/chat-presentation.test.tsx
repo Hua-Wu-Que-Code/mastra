@@ -7,6 +7,7 @@ import { http, HttpResponse } from 'msw';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ToolCallProvider } from '../../context/tool-call-context';
 import { MessageRow } from '../../messages/message-row';
+import { chatPreferencesSchema } from '../chat-preferences';
 import { ChatPreferencesProvider } from '../chat-preferences-provider';
 import { ChatPreferencesSettings } from '../chat-preferences-settings';
 import { EditorPreferencesSettings } from '../editor-preferences-settings';
@@ -105,22 +106,52 @@ describe('Chat presentation', () => {
   });
 
   describe('when a completed turn is folded', () => {
-    it('keeps every reply by default and reveals work on demand', async () => {
+    it('migrates the old persisted default while retaining deliberate new preferences', () => {
+      expect(chatPreferencesSchema.parse({ foldedReplies: 'all', fontSize: 18 })).toMatchObject({
+        foldedReplies: 'final',
+        fontSize: 18,
+        processFoldingVersion: 2,
+      });
+      expect(chatPreferencesSchema.parse({ foldedReplies: 'all', processFoldingVersion: 2 }).foldedReplies).toBe('all');
+    });
+    it('keeps only the final reply by default and reveals the whole process on demand', async () => {
       render(tree());
-      expect(screen.getByText('I will check the material first.')).toBeDefined();
+      expect(screen.queryByText('I will check the material first.')).toBeNull();
       expect(screen.getByText('The final story begins here.')).toBeDefined();
       expect(screen.queryByRole('group', { name: 'Reasoning' })).toBeNull();
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      expect(await screen.findByText('I will check the material first.')).toBeDefined();
+      fireEvent.click(within(screen.getByRole('group', { name: 'Work details: 2 steps' })).getByRole('button'));
       expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
       expect(screen.getByRole('button', { name: 'Hide work details' }).getAttribute('aria-expanded')).toBe('true');
     });
-    it('hides intermediate replies only when final answer only is selected', async () => {
-      render(tree());
-      await choose('Replies when collapsed', 'Final answer only');
-      expect(screen.queryByText('I will check the material first.')).toBeNull();
+    it('preserves the explicit option to keep all replies when collapsed', async () => {
+      const view = render(tree());
+      await choose('Replies when collapsed', 'All replies');
+      expect(await screen.findByText('I will check the material first.')).toBeDefined();
       expect(screen.getByText('The final story begins here.')).toBeDefined();
+      view.unmount();
+      render(tree());
+      expect(await screen.findByText('I will check the material first.')).toBeDefined();
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
       expect(screen.getByText('I will check the material first.')).toBeDefined();
+    });
+    it('retains every text segment of the final answer', () => {
+      const messages = conversation.map(message =>
+        message.role === 'assistant'
+          ? {
+              ...message,
+              content: {
+                ...message.content,
+                parts: [...message.content.parts, { type: 'text' as const, text: 'And its ending.' }],
+              },
+            }
+          : message,
+      );
+      render(tree({ messages }));
+      expect(screen.queryByText('I will check the material first.')).toBeNull();
+      expect(screen.getByText('The final story begins here.')).toBeDefined();
+      expect(screen.getByText('And its ending.')).toBeDefined();
     });
   });
   describe('when folding waits for the next message', () => {
@@ -144,6 +175,7 @@ describe('Chat presentation', () => {
         expect(screen.getByRole('button', { name: 'Show work details' }).getAttribute('aria-expanded')).toBe('false');
         expect(screen.getByText('The final story begins here.')).toBeDefined();
         fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+        fireEvent.click(within(screen.getByRole('group', { name: 'Work details: 2 steps' })).getByRole('button'));
         expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
       },
     );
@@ -202,11 +234,12 @@ describe('Chat presentation', () => {
     });
   });
   describe('when standard mode is selected during a run', () => {
-    it('adds a tool summary and a reasoning preview to the grouped steps', async () => {
+    it('keeps the group compact and reveals its reasoning preview on demand', async () => {
       render(tree({ running: true }));
       await choose('Work details', 'Standard');
       const group = screen.getByRole('group', { name: 'Work details: 2 steps' });
-      expect(group.textContent).toContain('story.txt');
+      expect(screen.queryByRole('group', { name: 'Reasoning' })).toBeNull();
+      fireEvent.click(within(group).getByRole('button'));
       const reasoning = screen.getByRole('group', { name: 'Reasoning' });
       expect(reasoning.textContent).toContain('Compare the two characters.');
       expect(reasoning.textContent).not.toContain('Keep their motives consistent.');

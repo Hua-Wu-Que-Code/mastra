@@ -16,11 +16,34 @@ describe('runtime capabilities in the tool list', () => {
         </TestLinkProvider>,
       );
       expect(screen.getAllByText('count-text')).toHaveLength(1);
+      expect(screen.queryByText(/Source:/)).toBeNull();
+      expect(screen.getByText('Count characters and paragraphs in text.')).toBeTruthy();
       expect(screen.getByText('mastra_workspace_read_file')).toBeTruthy();
       expect(screen.getByText(/Configure a search provider/)).toBeTruthy();
       expect(screen.getAllByRole('link')).toHaveLength(runtimeCatalog.length);
       expect(screen.getByRole('link', { name: /count-text/ }).textContent).toContain('count-text');
       expect(screen.getByText(/Enabled in conversation/)).toBeTruthy();
+    });
+  });
+  describe('when built-in tools have long model instructions', () => {
+    it('replaces every knowledge and code editing instruction with readable product copy', () => {
+      const ids = ['mastra_workspace_ast_edit', 'knowledge_page', 'knowledge_note', 'knowledge_pin'];
+      renderWithProviders(
+        <TestLinkProvider>
+          <ToolsList
+            tools={Object.fromEntries(
+              ids.map(id => [id, { id, description: 'Long model-only instructions.'.repeat(30) }]),
+            )}
+            agents={{}}
+            isLoading={false}
+          />
+        </TestLinkProvider>,
+      );
+      expect(screen.queryByText(/Long model-only/)).toBeNull();
+      expect(screen.getByText('Edit code using its syntax structure.')).toBeTruthy();
+      expect(screen.getByText('Create, edit, move, merge or delete knowledge pages.')).toBeTruthy();
+      expect(screen.getByText('Manage saved knowledge notes.')).toBeTruthy();
+      expect(screen.getByText('Pin knowledge pages or lists to conversation context.')).toBeTruthy();
     });
   });
 });

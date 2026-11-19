@@ -12,6 +12,7 @@ export const defaultSystemPackages: GetSystemPackagesResponse = {
 };
 
 export const defaultHandlers: HttpHandler[] = [
+  http.get('*/altflow/conversations/status', () => new HttpResponse(null, { status: 404 })),
   http.get('*/altflow/subagents', () =>
     HttpResponse.json({
       title: '',

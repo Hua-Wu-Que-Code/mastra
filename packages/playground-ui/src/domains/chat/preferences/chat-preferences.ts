@@ -15,6 +15,7 @@ export interface ChatPreferences {
   workDetails: WorkDetailMode;
   collapseTiming: 'completion' | 'next-input';
   foldedReplies: 'all' | 'final';
+  processFoldingVersion?: 2;
 }
 
 export const DEFAULT_CHAT_PREFERENCES: ChatPreferences = {
@@ -25,7 +26,8 @@ export const DEFAULT_CHAT_PREFERENCES: ChatPreferences = {
   fontSize: 14,
   workDetails: 'detailed',
   collapseTiming: 'completion',
-  foldedReplies: 'all',
+  foldedReplies: 'final',
+  processFoldingVersion: 2,
 };
 
 export function isWorkDetailMode(value: unknown): value is WorkDetailMode {
@@ -49,7 +51,16 @@ function parsePreferences(stored: unknown): ChatPreferences {
         : DEFAULT_CHAT_PREFERENCES.fontSize,
     workDetails: 'workDetails' in stored && isWorkDetailMode(stored.workDetails) ? stored.workDetails : 'detailed',
     collapseTiming: 'collapseTiming' in stored && stored.collapseTiming === 'next-input' ? 'next-input' : 'completion',
-    foldedReplies: 'foldedReplies' in stored && stored.foldedReplies === 'final' ? 'final' : 'all',
+    // The old default persisted "all" even without a deliberate selection. Adopt
+    // whole-process folding once; subsequent explicit "all" selections still work.
+    foldedReplies:
+      'processFoldingVersion' in stored &&
+      stored.processFoldingVersion === 2 &&
+      'foldedReplies' in stored &&
+      stored.foldedReplies === 'all'
+        ? 'all'
+        : 'final',
+    processFoldingVersion: 2,
   };
 }
 

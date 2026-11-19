@@ -66,6 +66,74 @@ describe('Sidebar conversations', () => {
       expect(historyRequests).toBe(0);
     });
   });
+  describe('when a background conversation is generating', () => {
+    it('shows its server status across project and recent rows and clears it on completion', async () => {
+      installOrganizationFixture({
+        projects: [{ id: 'writing', name: 'Writing', agentId: 'agent-1', threads: ['thread-1'] }],
+        projectPins: [],
+        pinned: [],
+        collapsed: [],
+        revision: 1,
+      });
+      let running = ['thread-1', 'thread-2'];
+      server.use(http.get(`${TEST_BASE_URL}/altflow/conversations/status`, () => HttpResponse.json({ running })));
+      const { queryClient } = renderConversations();
+      await waitFor(() => expect(screen.getAllByRole('status', { name: 'Generating reply' })).toHaveLength(2));
+      expect(
+        within(screen.getByRole('region', { name: 'Recent' })).getByRole('status', { name: 'Generating reply' }),
+      ).toBeTruthy();
+      expect(
+        within(screen.getByRole('region', { name: 'Projects' })).getByRole('status', { name: 'Generating reply' }),
+      ).toBeTruthy();
+      running = [];
+      await queryClient.invalidateQueries({ queryKey: ['conversation-status'] });
+      await waitFor(() => expect(screen.queryByRole('status', { name: 'Generating reply' })).toBeNull());
+    });
+  });
+  describe('when cloning a conversation from the sidebar', () => {
+    it('copies it with the owning agent and opens the independent copy', async () => {
+      let cloned = false;
+      const copy = { ...sidebarThreads.threads[0], id: 'copy-1', title: 'Trip planning (copy)' };
+      server.use(
+        http.post(`${TEST_BASE_URL}/api/memory/threads/thread-1/clone`, ({ request }) => {
+          expect(new URL(request.url).searchParams.get('agentId')).toBe('agent-1');
+          cloned = true;
+          return HttpResponse.json({ thread: copy, clonedMessages: [] });
+        }),
+        http.get(`${TEST_BASE_URL}/api/memory/threads`, ({ request }) =>
+          HttpResponse.json({
+            ...sidebarThreads,
+            threads: [...sidebarThreads.threads, ...(cloned ? [copy] : [])].filter(
+              t => t.resourceId === new URL(request.url).searchParams.get('agentId'),
+            ),
+          }),
+        ),
+      );
+      renderConversations();
+      await screen.findByText('Trip planning');
+      fireEvent.click(screen.getAllByRole('button', { name: 'Thread actions' })[1]);
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Clone chat' }));
+      const link = await screen.findByRole('link', { name: 'Trip planning (copy)' });
+      expect(link.getAttribute('href')).toBe('/chat/agent-1/threads/copy-1');
+      expect(screen.getByRole('link', { name: 'Trip planning', exact: true })).toBeTruthy();
+      await waitFor(() => expect(link.getAttribute('aria-current')).toBe('page'));
+    });
+    it('keeps the source and permits retrying after a failed clone', async () => {
+      server.use(
+        http.post(`${TEST_BASE_URL}/api/memory/threads/thread-1/clone`, () => new HttpResponse(null, { status: 500 })),
+      );
+      renderConversations();
+      await screen.findByText('Trip planning');
+      fireEvent.click(screen.getAllByRole('button', { name: 'Thread actions' })[1]);
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Clone chat' }));
+      await screen.findByText('Failed to clone thread');
+      expect(screen.getByRole('link', { name: 'Trip planning', exact: true })).toBeTruthy();
+      fireEvent.click(screen.getAllByRole('button', { name: 'Thread actions' })[1]);
+      expect((await screen.findByRole('menuitem', { name: 'Clone chat' })).getAttribute('aria-disabled')).not.toBe(
+        'true',
+      );
+    });
+  });
   describe('when archiving a conversation', () => {
     it('persists on the server and stays hidden after local preferences are cleared', async () => {
       let archived = false;
@@ -222,6 +290,7 @@ describe('Sidebar conversations', () => {
       await screen.findByRole('link', { name: 'My writing', exact: true });
       const recent = screen.getByRole('region', { name: 'Recent' });
       fireEvent.click(within(recent).getAllByRole('button', { name: 'Thread actions' })[1]);
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Move to project' }));
       fireEvent.click(await screen.findByRole('menuitem', { name: 'My writing' }));
       fireEvent.click(screen.getByRole('button', { name: 'Project actions' }));
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete project' }));
@@ -241,6 +310,7 @@ describe('Sidebar conversations', () => {
       await screen.findByRole('link', { name: 'My writing', exact: true });
       const recent = screen.getByRole('region', { name: 'Recent' });
       fireEvent.click(within(recent).getAllByRole('button', { name: 'Thread actions' })[1]);
+      fireEvent.click(await screen.findByRole('menuitem', { name: 'Move to project' }));
       fireEvent.click(await screen.findByRole('menuitem', { name: 'My writing' }));
       const projects = screen.getByRole('region', { name: 'Projects' });
       expect((await within(projects).findByRole('link', { name: 'Trip planning' })).getAttribute('href')).toBe(

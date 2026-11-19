@@ -4,9 +4,16 @@ import { hasToolArguments, isTaskTool, presentTool, stringifyToolValue, toolEdit
 
 describe('presentTool', () => {
   it('maps stable workspace aliases to humanized actions with their salient argument', () => {
-    expect(presentTool('view', { path: 'src/a.ts' })).toMatchObject({ label: 'Read', detail: 'src/a.ts' });
+    expect(presentTool('view', { path: 'src/a.ts' })).toMatchObject({ label: 'Read', detail: 'a.ts' });
     expect(presentTool('search_content', { pattern: 'useChat' })).toMatchObject({ label: 'Search', detail: 'useChat' });
-    expect(presentTool('string_replace', { path: 'src/a.ts' })).toMatchObject({ label: 'Edit', detail: 'src/a.ts' });
+    expect(presentTool('string_replace', { path: 'src/a.ts' })).toMatchObject({ label: 'Edit', detail: 'a.ts' });
+  });
+
+  it('shows only the file name without changing the actual tool arguments', () => {
+    const args = { path: '/uploads/att-123/report.docx' };
+    expect(presentTool('read_file', args).detail).toBe('report.docx');
+    expect(args.path).toBe('/uploads/att-123/report.docx');
+    expect(presentTool('read_document', args).detail).toBe('report.docx');
   });
 
   it('marks terminal-style tools with their command for the expanded body', () => {
@@ -72,7 +79,7 @@ describe('presentTool', () => {
   it('recognizes namespaced tools without guessing ambiguous provider operations', () => {
     expect(presentTool('mcp__workspace__read_file', { path: 'src/a.ts' })).toMatchObject({
       pose: 'reading',
-      detail: 'src/a.ts',
+      detail: 'a.ts',
     });
     expect(presentTool('workspace.kill_process', { pid: 42 })).toMatchObject({ pose: 'stopping', detail: '42' });
     expect(presentTool('mcp__catalog__search', { query: 'refunds' }).pose).toBe('tool');

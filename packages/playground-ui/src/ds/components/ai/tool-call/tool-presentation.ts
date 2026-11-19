@@ -64,7 +64,13 @@ export function presentTool(toolName: string, args: unknown): ToolPresentation {
   const dressed = { pose: style.pose, icon: agentGlyph(style.pose), label: style.label };
   const detail = style.detailKeys ? firstStringArg(args, style.detailKeys) : undefined;
   if (!detail) return dressed;
-  if (!style.isCommand) return { ...dressed, detail };
+  if (!style.isCommand) {
+    const file = style.detailKeys?.some(key => ['file_path', 'path'].includes(key) && stringArg(args, key) === detail);
+    return {
+      ...dressed,
+      detail: file ? (detail.replace(/\\/g, '/').split('/').filter(Boolean).at(-1) ?? detail) : detail,
+    };
+  }
   // Workspaces with `requireDescription` have the agent say what a command does; that reads better
   // on a one-line row than "Run" and the command, which stays in the expanded body.
   const description = stringArg(args, 'description')?.replace(/\s+/g, ' ').trim() || undefined;

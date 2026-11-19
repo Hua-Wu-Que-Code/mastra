@@ -8,6 +8,9 @@ cache-hit formatting and session accounting adapt DeepSeek Harness:
 - `ui-chat/src/client/chat/ReasoningRow.tsx`, `ChatGroupSeat.tsx` and `step-process.ts`.
 - The copy, database, gauge, branch, process category and disclosure SVG paths from `ui-primitives/src/icons/artwork.ts`.
 
+- The sidebar ongoing status glyph, animation and shared animation clock from
+  `ui-primitives/src/StateDot.tsx` and `StateDot.module.css`.
+
 These paths are relative to DSH's `packages/client/` directory. DeepSeek Harness is
 distributed under the MIT license reproduced in
 [DeepSeek-Harness-LICENSE.txt](./DeepSeek-Harness-LICENSE.txt).

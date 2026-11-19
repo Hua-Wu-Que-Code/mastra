@@ -37,10 +37,21 @@ export function canFoldWork(messages: MastraDBMessage[], context: ToolCardContex
 export function finalReply(messages: MastraDBMessage[]) {
   for (const message of messages.toReversed()) {
     if (message.role !== 'assistant') continue;
-    for (const part of message.content.parts.toReversed()) {
-      if (part.type === 'text' && part.text.trim() && messageTextKind(part.text, message.content.metadata) === 'prose')
-        return { messageId: message.id, text: part.text };
-    }
+    // Mastra can store several steps in one assistant message. Everything after
+    // the final tool/reasoning boundary belongs to the answer, including split text parts.
+    const boundary = message.content.parts.findLastIndex(
+      part => part.type === 'reasoning' || (isToolPart(part) && !isHiddenTool(readToolPart(part).toolName)),
+    );
+    const start = message.content.parts.findIndex(
+      (part, index) =>
+        index > boundary &&
+        part.type === 'text' &&
+        part.text.trim() &&
+        messageTextKind(part.text, message.content.metadata) === 'prose',
+    );
+    if (start >= 0) return { messageId: message.id, start };
+    // A trailing tool step has no final answer yet. Never use an earlier progress update as the answer.
+    if (boundary >= 0) return undefined;
   }
   return undefined;
 }
@@ -62,11 +73,11 @@ export function presentedParts(
   context: ToolCardContext,
 ) {
   if (!presentation?.collapsed || message.role !== 'assistant') return message.content.parts;
-  return message.content.parts.filter(part => {
+  return message.content.parts.filter((part, index) => {
     if (isWorkPart(part, context)) return false;
     if (part.type !== 'text' || !presentation.hideIntermediateReplies || !presentation.finalReply) return true;
     if (messageTextKind(part.text, message.content.metadata) !== 'prose') return true;
-    return message.id === presentation.finalReply.messageId && part.text === presentation.finalReply.text;
+    return message.id === presentation.finalReply.messageId && index >= presentation.finalReply.start;
   });
 }
 

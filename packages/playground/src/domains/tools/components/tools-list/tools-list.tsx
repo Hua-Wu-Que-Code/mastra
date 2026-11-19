@@ -11,6 +11,7 @@ import { truncateString } from '@mastra/playground-ui/utils/truncate-string';
 import { useMemo } from 'react';
 import type { ToolCatalogEntry } from '@/domains/tools/hooks/use-altflow-tool-catalog';
 import { prepareToolsTable } from '@/domains/tools/utils/prepareToolsTable';
+import { toolSummary } from '@/domains/tools/utils/tool-summary';
 
 export type ToolsSortKey = 'name' | 'agents';
 export type ToolsSort = ListSort<ToolsSortKey>;
@@ -117,31 +118,23 @@ export function ToolsList({
       {filteredData.map(tool => {
         const name = truncateString(tool.id, 50);
         const entry = tool.catalog;
-        const status =
-          entry?.status === 'unconfigured'
-            ? studioT('Not configured')
-            : entry?.status === 'conditional'
-              ? studioT('Enabled in conversation')
-              : studioT('Available');
-        const description = truncateString(tool.description ?? '', 200);
+        const description = toolSummary(tool.id, tool.description);
         const cells = (
           <>
             <DataList.NameCell>{name}</DataList.NameCell>
-            <DataList.DescriptionCell>
-              {description}
-              {entry && (
-                <span
-                  className="flex flex-wrap gap-x-3 text-muted-foreground"
-                  title={
-                    entry.reason ?? (entry.runtime ? studioT('Runtime tools are used in conversations.') : undefined)
-                  }
-                >
-                  <span>{studioT('Source: {value0}', { value0: entry.source })}</span>
-                  <span>{status}</span>
-                  {entry.reason && <span>{entry.reason}</span>}
-                </span>
-              )}
-            </DataList.DescriptionCell>
+            <DataList.Cell className="py-2">
+              <span className="grid min-w-0 gap-0.5">
+                <span className="line-clamp-2 leading-relaxed break-words whitespace-normal">{description}</span>
+                {entry && entry.status !== 'available' && (
+                  <span className="line-clamp-2 break-words whitespace-normal text-muted-foreground">
+                    {entry.reason ??
+                      (entry.status === 'unconfigured'
+                        ? studioT('Not configured')
+                        : studioT('Enabled in conversation'))}
+                  </span>
+                )}
+              </span>
+            </DataList.Cell>
             <DataList.TextCell className="text-center">{tool.agentCount || ''}</DataList.TextCell>
           </>
         );

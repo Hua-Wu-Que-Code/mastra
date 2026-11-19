@@ -1,0 +1,45 @@
+/* DSH ui-primitives StateDot: ongoing. Colors follow the surrounding sidebar. */
+.conversation-spinner-motion {
+  transform-origin: center;
+  animation: conversation-spinner-rotation 1.5s linear infinite;
+}
+.conversation-spinner-track,
+.conversation-spinner-arc {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.conversation-spinner-track {
+  opacity: 0.25;
+}
+.conversation-spinner-arc {
+  stroke-dasharray: 12 150;
+  animation: conversation-spinner-dash 1.5s ease-in-out infinite;
+}
+@keyframes conversation-spinner-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes conversation-spinner-dash {
+  0%,
+  100% {
+    stroke-dasharray: 12 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 24 150;
+    stroke-dashoffset: -6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .conversation-spinner-motion,
+  .conversation-spinner-arc {
+    animation: none;
+  }
+  .conversation-spinner-arc {
+    stroke-dasharray: 18 150;
+    stroke-dashoffset: -3;
+  }
+}

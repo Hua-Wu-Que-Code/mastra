@@ -50,7 +50,8 @@ export function WorkDetails({
   );
   const deferred = latest && preferences.collapseTiming === 'next-input';
   const safeToFold = canFoldWork(messages, { mcpAppTools });
-  const foldable = preferences.workDetails !== 'verbose' && count > 0 && safeToFold;
+  const answer = finalReply(messages);
+  const foldable = preferences.workDetails !== 'verbose' && count > 0 && safeToFold && (running || Boolean(answer));
   const automaticallyExpanded = running || deferred || focusWithinWork;
   const expanded = !foldable || (manual?.mode === preferences.workDetails ? manual.expanded : automaticallyExpanded);
   const historical = !running && !deferred && !keepActiveLayout;
@@ -66,7 +67,7 @@ export function WorkDetails({
     showReasoningPreview: preferences.workDetails !== 'compact',
     showLiveDetail: preferences.workDetails !== 'compact',
     hideIntermediateReplies: preferences.foldedReplies === 'final',
-    finalReply: finalReply(messages),
+    finalReply: answer,
   };
 
   const hasAssistant = messages.some(message => message.role === 'assistant');
@@ -99,7 +100,7 @@ export function WorkDetails({
       ref={trigger}
       type="button"
       style={chatContentStyle(preferences.fontSize)}
-      className="box-border flex h-[calc(33px+var(--dsh-content-font-delta,0px))] w-full items-center border-b-[0.5px] border-border pb-2 text-left text-body text-muted-foreground transition-colors duration-100 focus-visible:outline-border-focus motion-reduce:transition-none enabled:cursor-pointer enabled:hover:text-foreground"
+      className="box-border flex h-[calc(33px+var(--dsh-content-font-delta,0px))] w-full items-center border-b-[0.5px] border-border pb-2 text-left text-body text-muted-foreground transition-colors duration-100 focus-visible:outline-border-focus enabled:cursor-pointer enabled:hover:text-foreground motion-reduce:transition-none"
       disabled={!foldable}
       aria-label={foldable ? (expanded ? t('Hide work details') : t('Show work details')) : label}
       aria-expanded={foldable ? expanded : undefined}

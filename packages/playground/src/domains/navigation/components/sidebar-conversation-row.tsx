@@ -5,6 +5,7 @@ import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-c
 import { IconArchive } from '@mastra/playground-ui/icons/central/IconArchive';
 import { IconDotGrid1x3Vertical } from '@mastra/playground-ui/icons/central/IconDotGrid1x3Vertical';
 import { IconFolder1 } from '@mastra/playground-ui/icons/central/IconFolder1';
+import { IconFork } from '@mastra/playground-ui/icons/central/IconFork';
 import { IconPencil } from '@mastra/playground-ui/icons/central/IconPencil';
 import { IconPin } from '@mastra/playground-ui/icons/central/IconPin';
 import { IconUnpin } from '@mastra/playground-ui/icons/central/IconUnpin';
@@ -12,12 +13,15 @@ import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 import { t } from '@mastra/playground-ui/lib/i18n';
 import { formatDate } from '@mastra/playground-ui/utils/date-format';
 import { toast } from '@mastra/playground-ui/utils/toast';
+import { useCloneThread } from '@mastra/react/hooks/memory';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import type { ConversationOrganization } from '../use-conversation-projects';
 import type { SidebarThread } from '../use-sidebar-threads';
 import { useThreadArchive } from '../use-thread-archive';
 import { ConversationDeleteDialog } from './conversation-delete-dialog';
+import { ConversationSpinner } from './conversation-spinner';
 import { RenameThreadDialog } from '@/domains/agents/components/rename-thread-dialog';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
@@ -25,14 +29,18 @@ export function SidebarConversationRow({
   thread,
   organization,
   onNavigate,
+  running = false,
 }: {
   thread: SidebarThread;
   organization: ConversationOrganization;
   onNavigate: () => void;
+  running?: boolean;
 }) {
   const [dialog, setDialog] = useState<'rename' | 'delete'>();
   const [requestContext] = useEntityRequestContext('agent', thread.agentId);
   const archive = useThreadArchive(requestContext);
+  const queries = useQueryClient();
+  const clone = useCloneThread({ requestContext });
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { canEdit, canDelete } = usePermissions();
@@ -53,6 +61,17 @@ export function SidebarConversationRow({
       toast.success(t('Chat archived'));
     } catch {
       toast.error(t('Failed to archive chat'));
+    }
+  };
+  const cloneThread = async () => {
+    try {
+      const result = await clone.mutateAsync({ threadId: thread.id, agentId: thread.agentId });
+      await queries.invalidateQueries({ queryKey: ['memory', 'threads'] });
+      void navigate(`/chat/${encodeURIComponent(thread.agentId)}/threads/${encodeURIComponent(result.thread.id)}`);
+      onNavigate();
+      toast.success(t('Thread cloned successfully'));
+    } catch {
+      toast.error(t('Failed to clone thread'));
     }
   };
   return (
@@ -78,14 +97,33 @@ export function SidebarConversationRow({
                   {t('Rename')}
                 </DropdownMenu.Item>
               )}
-              {organization.projects
-                .filter(p => p.id !== project?.id)
-                .map(p => (
-                  <DropdownMenu.Item key={p.id} onClick={() => void organization.move(thread.id, p.id).catch(() => {})}>
+              {canEdit('memory') && (
+                <DropdownMenu.Item disabled={clone.isPending} onClick={() => void cloneThread()}>
+                  <IconFork />
+                  {t('Clone chat')}
+                </DropdownMenu.Item>
+              )}
+              {organization.projects.some(p => p.id !== project?.id) && (
+                <DropdownMenu.Sub>
+                  <DropdownMenu.SubTrigger>
                     <IconFolder1 />
-                    {p.name}
-                  </DropdownMenu.Item>
-                ))}
+                    {t('Move to project')}
+                  </DropdownMenu.SubTrigger>
+                  <DropdownMenu.SubContent>
+                    {organization.projects
+                      .filter(p => p.id !== project?.id)
+                      .map(p => (
+                        <DropdownMenu.Item
+                          key={p.id}
+                          onClick={() => void organization.move(thread.id, p.id).catch(() => {})}
+                        >
+                          <IconFolder1 />
+                          {p.name}
+                        </DropdownMenu.Item>
+                      ))}
+                  </DropdownMenu.SubContent>
+                </DropdownMenu.Sub>
+              )}
               {project && (
                 <DropdownMenu.Item onClick={() => void organization.move(thread.id).catch(() => {})}>
                   {t('Move to recent')}
@@ -112,6 +150,7 @@ export function SidebarConversationRow({
           <Txt as="span" variant="body-sm" className="block truncate" title={title}>
             {title}
           </Txt>
+          {running && <ConversationSpinner />}
         </span>
       </ThreadListItem>
       {dialog === 'rename' && (
@@ -123,6 +162,7 @@ export function SidebarConversationRow({
         />
       )}
       {archive.isError && <Txt role="alert">{t('Failed to archive chat')}</Txt>}
+      {clone.isError && <Txt role="alert">{t('Failed to clone thread')}</Txt>}
       {dialog === 'delete' && (
         <ConversationDeleteDialog
           thread={thread}

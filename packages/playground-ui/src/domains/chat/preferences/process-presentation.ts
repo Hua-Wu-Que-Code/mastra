@@ -65,7 +65,12 @@ function processDetail(input: unknown): string | undefined {
                 )
                 .at(0)
             : undefined;
-    if (text?.trim()) return text.replace(/\s+/g, ' ').trim();
+    if (text?.trim()) {
+      const detail = text.replace(/\s+/g, ' ').trim();
+      // Paths remain intact in tool arguments. Transcript summaries show the file's name.
+      if (['file_path', 'path'].includes(key)) return detail.replace(/\\/g, '/').split('/').filter(Boolean).at(-1);
+      return detail;
+    }
   }
   return undefined;
 }

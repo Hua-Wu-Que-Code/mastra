@@ -49,7 +49,7 @@ export function WorkDetailsBlock({ parts, children }: { parts: MessageFactoryPar
       label={label}
       detail={running && presentation.showLiveDetail ? live?.detail : undefined}
       status={running ? 'running' : 'idle'}
-      defaultOpen={presentation.showReasoningPreview}
+      defaultOpen={false}
       ariaLabel={t('Work details: {count} steps', { count: parts.length })}
       group
     >

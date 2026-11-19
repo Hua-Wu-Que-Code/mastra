@@ -2,6 +2,7 @@ import type { GetToolResponse } from '@mastra/client-js';
 import type { RequestContextEntityType } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { useApiToolSchemas } from '../../hooks/use-api-tool-schemas';
 import type { ToolExecution } from '../../utils/tool-run';
+import { toolSummary } from '../../utils/tool-summary';
 import { ToolOverview } from '../tool-overview';
 import { ToolPlayground } from '../tool-playground';
 import { ToolDrawerContent } from './tool-drawer-content';
@@ -31,7 +32,7 @@ export function ToolDrawerBody({
 
   return (
     <ToolDrawerContent
-      description={tool.description}
+      description={toolSummary(tool.id, tool.description)}
       overview={
         <ToolOverview
           inputSchema={inputSchema}

@@ -44,6 +44,7 @@ const schemas = {
       workDetails: z.enum(['compact', 'standard', 'detailed', 'verbose']),
       collapseTiming: z.enum(['completion', 'next-input']),
       foldedReplies: z.enum(['all', 'final']),
+      processFoldingVersion: z.literal(2),
     })
     .partial()
     .strict(),

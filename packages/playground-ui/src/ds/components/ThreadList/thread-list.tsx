@@ -99,6 +99,7 @@ export const ThreadListItem = ({
       <Button
         render={as ? createElement(as, { href, to }) : undefined}
         onClick={onClick}
+        aria-current={isActive ? 'page' : undefined}
         variant="ghost"
         className={cn(
           'w-full min-w-0 justify-start rounded-xl px-3 text-left',
