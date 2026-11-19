@@ -4,6 +4,47 @@ import type { ProviderConfig } from '@mastra/core/llm';
 import { z } from 'zod';
 import { contextPolicy } from './context-policy.ts';
 
+type ChatModel = ReturnType<ReturnType<typeof createOpenAICompatible>['chatModel']>;
+type ChatPrompt = Parameters<ChatModel['doGenerate']>[0]['prompt'];
+
+// The OpenAI-compatible adapter stringifies content tool results. Move image
+// parts to a native user attachment after the tool results so their bytes never
+// become text tokens. Keep tool-call IDs and textual results in their own role.
+function nativeToolImages(prompt: ChatPrompt): ChatPrompt {
+  return prompt.flatMap((message): ChatPrompt => {
+    if (message.role !== 'tool') return [message];
+    const images: Extract<ChatPrompt[number], { role: 'user' }>['content'] = [];
+    const content = message.content.map(part => {
+      if (part.type !== 'tool-result' || part.output.type !== 'content') return part;
+      const value = part.output.value.filter(item => {
+        if (item.type === 'image-data') {
+          images.push({ type: 'file', data: item.data, mediaType: item.mediaType });
+          return false;
+        }
+        if (item.type === 'image-url') {
+          images.push({ type: 'file', data: new URL(item.url), mediaType: 'image/*' });
+          return false;
+        }
+        return true;
+      });
+      if (value.length === part.output.value.length) return part;
+      return {
+        ...part,
+        output: {
+          type: 'text' as const,
+          value: value.map(item => (item.type === 'text' ? item.text : JSON.stringify(item))).join('\n'),
+        },
+      };
+    });
+    return images.length
+      ? [
+          { ...message, content },
+          { role: 'user' as const, content: images },
+        ]
+      : [message];
+  });
+}
+
 const optionSchema = z
   .object({
     level: z.string().min(1),
@@ -53,6 +94,8 @@ export class ModelHubGateway extends MastraModelGateway {
   readonly id = 'altflow';
   readonly name = 'AltFlow ModelHub';
   #apiKey: string;
+  #allowedModels?: readonly string[];
+  #defaultReasoningLevel?: string;
   #baseURL: string;
   #snapshot?: Catalog;
   #expires = 0;
@@ -60,7 +103,12 @@ export class ModelHubGateway extends MastraModelGateway {
   #info: Record<string, number> = {};
   #infoExpires = 0;
   #infoPending?: Promise<Record<string, number>>;
-  constructor(options: { apiKey: string; baseURL?: string }) {
+  constructor(options: {
+    apiKey: string;
+    baseURL?: string;
+    allowedModels?: readonly string[];
+    defaultReasoningLevel?: string;
+  }) {
     super();
     const url = new URL(options.baseURL ?? 'https://modelhub.altflow.cn/v1');
     if (
@@ -75,6 +123,8 @@ export class ModelHubGateway extends MastraModelGateway {
     }
     if (!options.apiKey) throw new Error('ModelHub credential is not configured');
     this.#apiKey = options.apiKey;
+    this.#allowedModels = options.allowedModels;
+    this.#defaultReasoningLevel = options.defaultReasoningLevel;
     this.#baseURL = url.href.replace(/\/$/, '');
   }
   handlesModel(id: string) {
@@ -91,7 +141,17 @@ export class ModelHubGateway extends MastraModelGateway {
           redirect: 'error',
         });
         if (!response.ok) throw new Error('ModelHub catalog is unavailable');
-        this.#snapshot = catalogSchema.parse(await response.json());
+        const catalog = catalogSchema.parse(await response.json());
+        // Apply the deployment policy before exposing or resolving models, including direct API overrides.
+        this.#snapshot = catalogSchema.parse({
+          ...catalog,
+          free_chat_models: catalog.free_chat_models
+            .filter(model => !this.#allowedModels || this.#allowedModels.includes(model.id))
+            .map(model => ({
+              ...model,
+              default_thinking_level: this.#defaultReasoningLevel ?? model.default_thinking_level,
+            })),
+        });
       } catch {
         // Keep the last validated catalog; never substitute the public registry.
         if (!this.#snapshot) throw new Error('ModelHub catalog is unavailable or invalid');
@@ -244,6 +304,16 @@ export class ModelHubGateway extends MastraModelGateway {
         return fetch(url, { ...init, body: JSON.stringify(body), redirect: 'error' });
       },
     });
-    return provider.chatModel(modelId);
+    const model = provider.chatModel(modelId);
+    return {
+      specificationVersion: model.specificationVersion,
+      provider: model.provider,
+      modelId: model.modelId,
+      supportedUrls: model.supportedUrls,
+      doGenerate: (options: Parameters<ChatModel['doGenerate']>[0]) =>
+        model.doGenerate({ ...options, prompt: nativeToolImages(options.prompt) }),
+      doStream: (options: Parameters<ChatModel['doStream']>[0]) =>
+        model.doStream({ ...options, prompt: nativeToolImages(options.prompt) }),
+    };
   }
 }

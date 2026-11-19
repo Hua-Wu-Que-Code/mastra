@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { crc32, deflateSync } from 'node:zlib';
 import { Agent } from '@mastra/core/agent';
 import { Mastra } from '@mastra/core/mastra';
 import { SpanType, TracingEventType } from '@mastra/core/observability';
 import { RequestContext, MASTRA_NORMALIZED_USER_KEY } from '@mastra/core/request-context';
 import { MastraCompositeStore } from '@mastra/core/storage';
 import { createTool } from '@mastra/core/tools';
+import { LocalFilesystem, Workspace } from '@mastra/core/workspace';
 import { LibSQLStore } from '@mastra/libsql';
 import { Memory } from '@mastra/memory';
 import { Observability } from '@mastra/observability';
@@ -24,7 +26,7 @@ import { modelHubFixture } from './modelhub-fixture.mjs';
 
 const isSummary = request =>
   request.body.messages.at(-1)?.content?.includes('You are now acting as a compaction engine');
-async function setup(t, trace = false, persistedOptOut = false) {
+async function setup(t, trace = false, persistedOptOut = false, gatewayOptions = {}) {
   const events = [];
   const observability = trace
     ? new Observability({
@@ -69,13 +71,13 @@ async function setup(t, trace = false, persistedOptOut = false) {
   if (persistedOptOut)
     await preferences.write('owner', 'owner', { kind: 'memory', id: 'creator-agent', patch: { enabled: false } });
   t.after(() => preferences.close());
-  const gateway = new ModelHubGateway({ apiKey: 'test', baseURL: hub.baseURL });
+  const gateway = new ModelHubGateway({ apiKey: 'test', baseURL: hub.baseURL, ...gatewayOptions });
   t.after(async () => {
     await hub.close();
     await storage.close();
     await rm(dir, { recursive: true, force: true });
   });
-  const agent = async (tools = {}, modelId = 'deepseek-v4-pro', memoryOptions = {}) => {
+  const agent = async (tools = {}, modelId = 'deepseek-v4-pro', memoryOptions = {}, agentOptions = {}) => {
     const compaction = new ContextCompaction({ gateway, storage });
     const instance = new Agent({
       id: 'test',
@@ -99,6 +101,7 @@ async function setup(t, trace = false, persistedOptOut = false) {
       outputProcessors: [compaction],
       errorProcessors: [compaction],
       tools,
+      ...agentOptions,
     });
     new Mastra({
       agents: { test: instance },
@@ -128,12 +131,89 @@ async function setup(t, trace = false, persistedOptOut = false) {
       })),
     });
   };
-  return { hub, store, agent, seed, storage, gateway, events };
+  return { hub, store, agent, seed, storage, gateway, events, dir };
 }
 const options = {
   memory: { thread: 'thread', resource: 'owner' },
   maxSteps: 4,
 };
+
+// Real PNG bytes: a noisy image exceeds the old text-based pressure threshold.
+function imageFixture() {
+  const chunk = (type, data) => {
+    const payload = Buffer.concat([Buffer.from(type), data]);
+    const length = Buffer.alloc(4);
+    length.writeUInt32BE(data.length);
+    const checksum = Buffer.alloc(4);
+    checksum.writeUInt32BE(crc32(payload));
+    return Buffer.concat([length, payload, checksum]);
+  };
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(512, 0);
+  header.writeUInt32BE(512, 4);
+  header[8] = 8;
+  header[9] = 2;
+  const pixels = Buffer.alloc(512 * (512 * 3 + 1));
+  let random = 123456789;
+  for (let i = 0; i < pixels.length; i++) {
+    random = (Math.imul(random, 1664525) + 1013904223) >>> 0;
+    if (i % (512 * 3 + 1)) pixels[i] = random >>> 24;
+  }
+  return Buffer.concat([
+    Buffer.from('89504e470d0a1a0a', 'hex'),
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(pixels)),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+for (const mode of ['generate', 'stream'])
+  test(`${mode}: reads a workspace image and continues answering after reopening the conversation`, async t => {
+    const { hub, agent, dir } = await setup(t);
+    const bytes = imageFixture();
+    await writeFile(join(dir, 'office.png'), bytes);
+    const workspace = new Workspace({ filesystem: new LocalFilesystem({ basePath: dir }) });
+    hub.state.toolCall = { name: 'mastra_workspace_read_file', args: { path: 'office.png' } };
+    for (const prompt of ['Read office.png and describe it.', 'Describe the image from the previous turn.']) {
+      const result = await (await agent({}, 'qwen3.8-max', {}, { workspace }))[mode](prompt, options);
+      if (mode === 'stream') await result.consumeStream();
+      assert.equal(await result.text, 'verified');
+      const main = hub.state.requests.filter(request => !isSummary(request)).at(-1).body;
+      const content = main.messages.flatMap(message => (Array.isArray(message.content) ? message.content : []));
+      assert.ok(
+        content.some(part => part.type === 'image_url' && part.image_url.url.endsWith(bytes.toString('base64'))),
+        'the complete workspace image reaches the provider as native media',
+      );
+      assert.doesNotMatch(
+        JSON.stringify(main.messages.filter(message => typeof message.content === 'string')),
+        /__workspaceMedia/,
+      );
+    }
+  });
+
+for (const mode of ['generate', 'stream'])
+  for (const type of ['image', 'file'])
+    for (const longHistory of [false, true])
+      test(`${mode}: answers a ${type} upload with ${longHistory ? 'compacted' : 'short'} history`, async t => {
+        const { hub, agent, seed } = await setup(t);
+        await seed(longHistory ? 40 : 4, longHistory ? 9000 : 64);
+        const data = `data:image/png;base64,${imageFixture().toString('base64')}`;
+        const attachment =
+          type === 'image'
+            ? { type, image: data, mediaType: 'image/png' }
+            : { type, data, mediaType: 'image/png', filename: 'upload.png' };
+        const result = await (
+          await agent({}, 'qwen3.8-max')
+        )[mode]([{ role: 'user', content: [{ type: 'text', text: 'Describe this image.' }, attachment] }], options);
+        if (mode === 'stream') await result.consumeStream();
+        assert.equal(await result.text, 'verified');
+        assert.equal(hub.state.requests.filter(isSummary).length, longHistory ? 1 : 0);
+        const main = hub.state.requests.filter(request => !isSummary(request)).at(-1).body;
+        const received = main.messages.flatMap(message => (Array.isArray(message.content) ? message.content : []));
+        assert.ok(received.some(part => part.type === 'image_url' && part.image_url.url === data));
+        assert.match(JSON.stringify(main.messages), /Describe this image/);
+        if (longHistory) assert.match(JSON.stringify(main.messages), /<compacted-summary>/);
+      });
 
 test('DSH pressure policy reserves output, headroom and recent verbatim history', () => {
   assert.deepEqual(contextPolicy(1000000), {
@@ -142,6 +222,23 @@ test('DSH pressure policy reserves output, headroom and recent verbatim history'
     threshold: 57344,
     retain: 19660,
   });
+});
+
+test('old conversations compact with the current model when their last model was retired', async t => {
+  const { hub, store, agent, seed } = await setup(t, false, false, { allowedModels: ['qwen3.8-max'] });
+  await seed(40, 9000);
+  await store.updateThreadMetadata({
+    id: 'thread',
+    resourceId: 'owner',
+    update: current => ({
+      ...current.metadata,
+      dshContext: { lastRoute: { modelId: 'deepseek-v4-pro', level: 'off' } },
+    }),
+  });
+  const result = await (await agent({}, 'qwen3.8-max')).generate('Continue this conversation.', options);
+  assert.equal(result.text, 'verified');
+  assert.ok(hub.state.requests.some(isSummary));
+  assert.ok(hub.state.requests.every(request => request.body.model === 'internal-qwen-route'));
 });
 
 for (const mode of ['generate', 'stream'])

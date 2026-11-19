@@ -25,6 +25,7 @@ import { createAltFlowAuth } from './altflow-auth';
 import { ContextCompaction } from './context-compaction';
 import { CONTEXT_MEMORY_OPTIONS } from './context-memory';
 import { localEmbedder } from './embedding';
+import { conversationModels, defaultConversationModel, defaultReasoningLevel } from './model-policy';
 import { ModelHubGateway } from './modelhub-gateway';
 import { accountPreferenceRoutes } from './routes/account-preferences';
 import { conversationProjectRoutes } from './routes/conversation-projects';
@@ -59,10 +60,15 @@ const accounts = createAltFlowAuth({
 });
 const apiKey = process.env.ALTFLOW_MODELHUB_API_KEY;
 if (!apiKey) throw new Error('AltFlow gateway credential is not configured');
-const modelHub = new ModelHubGateway({ apiKey, baseURL: process.env.ALTFLOW_MODELHUB_BASE_URL });
+const modelHub = new ModelHubGateway({
+  apiKey,
+  baseURL: process.env.ALTFLOW_MODELHUB_BASE_URL,
+  allowedModels: conversationModels,
+  defaultReasoningLevel,
+});
 // This deployment exposes only its registered ModelHub gateway.
 process.env.AUTO_BLOCK_EXTERNAL_PROVIDERS = 'true';
-const model = 'altflow/deepseek-v4-pro';
+const model = defaultConversationModel;
 // Fresh checkouts have no ignored database directories yet. Create them before opening stores.
 await mkdir(previewPath('src/mastra/public'), { recursive: true });
 await mkdir(previewPath('data'), { recursive: true });
@@ -254,9 +260,13 @@ const creatorAgent = new Agent({
   id: 'creator-agent',
   name: '创作者助手',
   instructions:
-    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。可按需使用 web_fetch 读取公开网页；web_search 仅在配置后可用。先检索事实再给引用，不声称执行未提供的工具。复杂任务维护 task 清单；需要用户选择时 ask_user；需要审批时写入 .mastracode/plans/*.md 后 submit_plan。历史设定用 session_search 字面检索，再用 recall 读取原文。可用 subagent 动态创建后台助手，用 subagent_fork 分叉已完成的上下文，用 send_message、wait_agent、list_agents、interrupt_agent 协作。团队开关只控制共享任务板和团队协作指令，普通子智能体独立可用。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取，Office 和 PDF 正文调用 read_document（使用 DSH LibreOffice Kit），不要依据旧记忆声称无法读取；生成的文件也写入该工作区。写入成功后调用 present 交付文件，不编造文件路径。',
+    '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。可按需使用 web_fetch 读取公开网页；web_search 仅在配置后可用。先检索事实再给引用，不声称执行未提供的工具。复杂任务维护 task 清单；需要用户选择时 ask_user；需要审批时写入 .mastracode/plans/*.md 后 submit_plan。历史设定用 session_search 字面检索，再用 recall 读取原文。可用 subagent 动态创建后台助手，用 subagent_fork 分叉已完成的上下文，用 send_message、wait_agent、list_agents、interrupt_agent 协作。团队开关只控制共享任务板和团队协作指令，普通子智能体独立可用。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取，Office 和 PDF 正文调用 read_document（使用 DSH LibreOffice Kit），不要依据旧记忆声称无法读取；生成的文件也写入该工作区。写入成功后调用 present 交付文件，不编造文件路径。面向用户只展示文件名，用 present 的文件卡片或下载链接交付，不在正文中展示工作区目录、内部存储路径或工具使用的路径。',
   model,
-  defaultOptions: { requireToolApproval: false, ...executionPolicy().loop },
+  defaultOptions: {
+    requireToolApproval: false,
+    ...executionPolicy().loop,
+    providerOptions: { altflow: { reasoningLevel: defaultReasoningLevel } },
+  },
   workspace: ({ user }) => (user?.id ? privateWorkspace(user.id) : undefined),
   knowledge,
   // Server auth supplies library access; do not grant every caller ownership.

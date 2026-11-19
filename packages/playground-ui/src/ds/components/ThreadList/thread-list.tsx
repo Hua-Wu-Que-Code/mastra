@@ -72,6 +72,7 @@ export interface ThreadListItemProps {
   href?: string;
   to?: string;
   isActive?: boolean;
+  'aria-expanded'?: boolean;
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   onDelete?: () => void;
   deleteLabel?: string;
@@ -86,6 +87,7 @@ export const ThreadListItem = ({
   href,
   to,
   isActive,
+  'aria-expanded': ariaExpanded,
   onClick,
   onDelete,
   deleteLabel = studioT('delete'),
@@ -95,11 +97,12 @@ export const ThreadListItem = ({
 }: ThreadListItemProps) => {
   useLocale();
   return (
-    <li className="group relative">
+    <li className="group relative rounded-xl focus-within:bg-fill-hover hover:bg-fill-hover">
       <Button
         render={as ? createElement(as, { href, to }) : undefined}
         onClick={onClick}
         aria-current={isActive ? 'page' : undefined}
+        aria-expanded={ariaExpanded}
         variant="ghost"
         className={cn(
           'w-full min-w-0 justify-start rounded-xl px-3 text-left',

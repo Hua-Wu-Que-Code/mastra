@@ -1,7 +1,8 @@
-// @vitest-environment jsdom
 import type { TextPart } from '@mastra/react';
+// @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { ChatFilePathsContext } from '../../../context/chat-context';
 
 import type { MessageMetadata } from '../../message-metadata';
 import { AssistantTextPartRenderer } from '../assistant-text-part-renderer';
@@ -42,4 +43,30 @@ describe('AssistantTextPartRenderer', () => {
     expect(screen.getByText('Complete')).not.toBeNull();
     expect(screen.getByText('all good')).not.toBeNull();
   });
+});
+
+it('shows known artifact names and preserves fenced code and download destinations', () => {
+  const path = 'drafts/报告.md';
+  render(
+    <ChatFilePathsContext.Provider value={['/' + path]}>
+      <AssistantTextPartRenderer
+        part={
+          {
+            type: 'text',
+            text:
+              'Saved `' +
+              path +
+              '`. [drafts/报告.md](/storage/download?path=%2Fdrafts%2F报告.md)\n\n```text\n' +
+              path +
+              '\n```\n\n`src/example.ts`\n\n完整图谱已保存于 /drafts/报告.md，请查收。',
+          } as TextPart
+        }
+      />
+    </ChatFilePathsContext.Provider>,
+  );
+  expect(screen.getAllByText('报告.md')).toHaveLength(2);
+  expect(screen.getByRole('link', { name: '报告.md' }).getAttribute('href')).toContain('/storage/download?path=');
+  expect(screen.getByText('src/example.ts')).not.toBeNull();
+  expect(screen.getByText(path)).not.toBeNull();
+  expect(screen.getByText('完整图谱已保存于 报告.md，请查收。')).not.toBeNull();
 });

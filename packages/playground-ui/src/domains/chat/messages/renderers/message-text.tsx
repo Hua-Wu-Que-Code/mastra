@@ -6,6 +6,7 @@ import type { UseKnowledgePagePreview } from '../../knowledge/knowledge-links';
 import type { MessageMetadata } from '../message-metadata';
 import { TripwireNotice } from '../tripwire-notice';
 import { errorMessage, messageTextKind } from './message-text-kind';
+import { remarkFileNames } from './remark-file-names';
 import {
   KNOWLEDGE_BARE_PROPERTY,
   KNOWLEDGE_REF_PROPERTY,
@@ -60,6 +61,7 @@ export interface MessageTextProps {
   externalLinkTarget?: MarkdownExternalLinkTarget;
   streaming?: boolean;
   tableActions?: boolean;
+  filePaths?: readonly string[];
 }
 
 /**
@@ -67,10 +69,23 @@ export interface MessageTextProps {
  * error/completion handling previously in `ErrorAwareText` (which read part
  * metadata).
  */
-export const MessageText = ({ text, metadata, externalLinkTarget, streaming, tableActions }: MessageTextProps) => {
+export const MessageText = ({
+  text,
+  metadata,
+  externalLinkTarget,
+  streaming,
+  tableActions,
+  filePaths,
+}: MessageTextProps) => {
   useLocale();
   const [collapsedCompletionCheck, setCollapsedCompletionCheck] = useState(false);
   const knowledgeLinks = useHasKnowledgeLinks();
+  const remarkPlugins: NonNullable<ComponentProps<typeof MarkdownRenderer>['remarkPlugins']> = [
+    ...(knowledgeLinks ? CHAT_REMARK_PLUGINS : []),
+    ...(filePaths?.length
+      ? [[remarkFileNames, { paths: filePaths }] as [typeof remarkFileNames, { paths: readonly string[] }]]
+      : []),
+  ];
 
   switch (messageTextKind(text, metadata)) {
     case 'tripwire':
@@ -122,7 +137,7 @@ export const MessageText = ({ text, metadata, externalLinkTarget, streaming, tab
           externalLinkTarget={externalLinkTarget}
           streaming={Boolean(streaming)}
           tableActions={tableActions}
-          remarkPlugins={knowledgeLinks ? CHAT_REMARK_PLUGINS : undefined}
+          remarkPlugins={remarkPlugins.length ? remarkPlugins : undefined}
           components={knowledgeLinks ? CHAT_COMPONENTS : undefined}
         >
           {text}

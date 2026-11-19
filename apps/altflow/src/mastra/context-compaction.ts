@@ -62,19 +62,47 @@ const checkpointMessage = (summary: string): Message => ({
   ],
 });
 
-// DSH fixed-density pressure pricing (4 chars/token, 4 tokens/block and role).
+// DSH text pricing (4 chars/token, 4 tokens/block and role), with Mastra's
+// multimodal estimator for attachments. Encoded bytes are not model text.
 // This internal admission estimate is never used for the displayed context occupancy.
-function price(message: Message): number {
+function price(message: Message, counter: TokenCounter): number {
+  const attachment = (part: Extract<Extract<Message, { role: 'user' }>['content'][number], { type: 'file' }>) =>
+    counter.countMessages(convertMessages([{ role: 'user', content: [part] }]).to('Mastra.V2'));
   if (typeof message.content === 'string') return 4 + Math.ceil(message.content.length / 4);
   return (
     4 +
     message.content.reduce((sum, block) => {
       if ('text' in block && typeof block.text === 'string') return sum + 4 + Math.ceil(block.text.length / 4);
+      // Provider prompts normalize both image uploads and file uploads to file blocks.
+      if (block.type === 'file') return sum + attachment(block);
+      // mastra.modelOutput is a stored copy of the mapped result, carried on
+      // both tool parts. Provider options are not model-visible text.
+      if (block.type === 'tool-call')
+        return sum + 4 + Math.ceil(JSON.stringify({ toolName: block.toolName, input: block.input }).length / 4);
+      if (block.type === 'tool-result' && block.output.type === 'content') {
+        const framing = { toolName: block.toolName, output: { type: block.output.type } };
+        return (
+          sum +
+          4 +
+          Math.ceil(JSON.stringify(framing).length / 4) +
+          block.output.value.reduce(
+            (tokens, part) =>
+              tokens +
+              (part.type === 'text'
+                ? 4 + Math.ceil(part.text.length / 4)
+                : attachment({ type: 'file', data: part.data, mediaType: part.mediaType })),
+            0,
+          )
+        );
+      }
+      if (block.type === 'tool-result')
+        return sum + 4 + Math.ceil(JSON.stringify({ toolName: block.toolName, output: block.output }).length / 4);
       return sum + 4 + Math.ceil(JSON.stringify(block).length / 4);
     }, 0)
   );
 }
-const pricePrompt = (prompt: Prompt) => prompt.reduce((sum, message) => sum + price(message), 0);
+const pricePrompt = (prompt: Prompt, counter: TokenCounter) =>
+  prompt.reduce((sum, message) => sum + price(message, counter), 0);
 
 function pruneValue(value: Json): Json {
   if (typeof value === 'string') {
@@ -131,12 +159,12 @@ function pruneTools(prompt: Prompt): Prompt {
 }
 
 /** Keep the recent tail and latest user request, moving the cut backward across open tool pairs. */
-function selectCut(messages: Prompt, retain: number, force: boolean): number {
+function selectCut(messages: Prompt, retain: number, force: boolean, counter: TokenCounter): number {
   let cut = messages.length;
   let tokens = 0;
   for (let i = messages.length - 1; i >= 0; i--) {
     cut = i;
-    tokens += price(messages[i]);
+    tokens += price(messages[i], counter);
     if (tokens >= retain || force) break;
   }
   let latestUser = -1;
@@ -278,7 +306,8 @@ export class ContextCompaction implements Processor {
       fingerprint(original.slice(0, previous.covered)) === previous.digest;
     let messages = applied ? [checkpointMessage(previous.summary), ...original.slice(previous.covered)] : original;
     let prompt = [...system, ...messages];
-    const estimate = () => pricePrompt(prompt) + overhead;
+    const counter = new TokenCounter({ model: { provider: args.apiProviderId, modelId: route.modelId } });
+    const estimate = () => pricePrompt(prompt, counter) + overhead;
     const pressure = () =>
       saved.measurement?.route === routeKey && saved.measurement.epoch === (applied ? previous.version : 0)
         ? Math.max(estimate(), saved.measurement.input + estimate() - saved.measurement.estimate)
@@ -289,11 +318,20 @@ export class ContextCompaction implements Processor {
       prompt = pruneTools(prompt);
       messages = prompt.filter(message => message.role !== 'system');
       if (force || pressure() >= route.policy.threshold) {
-        const cut = selectCut(messages, route.policy.retain, force);
+        const cut = selectCut(messages, route.policy.retain, force, counter);
         if (cut > 0 && !(applied && cut === 1)) {
           const covered = (applied ? previous.covered - 1 : 0) + cut;
           const prefix = messages.slice(0, cut);
-          const summaryRoute = saved.lastRoute ?? route;
+          const catalog = await this.#gateway.catalog();
+          const lastRoute = saved.lastRoute;
+          const lastProduct = catalog.free_chat_models.find(product => product.id === lastRoute?.modelId);
+          // A persisted conversation can outlive a deployment's model policy.
+          const summaryRoute =
+            lastRoute &&
+            lastProduct &&
+            (!lastRoute.level || lastProduct.thinking_options.some(option => option.level === lastRoute.level))
+              ? lastRoute
+              : route;
           const model = await this.#gateway.resolveSummaryModel(summaryRoute.modelId);
           let summary: string | undefined;
           for (let attempt = 0; attempt < 2; attempt++) {
@@ -313,15 +351,13 @@ export class ContextCompaction implements Processor {
                   content: [{ type: 'text', text: COMPACTION_INSTRUCTION }],
                 },
               ];
-              const summaryProduct = (await this.#gateway.catalog()).free_chat_models.find(
-                product => product.id === summaryRoute.modelId,
-              );
+              const summaryProduct = catalog.free_chat_models.find(product => product.id === summaryRoute.modelId);
               const summaryTarget = summaryProduct?.thinking_options.find(
                 option => option.level === summaryRoute.level,
               )?.target;
               const summaryCapacity = summaryTarget ? (await this.#gateway.modelInfo())[summaryTarget] : undefined;
               const summaryWindow = contextPolicy(summaryCapacity).window;
-              const summaryOutput = Math.min(65536, summaryWindow - pricePrompt(summaryPrompt) - overhead);
+              const summaryOutput = Math.min(65536, summaryWindow - pricePrompt(summaryPrompt, counter) - overhead);
               if (summaryOutput <= 0) throw new Error('Summary request exceeds its source model capacity');
               const result = await model.doGenerate({
                 prompt: providerPrompt(summaryPrompt),
@@ -358,10 +394,14 @@ export class ContextCompaction implements Processor {
                 .join('')
                 .trim();
               const replacement = checkpointMessage(text);
-              if (result.finishReason.unified !== 'stop' || !text || price(replacement) >= pricePrompt(prefix))
+              if (
+                result.finishReason.unified !== 'stop' ||
+                !text ||
+                price(replacement, counter) >= pricePrompt(prefix, counter)
+              )
                 continue;
               const candidate = [...system, replacement, ...messages.slice(cut)];
-              if (pricePrompt(candidate) + overhead >= route.policy.threshold) continue;
+              if (pricePrompt(candidate, counter) + overhead >= route.policy.threshold) continue;
               summary = text;
               break;
             } catch (error) {
@@ -407,13 +447,12 @@ export class ContextCompaction implements Processor {
         } else if (force) throw new Error('Context overflow has no balanced history to compact');
       }
     }
-    if (pricePrompt(prompt) + overhead >= route.policy.window - route.policy.output) {
+    if (pricePrompt(prompt, counter) + overhead >= route.policy.window - route.policy.output) {
       throw new Error('Current request exceeds the context budget; shorten the current message or attachments');
     }
-    args.state.contextEstimate = pricePrompt(prompt) + overhead;
+    args.state.contextEstimate = pricePrompt(prompt, counter) + overhead;
     // Count the projected request after pruning/compaction, using Mastra's shared
     // text and multimodal estimator. Keep estimates distinct from provider usage.
-    const counter = new TokenCounter({ model: { provider: args.apiProviderId, modelId: route.modelId } });
     const breakdown = {
       method: 'mastra-token-counter',
       system: prompt

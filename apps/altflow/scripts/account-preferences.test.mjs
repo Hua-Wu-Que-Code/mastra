@@ -102,7 +102,7 @@ test('thread model settings merge concurrent fields, reset durably, and import o
   assert.equal(
     (
       await f.request('alice', 'thread', id, {
-        patch: { selection: { provider: 'altflow', model: 'qwen' } },
+        patch: { selection: { provider: 'altflow', model: 'qwen3.8-max' } },
         import: true,
       })
     ).status,
@@ -129,4 +129,20 @@ test('thread model settings merge concurrent fields, reset durably, and import o
       .status,
     404,
   );
+});
+
+test('retired model preferences fall back to the Qwen default without old reasoning or lost teamwork', async t => {
+  const f = await setup(t);
+  const id = JSON.stringify(['creator-agent', 'chat-alice']);
+  const response = await f.request('alice', 'thread', id, {
+    patch: {
+      selection: { provider: 'altflow', model: 'deepseek-v4-pro' },
+      modelSettings: { teamwork: true, providerOptions: { altflow: { reasoningLevel: 'off' } } },
+    },
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).value, { modelSettings: { teamwork: true } });
+  assert.deepEqual((await (await f.request('alice', 'thread', id)).json()).value, {
+    modelSettings: { teamwork: true },
+  });
 });

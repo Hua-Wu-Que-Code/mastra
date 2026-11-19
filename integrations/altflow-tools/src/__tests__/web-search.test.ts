@@ -97,6 +97,29 @@ describe('web_search over real HTTP', () => {
     setTimeout(() => controller.abort(), 20);
     await expect(call).rejects.toMatchObject({ code: 'SEARCH_ABORTED' });
   });
+  it('uses independent authentication and 128 Unicode character limits', async () => {
+    let requests = 0;
+    const query = '😀'.repeat(128);
+    const baseURL = await serverFor(async (req, res) => {
+      requests++;
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      expect(req.headers.authorization).toBe('Bearer independent-key');
+      expect(JSON.parse(Buffer.concat(chunks).toString())).toEqual({
+        query,
+        ori_question: query,
+        count: 10,
+        need_content: false,
+      });
+      res.end('{"results":[]}');
+    });
+    const provider = createDeepSeekSearchProvider({ apiKey: 'independent-key', baseURL });
+    await expect(provider.search(query, { signal: new AbortController().signal })).resolves.toEqual({ results: [] });
+    await expect(provider.search(query + 'x', { signal: new AbortController().signal })).rejects.toMatchObject({
+      code: 'INVALID_SEARCH_QUERY',
+    });
+    expect(requests).toBe(1);
+  });
   it('maps the DeepSeek response without changing model input', async () => {
     const baseURL = await serverFor((_req, res) =>
       res.end(

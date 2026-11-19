@@ -148,9 +148,11 @@ export function AppSidebar() {
 
       {!account && <ImpersonationBanner />}
 
+      <SidebarConversations newChatOnly />
+
       <Sidebar.Nav>
         <Sidebar.Sections sections={sections} visibilityStorageKey="mastra:studio:sidebar-visibility" />
-        <SidebarConversations />
+        <SidebarConversations hideNewChat />
       </Sidebar.Nav>
 
       <Sidebar.Footer>

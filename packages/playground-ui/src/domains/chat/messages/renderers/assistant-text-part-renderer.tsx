@@ -1,4 +1,6 @@
 import type { TextPart } from '@mastra/react/ui';
+import { useContext } from 'react';
+import { ChatFilePathsContext } from '../../context/chat-context';
 
 import type { MessageMetadata } from '../message-metadata';
 import { MessageText } from './message-text';
@@ -14,11 +16,15 @@ export interface AssistantTextPartRendererProps {
  * Renders an assistant `MessageFactory` `Text` slot through `MessageText`, which
  * applies markdown plus the legacy error/completion-check handling.
  */
-export const AssistantTextPartRenderer = ({ part, metadata, revealing }: AssistantTextPartRendererProps) => (
-  <MessageText
-    text={part.text ?? ''}
-    metadata={metadata}
-    streaming={part.state === 'streaming' || revealing}
-    tableActions
-  />
-);
+export const AssistantTextPartRenderer = ({ part, metadata, revealing }: AssistantTextPartRendererProps) => {
+  const filePaths = useContext(ChatFilePathsContext);
+  return (
+    <MessageText
+      text={part.text ?? ''}
+      metadata={metadata}
+      streaming={part.state === 'streaming' || revealing}
+      tableActions
+      filePaths={filePaths}
+    />
+  );
+};

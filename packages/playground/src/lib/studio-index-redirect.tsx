@@ -1,4 +1,6 @@
+import { useAgents } from '@mastra/react/hooks/agents';
 import { Navigate } from 'react-router';
+import { useAccount } from '@/domains/account/account-context';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 import { getFirstAccessibleRoute } from '@/domains/auth/route-permissions';
 
@@ -12,6 +14,7 @@ import { getFirstAccessibleRoute } from '@/domains/auth/route-permissions';
  * wrong route mid-hydration.
  */
 export const StudioIndexRedirect = () => {
+  const account = useAccount();
   const {
     hasPermission,
     hasAnyPermission,
@@ -19,8 +22,18 @@ export const StudioIndexRedirect = () => {
     isLoading: isPermissionsLoading,
     isAuthenticated,
   } = usePermissions();
+  const openChat = !!account && hasPermission('agents:read') && hasPermission('agents:execute');
+  const { data: agents, isPending: isAgentsPending } = useAgents({
+    queryOptions: { enabled: openChat && !isPermissionsLoading },
+  });
 
   if (isPermissionsLoading) return null;
+
+  if (openChat) {
+    if (isAgentsPending) return null;
+    const agentId = Object.keys(agents ?? {})[0];
+    if (agentId) return <Navigate to={`/chat/${encodeURIComponent(agentId)}/threads/new`} replace />;
+  }
 
   // If RBAC is disabled or not authenticated, go to /agents (default behavior)
   if (!rbacEnabled || !isAuthenticated) {

@@ -90,6 +90,12 @@ describe('Conversation statistics dock', () => {
       expect(screen.getByText('~234 tok')).toBeDefined();
       expect(screen.getByText('~345 tok')).toBeDefined();
       expect(screen.getByRole('meter').getAttribute('aria-valuenow')).toBe('1');
+      const segments = Array.from(screen.getByRole('meter').children) as HTMLElement[];
+      expect(segments).toHaveLength(3);
+      const widths = segments.map(segment => parseFloat(segment.style.width));
+      expect(widths.reduce((a, b) => a + b, 0)).toBeCloseTo((1000 / 131072) * 100);
+      expect(widths[0] / widths[1]).toBeCloseTo(123 / 234);
+
       expect(screen.getByRole('button', { name: 'Token usage' }).textContent).toContain('1.2K tok');
       expect(screen.getByRole('button', { name: 'Token usage' }).textContent).toContain('80%');
       fireEvent.click(screen.getByRole('button', { name: 'Token usage' }));

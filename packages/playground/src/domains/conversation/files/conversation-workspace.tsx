@@ -1,4 +1,5 @@
 import { Button } from '@mastra/playground-ui/components/Button';
+import { ChatFilePathsContext } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { useIsMobile } from '@mastra/playground-ui/hooks/use-is-mobile';
 import { IconSidebarSimpleRightWide } from '@mastra/playground-ui/icons/central/IconSidebarSimpleRightWide';
 import { t, useLocale } from '@mastra/playground-ui/lib/i18n';
@@ -7,11 +8,17 @@ import { useState } from 'react';
 import { z } from 'zod';
 import { ConversationTree } from '../subagents/conversation-tree';
 import { ConversationFilesPanel } from './conversation-files-panel';
+import { useConversationFilePaths } from './use-conversation-file-paths';
 import { storageUrl } from '@/domains/account/storage-api';
 import { AgentLayout } from '@/domains/agents/components/agent-layout';
 import { useStudioConfig } from '@/domains/configuration/context/studio-config-state';
 
-const viewSchema = z.object({ open: z.boolean(), path: z.string().optional() });
+const viewSchema = z.object({
+  open: z.boolean(),
+  path: z.string().optional(),
+  version: z.literal(2).optional(),
+  seenPaths: z.array(z.string()).default([]),
+});
 
 /** The parent keys this component by server, user, agent and conversation. */
 export function ConversationWorkspace({
@@ -29,18 +36,22 @@ export function ConversationWorkspace({
 }) {
   useLocale();
   const target = useStudioConfig();
+  const { paths } = useConversationFilePaths({ agentId, threadId, requestContext });
   const isMobile = useIsMobile();
   const storageKey = `altflow:conversation-files:${scope}`;
   const [view, setView] = useState(() => {
     try {
       const saved = viewSchema.safeParse(JSON.parse(localStorage.getItem(storageKey) ?? 'null'));
-      if (saved.success) return saved.data;
+      if (saved.success) return { ...saved.data, open: saved.data.version === 2 && saved.data.open };
     } catch {
       /* Storage can be disabled in private browsing. */
     }
-    return { open: true, path: undefined };
+    return { open: false, path: undefined, seenPaths: [] as string[] };
   });
-  const update = (next: z.infer<typeof viewSchema>) => {
+  const hasFiles = paths.length > 0;
+  const open = hasFiles && (view.open || paths.some(path => !view.seenPaths.includes(path)));
+  const update = (change: { open: boolean; path?: string }) => {
+    const next = { ...change, version: 2 as const, seenPaths: [...new Set([...view.seenPaths, ...paths])] };
     setView(next);
     try {
       localStorage.setItem(storageKey, JSON.stringify(next));
@@ -70,7 +81,7 @@ export function ConversationWorkspace({
       agentId={agentId}
       rightDrawerLabel={t('Files and artifacts')}
       rightSlot={
-        isMobile || view.open ? (
+        hasFiles && (isMobile || open) ? (
           <ConversationFilesPanel
             agentId={agentId}
             threadId={threadId}
@@ -82,25 +93,28 @@ export function ConversationWorkspace({
       }
     >
       <div className="flex h-full min-h-0 flex-col" onClickCapture={openFileLink}>
-        <ConversationTree
-          root={threadId}
-          isNew={!threadId}
-          actions={
-            !isMobile && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t('Files and artifacts')}
-                aria-expanded={view.open}
-                onClick={() => update({ ...view, open: !view.open })}
-              >
-                <IconSidebarSimpleRightWide />
-              </Button>
-            )
-          }
-        >
-          {children}
-        </ConversationTree>
+        <ChatFilePathsContext.Provider value={paths}>
+          <ConversationTree
+            root={threadId}
+            isNew={!threadId}
+            actions={
+              !isMobile &&
+              hasFiles && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t('Files and artifacts')}
+                  aria-expanded={open}
+                  onClick={() => update({ ...view, open: !open })}
+                >
+                  <IconSidebarSimpleRightWide />
+                </Button>
+              )
+            }
+          >
+            {children}
+          </ConversationTree>
+        </ChatFilePathsContext.Provider>
       </div>
     </AgentLayout>
   );

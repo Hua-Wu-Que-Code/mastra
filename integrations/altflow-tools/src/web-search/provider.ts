@@ -6,6 +6,7 @@ export interface SearchResult {
 }
 
 export interface WebSearchProvider {
+  maxQueryCharacters?: number;
   search(query: string, options: { signal: AbortSignal }): Promise<{ results: SearchResult[]; answer?: string }>;
 }
 

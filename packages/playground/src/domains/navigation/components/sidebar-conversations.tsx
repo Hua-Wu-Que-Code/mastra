@@ -19,7 +19,13 @@ import { SidebarConversationRow } from './sidebar-conversation-row';
 import { SidebarProjectRow } from './sidebar-project-row';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 
-export function SidebarConversations() {
+export function SidebarConversations({
+  newChatOnly = false,
+  hideNewChat = false,
+}: {
+  newChatOnly?: boolean;
+  hideNewChat?: boolean;
+}) {
   const scope = useConversationScope();
   const { hasPermission, isLoading } = usePermissions();
   const { state } = useSidebar();
@@ -31,8 +37,10 @@ export function SidebarConversations() {
   if (state !== 'default' || isLoading || !hasPermission('agents:read')) return null;
   return (
     <>
-      {newAgentId && <SidebarNewConversation agentId={newAgentId} />}
-      {hasPermission('memory:read') && <SidebarConversationsBody key={scope} scope={scope} agentId={newAgentId} />}
+      {!hideNewChat && newAgentId && <SidebarNewConversation agentId={newAgentId} />}
+      {!newChatOnly && hasPermission('memory:read') && (
+        <SidebarConversationsBody key={scope} scope={scope} agentId={newAgentId} />
+      )}
     </>
   );
 }
@@ -40,13 +48,17 @@ export function SidebarConversations() {
 function SidebarNewConversation({ agentId }: { agentId: string }) {
   useLocale();
   const { isMobile, setOpenMobile } = useSidebar();
+  const { pathname } = useLocation();
+  const selected = pathname === '/' || Boolean(matchPath('/chat/:agentId/threads/new', pathname));
   return (
-    <div className="mt-3.5">
+    <div className="shrink-0 px-0.5 py-2">
       <Button
-        variant="ghost"
+        variant={selected ? 'subtle' : 'ghost'}
+        className="h-[38px] w-full justify-center rounded-lg text-foreground"
         render={
           <Link
             to={`/chat/${encodeURIComponent(agentId)}/threads/new`}
+            aria-current={selected ? 'page' : undefined}
             onClick={() => isMobile && setOpenMobile(false)}
           />
         }

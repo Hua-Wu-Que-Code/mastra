@@ -400,3 +400,30 @@ test('provider failure releases dynamic capacity and allows a replacement child'
   await until(async () => (await f.treeStore.read('alice', 'alice-thread')).children[0]?.state === 'completed');
   assert.equal((await f.treeStore.read('alice', 'alice-thread')).children[0].result, 'Recovered child');
 });
+
+test('child reports usage after each step while running and does not double count on completion', async t => {
+  const f = await fixture(t);
+  await f.agent.generate('Initialize.', runOptions());
+  const { context } = await import('./tool-fixture.mjs');
+  const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
+  let release,
+    steps = 0;
+  const blocked = new Promise(resolve => {
+    release = resolve;
+  });
+  t.after(() => release());
+  f.setHandler(async body => {
+    if (!childRequest(body)) return { text: 'Parent' };
+    if (++steps === 1) return { calls: [{ name: 'countText', args: { text: 'work' } }] };
+    await blocked;
+    return { text: 'Finished.' };
+  });
+  await f.tree.runtime.spawn(actor, { name: 'worker', description: 'Worker', prompt: 'Two steps.' });
+  await until(() => steps === 2);
+  const running = (await f.tree.runtime.snapshot(actor)).children[0];
+  assert.equal(running.state, 'running');
+  assert.equal(running.totalTokens, 15);
+  release();
+  await until(async () => (await f.tree.runtime.snapshot(actor)).children[0].state === 'completed');
+  assert.equal((await f.tree.runtime.snapshot(actor)).children[0].totalTokens, 30);
+});

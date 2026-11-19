@@ -1,5 +1,6 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import { z } from 'zod/v4';
+import { AltflowToolError } from '../policy';
 import { searchEndpoint, searchPost } from './http';
 import type { WebSearchProvider } from './provider';
 
@@ -20,25 +21,24 @@ export function createDeepSeekSearchProvider(options: { apiKey: string; baseURL?
   const url = searchEndpoint(options.baseURL ?? 'https://api.deepseek.com/v1/tools/search');
   const starts: number[] = [];
   return {
+    maxQueryCharacters: 128,
     async search(query, { signal }) {
-      // Shared by all queries/calls using this provider: DeepSeek permits 5 starts per second.
+      query = query.trim();
+      if (!query || Array.from(query).length > 128)
+        throw new AltflowToolError('INVALID_SEARCH_QUERY', 'DeepSeek search queries must contain 1–128 characters.');
+      // Shared by all queries/calls using this provider: the independent Search API permits 100 starts per second.
       for (;;) {
         signal.throwIfAborted();
         const now = performance.now();
         while (starts.length && starts[0]! <= now - 1000) starts.shift();
-        if (starts.length < 5) {
+        if (starts.length < 100) {
           starts.push(now);
           break;
         }
         await delay(Math.max(1, starts[0]! + 1001 - now), undefined, { signal });
       }
       const data = responseSchema.parse(
-        await searchPost(
-          url,
-          options.apiKey,
-          { query, count: 10, need_content: false, ori_question: query.slice(0, 128) },
-          signal,
-        ),
+        await searchPost(url, options.apiKey, { query, count: 10, need_content: false, ori_question: query }, signal),
       );
       return {
         results: data.results.map(item => ({

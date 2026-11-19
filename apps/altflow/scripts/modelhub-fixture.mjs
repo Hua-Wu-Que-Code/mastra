@@ -48,6 +48,7 @@ export async function modelHubFixture() {
     },
     unavailable: false,
     toolCallText: undefined,
+    toolCall: undefined,
     blocked: false,
     summaryText: '## Primary Request and Intent\n- Preserve original task.\n## Current Work\n- Continue the task.',
     summaryFinish: 'stop',
@@ -78,10 +79,11 @@ export async function modelHubFixture() {
         );
         return;
       }
+      const plannedCall = state.toolCall ?? { name: 'countText', args: { text: state.toolCallText } };
       const callTool =
         !summarizing &&
-        state.toolCallText !== undefined &&
-        body.tools?.some(tool => tool.function?.name === 'countText') &&
+        (state.toolCall !== undefined || state.toolCallText !== undefined) &&
+        body.tools?.some(tool => tool.function?.name === plannedCall.name) &&
         !body.messages.some(message => message.role === 'tool');
       const message = callTool
         ? {
@@ -92,8 +94,8 @@ export async function modelHubFixture() {
                 id: 'count-test',
                 type: 'function',
                 function: {
-                  name: 'countText',
-                  arguments: JSON.stringify({ text: state.toolCallText }),
+                  name: plannedCall.name,
+                  arguments: JSON.stringify(plannedCall.args),
                 },
               },
             ],

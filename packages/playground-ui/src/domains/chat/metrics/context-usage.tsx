@@ -36,6 +36,13 @@ export function ContextUsage({
     { label: t('Tool definitions'), color: 'bg-[#a78bfa]', tokens: sample?.breakdown?.tools },
     { label: t('Conversation messages'), color: 'bg-[#4d93f8]', tokens: sample?.breakdown?.messages },
   ];
+  const breakdownTotal = rows.reduce((sum, row) => sum + (row.tokens ?? 0), 0);
+  const segments =
+    breakdownTotal > 0
+      ? rows
+          .filter(row => (row.tokens ?? 0) > 0)
+          .map(row => ({ ...row, width: ((occupied ?? 0) * (row.tokens ?? 0)) / breakdownTotal }))
+      : [{ label: t('Context usage'), color: 'bg-[#adb2b8]', width: occupied ?? 0 }];
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger
@@ -83,7 +90,14 @@ export function ContextUsage({
           aria-valuenow={percent}
           aria-valuetext={exactReading}
         >
-          <span className="h-full rounded-sm bg-[#adb2b8]" style={{ width: `${occupied ?? 0}%` }} />
+          {segments.map(segment => (
+            <span
+              key={segment.label}
+              aria-hidden="true"
+              className={`h-full ${segment.color}`}
+              style={{ width: `${segment.width}%` }}
+            />
+          ))}
         </div>
         <dl className="space-y-1">
           {rows.map(row => (

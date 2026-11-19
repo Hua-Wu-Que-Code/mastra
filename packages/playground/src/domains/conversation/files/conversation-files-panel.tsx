@@ -1,14 +1,12 @@
 import { Button } from '@mastra/playground-ui/components/Button';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-import { useChatMessages } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
 import { IconArrowRotateClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateClockwise';
 import { t, useLocale } from '@mastra/playground-ui/lib/i18n';
-import { useMastraClient } from '@mastra/react';
 import { useQuery } from '@tanstack/react-query';
-import { conversationFilePaths, loadConversationFilePaths } from './conversation-file-paths';
 import { ConversationFilePreview } from './conversation-file-preview';
 import { ConversationFileTree } from './conversation-file-tree';
+import { useConversationFilePaths } from './use-conversation-file-paths';
 import { useAccount } from '@/domains/account/account-context';
 import { getStorage } from '@/domains/account/storage-api';
 import { useStudioConfig } from '@/domains/configuration/context/studio-config-state';
@@ -29,31 +27,14 @@ export function ConversationFilesPanel({
   useLocale();
   const target = useStudioConfig();
   const account = useAccount();
-  const client = useMastraClient();
-  const messages = useChatMessages();
-  const history = useQuery({
-    queryKey: [
-      'conversation-file-paths',
-      target.baseUrl,
-      target.headers,
-      account?.user.id,
-      agentId,
-      threadId,
-      requestContext,
-    ],
-    queryFn: ({ signal }) => loadConversationFilePaths(client, agentId!, threadId!, requestContext, signal),
-    enabled: Boolean(agentId && threadId && target.baseUrl),
-    staleTime: 60_000,
-    retry: false,
-  });
+  const { history, paths } = useConversationFilePaths({ agentId, threadId, requestContext });
   const storage = useQuery({
     queryKey: ['account-storage', target.baseUrl, account?.user.id, target.headers],
     queryFn: () => getStorage(target),
     enabled: Boolean(target.baseUrl),
     refetchInterval: 10_000,
   });
-  const paths = new Set([...(history.data ?? []), ...conversationFilePaths(messages)]);
-  const files = (storage.data?.files ?? []).filter(file => paths.has(file.path));
+  const files = (storage.data?.files ?? []).filter(file => paths.includes(file.path));
   const selected = files.find(file => file.path === selectedPath);
   return (
     <aside aria-label={t('Files and artifacts')} className="bg-surface1 flex h-full min-h-0 flex-col">

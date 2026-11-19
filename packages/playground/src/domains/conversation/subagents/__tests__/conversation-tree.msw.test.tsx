@@ -124,6 +124,7 @@ describe('Conversation tree', () => {
       fireEvent.click(await screen.findByRole('button', { name: /Research sources/ }));
       await screen.findByText('Verified sources for the report.');
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Tools called' }));
       fireEvent.click(await screen.findByText('verify_source'));
       expect(await screen.findByText(/source-42/)).toBeTruthy();
       expect(await screen.findByText(/CHILD-TOOL-RESULT/)).toBeTruthy();

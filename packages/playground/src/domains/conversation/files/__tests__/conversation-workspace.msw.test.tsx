@@ -1,9 +1,9 @@
-import { MemoryRouter } from 'react-router';
 import { ChatMessagesContext } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
+import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ConversationWorkspace } from '../conversation-workspace';
 import { fileMessages, filesFixture } from './fixtures/files';
@@ -18,19 +18,21 @@ afterEach(() => {
 
 function show(scope = 'thread-a') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const workspace = (nextScope: string) => (
+  const workspace = (
+    nextScope: string,
+    messages = nextScope === 'new'
+      ? []
+      : nextScope === 'thread-b'
+        ? fileMessages.slice(0, 1)
+        : fileMessages.slice(0, 2),
+  ) => (
     <MemoryRouter>
       <QueryClientProvider client={client}>
         <StudioConfigContext.Provider value={{ baseUrl, headers: {}, isLoading: false, setConfig: () => {} }}>
           <MastraReactProvider baseUrl={baseUrl}>
             <ChatMessagesContext.Provider
               value={{
-                messages:
-                  nextScope === 'new'
-                    ? []
-                    : nextScope === 'thread-b'
-                      ? fileMessages.slice(0, 1)
-                      : fileMessages.slice(0, 2),
+                messages,
               }}
             >
               <ConversationWorkspace key={nextScope} scope={nextScope} agentId="creator-agent">
@@ -58,15 +60,28 @@ function handlers() {
 }
 
 describe('Conversation workspace', () => {
-  it('shows files for both a new chat and a saved conversation', async () => {
+  it('keeps an empty chat closed and opens when conversation files exist', async () => {
     handlers();
     const view = show('new');
-    expect(await screen.findByRole('complementary', { name: 'Files and artifacts' })).toBeTruthy();
-    expect(await screen.findByText('No files found.')).toBeTruthy();
+    expect(screen.queryByRole('complementary', { name: 'Files and artifacts' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Files and artifacts' })).toBeNull();
     view.rerender(view.workspace('saved'));
     expect(await screen.findByRole('button', { name: 'draft.md' })).toBeTruthy();
     expect(screen.getByText('Chat content')).toBeTruthy();
     expect(screen.getAllByRole('button', { name: 'Files and artifacts' })).toHaveLength(1);
+  });
+
+  it('opens for uploads and generated files, respects manual closing, and reopens for the next file', async () => {
+    handlers();
+    const view = show('new');
+    view.rerender(view.workspace('new', fileMessages.slice(0, 1)));
+    expect(await screen.findByRole('button', { name: 'notes.txt' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Files and artifacts' }));
+    expect(screen.queryByRole('complementary')).toBeNull();
+    view.rerender(view.workspace('new', fileMessages.slice(0, 1)));
+    expect(screen.queryByRole('complementary')).toBeNull();
+    view.rerender(view.workspace('new', fileMessages.slice(0, 2)));
+    expect(await screen.findByRole('button', { name: 'draft.md' })).toBeTruthy();
   });
 
   it('opens an assistant file link in the panel and preserves chat content', async () => {

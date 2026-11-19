@@ -35,6 +35,41 @@ const renderConversations = () =>
   );
 
 describe('Sidebar conversations', () => {
+  it.each([
+    ['/', 'page'],
+    ['/chat/agent-1/threads/new', 'page'],
+    ['/chat/agent-1/threads/thread-1', null],
+  ])('marks new chat selected only on the home or new-chat route: %s', async (path, current) => {
+    renderWithProviders(
+      <Sidebar.Provider>
+        <SidebarConversations newChatOnly />
+      </Sidebar.Provider>,
+      { router: { initialEntries: [path] } },
+    );
+    expect((await screen.findByRole('link', { name: 'New Thread' })).getAttribute('aria-current')).toBe(current);
+  });
+
+  it('toggles the project from its integrated name row and preserves its new-chat action', async () => {
+    const fixture = installOrganizationFixture({
+      projects: [{ id: 'writing', name: 'Writing', agentId: 'agent-1', threads: ['thread-1'] }],
+      pinned: [],
+      projectPins: [],
+      collapsed: [],
+      revision: 1,
+    });
+    renderConversations();
+    const row = await screen.findByRole('button', { name: 'Writing', exact: true });
+    expect(row.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(row);
+    await waitFor(() => expect(row.getAttribute('aria-expanded')).toBe('false'));
+    expect(fixture.state.collapsed).toContain('writing');
+    fireEvent.click(row);
+    await waitFor(() => expect(row.getAttribute('aria-expanded')).toBe('true'));
+    expect(screen.getByRole('link', { name: 'New chat in Writing' }).getAttribute('href')).toBe(
+      '/chat/agent-1/threads/new?project=writing',
+    );
+  });
+
   it('offers new chat before the first conversation exists, including outside agent pages', async () => {
     server.use(http.get(`${TEST_BASE_URL}/api/memory/threads`, () => HttpResponse.json({ threads: [] })));
     renderWithProviders(
@@ -234,10 +269,10 @@ describe('Sidebar conversations', () => {
       fireEvent.click(within(dialog).getByRole('button', { name: 'Create' }));
       expect(await within(dialog).findByRole('alert')).toHaveProperty('textContent', 'Project save failed');
       expect(within(dialog).getByRole('textbox', { name: 'Project name' })).toHaveProperty('value', 'My writing');
-      expect(screen.queryByRole('link', { name: 'My writing', exact: true })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'My writing', exact: true })).toBeNull();
       fixture.fail(false);
       fireEvent.click(within(dialog).getByRole('button', { name: 'Create' }));
-      await screen.findByRole('link', { name: 'My writing', exact: true });
+      await screen.findByRole('button', { name: 'My writing', exact: true });
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
@@ -270,10 +305,13 @@ describe('Sidebar conversations', () => {
       fireEvent.click(screen.getByRole('button', { name: 'New project' }));
       fireEvent.change(screen.getByRole('textbox', { name: 'Project name' }), { target: { value: 'My writing' } });
       fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-      const project = await screen.findByRole('link', { name: 'My writing', exact: true });
-      expect(project.getAttribute('href')).toMatch(/^\/chat\/agent-1\/projects\//);
+      const project = await screen.findByRole('button', { name: 'My writing', exact: true });
+      expect(project.getAttribute('aria-expanded')).toBe('true');
       expect(screen.getByRole('link', { name: 'New chat in My writing' }).getAttribute('href')).toContain('?project=');
       fireEvent.click(screen.getByRole('button', { name: 'Project actions' }));
+      expect((await screen.findByRole('menuitem', { name: 'Project home' })).getAttribute('href')).toMatch(
+        /^\/chat\/agent-1\/projects\//,
+      );
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Pin project' }));
       await waitFor(() => expect(screen.queryByRole('menuitem', { name: 'Pin project' })).toBeNull());
       fireEvent.click(screen.getByRole('button', { name: 'Project actions' }));
@@ -287,7 +325,7 @@ describe('Sidebar conversations', () => {
       fireEvent.click(screen.getByRole('button', { name: 'New project' }));
       fireEvent.change(screen.getByRole('textbox', { name: 'Project name' }), { target: { value: 'My writing' } });
       fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-      await screen.findByRole('link', { name: 'My writing', exact: true });
+      await screen.findByRole('button', { name: 'My writing', exact: true });
       const recent = screen.getByRole('region', { name: 'Recent' });
       fireEvent.click(within(recent).getAllByRole('button', { name: 'Thread actions' })[1]);
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Move to project' }));
@@ -298,7 +336,7 @@ describe('Sidebar conversations', () => {
       const dialog = await screen.findByRole('alertdialog');
       fireEvent.click(within(dialog).getByRole('button', { name: 'Delete project' }));
       await waitFor(() => expect(fixture.commands.some(command => command.type === 'remove')).toBe(true));
-      await waitFor(() => expect(screen.queryByRole('link', { name: 'My writing' })).toBeNull());
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'My writing' })).toBeNull());
     });
 
     it('moves a conversation into the project without changing its destination', async () => {
@@ -307,7 +345,7 @@ describe('Sidebar conversations', () => {
       fireEvent.click(screen.getByRole('button', { name: 'New project' }));
       fireEvent.change(screen.getByRole('textbox', { name: 'Project name' }), { target: { value: 'My writing' } });
       fireEvent.click(screen.getByRole('button', { name: 'Create' }));
-      await screen.findByRole('link', { name: 'My writing', exact: true });
+      await screen.findByRole('button', { name: 'My writing', exact: true });
       const recent = screen.getByRole('region', { name: 'Recent' });
       fireEvent.click(within(recent).getAllByRole('button', { name: 'Thread actions' })[1]);
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Move to project' }));

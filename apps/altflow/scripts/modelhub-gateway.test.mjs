@@ -179,3 +179,26 @@ test('gateway caps output for every call while retaining the physical model/info
   });
   assert.equal(hub.state.requests.at(-1).body.max_tokens, 100);
 });
+
+test('deployment model policy limits listing and execution to Qwen with medium defaults', async t => {
+  const hub = await modelHubFixture();
+  t.after(hub.close);
+  const qwen = hub.state.catalog.free_chat_models[1];
+  qwen.thinking_options.push({ ...qwen.thinking_options[0], level: 'medium', target: 'qwen-medium' });
+  hub.state.catalog.free_chat_models.push({ ...structuredClone(qwen), id: 'qwen3.8-flash' });
+  const gateway = new ModelHubGateway({
+    apiKey: 'test',
+    baseURL: hub.baseURL,
+    allowedModels: ['qwen3.8-flash', 'qwen3.8-max'],
+    defaultReasoningLevel: 'medium',
+  });
+  const provider = (await gateway.fetchProviders()).altflow;
+  assert.deepEqual([...provider.models].sort(), ['qwen3.8-flash', 'qwen3.8-max']);
+  for (const id of provider.models) {
+    assert.equal(provider.modelReasoning[id].defaultLevel, 'medium');
+    const model = await gateway.resolveLanguageModel({ modelId: id });
+    await model.doGenerate({ prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }] });
+    assert.equal(hub.state.requests.at(-1).body.model, 'qwen-medium');
+  }
+  await assert.rejects(gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' }));
+});

@@ -50,6 +50,8 @@ export const AgentChat = ({
     threadId: isNewThread ? undefined : threadId,
     memory: memory ?? false,
     requestContext: requestContext,
+    // Keep the last transcript on navigation; stale data refetches in the background.
+    queryOptions: { gcTime: 5 * 60_000 },
   });
 
   // Handle scrolling to message after navigation

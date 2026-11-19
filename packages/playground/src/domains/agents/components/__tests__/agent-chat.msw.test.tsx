@@ -3,6 +3,7 @@ import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -135,4 +136,55 @@ describe('AgentChat history pagination', () => {
 
     expect(rendered).toEqual(['message 0', 'message 1', 'message 2', 'message 3']);
   });
+});
+
+it('keeps cached messages visible on returning while syncing new messages in the background', async () => {
+  let block = false,
+    release: (() => void) | undefined;
+  server.use(
+    ...baseHandlers(),
+    http.get(`${BASE_URL}/api/memory/threads/:threadId/messages`, async () => {
+      if (block)
+        await new Promise<void>(resolve => {
+          release = resolve;
+        });
+      return HttpResponse.json({ messages: [userMessage(1), ...(block ? [userMessage(2)] : [])], hasMore: false });
+    }),
+  );
+  function Navigation() {
+    const [visible, setVisible] = useState(true);
+    return (
+      <>
+        <button onClick={() => setVisible(!visible)}>Switch page</button>
+        {visible && (
+          <AgentChat
+            agentId="agent-1"
+            agentName="Helper"
+            threadId="thread-1"
+            memory
+            supportsMemory
+            isNewThread={false}
+          />
+        )}
+      </>
+    );
+  }
+  render(
+    <Wrapper>
+      <Navigation />
+    </Wrapper>,
+  );
+  await screen.findByText('message 1');
+  fireEvent.click(screen.getByRole('button', { name: 'Switch page' }));
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 10));
+  });
+  block = true;
+  fireEvent.click(screen.getByRole('button', { name: 'Switch page' }));
+  expect(screen.getByText('message 1')).toBeTruthy();
+  await waitFor(() => expect(release).toBeTypeOf('function'));
+  await act(async () => {
+    release!();
+  });
+  expect(await screen.findByText('message 2')).toBeTruthy();
 });

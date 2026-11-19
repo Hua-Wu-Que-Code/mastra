@@ -2,6 +2,7 @@ import { createClient } from '@libsql/client';
 import type { Client } from '@libsql/client';
 import type { MemoryStorage } from '@mastra/core/storage';
 import { z } from 'zod';
+import { conversationModels } from '../model-policy';
 
 const identifier = z.string().min(1).max(500);
 export const preferenceAddress = z
@@ -32,6 +33,19 @@ const modelSettings = z
   })
   .partial()
   .strict();
+/** Retire saved routes without rewriting unrelated conversation preferences. */
+function currentThreadOptions(value: unknown) {
+  const options = schemas.thread.parse(value);
+  const selected = options.selection;
+  if (!selected || (selected.provider === 'altflow' && conversationModels.some(model => model === selected.model)))
+    return options;
+  const { selection: _selection, ...rest } = options;
+  if (rest.modelSettings) {
+    const { providerOptions: _providerOptions, ...settings } = rest.modelSettings;
+    rest.modelSettings = settings;
+  }
+  return rest;
+}
 const schemas = {
   memory: z.object({ enabled: z.boolean().optional() }).strict(),
   chat: z
@@ -109,7 +123,11 @@ export class AccountPreferences {
     });
     const row = result.rows[0];
     return {
-      value: row ? schemas[address.kind].parse(JSON.parse(String(row.value))) : {},
+      value: row
+        ? address.kind === 'thread'
+          ? currentThreadOptions(JSON.parse(String(row.value)))
+          : schemas[address.kind].parse(JSON.parse(String(row.value)))
+        : {},
       revision: row ? Number(row.revision) : 0,
     };
   }
@@ -136,9 +154,13 @@ export class AccountPreferences {
       // Even an explicitly reset empty entry wins over a stale browser backup.
       if (command.import && row) {
         await tx.commit();
-        return { value: current, revision: Number(row.revision) };
+        return {
+          value: command.kind === 'thread' ? currentThreadOptions(current) : current,
+          revision: Number(row.revision),
+        };
       }
-      const value = schemas[command.kind].parse(merge(current, command.patch));
+      const parsed = schemas[command.kind].parse(merge(current, command.patch));
+      const value = command.kind === 'thread' ? currentThreadOptions(parsed) : parsed;
       if (Buffer.byteLength(JSON.stringify(value)) > 65536) throw new PreferenceError('设置数据过大');
       const revision = (row ? Number(row.revision) : 0) + 1;
       await tx.execute({

@@ -414,6 +414,24 @@ export class SubagentRuntime {
     let result = '',
       error: string | undefined,
       tokens: number | undefined;
+    const baseTokens = child.totalTokens ?? 0;
+    const recordUsage = async (
+      usage: { totalTokens?: number; inputTokens?: number; outputTokens?: number },
+      cumulative: boolean,
+    ) => {
+      const reported =
+        usage.totalTokens ??
+        (usage.inputTokens !== undefined && usage.outputTokens !== undefined
+          ? usage.inputTokens + usage.outputTokens
+          : undefined);
+      if (reported === undefined || !Number.isFinite(reported) || reported < 0) return;
+      tokens = cumulative ? Math.max(tokens ?? 0, reported) : (tokens ?? 0) + reported;
+      const total = baseTokens + tokens;
+      await this.store.edit(actor.owner, actor.root, tree => {
+        const row = tree.children.find(row => row.id === id);
+        if (row?.generation === child.generation) row.totalTokens = total;
+      });
+    };
     try {
       const agent = this.options.createChild(child, actor);
       const prompt =
@@ -424,6 +442,9 @@ export class SubagentRuntime {
         requestContext: childContext(actor),
         memory: { thread: id, resource: childResource(actor) },
         abortSignal: controller.signal,
+        onStepFinish: async step => {
+          await recordUsage(step.usage, false);
+        },
         ...(child.reasoningLevel
           ? {
               providerOptions: {
@@ -437,7 +458,7 @@ export class SubagentRuntime {
         throw new SubagentError('CHILD_SUSPENDED', 'Ask the lead to handle user approval before continuing.');
       result = await stream.text;
       const usage = await stream.totalUsage;
-      tokens = usage.totalTokens;
+      await recordUsage(usage, true);
       if (stream.status === 'failed' || stream.status === 'tripwire' || stream.status === 'canceled')
         throw new Error('Child model run failed.');
     } catch (caught) {
@@ -460,7 +481,7 @@ export class SubagentRuntime {
       row.error = error;
       row.finishedAt = Date.now();
       row.elapsedMs = (row.elapsedMs ?? 0) + Math.max(0, row.finishedAt - (child.startedAt ?? row.finishedAt));
-      if (tokens !== undefined) row.totalTokens = (row.totalTokens ?? 0) + tokens;
+      if (tokens !== undefined) row.totalTokens = baseTokens + tokens;
       const mail: Mail = {
         id: randomUUID(),
         sender: row.name,
