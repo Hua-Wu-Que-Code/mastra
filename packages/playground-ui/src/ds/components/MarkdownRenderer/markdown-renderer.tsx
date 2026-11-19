@@ -4,6 +4,7 @@ import type { MouseEvent, MouseEventHandler, ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import type { Components, ExtraProps, Options } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
+import remarkCjkFriendly from 'remark-cjk-friendly';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remend from 'remend';
@@ -326,9 +327,10 @@ function markdownLink(externalLinkTarget: MarkdownExternalLinkTarget): NonNullab
   };
 }
 
-const REMARK_PLUGINS = [remarkGfm];
-const MATH_REMARK_PLUGINS = [remarkGfm, remarkMath];
-const COPYABLE_REMARK_PLUGINS = [remarkGfm, remarkMath, remarkTableMarkdown];
+// CommonMark's emphasis boundaries can reject fullwidth punctuation next to unspaced CJK text.
+const REMARK_PLUGINS = [remarkGfm, remarkCjkFriendly];
+const MATH_REMARK_PLUGINS = [...REMARK_PLUGINS, remarkMath];
+const COPYABLE_REMARK_PLUGINS = [...MATH_REMARK_PLUGINS, remarkTableMarkdown];
 
 // Links stay text until their URL lands: remend's placeholder href would render
 // a live anchor to nowhere. TeX stays literal until the stream finishes.

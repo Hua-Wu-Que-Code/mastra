@@ -16,6 +16,36 @@ describe('AssistantTextPartRenderer', () => {
     expect(screen.getByText('world')).not.toBeNull();
   });
 
+  it('renders emphasis against Chinese punctuation in both streaming and saved replies', () => {
+    const highlighted = '黑色羽绒服（黑色棉服外套）';
+    const sentence = `一件**${highlighted}**搭在左侧办公椅的椅背上。`;
+    const part: TextPart = { type: 'text', text: sentence };
+    const { container, rerender } = render(<AssistantTextPartRenderer part={{ ...part, state: 'streaming' }} />);
+
+    expect(container.querySelector('strong')?.textContent).toBe(highlighted);
+    rerender(<AssistantTextPartRenderer part={part} />);
+    expect(container.querySelector('strong')?.textContent).toBe(highlighted);
+    expect(container.textContent).toBe(`一件${highlighted}搭在左侧办公椅的椅背上。`);
+  });
+
+  it('keeps literal Chinese Markdown syntax in code, escapes and unmatched delimiters', () => {
+    const literal = '一件**（外套）**搭着';
+    const part: TextPart = {
+      type: 'text',
+      text: `\`${literal}\`\n\n一件\\*\\*（外套）\\*\\*搭着\n\n未闭合的**（括号）`,
+    };
+
+    const { container } = render(<AssistantTextPartRenderer part={part} />);
+
+    expect(container.querySelector('code')?.textContent).toBe(literal);
+    expect(container.querySelector('strong')).toBeNull();
+    expect(Array.from(container.querySelectorAll('p'), node => node.textContent)).toEqual([
+      literal,
+      literal,
+      '未闭合的**（括号）',
+    ]);
+  });
+
   it('renders the empty string safely when text is missing', () => {
     const part = { type: 'text' } as TextPart;
 
