@@ -73,8 +73,10 @@ export function ProcessRow({
   const open = !collapsible || (controlledOpen ?? localOpen);
   const fade = useFadingEdges(group && open);
   const rowClass = cn(
-    'flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left font-normal',
+    'box-border flex min-w-0 flex-1 items-center gap-1.5 text-left font-normal',
     'min-h-[calc(24px+var(--dsh-content-font-delta,0px))] text-[length:var(--dsh-content-font-size-secondary,13px)]',
+    // After the size: tailwind-merge drops an earlier `leading-*` when a font-size follows it.
+    'leading-[calc(24px+var(--dsh-content-font-delta,0px))]',
     'transition-colors duration-100 motion-reduce:transition-none',
   );
   const headline = (

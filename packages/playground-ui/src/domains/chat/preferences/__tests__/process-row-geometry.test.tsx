@@ -42,6 +42,9 @@ describe('ProcessRow geometry', () => {
     renderRow();
     const trigger = screen.getByRole('button', { name: 'Read' });
     expect(trigger.className).toContain('min-h-[calc(24px+var(--dsh-content-font-delta,0px))]');
+    // The row is exactly one 24px line: no vertical padding stacked on the line box.
+    expect(trigger.className).toContain('leading-[calc(24px+var(--dsh-content-font-delta,0px))]');
+    expect(trigger.className).not.toContain('py-1');
     const slot = screen.getByTestId('glyph').closest('[data-process-slot]');
     expect(slot?.className).toContain('size-[calc(16px+var(--dsh-content-font-delta,0px))]');
     expect(slot?.className).toContain('[&_svg]:size-[calc(14px+var(--dsh-content-font-delta,0px))]');
