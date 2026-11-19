@@ -1,5 +1,5 @@
 import { posix } from 'node:path';
-import { UserStorage } from './user-storage.ts';
+import type { UserStorage } from './user-storage.ts';
 
 type Part = {
   type?: string;

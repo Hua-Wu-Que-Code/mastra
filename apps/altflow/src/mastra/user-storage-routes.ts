@@ -1,7 +1,8 @@
 import { registerApiRoute } from '@mastra/core/server';
 import { z } from 'zod';
-import { FileStorageError, UserStorage } from './user-storage.ts';
 import type { AltFlowUser } from './altflow-auth.ts';
+import { FileStorageError } from './user-storage.ts';
+import type { UserStorage } from './user-storage.ts';
 
 const uploadParams = z.object({
   id: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/),

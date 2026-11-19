@@ -68,18 +68,21 @@ export async function modelHubFixture() {
       state.requests.push({ body: JSON.parse(raw), authorization: request.headers.authorization });
       const body = JSON.parse(raw);
       state.onRequest?.(body);
-      while (state.blocked) await new Promise((resolve) => setTimeout(resolve, 20));
+      while (state.blocked) await new Promise(resolve => setTimeout(resolve, 20));
       const summarizing = body.messages.at(-1)?.content?.includes('You are now acting as a compaction engine');
       if (state.rejectContextOnce && !summarizing) {
         state.rejectContextOnce = false;
         response.writeHead(400, { 'Content-Type': 'application/json' });
-        response.end(JSON.stringify({ error: { message: 'maximum context length exceeded', code: 'context_length_exceeded' } }));
+        response.end(
+          JSON.stringify({ error: { message: 'maximum context length exceeded', code: 'context_length_exceeded' } }),
+        );
         return;
       }
       const callTool =
-        !summarizing && state.toolCallText !== undefined &&
-        body.tools?.some((tool) => tool.function?.name === 'countText') &&
-        !body.messages.some((message) => message.role === 'tool');
+        !summarizing &&
+        state.toolCallText !== undefined &&
+        body.tools?.some(tool => tool.function?.name === 'countText') &&
+        !body.messages.some(message => message.role === 'tool');
       const message = callTool
         ? {
             role: 'assistant',
@@ -97,12 +100,19 @@ export async function modelHubFixture() {
           }
         : { role: 'assistant', content: summarizing ? state.summaryText : 'verified' };
       const finishReason = summarizing ? state.summaryFinish : callTool ? 'tool_calls' : 'stop';
-      const usage = state.usage ?? (summarizing
-        ? { prompt_tokens: 100, completion_tokens: 1, total_tokens: 101, prompt_tokens_details: { cached_tokens: 80 } }
-        : { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 });
+      const usage =
+        state.usage ??
+        (summarizing
+          ? {
+              prompt_tokens: 100,
+              completion_tokens: 1,
+              total_tokens: 101,
+              prompt_tokens_details: { cached_tokens: 80 },
+            }
+          : { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 });
       if (body.stream) {
         response.writeHead(200, { 'Content-Type': 'text/event-stream' });
-        const chunk = (delta) => ({
+        const chunk = delta => ({
           id: 'test-completion',
           object: 'chat.completion.chunk',
           created: 1,
@@ -112,7 +122,7 @@ export async function modelHubFixture() {
         const delta = callTool
           ? {
               role: 'assistant',
-              tool_calls: message.tool_calls.map((tool) => ({ index: 0, ...tool })),
+              tool_calls: message.tool_calls.map(tool => ({ index: 0, ...tool })),
             }
           : message;
         response.write('data: ' + JSON.stringify(chunk(delta)) + '\n\n');
@@ -151,6 +161,6 @@ export async function modelHubFixture() {
   return {
     state,
     baseURL: `http://127.0.0.1:${server.address().port}/v1`,
-    close: () => new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
+    close: () => new Promise((resolve, reject) => server.close(error => (error ? reject(error) : resolve()))),
   };
 }

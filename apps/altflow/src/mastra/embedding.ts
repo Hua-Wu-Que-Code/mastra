@@ -1,8 +1,11 @@
+import { resolve } from 'node:path';
 import { pipeline, env } from '@huggingface/transformers';
 import type { MastraEmbeddingModel } from '@mastra/core/vector';
-import { resolve } from 'node:path';
 
-env.cacheDir = resolve(process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(), '.cache/embeddings');
+env.cacheDir = resolve(
+  process.env.ALTFLOW_RUNTIME_ROOT ?? process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(),
+  '.cache/embeddings',
+);
 const loadExtractor = () =>
   pipeline('feature-extraction', 'Xenova/paraphrase-multilingual-MiniLM-L12-v2', {
     dtype: 'q8',

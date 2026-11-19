@@ -12,6 +12,10 @@ Mastra is a framework for building AI-powered applications and agents with a mod
 
 It includes everything you need to go from early prototypes to production-ready applications. Mastra integrates with frontend and backend frameworks like React, Next.js, and Node, or you can deploy it anywhere as a standalone server. It's the easiest way to build, tune, and scale reliable AI products.
 
+## Altflow application
+
+The Altflow product application is maintained in [`apps/altflow`](./apps/altflow/README.md) on the `altflow` branch. It uses this repository's framework, Studio and creator tools through pnpm workspace dependencies. See the application README for configuration, startup, persistence and verification.
+
 ## Why Mastra?
 
 Purpose-built for TypeScript and designed around established AI patterns, Mastra gives you everything you need to build great AI applications out-of-the-box.

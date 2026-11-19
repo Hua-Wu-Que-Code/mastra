@@ -11,7 +11,8 @@ import type {
   FileStat,
   ProviderStatus,
 } from '@mastra/core/workspace';
-import { UserStorage, FileStorageError, filePath } from './user-storage.ts';
+import type { UserStorage } from './user-storage.ts';
+import { FileStorageError, filePath } from './user-storage.ts';
 
 /** All agent file tools use the same private namespace and quota as uploads. */
 export class UserFilesystem extends MastraFilesystem {
@@ -46,7 +47,7 @@ export class UserFilesystem extends MastraFilesystem {
     }
     await this.store.write(this.owner, path, Buffer.concat([before, Buffer.from(content)]), {
       expectedMtime,
-      overwrite: expectedMtime ? true : false,
+      overwrite: Boolean(expectedMtime),
     });
   }
   async deleteFile(path: string, options?: RemoveOptions) {

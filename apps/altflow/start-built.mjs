@@ -1,16 +1,19 @@
-import { modelCredential } from './scripts/environment.mjs';
 import { spawn } from 'node:child_process';
-import { rm } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { mkdir, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { modelCredential } from './scripts/environment.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const env = {
   ...process.env,
   ALTFLOW_MODELHUB_API_KEY: await modelCredential(),
-  MASTRA_PREVIEW_ROOT: root,
+  ALTFLOW_RUNTIME_ROOT: resolve(process.env.ALTFLOW_RUNTIME_ROOT ?? process.env.MASTRA_PREVIEW_ROOT ?? root),
   MASTRA_BUILD_SKIP_INSTALL: 'true',
 };
+// Config discovery opens stores before the application's top-level setup runs.
+await mkdir(resolve(env.ALTFLOW_RUNTIME_ROOT, 'src/mastra/public'), { recursive: true });
+await mkdir(resolve(env.ALTFLOW_RUNTIME_ROOT, 'data'), { recursive: true });
 let current;
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => current?.kill(signal));
 function run(command, args) {
@@ -20,8 +23,11 @@ function run(command, args) {
     current.once('exit', code => done(code ?? 1));
   });
 }
-// This preview uses the already installed local framework and integration packages.
+// Use this checkout's workspace framework and integration packages.
 // A fresh registry install in the output directory would replace those local builds.
 await rm(resolve(root, '.mastra/output/node_modules'), { recursive: true, force: true });
 const built = await run(resolve(root, 'node_modules/.bin/mastra'), ['build']);
-process.exitCode = built === 0 ? await run(process.execPath, ['.mastra/output/index.mjs']) : built;
+process.exitCode =
+  built === 0 && !process.argv.includes('--build-only')
+    ? await run(process.execPath, ['.mastra/output/index.mjs'])
+    : built;

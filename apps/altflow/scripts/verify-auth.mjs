@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
+import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, cp, symlink, writeFile, readFile, rm, open } from 'node:fs/promises';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawn, execFileSync } from 'node:child_process';
-import { createServer } from 'node:net';
 import { modelCredential } from './environment.mjs';
 import { modelHubFixture } from './modelhub-fixture.mjs';
 
@@ -39,8 +39,10 @@ try {
   await mkdir(resolve(sandbox, 'data'), { recursive: true });
   await mkdir(resolve(sandbox, 'src/mastra/public'), { recursive: true });
   await mkdir(resolve(sandbox, '.cache'), { recursive: true });
-  for (const file of ['index.ts', 'embedding.ts', 'altflow-auth.ts', 'modelhub-gateway.ts'])
-    await cp(resolve(root, 'src/mastra', file), resolve(sandbox, 'src/mastra', file));
+  await cp(resolve(root, 'src/mastra'), resolve(sandbox, 'src/mastra'), {
+    recursive: true,
+    filter: source => source !== resolve(root, 'src/mastra/public'),
+  });
   const fixtureModule = resolve(sandbox, 'src/mastra/index.ts');
   await writeFile(
     fixtureModule,
@@ -48,7 +50,6 @@ try {
       `\nawait knowledge.upsertPage({scope:'resource:altflow%3Astudio-check-alice',path:'alice-private',name:'Alice private note',body:'ALICE_PRIVATE_KNOWLEDGE'});\n`,
   );
   await cp(resolve(root, 'package.json'), resolve(sandbox, 'package.json'));
-  await cp(resolve(root, 'workspace'), resolve(sandbox, 'workspace'), { recursive: true });
   await symlink(resolve(root, 'node_modules'), resolve(sandbox, 'node_modules'));
   await symlink(resolve(root, '.cache/embeddings'), resolve(sandbox, '.cache/embeddings'));
   const credential =
@@ -61,6 +62,7 @@ try {
       ...process.env,
       NODE_ENV: 'development',
       STUDIO_PORT: String(port),
+      ALTFLOW_RUNTIME_ROOT: sandbox,
       MASTRA_PREVIEW_ROOT: sandbox,
       ALTFLOW_BACKEND_URL: process.env.TEST_GO_AUTH_URL,
       ALTFLOW_LEGACY_OWNER_ID: '',
@@ -329,30 +331,64 @@ try {
       assert.equal(queued.status, 200, 'creator can queue a follow-up');
       const queueTarget = { threadId: actualId, resourceId: alice.body.resourceId };
       const later = await request('/api/agents/creator-agent/queue-message', alice, 'POST', {
-        ...queueTarget, message: 'Reordered follow-up marker',
+        ...queueTarget,
+        message: 'Reordered follow-up marker',
       });
       const removed = await request('/api/agents/creator-agent/queue-message', alice, 'POST', {
-        ...queueTarget, message: 'Deleted follow-up marker',
+        ...queueTarget,
+        message: 'Deleted follow-up marker',
       });
       const steerQueue = await request('/api/agents/creator-agent/queue-message', alice, 'POST', {
-        ...queueTarget, message: 'Queued steer marker',
+        ...queueTarget,
+        message: 'Queued steer marker',
       });
       assert.equal(later.status, 200);
       assert.equal(removed.status, 200);
       assert.equal(steerQueue.status, 200);
       assert.ok(later.body.signal?.id && removed.body.signal?.id && steerQueue.body.signal?.id);
-      assert.equal((await request('/api/agents/creator-agent/threads/queue/update', bob, 'POST', {
-        ...queueTarget, signalId: later.body.signal.id, action: 'move-up',
-      })).status, 403, 'another user cannot reorder this queue');
-      assert.equal((await request('/api/agents/creator-agent/threads/queue/update', alice, 'POST', {
-        ...queueTarget, signalId: later.body.signal.id, action: 'move-up',
-      })).body.updated, true, 'queued turn can be moved ahead of the earlier one');
-      assert.deepEqual((await request('/api/agents/creator-agent/threads/signals/cancel', alice, 'POST', {
-        ...queueTarget, signalIds: [removed.body.signal.id],
-      })).body.cancelledSignalIds, [removed.body.signal.id], 'pending turn can be deleted');
-      assert.equal((await request('/api/agents/creator-agent/threads/queue/update', alice, 'POST', {
-        ...queueTarget, signalId: steerQueue.body.signal.id, action: 'steer',
-      })).body.updated, true, 'queued turn can steer the current run without a resend');
+      assert.equal(
+        (
+          await request('/api/agents/creator-agent/threads/queue/update', bob, 'POST', {
+            ...queueTarget,
+            signalId: later.body.signal.id,
+            action: 'move-up',
+          })
+        ).status,
+        403,
+        'another user cannot reorder this queue',
+      );
+      assert.equal(
+        (
+          await request('/api/agents/creator-agent/threads/queue/update', alice, 'POST', {
+            ...queueTarget,
+            signalId: later.body.signal.id,
+            action: 'move-up',
+          })
+        ).body.updated,
+        true,
+        'queued turn can be moved ahead of the earlier one',
+      );
+      assert.deepEqual(
+        (
+          await request('/api/agents/creator-agent/threads/signals/cancel', alice, 'POST', {
+            ...queueTarget,
+            signalIds: [removed.body.signal.id],
+          })
+        ).body.cancelledSignalIds,
+        [removed.body.signal.id],
+        'pending turn can be deleted',
+      );
+      assert.equal(
+        (
+          await request('/api/agents/creator-agent/threads/queue/update', alice, 'POST', {
+            ...queueTarget,
+            signalId: steerQueue.body.signal.id,
+            action: 'steer',
+          })
+        ).body.updated,
+        true,
+        'queued turn can steer the current run without a resend',
+      );
 
       const steered = await request('/api/agents/creator-agent/send-message', alice, 'POST', {
         threadId: actualId,
@@ -382,11 +418,27 @@ try {
         JSON.stringify(saved.body).includes('Steer current marker')
       );
     }, 'queued and steered messages must both persist');
-    await eventually(() => modelHub.state.requests.some(({ body }) => JSON.stringify(body.messages).includes('Reordered follow-up marker')), 'reordered input must execute');
+    await eventually(
+      () =>
+        modelHub.state.requests.some(({ body }) =>
+          JSON.stringify(body.messages).includes('Reordered follow-up marker'),
+        ),
+      'reordered input must execute',
+    );
     const requests = modelHub.state.requests.map(({ body }) => JSON.stringify(body.messages));
-    assert.ok(requests.findIndex(body => body.includes('Reordered follow-up marker')) < requests.findIndex(body => body.includes('Queued follow-up marker')), 'actual model requests follow the edited queue order');
-    assert.ok(requests.every(body => !body.includes('Deleted follow-up marker')), 'deleted input must never reach the model');
-    assert.ok(requests.some(body => body.includes('Queued steer marker') && !body.includes('Queued follow-up marker')), 'steered input must reach the active run before the queued turn');
+    assert.ok(
+      requests.findIndex(body => body.includes('Reordered follow-up marker')) <
+        requests.findIndex(body => body.includes('Queued follow-up marker')),
+      'actual model requests follow the edited queue order',
+    );
+    assert.ok(
+      requests.every(body => !body.includes('Deleted follow-up marker')),
+      'deleted input must never reach the model',
+    );
+    assert.ok(
+      requests.some(body => body.includes('Queued steer marker') && !body.includes('Queued follow-up marker')),
+      'steered input must reach the active run before the queued turn',
+    );
     checks.push('busy queue supports real deletion, steering, reordering and cross-user denial');
   }
   const userMetadata = await request('/api/memory/threads?agentId=creator-agent', alice, 'POST', {

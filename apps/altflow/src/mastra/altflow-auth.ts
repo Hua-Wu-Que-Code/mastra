@@ -1,7 +1,7 @@
-import { defineAuth, registerApiRoute } from '@mastra/core/server';
 import { ALTFLOW_ACCOUNT_RESOURCE_KEY } from '@mastra/altflow-tools';
-import { MASTRA_RESOURCE_ID_KEY, MASTRA_SCOPES_KEY } from '@mastra/core/request-context';
 import { encodeKnowledgeScopeId } from '@mastra/core/knowledge';
+import { MASTRA_RESOURCE_ID_KEY, MASTRA_SCOPES_KEY } from '@mastra/core/request-context';
+import { defineAuth, registerApiRoute } from '@mastra/core/server';
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -79,9 +79,7 @@ const forbiddenOverrides = new Set([
 ]);
 const conversationMemory = z
   .object({
-    thread: z
-      .union([z.string(), z.object({ id: z.string() }).strict()])
-      .optional(),
+    thread: z.union([z.string(), z.object({ id: z.string() }).strict()]).optional(),
     resource: z.string().optional(),
     options: z
       .object({

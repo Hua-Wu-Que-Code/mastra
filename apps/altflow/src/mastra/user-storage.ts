@@ -280,7 +280,7 @@ export class UserStorage {
     // Never release quota while the object still exists.
     try {
       await this.client.delete(field(row, 'object_key'));
-    } catch (error) {
+    } catch {
       await this.transaction(async tx => {
         await tx.execute({ sql: 'DELETE FROM file_operations WHERE id=?', args: [id] });
       });

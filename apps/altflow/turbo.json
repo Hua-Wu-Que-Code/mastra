@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["ALTFLOW_*", "STUDIO_*", "MASTRA_PREVIEW_ROOT", "MASTRA_BUILD_SKIP_INSTALL"],
+      "outputs": [".mastra/output/**"]
+    }
+  }
+}

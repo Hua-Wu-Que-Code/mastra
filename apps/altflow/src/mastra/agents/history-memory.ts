@@ -1,5 +1,5 @@
-import { Memory } from '@mastra/memory';
 import type { MemoryConfigInternal } from '@mastra/core/memory';
+import { Memory } from '@mastra/memory';
 
 /** Expose native history browsing without re-enabling observation-based context compaction. */
 export class HistoryMemory extends Memory {

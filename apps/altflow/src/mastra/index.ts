@@ -1,50 +1,53 @@
-import { subagentRoutes } from './routes/subagents';
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { createClient } from '@libsql/client';
+import { LibSQLSessionSearch } from '@mastra/altflow-tools';
 import { Mastra } from '@mastra/core';
 import { Agent } from '@mastra/core/agent';
 import { Knowledge, knowledgeMemoryScopes } from '@mastra/core/knowledge';
 import { MastraCompositeStore } from '@mastra/core/storage';
 import { createTool, TaskStateProcessor } from '@mastra/core/tools';
-import { createClient } from '@libsql/client';
-import { LibSQLSessionSearch } from '@mastra/altflow-tools';
-import { createCreatorTools } from './tools';
-import { UserDeliveryService } from './services/delivery';
-import { createPrivateWorkspace } from './agents/private-workspace';
-import { createAgentTree } from './subagents/agents';
-import { SubagentStore } from './subagents/store';
-import { toolCatalogRoute } from './routes/tool-catalog';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { LocalFilesystem, Workspace } from '@mastra/core/workspace';
 import { DuckDBStore } from '@mastra/duckdb';
 import { MastraEditor } from '@mastra/editor';
 import { LibSQLStore, LibSQLVector } from '@mastra/libsql';
 import { MCPServer } from '@mastra/mcp';
-import { executionPolicy } from './agents/execution-policy';
-import { HistoryMemory } from './agents/history-memory';
-import { DisabledRecallMemory } from './agents/disabled-recall-memory';
 import { Observability, MastraStorageExporter } from '@mastra/observability';
 import { KNOWLEDGE_ROUTES } from '@mastra/server/server-adapter';
-import { resolve } from 'node:path';
-import { mkdir } from 'node:fs/promises';
 import OSS from 'ali-oss';
 import { z } from 'zod';
-import { localEmbedder } from './embedding';
+import { DisabledRecallMemory } from './agents/disabled-recall-memory';
+import { executionPolicy } from './agents/execution-policy';
+import { HistoryMemory } from './agents/history-memory';
+import { createPrivateWorkspace } from './agents/private-workspace';
 import { createAltFlowAuth } from './altflow-auth';
-import { ModelHubGateway } from './modelhub-gateway';
 import { ContextCompaction } from './context-compaction';
 import { CONTEXT_MEMORY_OPTIONS } from './context-memory';
+import { localEmbedder } from './embedding';
+import { ModelHubGateway } from './modelhub-gateway';
+import { accountPreferenceRoutes } from './routes/account-preferences';
+import { conversationProjectRoutes } from './routes/conversation-projects';
+import { subagentRoutes } from './routes/subagents';
+import { toolCatalogRoute } from './routes/tool-catalog';
+import { accountMemory } from './services/account-memory';
+import { AccountPreferences } from './services/account-preferences';
+import { ConversationProjects } from './services/conversation-projects';
+import { UserDeliveryService } from './services/delivery';
+import { createAgentTree } from './subagents/agents';
+import { SubagentStore } from './subagents/store';
+import { createCreatorTools } from './tools';
 import { UserStorage } from './user-storage';
 import { userStorageRoutes } from './user-storage-routes';
-import { ConversationProjects } from './services/conversation-projects';
-import { conversationProjectRoutes } from './routes/conversation-projects';
-import { AccountPreferences } from './services/account-preferences';
-import { accountPreferenceRoutes } from './routes/account-preferences';
-import { accountMemory } from './services/account-memory';
 
-const previewPath = (...parts: string[]) => resolve(process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(), ...parts);
+const previewPath = (...parts: string[]) =>
+  resolve(process.env.ALTFLOW_RUNTIME_ROOT ?? process.env.MASTRA_PREVIEW_ROOT ?? process.cwd(), ...parts);
 const accountsOrigins = (
   process.env.STUDIO_ALLOWED_ORIGINS ??
   'http://127.0.0.1:5174,http://127.0.0.1:4111,http://localhost:5174,http://localhost:4111'
-).split(',').map(value => value.trim());
+)
+  .split(',')
+  .map(value => value.trim());
 const accounts = createAltFlowAuth({
   backendUrl: process.env.ALTFLOW_BACKEND_URL ?? 'http://127.0.0.1:8080',
   origins: accountsOrigins,
@@ -57,6 +60,9 @@ const modelHub = new ModelHubGateway({ apiKey, baseURL: process.env.ALTFLOW_MODE
 // This deployment exposes only its registered ModelHub gateway.
 process.env.AUTO_BLOCK_EXTERNAL_PROVIDERS = 'true';
 const model = 'altflow/deepseek-v4-pro';
+// Fresh checkouts have no ignored database directories yet. Create them before opening stores.
+await mkdir(previewPath('src/mastra/public'), { recursive: true });
+await mkdir(previewPath('data'), { recursive: true });
 const storage = new MastraCompositeStore({
   id: 'creator-preview-storage',
   default: new LibSQLStore({ id: 'preview-storage', url: `file:${previewPath('src/mastra/public/preview.db')}` }),
@@ -68,7 +74,10 @@ const storage = new MastraCompositeStore({
 const projectMemory = await storage.getStore('memory');
 if (!projectMemory) throw new Error('Conversation storage is unavailable');
 await mkdir(previewPath('data'), { recursive: true });
-const conversationProjects = new ConversationProjects(`file:${previewPath('data/conversation-projects.db')}`, projectMemory);
+const conversationProjects = new ConversationProjects(
+  `file:${previewPath('data/conversation-projects.db')}`,
+  projectMemory,
+);
 await conversationProjects.init();
 const accountPreferences = new AccountPreferences(`file:${previewPath('data/account-preferences.db')}`, projectMemory);
 await accountPreferences.init();
@@ -77,9 +86,7 @@ await mkdir(previewPath('data'), { recursive: true });
 const ossKey = process.env.ALTFLOW_OSS_ACCESS_KEY_ID;
 const ossSecret = process.env.ALTFLOW_OSS_ACCESS_KEY_SECRET;
 if (!ossKey || !ossSecret)
-  throw new Error(
-    'Configure server-only ALTFLOW_OSS_ACCESS_KEY_ID and ALTFLOW_OSS_ACCESS_KEY_SECRET',
-  );
+  throw new Error('Configure server-only ALTFLOW_OSS_ACCESS_KEY_ID and ALTFLOW_OSS_ACCESS_KEY_SECRET');
 const userFiles = new UserStorage({
   client: new OSS({
     accessKeyId: ossKey,
@@ -90,8 +97,7 @@ const userFiles = new UserStorage({
     authorizationV4: true,
     timeout: 30000,
   }),
-  databaseUrl:
-    process.env.ALTFLOW_FILES_DATABASE_URL ?? `file:${previewPath('data/user-files.db')}`,
+  databaseUrl: process.env.ALTFLOW_FILES_DATABASE_URL ?? `file:${previewPath('data/user-files.db')}`,
   authToken: process.env.ALTFLOW_FILES_DATABASE_AUTH_TOKEN,
 });
 await userFiles.init();
@@ -179,37 +185,65 @@ const textReview = createWorkflow({
   .commit();
 const contextCompaction = new ContextCompaction({ gateway: modelHub, storage });
 const creatorMemory = new HistoryMemory({
-    storage,
-    vector,
-    embedder: localEmbedder,
-    options: {
-      ...CONTEXT_MEMORY_OPTIONS,
-      semanticRecall: true,
-      workingMemory: {
-        enabled: true,
-        scope: 'resource',
-        template: '# 作者偏好\n\n# 当前作品\n\n# 人物与世界观\n\n# 已确认的约束\n\n# 创作进度\n',
-      },
-      generateTitle: { instructions: '根据首条用户消息生成简洁的中文对话标题，不超过 12 个汉字，只输出标题。' },
+  storage,
+  vector,
+  embedder: localEmbedder,
+  options: {
+    ...CONTEXT_MEMORY_OPTIONS,
+    semanticRecall: true,
+    workingMemory: {
+      enabled: true,
+      scope: 'resource',
+      template: '# 作者偏好\n\n# 当前作品\n\n# 人物与世界观\n\n# 已确认的约束\n\n# 创作进度\n',
     },
-  });
+    generateTitle: { instructions: '根据首条用户消息生成简洁的中文对话标题，不超过 12 个汉字，只输出标题。' },
+  },
+});
 const disabledRecallMemory = new DisabledRecallMemory({ storage, options: { generateTitle: true } });
 const sessionClient = createClient({ url: `file:${previewPath('src/mastra/public/preview.db')}` });
-const creatorToolBundle = createCreatorTools({ countText, sessionSearch: new LibSQLSessionSearch(sessionClient),
-  delivery: new UserDeliveryService(userFiles) });
+const creatorToolBundle = createCreatorTools({
+  countText,
+  sessionSearch: new LibSQLSessionSearch(sessionClient),
+  delivery: new UserDeliveryService(userFiles),
+});
 const privateWorkspace = createPrivateWorkspace(userFiles, previewPath('workspace/skills'));
 const subagentStore = new SubagentStore(`file:${previewPath('data/subagents.db')}`);
 await subagentStore.init();
-const childMemory = new HistoryMemory({ storage, options: { ...CONTEXT_MEMORY_OPTIONS, semanticRecall: false,
-  workingMemory: { enabled: false }, generateTitle: false } });
-const agentTree = createAgentTree({
-  store: subagentStore, memory: projectMemory, childMemory, model, tools: creatorToolBundle.tools,
-  getMastra: () => mastra, getRootAgent: () => creatorAgent,
-  teamEnabled: async actor => {
-    const preferences = await accountPreferences.read(actor.owner, actor.resourceId, { kind: 'thread', id: JSON.stringify(['creator-agent', actor.root]) });
-    return z.object({ modelSettings: z.object({ teamwork: z.boolean().optional() }).optional() }).parse(preferences.value).modelSettings?.teamwork === true;
+const childMemory = new HistoryMemory({
+  storage,
+  options: {
+    ...CONTEXT_MEMORY_OPTIONS,
+    semanticRecall: false,
+    workingMemory: { enabled: false },
+    generateTitle: false,
   },
-  childConfig: { inputProcessors: [contextCompaction], outputProcessors: [contextCompaction], errorProcessors: [contextCompaction], workspace: ({ user }) => user?.id ? privateWorkspace(user.id) : undefined, knowledge, scopes: ({ scopes }) => scopes },
+});
+const agentTree = createAgentTree({
+  store: subagentStore,
+  memory: projectMemory,
+  childMemory,
+  model,
+  tools: creatorToolBundle.tools,
+  getMastra: () => mastra,
+  getRootAgent: () => creatorAgent,
+  teamEnabled: async actor => {
+    const preferences = await accountPreferences.read(actor.owner, actor.resourceId, {
+      kind: 'thread',
+      id: JSON.stringify(['creator-agent', actor.root]),
+    });
+    return (
+      z.object({ modelSettings: z.object({ teamwork: z.boolean().optional() }).optional() }).parse(preferences.value)
+        .modelSettings?.teamwork === true
+    );
+  },
+  childConfig: {
+    inputProcessors: [contextCompaction],
+    outputProcessors: [contextCompaction],
+    errorProcessors: [contextCompaction],
+    workspace: ({ user }) => (user?.id ? privateWorkspace(user.id) : undefined),
+    knowledge,
+    scopes: ({ scopes }) => scopes,
+  },
 });
 const creatorTools = { ...creatorToolBundle.tools, ...agentTree.tools };
 const creatorAgent = new Agent({
@@ -219,7 +253,7 @@ const creatorAgent = new Agent({
     '你是面向创作者的通用智能体。默认用中文交流。根据用户目标自主拆解任务，协助构思、写作、改稿和分析。精确字数调用 countText，篇幅检查可调用工作流。可在创作工作区读写稿件，按需读取技能和检索知识库；只把用户明确提供的偏好、设定和进度写入记忆。可按需使用 web_fetch 读取公开网页；web_search 仅在配置后可用。先检索事实再给引用，不声称执行未提供的工具。复杂任务维护 task 清单；需要用户选择时 ask_user；需要审批时写入 .mastracode/plans/*.md 后 submit_plan。历史设定用 session_search 字面检索，再用 recall 读取原文。可用 subagent 动态创建后台助手，用 subagent_fork 分叉已完成的上下文，用 send_message、wait_agent、list_agents、interrupt_agent 协作。团队开关只控制共享任务板和协作指令。不要编造工具结果。用户附件已保存在本人工作区，应按附件提供的路径调用文件工具读取；生成的文件也写入该工作区。写入成功后调用 present 交付文件，不编造文件路径。',
   model,
   defaultOptions: { requireToolApproval: false, ...executionPolicy().loop },
-  workspace: ({ user }) => user?.id ? privateWorkspace(user.id) : undefined,
+  workspace: ({ user }) => (user?.id ? privateWorkspace(user.id) : undefined),
   knowledge,
   // Server auth supplies library access; do not grant every caller ownership.
   scopes: ({ scopes }) => scopes,
@@ -232,6 +266,20 @@ const creatorAgent = new Agent({
 });
 const creatorMcp = new MCPServer({ id: 'creator-mcp', name: '创作工具服务', version: '1.0.0', tools: { countText } });
 export const mastra = new Mastra({
+  // Keep workspace packages intact so pnpm resolves each package's own dependencies.
+  bundler: {
+    externals: [
+      '@mastra/altflow-tools',
+      '@mastra/core',
+      '@mastra/duckdb',
+      '@mastra/editor',
+      '@mastra/libsql',
+      '@mastra/mcp',
+      '@mastra/memory',
+      '@mastra/observability',
+      '@mastra/server',
+    ],
+  },
   gateways: { altflow: modelHub },
   agents: { creatorAgent },
   workflows: { textReview },
@@ -254,13 +302,37 @@ export const mastra = new Mastra({
     auth: accounts.auth,
     apiRoutes: [
       ...accounts.apiRoutes,
-      ...subagentRoutes(agentTree.runtime, accounts, accountsOrigins, () => creatorAgent, async actor => {
-        const saved = await accountPreferences.read(actor.owner, actor.resourceId, { kind: 'thread', id: JSON.stringify(['creator-agent', actor.root]) });
-        const options = z.object({ selection: z.object({ provider: z.string(), model: z.string() }).optional(), modelSettings: z.object({ reasoningLevel: z.string().optional() }).optional() }).parse(saved.value);
-        return { model: options.selection ? `${options.selection.provider}/${options.selection.model}` : undefined, reasoningLevel: options.modelSettings?.reasoningLevel };
+      ...subagentRoutes(
+        agentTree.runtime,
+        accounts,
+        accountsOrigins,
+        () => creatorAgent,
+        async actor => {
+          const saved = await accountPreferences.read(actor.owner, actor.resourceId, {
+            kind: 'thread',
+            id: JSON.stringify(['creator-agent', actor.root]),
+          });
+          const options = z
+            .object({
+              selection: z.object({ provider: z.string(), model: z.string() }).optional(),
+              modelSettings: z.object({ reasoningLevel: z.string().optional() }).optional(),
+            })
+            .parse(saved.value);
+          return {
+            model: options.selection ? `${options.selection.provider}/${options.selection.model}` : undefined,
+            reasoningLevel: options.modelSettings?.reasoningLevel,
+          };
+        },
+      ),
+      toolCatalogRoute({
+        accounts,
+        origins: accountsOrigins,
+        tools: creatorTools,
+        memory: creatorMemory,
+        knowledge,
+        workspace: privateWorkspace,
+        providerConfigured: creatorToolBundle.providerConfigured,
       }),
-      toolCatalogRoute({ accounts, origins: accountsOrigins, tools: creatorTools,
-        memory: creatorMemory, knowledge, workspace: privateWorkspace, providerConfigured: creatorToolBundle.providerConfigured }),
       ...userStorageRoutes(userFiles, accounts.authenticate, accountsOrigins),
       ...conversationProjectRoutes(conversationProjects, accounts, accountsOrigins),
       ...accountPreferenceRoutes(accountPreferences, accounts, accountsOrigins),

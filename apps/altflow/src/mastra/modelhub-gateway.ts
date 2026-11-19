@@ -12,7 +12,7 @@ const optionSchema = z
     supports_thinking_budget: z.boolean(),
     agent_budget_tokens: z.number().int().positive().optional(),
   })
-  .refine((option) => !option.supports_thinking_budget || option.agent_budget_tokens !== undefined);
+  .refine(option => !option.supports_thinking_budget || option.agent_budget_tokens !== undefined);
 const catalogSchema = z
   .object({
     config_version: z.number().int().positive(),
@@ -27,16 +27,14 @@ const catalogSchema = z
             thinking_options: z.array(optionSchema).min(1),
           })
           .refine(
-            (model) =>
-              new Set(model.thinking_options.map((option) => option.level)).size === model.thinking_options.length &&
-              model.thinking_options.some((option) => option.level === model.default_thinking_level),
+            model =>
+              new Set(model.thinking_options.map(option => option.level)).size === model.thinking_options.length &&
+              model.thinking_options.some(option => option.level === model.default_thinking_level),
           ),
       )
       .min(1),
   })
-  .refine(
-    (catalog) => new Set(catalog.free_chat_models.map((model) => model.id)).size === catalog.free_chat_models.length,
-  );
+  .refine(catalog => new Set(catalog.free_chat_models.map(model => model.id)).size === catalog.free_chat_models.length);
 type Catalog = z.infer<typeof catalogSchema>;
 const infoSchema = z.object({
   data: z.array(
@@ -146,7 +144,7 @@ export class ModelHubGateway extends MastraModelGateway {
     const [catalog, info] = await Promise.all([this.catalog(), this.modelInfo()]);
     const contextWindows = (model: Catalog['free_chat_models'][number]) =>
       Object.fromEntries(
-        model.thinking_options.flatMap((option) => {
+        model.thinking_options.flatMap(option => {
           const capacity = info[option.target];
           return capacity === undefined ? [] : [[option.level, contextPolicy(capacity).window]];
         }),
@@ -158,25 +156,25 @@ export class ModelHubGateway extends MastraModelGateway {
         apiKeyEnvVar: 'ALTFLOW_MODELHUB_API_KEY',
         url: this.#baseURL,
         modelContextWindows: Object.fromEntries(
-          catalog.free_chat_models.flatMap((model) => {
+          catalog.free_chat_models.flatMap(model => {
             const capacity = contextWindows(model)[model.default_thinking_level];
             return capacity === undefined ? [] : [[model.id, capacity]];
           }),
         ),
-        modelNames: Object.fromEntries(catalog.free_chat_models.map((model) => [model.id, model.display_name])),
+        modelNames: Object.fromEntries(catalog.free_chat_models.map(model => [model.id, model.display_name])),
         modelReasoning: Object.fromEntries(
-          catalog.free_chat_models.map((model) => [
+          catalog.free_chat_models.map(model => [
             model.id,
             {
               defaultLevel: model.default_thinking_level,
-              levels: model.thinking_options.map((option) => option.level),
+              levels: model.thinking_options.map(option => option.level),
               contextWindows: contextWindows(model),
             },
           ]),
         ),
         models: [...catalog.free_chat_models]
           .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
-          .map((model) => model.id),
+          .map(model => model.id),
       },
     };
   }
@@ -194,7 +192,7 @@ export class ModelHubGateway extends MastraModelGateway {
     return this.#languageModel(modelId, true);
   }
   async #languageModel(modelId: string, summary: boolean) {
-    if (!(await this.catalog()).free_chat_models.some((model) => model.id === modelId))
+    if (!(await this.catalog()).free_chat_models.some(model => model.id === modelId))
       throw new Error('Model is not in the ModelHub product catalog');
     const provider = createOpenAICompatible({
       name: this.id,
@@ -209,11 +207,11 @@ export class ModelHubGateway extends MastraModelGateway {
         // Mastra caches model instances. Refresh here, then freeze one snapshot
         // per HTTP call so catalog changes apply to later generations too.
         const catalog = await this.catalog();
-        const product = catalog.free_chat_models.find((model) => model.id === modelId);
+        const product = catalog.free_chat_models.find(model => model.id === modelId);
         const body = JSON.parse(init.body);
         if (!product) throw new Error('Model is not in the ModelHub product catalog');
         const level = body.reasoningLevel ?? product.default_thinking_level;
-        const option = product.thinking_options.find((option) => option.level === level);
+        const option = product.thinking_options.find(option => option.level === level);
         if (!option) throw new Error('Unsupported ModelHub reasoning level; select a level from the current catalog');
         for (const key of [
           'reasoningLevel',

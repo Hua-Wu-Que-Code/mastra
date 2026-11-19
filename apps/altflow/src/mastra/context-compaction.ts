@@ -3,7 +3,7 @@
 // See THIRD_PARTY_NOTICES.md for attribution and license.
 import { createHash } from 'node:crypto';
 import { convertMessages } from '@mastra/core/agent/message-list';
-import { TokenCounter } from '@mastra/memory/processors';
+import { SpanType } from '@mastra/core/observability';
 import type {
   Processor,
   ProcessInputStepArgs,
@@ -12,13 +12,13 @@ import type {
   ProcessAPIErrorArgs,
   ProcessLLMResponseArgs,
 } from '@mastra/core/processors';
-import type { MastraCompositeStore } from '@mastra/core/storage';
-import { SpanType } from '@mastra/core/observability';
 import { isStandardSchemaWithJSON, standardSchemaToJSONSchema } from '@mastra/core/schema';
+import type { MastraCompositeStore } from '@mastra/core/storage';
+import { TokenCounter } from '@mastra/memory/processors';
 import { z } from 'zod';
-import { ModelHubGateway } from './modelhub-gateway.ts';
-import { contextPolicy } from './context-policy.ts';
 import { CHECKPOINT_PREAMBLE, COMPACTION_INSTRUCTION } from './compaction-prompt.ts';
+import { contextPolicy } from './context-policy.ts';
+import type { ModelHubGateway } from './modelhub-gateway.ts';
 
 type ProviderPrompt = Parameters<
   Awaited<ReturnType<ModelHubGateway['resolveLanguageModel']>>['doGenerate']
@@ -416,14 +416,19 @@ export class ContextCompaction implements Processor {
     const counter = new TokenCounter({ model: { provider: args.apiProviderId, modelId: route.modelId } });
     const breakdown = {
       method: 'mastra-token-counter',
-      system: prompt.filter(message => message.role === 'system')
+      system: prompt
+        .filter(message => message.role === 'system')
         .reduce((sum, message) => sum + counter.countString(message.content) + 4, 0),
       tools: tools.length ? counter.countString(JSON.stringify(tools)) : 0,
-      messages: counter.countMessages(convertMessages(prompt.filter(message => message.role !== 'system')).to('Mastra.V2')),
+      messages: counter.countMessages(
+        convertMessages(prompt.filter(message => message.role !== 'system')).to('Mastra.V2'),
+      ),
     };
     // The processor span is a child of the current model step. Persist there so
     // each inference can recover its own counts without copying prompt contents.
-    args.tracingContext?.currentSpan?.findParent(SpanType.MODEL_STEP)?.update({ metadata: { contextBreakdown: breakdown } });
+    args.tracingContext?.currentSpan
+      ?.findParent(SpanType.MODEL_STEP)
+      ?.update({ metadata: { contextBreakdown: breakdown } });
     return { prompt };
   }
   async processOutputStep(args: ProcessOutputStepArgs) {

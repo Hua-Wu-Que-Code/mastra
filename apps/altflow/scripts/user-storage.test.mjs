@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
-import { createServer } from 'node:http';
 import { mkdtemp, rm } from 'node:fs/promises';
+import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { test } from 'node:test';
 import OSS from 'ali-oss';
-import { UserStorage } from '../src/mastra/user-storage.ts';
 import { UserFilesystem } from '../src/mastra/user-filesystem.ts';
+import { UserStorage } from '../src/mastra/user-storage.ts';
 
 async function setup(t, quota = 512 * 1024 * 1024) {
   const objects = new Map();
@@ -242,7 +242,8 @@ test('legacy attachment recovery preserves text, is idempotent and never imports
 test('file delivery references the private ledger without duplicating quota and rejects missing or foreign files', async t => {
   const { UserDeliveryService } = await import('../src/mastra/services/delivery.ts');
   const { createPresentTool } = await import('@mastra/altflow-tools');
-  const { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } = await import('@mastra/core/request-context');
+  const { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } =
+    await import('@mastra/core/request-context');
   const fixture = await setup(t);
   await fixture.store.write('alice', '/report.md', Buffer.from('# Final report'), { mimeType: 'text/markdown' });
   const delivery = new UserDeliveryService(fixture.store);
@@ -254,7 +255,10 @@ test('file delivery references the private ledger without duplicating quota and 
     return { requestContext, agent: { agentId: 'creator-agent' } };
   };
   const before = await fixture.store.summary('alice');
-  const output = await tool.execute({ files: [{ path: '/report.md', description: 'Final report' }, { path: '/report.md' }] }, context('alice'));
+  const output = await tool.execute(
+    { files: [{ path: '/report.md', description: 'Final report' }, { path: '/report.md' }] },
+    context('alice'),
+  );
   assert.equal(output.files.length, 1);
   assert.equal(output.files[0].downloadUrl, '/storage/download?path=%2Freport.md');
   assert.equal((await fixture.store.summary('alice')).usedBytes, before.usedBytes);

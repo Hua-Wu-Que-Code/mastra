@@ -1,10 +1,10 @@
 import './environment.mjs';
-import { createClient } from '@libsql/client';
-import OSS from 'ali-oss';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { UserStorage } from '../src/mastra/user-storage.ts';
+import { createClient } from '@libsql/client';
+import OSS from 'ali-oss';
 import { restoreLegacyAttachments } from '../src/mastra/legacy-files.ts';
+import { UserStorage } from '../src/mastra/user-storage.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const db = createClient({ url: `file:${resolve(root, 'src/mastra/public/preview.db')}` });

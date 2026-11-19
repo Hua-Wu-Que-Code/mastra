@@ -1,6 +1,6 @@
-import { backendRepo } from './environment.mjs';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { backendRepo } from './environment.mjs';
 
 if (!process.env.TEST_STUDIO_DATABASE_URL) {
   throw new Error(

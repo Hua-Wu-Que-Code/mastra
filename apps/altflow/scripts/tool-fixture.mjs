@@ -1,30 +1,26 @@
-import assert from "node:assert/strict";
-import { test } from "node:test";
-import { createServer } from "node:http";
-import { mkdtemp, mkdir, writeFile, symlink, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { Agent } from "@mastra/core/agent";
-import { Mastra } from "@mastra/core/mastra";
-import {
-  RequestContext,
-  MASTRA_RESOURCE_ID_KEY,
-  MASTRA_NORMALIZED_USER_KEY,
-} from "@mastra/core/request-context";
-import { createTool, TaskStateProcessor } from "@mastra/core/tools";
-import { createWorkspaceTools, createSkillTools } from "@mastra/core/workspace";
-import { LibSQLStore } from "@mastra/libsql";
-import { Memory } from "@mastra/memory";
-import { createClient } from "@libsql/client";
-import { LibSQLSessionSearch } from "@mastra/altflow-tools";
-import { z } from "zod";
-import { HistoryMemory } from "../src/mastra/agents/history-memory.ts";
-import { createCreatorTools } from "../src/mastra/tools/index.ts";
-import { executionPolicy } from "../src/mastra/agents/execution-policy.ts";
-import { createAgentTree } from "../src/mastra/subagents/agents.ts";
-import { SubagentStore } from "../src/mastra/subagents/store.ts";
-import { SharedSkillSource } from "../src/mastra/services/shared-skills.ts";
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test } from 'node:test';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createClient } from '@libsql/client';
+import { LibSQLSessionSearch } from '@mastra/altflow-tools';
+import { Agent } from '@mastra/core/agent';
+import { Mastra } from '@mastra/core/mastra';
+import { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } from '@mastra/core/request-context';
+import { createTool, TaskStateProcessor } from '@mastra/core/tools';
+import { createWorkspaceTools, createSkillTools } from '@mastra/core/workspace';
+import { LibSQLStore } from '@mastra/libsql';
+import { Memory } from '@mastra/memory';
+import { z } from 'zod';
+import { executionPolicy } from '../src/mastra/agents/execution-policy.ts';
+import { HistoryMemory } from '../src/mastra/agents/history-memory.ts';
+import { SharedSkillSource } from '../src/mastra/services/shared-skills.ts';
+import { createAgentTree } from '../src/mastra/subagents/agents.ts';
+import { SubagentStore } from '../src/mastra/subagents/store.ts';
+import { createCreatorTools } from '../src/mastra/tools/index.ts';
 
 // Only the paid model edge is a fixture. Agent execution, suspension, memory,
 // tool schemas, filesystem authorization and SQLite persistence are real.
@@ -37,68 +33,65 @@ export async function modelServer(t) {
     for await (const chunk of req) chunks.push(chunk);
     const body = JSON.parse(Buffer.concat(chunks).toString());
     requests.push(body);
-    const next = (await handler?.(body)) ??
-      responses.shift() ?? { text: "Verified." };
+    const next = (await handler?.(body)) ?? responses.shift() ?? { text: 'Verified.' };
     if (next.status) {
-      res.writeHead(next.status, { "content-type": "application/json" });
-      res.end(
-        JSON.stringify({ error: { message: "Fixture provider failure" } }),
-      );
+      res.writeHead(next.status, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: { message: 'Fixture provider failure' } }));
       return;
     }
     if (next.block) {
       next.started();
-      res.on("close", next.closed);
+      res.on('close', next.closed);
       return;
     }
     const calls = next.calls?.map((call, index) => ({
       id: `call-${requests.length}-${index}`,
-      type: "function",
+      type: 'function',
       function: { name: call.name, arguments: JSON.stringify(call.args) },
     }));
-    const finish = calls ? "tool_calls" : "stop";
+    const finish = calls ? 'tool_calls' : 'stop';
     const base = {
       id: `response-${requests.length}`,
       created: 1,
-      model: "fixture-model",
+      model: 'fixture-model',
     };
     if (body.stream) {
-      res.setHeader("content-type", "text/event-stream");
-      const send = (value) => res.write(`data: ${JSON.stringify(value)}\n\n`);
+      res.setHeader('content-type', 'text/event-stream');
+      const send = value => res.write(`data: ${JSON.stringify(value)}\n\n`);
       send({
         ...base,
-        object: "chat.completion.chunk",
+        object: 'chat.completion.chunk',
         choices: [
           {
             index: 0,
             delta: calls
               ? {
-                  role: "assistant",
+                  role: 'assistant',
                   tool_calls: calls.map((call, index) => ({ index, ...call })),
                 }
-              : { role: "assistant", content: next.text },
+              : { role: 'assistant', content: next.text },
             finish_reason: null,
           },
         ],
       });
       send({
         ...base,
-        object: "chat.completion.chunk",
+        object: 'chat.completion.chunk',
         choices: [{ index: 0, delta: {}, finish_reason: finish }],
         usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
       });
-      res.end("data: [DONE]\n\n");
+      res.end('data: [DONE]\n\n');
     } else {
-      res.setHeader("content-type", "application/json");
+      res.setHeader('content-type', 'application/json');
       res.end(
         JSON.stringify({
           ...base,
-          object: "chat.completion",
+          object: 'chat.completion',
           choices: [
             {
               index: 0,
               message: {
-                role: "assistant",
+                role: 'assistant',
                 content: calls ? null : next.text,
                 ...(calls ? { tool_calls: calls } : {}),
               },
@@ -110,23 +103,23 @@ export async function modelServer(t) {
       );
     }
   });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(async () => {
     server.closeAllConnections();
-    await new Promise((resolve) => server.close(resolve));
+    await new Promise(resolve => server.close(resolve));
   });
   const provider = createOpenAICompatible({
-    name: "tool-fixture",
+    name: 'tool-fixture',
     baseURL: `http://127.0.0.1:${server.address().port}/v1`,
-    apiKey: "fixture-only",
+    apiKey: 'fixture-only',
   });
   return {
     requests,
     responses,
-    setHandler: (value) => {
+    setHandler: value => {
       handler = value;
     },
-    model: provider.chatModel("fixture-model"),
+    model: provider.chatModel('fixture-model'),
   };
 }
 export function context(userId) {
@@ -136,10 +129,10 @@ export function context(userId) {
   return requestContext;
 }
 export async function fixture(t) {
-  const dir = await mkdtemp(join(tmpdir(), "altflow-tools-"));
+  const dir = await mkdtemp(join(tmpdir(), 'altflow-tools-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
-  const url = `file:${join(dir, "memory.db")}`;
-  const storage = new LibSQLStore({ id: "runtime", url });
+  const url = `file:${join(dir, 'memory.db')}`;
+  const storage = new LibSQLStore({ id: 'runtime', url });
   await storage.init();
   const client = createClient({ url });
   t.after(() => client.close());
@@ -157,16 +150,16 @@ export async function fixture(t) {
   const bundle = createCreatorTools({
     env: {},
     countText: createTool({
-      id: "count-text",
-      description: "Count characters",
+      id: 'count-text',
+      description: 'Count characters',
       inputSchema: z.object({ text: z.string() }),
       execute: async ({ text }) => ({ count: text.length }),
     }),
     sessionSearch: new LibSQLSessionSearch(client),
     delivery: { present: async () => [] },
   });
-  const memoryStore = await storage.getStore("memory");
-  const treeStore = new SubagentStore(`file:${join(dir, "subagents.db")}`);
+  const memoryStore = await storage.getStore('memory');
+  const treeStore = new SubagentStore(`file:${join(dir, 'subagents.db')}`);
   await treeStore.init();
   let teamEnabled = false;
   const tree = createAgentTree({
@@ -184,9 +177,9 @@ export async function fixture(t) {
     treeStore.close();
   });
   const agent = new Agent({
-    id: "creator-agent",
-    name: "Creator",
-    instructions: "Use the requested tool.",
+    id: 'creator-agent',
+    name: 'Creator',
+    instructions: 'Use the requested tool.',
     model: edge.model,
     tools: { ...bundle.tools, ...tree.tools },
     memory,
@@ -205,18 +198,18 @@ export async function fixture(t) {
     tree,
     treeStore,
     memoryStore,
-    setTeamEnabled: (value) => {
+    setTeamEnabled: value => {
       teamEnabled = value;
     },
-    agent: mastra.getAgent("agent"),
+    agent: mastra.getAgent('agent'),
   };
 }
-export function runOptions(thread = "alice-thread") {
+export function runOptions(thread = 'alice-thread') {
   return {
-    memory: { thread, resource: "altflow:alice" },
-    requestContext: context("alice"),
+    memory: { thread, resource: 'altflow:alice' },
+    requestContext: context('alice'),
   };
 }
 export function toolResults(result) {
-  return result.steps.flatMap((step) => step.toolResults ?? []);
+  return result.steps.flatMap(step => step.toolResults ?? []);
 }

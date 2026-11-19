@@ -1,21 +1,21 @@
-import assert from "node:assert/strict";
-import { test } from "node:test";
-import { RequestContext } from "@mastra/core/request-context";
-import { createAltFlowAuth } from "../src/mastra/altflow-auth.ts";
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { RequestContext } from '@mastra/core/request-context';
+import { createAltFlowAuth } from '../src/mastra/altflow-auth.ts';
 
-const origin = "http://localhost:5174";
+const origin = 'http://localhost:5174';
 const { auth } = createAltFlowAuth({
-  backendUrl: "http://127.0.0.1:8080",
+  backendUrl: 'http://127.0.0.1:8080',
   origins: [origin],
   secureCookies: false,
 });
-const user = { id: "test-owner", username: "Test", role: "creator" };
-async function authorized(body, endpoint = "send-message") {
+const user = { id: 'test-owner', username: 'Test', role: 'creator' };
+async function authorized(body, endpoint = 'send-message') {
   const requestContext = new RequestContext();
-  return auth.authorize("/api/agents/creator-agent/" + endpoint, "POST", user, {
+  return auth.authorize('/api/agents/creator-agent/' + endpoint, 'POST', user, {
     req: {
-      raw: new Request(origin + "/api", {
-        method: "POST",
+      raw: new Request(origin + '/api', {
+        method: 'POST',
         headers: { Origin: origin },
         body: JSON.stringify(body),
       }),
@@ -23,10 +23,10 @@ async function authorized(body, endpoint = "send-message") {
     get: () => requestContext,
   });
 }
-test("managed users can disable memory and choose teamwork through message admission", async () => {
+test('managed users can disable memory and choose teamwork through message admission', async () => {
   const memory = {
-    thread: "owned-thread",
-    resource: "altflow:test-owner",
+    thread: 'owned-thread',
+    resource: 'altflow:test-owner',
     options: {
       lastMessages: false,
       workingMemory: { enabled: false },
@@ -35,40 +35,37 @@ test("managed users can disable memory and choose teamwork through message admis
   };
   assert.equal(
     await authorized({
-      threadId: "owned-thread",
+      threadId: 'owned-thread',
       message: {},
       ifIdle: { streamOptions: { memory, disableSubAgents: true } },
     }),
     true,
   );
-  assert.equal(
-    await authorized(
-      { messages: [], memory, disableSubAgents: false },
-      "stream",
-    ),
-    true,
-  );
+  assert.equal(await authorized({ messages: [], memory, disableSubAgents: false }, 'stream'), true);
 });
-test("managed users cannot smuggle agent configuration through conversation preferences", async () => {
+test('managed users cannot smuggle agent configuration through conversation preferences', async () => {
   for (const override of [
-    { model: "other/model" },
-    { instructions: "replace" },
+    { model: 'other/model' },
+    { instructions: 'replace' },
     { tools: {} },
     {
       memory: {
-        options: { workingMemory: { enabled: true, template: "replace" } },
+        options: { workingMemory: { enabled: true, template: 'replace' } },
       },
     },
-    { memory: { options: { observationalMemory: { model: "other/model" } } } },
+    { memory: { options: { observationalMemory: { model: 'other/model' } } } },
     { memory: { options: { lastMessages: -1 } } },
     { memory: { options: { lastMessages: 20 } } },
     { memory: { options: { observationalMemory: true } } },
   ]) {
     for (const endpoint of ['send-message', 'stream']) {
       assert.equal(
-        await authorized(endpoint === 'send-message'
-          ? { threadId: 'owned-thread', message: {}, ifIdle: { streamOptions: override } }
-          : { messages: [], ...override }, endpoint),
+        await authorized(
+          endpoint === 'send-message'
+            ? { threadId: 'owned-thread', message: {}, ifIdle: { streamOptions: override } }
+            : { messages: [], ...override },
+          endpoint,
+        ),
         false,
       );
     }

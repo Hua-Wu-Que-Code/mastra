@@ -1,8 +1,8 @@
-import { backendRepo } from './scripts/environment.mjs';
-import { readFile } from 'node:fs/promises';
-import { parseEnv } from 'node:util';
 import { spawn } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { parseEnv } from 'node:util';
+import { backendRepo } from './scripts/environment.mjs';
 
 // The separate checkout contains the latest Go main plus a local auth-only entry.
 // Its handlers and services are the same ones used by the full backend.

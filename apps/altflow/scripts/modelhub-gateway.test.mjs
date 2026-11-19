@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { ModelHubGateway } from '../src/mastra/modelhub-gateway.ts';
 import { modelHubFixture } from './modelhub-fixture.mjs';
 
-test('streaming chat retains input, output and cache usage after switching product models', async (t) => {
+test('streaming chat retains input, output and cache usage after switching product models', async t => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   hub.state.usage = {
@@ -21,7 +21,7 @@ test('streaming chat retains input, output and cache usage after switching produ
     const result = await model.doStream(options);
     const chunks = [];
     for await (const chunk of result.stream) chunks.push(chunk);
-    const finish = chunks.find((chunk) => chunk.type === 'finish');
+    const finish = chunks.find(chunk => chunk.type === 'finish');
     assert.equal(finish?.usage.inputTokens.total, 100, `${modelId} streaming input usage`);
     assert.equal(finish.usage.inputTokens.cacheRead, 80);
     assert.equal(finish.usage.inputTokens.noCache, 20);
@@ -31,7 +31,7 @@ test('streaming chat retains input, output and cache usage after switching produ
   }
 });
 
-test('ModelHub catalog drives listing and real SDK request routing, including cached instances', async (t) => {
+test('ModelHub catalog drives listing and real SDK request routing, including cached instances', async t => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   const gateway = new ModelHubGateway({ apiKey: 'server-test-key', baseURL: hub.baseURL });
@@ -68,17 +68,17 @@ test('ModelHub catalog drives listing and real SDK request routing, including ca
   assert.equal(hub.state.requests[2].body.model, 'new-qwen-route', 'temporary failure retains validated snapshot');
 });
 
-test('invalid or unavailable first catalog fails closed', async (t) => {
+test('invalid or unavailable first catalog fails closed', async t => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   for (const corrupt of [
-    (catalog) => {
+    catalog => {
       catalog.free_chat_models = [];
     },
-    (catalog) => {
+    catalog => {
       catalog.free_chat_models.push(catalog.free_chat_models[0]);
     },
-    (catalog) => {
+    catalog => {
       catalog.free_chat_models[0].default_thinking_level = 'missing';
     },
   ]) {
@@ -92,7 +92,7 @@ test('invalid or unavailable first catalog fails closed', async (t) => {
   assert.throws(() => new ModelHubGateway({ apiKey: 'test-key', baseURL: 'http://untrusted.example/v1' }));
 });
 
-test('catalog publishes names and supported reasoning; a selected level controls the upstream route', async (t) => {
+test('catalog publishes names and supported reasoning; a selected level controls the upstream route', async t => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   hub.state.catalog.free_chat_models[1].thinking_options.push({
@@ -110,7 +110,7 @@ test('catalog publishes names and supported reasoning; a selected level controls
     contextWindows: { high: 131072 },
   });
   const model = await gateway.resolveLanguageModel({ modelId: 'qwen3.8-max' });
-  const generate = (level) =>
+  const generate = level =>
     model.doGenerate({
       prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
       providerOptions: { altflow: { reasoningLevel: level } },
@@ -127,7 +127,7 @@ test('catalog publishes names and supported reasoning; a selected level controls
   assert.equal(hub.state.requests.length, 2);
 });
 
-test('model/info supplies exact per-reasoning route capacities without guessing output limits as context', async (t) => {
+test('model/info supplies exact per-reasoning route capacities without guessing output limits as context', async t => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   hub.state.catalog.free_chat_models[1].thinking_options.push({
@@ -149,7 +149,7 @@ test('model/info supplies exact per-reasoning route capacities without guessing 
   assert.equal(hub.state.infos, 1);
 });
 
-test('missing or unavailable model/info never fabricates a context capacity or blocks chat', async (t) => {
+test('missing or unavailable model/info never fabricates a context capacity or blocks chat', async t => {
   const hub = await modelHubFixture();
   t.after(hub.close);
   hub.state.info.data = [{ model_name: 'internal-deepseek-route', model_info: { max_output_tokens: 131072 } }];
@@ -162,14 +162,20 @@ test('missing or unavailable model/info never fabricates a context capacity or b
   assert.equal((await gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' })).modelId, 'deepseek-v4-pro');
 });
 
-
 test('gateway caps output for every call while retaining the physical model/info limit', async t => {
-  const hub = await modelHubFixture(); t.after(hub.close);
+  const hub = await modelHubFixture();
+  t.after(hub.close);
   const gateway = new ModelHubGateway({ apiKey: 'test', baseURL: hub.baseURL });
   assert.equal((await gateway.modelInfo())['internal-deepseek-route'], 1048576);
   const model = await gateway.resolveLanguageModel({ modelId: 'deepseek-v4-pro' });
-  await model.doGenerate({ prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }], maxOutputTokens: 64000 });
+  await model.doGenerate({
+    prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+    maxOutputTokens: 64000,
+  });
   assert.equal(hub.state.requests.at(-1).body.max_tokens, 8192);
-  await model.doGenerate({ prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }], maxOutputTokens: 100 });
+  await model.doGenerate({
+    prompt: [{ role: 'user', content: [{ type: 'text', text: 'hello' }] }],
+    maxOutputTokens: 100,
+  });
   assert.equal(hub.state.requests.at(-1).body.max_tokens, 100);
 });

@@ -1,6 +1,6 @@
 # 创作者助手工具
 
-同事实现已以 `39c2fab5c6` 合入主工作树 `/Users/huawuque/工作/mastra` 的 `altflow` 分支。运行应用仍位于本目录。
+公共工具库位于 `integrations/altflow-tools`，应用组装位于 `apps/altflow`。两者均由主仓库的 `altflow` 分支维护。
 
 ## 能力
 
@@ -12,19 +12,17 @@
 
 ## 本地安装与验证
 
-package.json 通过相对 file 路径引用主工作树里的 `integrations/altflow-tools`。换机器或移动目录后需要修改该路径；部署时先构建包、打包或发布到私有 registry，再安装产物。
+`package.json` 使用 `workspace:*` 引用同仓库的框架和工具包。从仓库根目录执行：
 
 ```sh
-# 在 Mastra 工作树中构建 @mastra/altflow-tools
+pnpm install --frozen-lockfile
 pnpm --filter @mastra/altflow-tools build:lib
-# 回到本应用，使用复制安装以共用本应用的 Mastra 实例
-npm install --install-links
-npm run typecheck
-npm run test:tools
-npm test
+pnpm --filter @internal/altflow typecheck
+pnpm --filter @internal/altflow test:tools
+pnpm --filter @internal/altflow test
 ```
 
-包源码改变后应先重新构建并更新应用安装的包副本。UI 位于主工作树 `packages/playground` 与 `packages/playground-ui`。
+工具包源码改变后先重新构建，无需复制安装包。UI 位于 `packages/playground` 与 `packages/playground-ui`。
 
 ## 搜索配置
 

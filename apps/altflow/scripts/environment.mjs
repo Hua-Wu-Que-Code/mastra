@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
-import { parseEnv } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { parseEnv } from 'node:util';
 
 // Load only explicitly configured files. Never search another checkout for secrets.
 const local = parseEnv(

@@ -26,7 +26,7 @@
 
 ## 参考与验证边界
 
-参考源码：`/Users/huawuque/工作/deepseek-harness/packages/subagent`、`packages/team`、`packages/client/ui-subagent`、`packages/client/ui-agent-team`。
+参考源码：DeepSeek Harness 的 `packages/subagent`、`packages/team`、`packages/client/ui-subagent`、`packages/client/ui-agent-team`。
 
 自动测试使用真实 Agent、LibSQL、HTTP、文件适配器和 UI hooks；付费模型与外部 OSS/Go 认证服务的网络边界使用协议样本。覆盖动态 9 次工具调用、身份隔离、并发容量、异常恢复、用户插话、中断继续、冷恢复、任务 revision 与 UI 导航。冷恢复测试创建新的运行管理器；不是实际杀进程故障注入。
 
@@ -39,5 +39,5 @@
 - 类型检查、受影响文件 lint、双语检查和 Studio/组件库/工具包构建通过。
 - 真实浏览器核对已有会话标题与文件面板；修正 Vite 缺少 `/altflow` 代理导致返回 HTML 的问题。子会话导航及输入用真实 hooks 与 HTTP 协议样本验证，尚未执行付费模型的浏览器全流程。
 - 容量满时继续子会话，先校验接收容量再保存输入；被拒绝的输入不会成为历史消息。
-- 本地 `npm start` 使用 `start-built.mjs` 打包后启动，复用当前安装并验证过的框架依赖，避免开发发现进程与运行进程争用 DuckDB。该入口不是独立部署包：独立部署仍需携带对应的本地框架构建，不能换成同版本的未经补丁的公开包。
+- 本地 `pnpm --filter @internal/altflow start` 使用 `start-built.mjs` 打包后启动，复用当前安装并验证过的框架依赖，避免开发发现进程与运行进程争用 DuckDB。该入口不是独立部署包：独立部署仍需携带对应的本地框架构建，不能换成同版本的未经补丁的公开包。
 - 本地运行端口：4111 API、5174 Studio、8080 账号服务。补齐代码保留为未提交修改，未推送。

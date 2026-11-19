@@ -1,19 +1,33 @@
-# 创作者助手
+# Altflow 应用
 
 Go 后端复用 AltFlow 的密码登录、令牌校验、退出和账号角色。TypeScript/Mastra 负责 Agent、模型、会话记忆和知识库。认证接入不依赖 Mastra Enterprise 登录或 RBAC。
 
 ## 本地启动
 
-需要 Node.js 24+、Go、PostgreSQL、已配置的 AltFlow 账号库，以及同一套修改后的 Mastra Studio 源码。
+本应用位于主仓库的 `apps/altflow`，与 `packages/playground`、`packages/playground-ui` 和 `integrations/altflow-tools` 一起由 `altflow` 分支维护。框架及工具依赖使用 `workspace:*`，安装时由根目录的 `pnpm-lock.yaml` 锁定，无需原来的独立 `mastra-preview` 目录。
 
-1. `npm ci`，复制 `.env.example` 为 `.env`。
-2. 配置 `ALTFLOW_BACKEND_REPO` 和 `ALTFLOW_BACKEND_ENV_FILE`，指向含 `cmd/studio-auth` 的 Go 仓库及本地环境文件。
-3. 配置 `ALTFLOW_MODELHUB_API_KEY`；或通过 `ALTFLOW_MODELHUB_ENV_FILE` 明确指定含 `LITELLM_MASTER_KEY` 的文件。启动器不会搜索其他目录的密钥。
-4. 配置服务端 `ALTFLOW_OSS_ACCESS_KEY_ID`、`ALTFLOW_OSS_ACCESS_KEY_SECRET`，以及 `.env.example` 中的 OSS 桶和区域。
-5. 分别运行 `npm run dev:auth` 和 `npm run dev`，监听 `127.0.0.1:8080` 和 `127.0.0.1:4111`。
-6. 在修改后的 Mastra 仓库运行 Studio 的 Vite 开发服务，端口 5174，将 `/api`、`/account`、`/storage` 代理到 4111。
+需要 Node.js 24.11+、仓库指定的 pnpm、Go、PostgreSQL 和已配置的 AltFlow 账号库。从仓库根目录执行：
 
-Go 认证入口只用于本地开发，不启动项目任务恢复或业务后台任务，不迁移数据库。正式部署应让 `ALTFLOW_BACKEND_URL` 指向正式 Go 服务，配置 `STUDIO_ALLOWED_ORIGINS`，使用 HTTPS、持久化存储及生产进程入口；这份开发启动脚本不承担部署。
+```sh
+pnpm install --frozen-lockfile
+cp apps/altflow/.env.example apps/altflow/.env
+# 填写 apps/altflow/.env 后构建应用及其依赖
+pnpm exec turbo build --filter=@internal/altflow --concurrency=1
+```
+
+构建依赖时逐包执行；不要从仓库根目录直接运行应用的 TypeScript 配置。
+
+1. 在 `apps/altflow/.env` 配置 `ALTFLOW_BACKEND_REPO` 和 `ALTFLOW_BACKEND_ENV_FILE`，指向含 `cmd/studio-auth` 的 Go 仓库及本地环境文件。
+2. 配置 `ALTFLOW_MODELHUB_API_KEY`；或用 `ALTFLOW_MODELHUB_ENV_FILE` 明确指定含 `LITELLM_MASTER_KEY` 的文件。启动器不会搜索其他目录的密钥。
+3. 配置服务端 `ALTFLOW_OSS_ACCESS_KEY_ID`、`ALTFLOW_OSS_ACCESS_KEY_SECRET`，以及 `.env.example` 中的 OSS 桶和区域。
+4. 分别运行 `pnpm --filter @internal/altflow dev:auth` 和 `pnpm --filter @internal/altflow start`，监听 `127.0.0.1:8080` 和 `127.0.0.1:4111`。`dev` 提供热重载，使用 DuckDB 时优先使用单进程 `start`。
+5. 运行 `pnpm --filter @internal/playground dev --port 5174`，将 `/api`、`/account`、`/storage`、`/conversation-projects`、`/account-preferences`、`/altflow` 代理到 4111。
+
+Go 认证入口用于本地开发，不启动项目任务恢复或业务后台任务，不迁移数据库。正式部署让 `ALTFLOW_BACKEND_URL` 指向正式 Go 服务，配置 `STUDIO_ALLOWED_ORIGINS`，并使用 HTTPS 和持久化存储。
+
+### 已有数据
+
+源码合并不移动现有安装的数据库、环境文件、上传资料或工作区。切换服务前，停止旧进程并备份数据；通过 `ALTFLOW_RUNTIME_ROOT` 指向原有数据根目录，即可沿用原目录下的 `src/mastra/public/preview.db`、`data/`、`workspace/` 和 `.cache/embeddings/`。`MASTRA_PREVIEW_ROOT` 作为旧配置别名继续兼容。不要让两个进程同时打开同一个 DuckDB 文件。
 
 ## 模型
 
@@ -51,12 +65,12 @@ ModelHub 适配器显式启用 `includeUsage`，流式请求携带 `stream_optio
 
 ## 验证
 
-- `npm run typecheck`：配置与适配器类型。
-- `npm test`：真实 AI SDK 通过本地 HTTP ModelHub 测试服务验证目录校验、模型路由、默认思考参数、刷新与故障缓存，以及真实 Agent + 临时 LibSQL 的压缩、恢复、工具配对、模型切换、取消和溢出重试；不调用付费模型。
+- `pnpm --filter @internal/altflow typecheck`：配置与适配器类型。
+- `pnpm --filter @internal/altflow test`：真实 AI SDK 通过本地 HTTP ModelHub 测试服务验证目录校验、模型路由、默认思考参数、刷新与故障缓存，以及真实 Agent + 临时 LibSQL 的压缩、恢复、工具配对、模型切换、取消和溢出重试；不调用付费模型。
 - 通用设置中的“繁忙时的发送行为”默认排队发送。Enter 和发送按钮遵循该选项，Cmd/Ctrl+Enter 使用另一行为；可切换为插话发送。普通用户的两种发送方式均由服务端检查会话归属。
-- 设置 `TEST_STUDIO_DATABASE_URL` 后运行 `npm run verify`：真实 Go 密码验证、临时 Mastra 实例及独立账号，验证角色、跨用户隔离、私有知识、目录过滤、自动工具执行、繁忙时排队与插话、停用、角色变更和退出。
+- 设置 `TEST_STUDIO_DATABASE_URL` 后运行 `pnpm --filter @internal/altflow verify`：真实 Go 密码验证、临时 Mastra 实例及独立账号，验证角色、跨用户隔离、私有知识、目录过滤、自动工具执行、繁忙时排队与插话、停用、角色变更和退出。
 - 测试库名必须以 `studio_auth_verify_` 开头，并预先人工准备与 Go 相同的 schema。测试不自动迁移，不使用正常业务库。
-- `TEST_STUDIO_LIVE_MODEL=1 npm run verify` 使用真实 ModelHub 目录及模型，验证回复和消息保存，会产生模型费用。默认验证使用本地 HTTP 目录服务。
+- `TEST_STUDIO_LIVE_MODEL=1 pnpm --filter @internal/altflow verify` 使用真实 ModelHub 目录及模型，验证回复和消息保存，会产生模型费用。默认验证使用本地 HTTP 目录服务。
 
 ## 用户文件与 512 MB 配额
 
@@ -67,16 +81,15 @@ ModelHub 适配器显式启用 `includeUsage`，流式请求携带 `stream_optio
 - `/storage`、`/storage/upload`、`/storage/download`、`/storage/file` 每次复用 Go 身份验证；Cookie 写请求校验 Origin，下载无公共 OSS URL。页面支持容量条、文件/图像分类、搜索、下载、删除确认和错误恢复。
 - 当前身份需有桶内 `users/*` 的 `oss:PutObject`、`oss:GetObject`、`oss:DeleteObject` 权限。验证前缀 `integration-tests/*` 用于独立连通性检查。删除权限缺失时页面会报错，不会伪造删除成功。
 - `node --import tsx scripts/import-legacy-files.mjs` 可恢复历史会话中的原始文本附件和内联文件，按会话账本归属写入用户空间。旧 `creator-agent` 资源必须有明确的 `ALTFLOW_LEGACY_OWNER_ID`；不推断归属、不下载历史外部 URL、不改写会话，重复执行不会重复占用空间。
-- `npm test` 包含真实 OSS SDK 对接本地 HTTP 边界、真实临时 LibSQL、真实文件适配器和 HTTP 路由验证，覆盖并发配额、身份隔离、Origin、重启恢复、读取/生成、下载和失败删除。
+- `pnpm --filter @internal/altflow test` 包含真实 OSS SDK 对接本地 HTTP 边界、真实临时 LibSQL、真实文件适配器和 HTTP 路由验证，覆盖并发配额、身份隔离、Origin、重启恢复、读取/生成、下载和失败删除。
 
 官方参考：[Mastra 文件系统](https://mastra.ai/docs/sandbox/filesystem)、[OSS Node.js SDK 初始化](https://www.alibabacloud.com/help/en/oss/initialization-10)。
 
-
 ## 本地集成启动
 
-`npm start` 通过 `start-built.mjs` 编译后启动 4111 服务。它复用本项目当前安装的本地框架及工具包，不在输出目录重新安装公开包，以免覆盖本地框架实现。此入口没有热重载；修改运行代码后重新执行。Studio 开发入口仍为 5174，账号服务由 `npm run dev:auth` 提供。
+`pnpm --filter @internal/altflow start` 通过 `start-built.mjs` 编译后启动 4111 服务。它使用本仓库的 workspace 框架及工具包，不在输出目录重新安装公开包，以免覆盖本地框架实现。此入口没有热重载；修改运行代码后重新执行。Studio 开发入口仍为 5174，账号服务由 `pnpm --filter @internal/altflow dev:auth` 提供。
 
-独立部署必须同时打包匹配的框架依赖；不能把此本地启动结果视为已验证公开 registry 依赖的独立部署。动态子智能体的契约、界面及验收边界见 [DSH-SUBAGENT-HANDOFF.md](./DSH-SUBAGENT-HANDOFF.md)。
+部署时须携带本分支构建的框架依赖与根锁文件；公开 registry 中的同名包不能替代本分支实现。动态子智能体的契约、界面及验收边界见 [DSH-SUBAGENT-HANDOFF.md](./DSH-SUBAGENT-HANDOFF.md)。
 
 ## Context component estimates
 
