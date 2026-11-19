@@ -16,6 +16,7 @@ import {
   taskCheckTool,
 } from '@mastra/core/tools';
 import type { ToolAction } from '@mastra/core/tools';
+import { createValidateScriptFormatTool } from './validate-script-format';
 
 export function createCreatorTools(options: {
   countText: ToolAction<any, any>;
@@ -42,6 +43,7 @@ export function createCreatorTools(options: {
     task_check: taskCheckTool,
     session_search: createSessionSearchTool({ service: options.sessionSearch }),
     present: createPresentTool({ service: options.delivery }),
+    validate_script_format: createValidateScriptFormatTool(),
     ...(provider ? { web_search: createWebSearchTool({ provider }) } : {}),
   };
   return { tools, providerConfigured: Boolean(provider), providerName };

@@ -26,7 +26,8 @@ import { fixture, context, runOptions, toolResults } from './tool-fixture.mjs';
 
 test('native task tools persist through a real Agent run and a reopened LibSQL store', async t => {
   const f = await fixture(t);
-  assert.equal(Object.keys(f.bundle.tools).length, 10);
+  assert.equal(Object.keys(f.bundle.tools).length, 11);
+  assert.ok('validate_script_format' in f.bundle.tools);
   assert.equal('web_search' in f.bundle.tools, false);
   assert.equal(
     Object.keys(f.bundle.tools).some(name => name.startsWith('schedule')),
