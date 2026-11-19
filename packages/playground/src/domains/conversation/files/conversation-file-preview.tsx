@@ -47,7 +47,7 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
         <Button variant="ghost" size="icon-sm" aria-label={t('Back to files')} onClick={onBack}>
           <IconArrowLeft />
         </Button>
-        <Txt variant="label" className="min-w-0 flex-1 truncate" title={file.path}>
+        <Txt variant="label" className="min-w-0 flex-1 truncate" title={file.name}>
           {file.name}
         </Txt>
         <Button
@@ -60,9 +60,6 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
           <IconCloudDownload />
         </Button>
       </div>
-      <Txt variant="caption" tone="muted" className="break-all px-4 py-2">
-        {file.path}
-      </Txt>
       {download.isError && (
         <Txt role="alert" className="px-4">
           {download.error.message}
@@ -86,7 +83,7 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
           /\.md$/i.test(file.name) || file.mimeType === 'text/markdown' ? (
             <MarkdownRenderer>{preview.data.text}</MarkdownRenderer>
           ) : (
-            <pre className="whitespace-pre-wrap break-words font-mono text-label">{preview.data.text}</pre>
+            <pre className="font-mono text-label break-words whitespace-pre-wrap">{preview.data.text}</pre>
           )
         ) : preview.data?.blob ? (
           <ConversationBinaryPreview key={preview.dataUpdatedAt} blob={preview.data.blob} name={file.name} pdf={pdf} />
