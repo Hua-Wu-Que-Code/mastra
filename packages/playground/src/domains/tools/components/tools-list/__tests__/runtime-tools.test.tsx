@@ -9,7 +9,7 @@ import { renderWithProviders } from '@/test/render';
 const countText: GetToolResponse = { id: 'count-text', description: 'Count characters.' };
 describe('runtime capabilities in the tool list', () => {
   describe('when the registry and runtime catalog overlap', () => {
-    it('deduplicates tools, shows missing credentials and keeps runtime tools out of the unscoped playground', () => {
+    it('deduplicates tools, shows missing credentials and links every runtime tool to its details', () => {
       renderWithProviders(
         <TestLinkProvider>
           <ToolsList tools={{ countText }} agents={{}} isLoading={false} catalog={runtimeCatalog} />
@@ -18,8 +18,8 @@ describe('runtime capabilities in the tool list', () => {
       expect(screen.getAllByText('count-text')).toHaveLength(1);
       expect(screen.getByText('mastra_workspace_read_file')).toBeTruthy();
       expect(screen.getByText(/Configure a search provider/)).toBeTruthy();
-      expect(screen.getAllByRole('link')).toHaveLength(1);
-      expect(screen.getByRole('link').textContent).toContain('count-text');
+      expect(screen.getAllByRole('link')).toHaveLength(runtimeCatalog.length);
+      expect(screen.getByRole('link', { name: /count-text/ }).textContent).toContain('count-text');
       expect(screen.getByText(/Enabled in conversation/)).toBeTruthy();
     });
   });

@@ -1,3 +1,4 @@
+import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
@@ -9,15 +10,19 @@ import { StudioConfigContext } from '@/domains/configuration/context/studio-conf
 import { server } from '@/test/msw-server';
 const baseUrl = 'http://localhost:4111';
 afterEach(cleanup);
+
 function show() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  server.use(http.get(`${baseUrl}/api/mcp/v0/servers`, () => HttpResponse.json({ servers: [], totalCount: 0 })));
   return render(
     <MemoryRouter>
       <QueryClientProvider client={client}>
         <StudioConfigContext.Provider value={{ baseUrl, headers: {}, isLoading: false, setConfig: () => {} }}>
-          <ConversationTree root="root-one">
-            <div>Root conversation</div>
-          </ConversationTree>
+          <MastraReactProvider baseUrl={baseUrl}>
+            <ConversationTree root="root-one">
+              <div>Root conversation</div>
+            </ConversationTree>
+          </MastraReactProvider>
         </StudioConfigContext.Provider>
       </QueryClientProvider>
     </MemoryRouter>,
@@ -44,7 +49,11 @@ describe('Conversation tree', () => {
       let submitted: unknown;
       server.use(
         http.get(`${baseUrl}/altflow/subagents`, ({ request }) =>
-          HttpResponse.json(new URL(request.url).searchParams.has('child') ? childTree : tree),
+          HttpResponse.json(
+            new URL(request.url).searchParams.has('child')
+              ? { ...childTree, teamEnabled: true }
+              : { ...tree, teamEnabled: true },
+          ),
         ),
         http.post(`${baseUrl}/altflow/subagents`, async ({ request }) => {
           submitted = { url: request.url, body: await request.json() };
@@ -64,6 +73,64 @@ describe('Conversation tree', () => {
           body: { action: 'prompt', prompt: 'Check the second source' },
         }),
       );
+    });
+  });
+  describe('when teamwork is disabled', () => {
+    it('preserves the saved child transcript and disables new child instructions', async () => {
+      server.use(
+        http.get(`${baseUrl}/altflow/subagents`, ({ request }) =>
+          HttpResponse.json(new URL(request.url).searchParams.has('child') ? childTree : tree),
+        ),
+      );
+      show();
+      fireEvent.click(await screen.findByRole('button', { name: '1 sub-agents' }));
+      fireEvent.click(await screen.findByRole('button', { name: /Research sources/ }));
+      expect(await screen.findByText('Verified sources for the report.')).toBeTruthy();
+      expect(screen.getByRole('textbox', { name: 'Message sub-agent' }).hasAttribute('disabled')).toBe(true);
+      expect(screen.getByRole('button', { name: 'Send message' }).hasAttribute('disabled')).toBe(true);
+      expect(document.querySelector('[data-slot="composer-box"]')).toBeTruthy();
+    });
+    it('renders saved tool arguments and results with the root chat tool card', async () => {
+      server.use(
+        http.get(`${baseUrl}/altflow/subagents`, ({ request }) =>
+          HttpResponse.json(
+            new URL(request.url).searchParams.has('child')
+              ? {
+                  ...childTree,
+                  messages: [
+                    {
+                      ...childTree.messages[0],
+                      content: {
+                        format: 2,
+                        parts: [
+                          {
+                            type: 'tool-invocation',
+                            toolInvocation: {
+                              toolCallId: 'tool-one',
+                              toolName: 'verify_source',
+                              state: 'result',
+                              args: { source: 'source-42' },
+                              result: { verified: 'CHILD-TOOL-RESULT' },
+                            },
+                          },
+                          { type: 'text', text: 'Verified sources for the report.' },
+                        ],
+                      },
+                    },
+                  ],
+                }
+              : tree,
+          ),
+        ),
+      );
+      show();
+      fireEvent.click(await screen.findByRole('button', { name: '1 sub-agents' }));
+      fireEvent.click(await screen.findByRole('button', { name: /Research sources/ }));
+      await screen.findByText('Verified sources for the report.');
+      fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      fireEvent.click(await screen.findByText('verify_source'));
+      expect(await screen.findByText(/source-42/)).toBeTruthy();
+      expect(await screen.findByText(/CHILD-TOOL-RESULT/)).toBeTruthy();
     });
   });
   describe('when there are no children', () => {

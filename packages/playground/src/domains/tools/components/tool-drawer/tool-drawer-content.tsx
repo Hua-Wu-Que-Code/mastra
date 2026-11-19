@@ -13,17 +13,28 @@ export interface ToolDrawerContentProps {
   playground: ReactNode;
   /** False when the viewer can't execute tools: the Playground tab is disabled. */
   canRun: boolean;
+  runDisabledReason?: string;
 }
 
 /** What the tool is (Overview) apart from running it (Playground). */
-export function ToolDrawerContent({ description, overview, playground, canRun }: ToolDrawerContentProps) {
+export function ToolDrawerContent({
+  description,
+  overview,
+  playground,
+  canRun,
+  runDisabledReason,
+}: ToolDrawerContentProps) {
   useLocale();
   return (
     <>
       <Tabs<ToolDrawerTab> defaultTab="overview" className="grid flex-1 grid-rows-[auto_1fr] gap-4 overflow-visible">
         <TabList variant="pill" size="sm">
           <Tab value="overview">{studioT('Overview')}</Tab>
-          <Tab value="playground" disabled={!canRun} disabledTooltip="You don't have permission to execute tools.">
+          <Tab
+            value="playground"
+            disabled={!canRun}
+            disabledTooltip={runDisabledReason ?? studioT("You don't have permission to execute tools.")}
+          >
             {studioT('Playground')}
           </Tab>
         </TabList>

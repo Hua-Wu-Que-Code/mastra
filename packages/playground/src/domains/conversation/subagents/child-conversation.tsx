@@ -1,14 +1,25 @@
 import { Button } from '@mastra/playground-ui/components/Button';
-import { MarkdownRenderer } from '@mastra/playground-ui/components/MarkdownRenderer';
-import { Textarea } from '@mastra/playground-ui/components/Textarea';
+import {
+  Composer,
+  ComposerBox,
+  ComposerRing,
+  ComposerInput,
+  ComposerActions,
+  ComposerActionsEnd,
+} from '@mastra/playground-ui/components/Composer';
+import { groupTurns } from '@mastra/playground-ui/components/ThreadRail';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { ChatMessagesContext, ChatRunningContext } from '@mastra/playground-ui/domains/chat/context/chat-context';
+import { ToolCallProvider } from '@mastra/playground-ui/domains/chat/context/tool-call-context';
+import { MessageRow } from '@mastra/playground-ui/domains/chat/messages/message-row';
+import { WorkDetails, WorkDetailsToggle } from '@mastra/playground-ui/domains/chat/preferences/work-details-context';
 import { IconArrowUp } from '@mastra/playground-ui/icons/central/IconArrowUp';
 import { IconStop } from '@mastra/playground-ui/icons/central/IconStop';
 import { t } from '@mastra/playground-ui/lib/i18n';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { childDuration, childUsage } from './child-metrics';
-import { subagentRequest } from './subagent-api';
+import { childMessages, subagentRequest } from './subagent-api';
 import type { ChildAgent } from './subagent-api';
 import { useAccount } from '@/domains/account/account-context';
 import { useStudioConfig } from '@/domains/configuration/context/studio-config-state';
@@ -38,8 +49,11 @@ export function ChildConversation({ root, id, child }: { root: string; id: strin
     },
   });
   const active = child && ['preparing', 'queued', 'running'].includes(child.state);
+  const messages = childMessages(history.data);
+  const turns = groupTurns(messages, { key: message => message.id, opensTurn: message => message.role === 'user' });
+  const canSend = history.data?.teamEnabled === true;
   const send = () => {
-    if (prompt.trim() && !mutation.isPending) mutation.mutate({ action: 'prompt', prompt: prompt.trim() });
+    if (canSend && prompt.trim() && !mutation.isPending) mutation.mutate({ action: 'prompt', prompt: prompt.trim() });
   };
   return (
     <section className="flex h-full min-h-0 flex-col" aria-label={t('Sub-agent conversation')}>
@@ -67,27 +81,46 @@ export function ChildConversation({ root, id, child }: { root: string; id: strin
                   </Button>
                 )}
               </div>
-              {history.data?.messages.map(message => (
-                <div
-                  key={message.id}
-                  className={
-                    message.role === 'user' ? 'ml-auto w-fit max-w-full rounded-2xl bg-surface3 px-4 py-3' : ''
-                  }
-                >
-                  {message.tools.map((tool, index) => (
-                    <Txt
-                      key={`${tool.name}:${index}`}
-                      tone="muted"
-                      variant="caption"
-                      className="flex items-center gap-3 py-1"
-                    >
-                      <span>{tool.name}</span>
-                      <span>{tool.state}</span>
-                    </Txt>
-                  ))}
-                  {message.text && <MarkdownRenderer>{message.text}</MarkdownRenderer>}
-                </div>
-              ))}
+              <ToolCallProvider
+                approveToolcall={() => {}}
+                declineToolcall={() => {}}
+                approveToolcallGenerate={() => {}}
+                declineToolcallGenerate={() => {}}
+                approveNetworkToolcall={() => {}}
+                declineNetworkToolcall={() => {}}
+                isRunning={Boolean(active)}
+                toolCallApprovals={{}}
+                networkToolCallApprovals={{}}
+              >
+                <ChatMessagesContext.Provider value={{ messages }}>
+                  <ChatRunningContext.Provider
+                    value={{
+                      isRunning: Boolean(active),
+                      cancelRun: () => mutation.mutate({ action: 'interrupt' }),
+                      canSendWhileStreaming: canSend,
+                    }}
+                  >
+                    {turns.map((turn, index) => (
+                      <div key={turn.key} className="flex flex-col gap-4">
+                        <WorkDetails
+                          messages={turn.entries}
+                          running={Boolean(active) && index === turns.length - 1}
+                          latest={index === turns.length - 1}
+                        >
+                          {turn.entries.map((message, messageIndex) => (
+                            <Fragment key={message.id}>
+                              {messageIndex === turn.entries.findIndex(entry => entry.role === 'assistant') && (
+                                <WorkDetailsToggle />
+                              )}
+                              <MessageRow message={message} readOnly />
+                            </Fragment>
+                          ))}
+                        </WorkDetails>
+                      </div>
+                    ))}
+                  </ChatRunningContext.Provider>
+                </ChatMessagesContext.Provider>
+              </ToolCallProvider>
               {active && (
                 <Txt role="status" tone="muted">
                   {t('Working…')}
@@ -116,50 +149,57 @@ export function ChildConversation({ root, id, child }: { root: string; id: strin
           </div>
         )}
         {mutation.isError && <Txt role="alert">{mutation.error.message}</Txt>}
-        <form
+        <Composer
           onSubmit={event => {
             event.preventDefault();
             send();
           }}
-          className="rounded-2xl border border-border bg-surface1 p-3"
         >
-          <Textarea
-            aria-label={t('Message sub-agent')}
-            placeholder={t('Message sub-agent')}
-            maxLength={32000}
-            value={prompt}
-            onChange={event => setPrompt(event.target.value)}
-            disabled={!history.data || mutation.isPending}
-            onKeyDown={event => {
-              if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
-                event.preventDefault();
-                send();
-              }
-            }}
-          />
-          <div className="mt-2 flex justify-end gap-2">
-            {active && (
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="ghost"
-                aria-label={t('Stop sub-agent')}
-                disabled={mutation.isPending}
-                onClick={() => mutation.mutate({ action: 'interrupt' })}
-              >
-                <IconStop />
-              </Button>
-            )}
-            <Button
-              type="submit"
-              size="icon-sm"
-              aria-label={t('Send message')}
-              disabled={!history.data || !prompt.trim() || mutation.isPending}
-            >
-              <IconArrowUp />
-            </Button>
-          </div>
-        </form>
+          <ComposerRing busy={Boolean(active)}>
+            <ComposerBox>
+              <ComposerInput
+                aria-label={t('Message sub-agent')}
+                placeholder={t('Message sub-agent')}
+                maxLength={32000}
+                value={prompt}
+                onChange={event => setPrompt(event.target.value)}
+                disabled={!canSend || mutation.isPending}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                    event.preventDefault();
+                    send();
+                  }
+                }}
+              />
+              <ComposerActions>
+                <span />
+                <ComposerActionsEnd>
+                  {active && (
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label={t('Stop sub-agent')}
+                      disabled={mutation.isPending}
+                      onClick={() => mutation.mutate({ action: 'interrupt' })}
+                    >
+                      <IconStop />
+                    </Button>
+                  )}
+                  <Button
+                    type="submit"
+                    size="icon-md"
+                    variant="primary"
+                    aria-label={t('Send message')}
+                    disabled={!canSend || !prompt.trim() || mutation.isPending}
+                  >
+                    <IconArrowUp />
+                  </Button>
+                </ComposerActionsEnd>
+              </ComposerActions>
+            </ComposerBox>
+          </ComposerRing>
+        </Composer>
       </div>
     </section>
   );

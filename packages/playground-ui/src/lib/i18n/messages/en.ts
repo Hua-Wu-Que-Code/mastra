@@ -4,6 +4,9 @@ export const en = {
   '{count} sub-agents': '{count} sub-agents',
   '{count} running': '{count} running',
   'Sub-agent': 'Sub-agent',
+  'This tool runs in a conversation and requires its runtime context.':
+    'This tool runs in a conversation and requires its runtime context.',
+  "You don't have permission to execute tools.": "You don't have permission to execute tools.",
   'Sub-agent conversation': 'Sub-agent conversation',
   'Message sub-agent': 'Message sub-agent',
   'Stop sub-agent': 'Stop sub-agent',

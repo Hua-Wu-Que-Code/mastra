@@ -156,7 +156,7 @@ describe('Conversation files', () => {
     expect(await screen.findByText('No files found.')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'draft.md' })).toBeNull();
   });
-  it('browses uploads and generated artifacts, searches paths and filters artifacts', async () => {
+  it('lists conversation files directly without folders or redundant panel controls', async () => {
     server.use(
       http.get(`${baseUrl}/storage`, ({ request }) => {
         expect(request.headers.get('X-Workspace')).toBe('private');
@@ -167,11 +167,10 @@ describe('Conversation files', () => {
     show();
     expect(await screen.findByRole('button', { name: 'notes.txt' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'draft.md' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Agent generated' }));
-    expect(screen.queryByRole('button', { name: 'notes.txt' })).toBeNull();
-    fireEvent.change(screen.getByRole('searchbox', { name: 'Search files' }), { target: { value: 'draft' } });
-    expect(screen.getByRole('button', { name: 'draft.md' })).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'cover.png' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Files and artifacts' })).toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
+    expect(screen.queryByText('Agent generated')).toBeNull();
+    expect(document.querySelector('summary')).toBeNull();
   });
 
   it('fetches an authenticated preview, renders Markdown and returns to the file tree', async () => {

@@ -12,6 +12,9 @@ export const toolCatalogEntrySchema = z.object({
   reason: z.string().optional(),
   agents: z.array(z.string()),
   runtime: z.boolean(),
+  inputSchema: z.unknown().optional(),
+  outputSchema: z.unknown().optional(),
+  requestContextSchema: z.unknown().optional(),
 });
 const catalogSchema = z.object({ entries: z.array(toolCatalogEntrySchema) });
 export type ToolCatalogEntry = z.infer<typeof toolCatalogEntrySchema>;

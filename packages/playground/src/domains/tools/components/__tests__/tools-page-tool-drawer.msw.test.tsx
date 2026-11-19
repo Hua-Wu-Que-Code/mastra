@@ -23,6 +23,7 @@ const renderDrawer = (toolId: string) =>
 
 const useBaseHandlers = () => {
   server.use(
+    http.get(`${TEST_BASE_URL}/altflow/tools/catalog`, () => HttpResponse.json({ entries: [] })),
     http.get(`${TEST_BASE_URL}/api/auth/capabilities`, () => HttpResponse.json(authDisabled)),
     http.get(`${TEST_BASE_URL}/api/agents`, () => HttpResponse.json(agentsWithRefundUser)),
     http.get(`${TEST_BASE_URL}/api/tools/refundUser`, () => HttpResponse.json(refundUserTool)),
@@ -61,6 +62,38 @@ describe('Tools page tool drawer', () => {
       await waitFor(() => expect(onExecute).toHaveBeenCalledTimes(1));
       expect(document.body.textContent).toMatch(/"newBalance":\s*25/);
       await waitForMutationsIdle(queryClient);
+    });
+  });
+
+  describe('when a tool requires conversation context', () => {
+    it('shows its description and schema without fetching or executing the unscoped tool API', async () => {
+      useBaseHandlers();
+      server.use(
+        http.get(`${TEST_BASE_URL}/altflow/tools/catalog`, () =>
+          HttpResponse.json({
+            entries: [
+              {
+                id: 'ask_user',
+                name: 'ask_user',
+                description: 'Ask the user a question.',
+                source: 'Altflow',
+                status: 'available',
+                agents: ['creator-agent'],
+                runtime: true,
+                inputSchema: {
+                  type: 'object',
+                  properties: { question: { type: 'string', description: 'Question text' } },
+                  required: ['question'],
+                },
+              },
+            ],
+          }),
+        ),
+      );
+      renderDrawer('ask_user');
+      expect(await screen.findByText('Ask the user a question.')).toBeTruthy();
+      expect(screen.getByText('question')).toBeTruthy();
+      expect(screen.getByRole('tab', { name: 'Playground' }).getAttribute('aria-disabled')).toBe('true');
     });
   });
 

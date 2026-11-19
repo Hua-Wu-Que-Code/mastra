@@ -6,6 +6,8 @@ export const zh = {
   '{count} sub-agents': '{count} 个子智能体',
   '{count} running': '{count} 个运行中',
   'Sub-agent': '子智能体',
+  'This tool runs in a conversation and requires its runtime context.': '此工具需要在会话中运行，不能在这里单独执行。',
+  "You don't have permission to execute tools.": '你没有执行工具的权限。',
   'Sub-agent conversation': '子智能体会话',
   'Message sub-agent': '向子智能体发送消息',
   'Stop sub-agent': '停止子智能体',

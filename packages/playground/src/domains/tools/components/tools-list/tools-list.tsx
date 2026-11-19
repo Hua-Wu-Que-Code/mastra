@@ -37,8 +37,6 @@ const sortAccessors = {
   name: (tool: ListItem) => tool.id,
   agents: (tool: ListItem) => tool.agentCount,
 };
-const requiresConversation = (tool: ListItem) =>
-  tool.catalog?.runtime || (tool.catalog && tool.catalog.status !== 'available');
 
 export function ToolsList({
   tools,
@@ -78,17 +76,17 @@ export function ToolsList({
     sort,
     sortAccessors,
   );
-  const interactive = filteredData.filter(tool => !requiresConversation(tool));
+  const interactive = filteredData;
   const { containerRef, getRowProps } = useDataListKeyboard({ count: interactive.length, global: true });
 
   if (isLoading) {
-    return <DataListSkeleton columns="auto 1fr auto" />;
+    return <DataListSkeleton columns="auto minmax(0,1fr) auto" />;
   }
 
   const sortFor = (key: ToolsSortKey) => (sort?.key === key ? sort.direction : undefined);
 
   return (
-    <DataList columns="auto 1fr auto" scrollRef={containerRef}>
+    <DataList columns="auto minmax(0,1fr) auto" scrollRef={containerRef}>
       <DataList.Top>
         {onSortChange ? (
           <DataList.SortableTopCell sortKey="name" sort={sortFor('name')} onSortChange={onSortChange}>
@@ -133,7 +131,7 @@ export function ToolsList({
               {description}
               {entry && (
                 <span
-                  className="text-muted-foreground flex flex-wrap gap-x-3"
+                  className="flex flex-wrap gap-x-3 text-muted-foreground"
                   title={
                     entry.reason ?? (entry.runtime ? studioT('Runtime tools are used in conversations.') : undefined)
                   }
@@ -147,7 +145,6 @@ export function ToolsList({
             <DataList.TextCell className="text-center">{tool.agentCount || ''}</DataList.TextCell>
           </>
         );
-        if (requiresConversation(tool)) return <DataList.RowStatic key={tool.id}>{cells}</DataList.RowStatic>;
         return (
           <DataList.RowLink
             key={tool.id}
