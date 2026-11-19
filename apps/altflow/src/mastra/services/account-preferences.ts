@@ -112,6 +112,16 @@ export class AccountPreferences {
       revision: row ? Number(row.revision) : 0,
     };
   }
+  async conversationOptions(owner: string, resourceId: string, agentId: string, threadId: string) {
+    const saved = await this.read(owner, resourceId, { kind: 'thread', id: JSON.stringify([agentId, threadId]) });
+    const options = schemas.thread.parse(saved.value);
+    const provider = options.selection?.provider ?? 'altflow';
+    const level = options.modelSettings?.providerOptions?.[provider]?.reasoningLevel;
+    return {
+      model: options.selection ? `${provider}/${options.selection.model}` : undefined,
+      reasoningLevel: typeof level === 'string' ? level : undefined,
+    };
+  }
   async write(owner: string, resourceId: string, command: z.infer<typeof preferenceCommand>): Promise<PreferenceEntry> {
     await this.authorize(resourceId, command, command.import);
     const tx = await this.db.transaction('write');

@@ -103,12 +103,11 @@ export class SubagentRuntime {
     });
     if (runId) this.activeRuns.set(this.key(actor, actor.self), { agent, runId });
     if (actor.self !== actor.root) return;
-    const previous = this.roots.get(this.key(actor));
     this.roots.set(this.key(actor), {
       actor,
       agent,
-      model: model ?? previous?.model,
-      reasoningLevel: reasoningLevel ?? previous?.reasoningLevel,
+      model,
+      reasoningLevel,
     });
     const saved = await this.store.read(actor.owner, actor.root);
     if (saved.children.some(child => child.state === 'preparing' && child.lease < Date.now()))
@@ -329,6 +328,10 @@ export class SubagentRuntime {
     const controller = new AbortController();
     this.wakeControllers.add(controller);
     try {
+      // Completion can arrive after the user deletes the conversation. Mastra's
+      // idle wake creates missing threads, so recheck the durable owner first.
+      const thread = await this.options.memory.getThreadById({ threadId: actor.root });
+      if (!thread || thread.resourceId !== actor.resourceId || this.closed) return;
       const delivery = await root.agent.sendSignal(
         {
           id: mail.id,

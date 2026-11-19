@@ -34,10 +34,16 @@ export function conversationFilePaths(messages: readonly MastraDBMessage[]) {
       }
       const tool: unknown = part.type === 'tool-invocation' ? part.toolInvocation : part;
       if (!record(tool) || typeof tool.toolName !== 'string') continue;
-      if (!/^(?:mastra_workspace_)?(?:read_file|write_file|edit_file)$/.test(tool.toolName)) continue;
+      const fileOperation = /^(?:mastra_workspace_)?(?:read_file|write_file|edit_file)$/.test(tool.toolName);
+      if (!fileOperation && tool.toolName !== 'present') continue;
       if (tool.state !== 'result' && tool.state !== 'output-available') continue;
       const output = tool.result ?? tool.output;
       if (record(output) && (output.isError === true || output.success === false || output.error)) continue;
+      if (tool.toolName === 'present') {
+        if (record(output) && Array.isArray(output.files))
+          for (const file of output.files) if (record(file)) add(file.path);
+        continue;
+      }
       const input = tool.args ?? tool.input;
       if (record(input)) add(input.path);
     }

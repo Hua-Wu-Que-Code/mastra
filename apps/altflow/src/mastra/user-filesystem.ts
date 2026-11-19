@@ -75,7 +75,9 @@ export class UserFilesystem extends MastraFilesystem {
   async rmdir(input: string, options?: RemoveOptions) {
     const path = filePath(input);
     const files = (await this.store.list(this.owner)).filter(file => file.path.startsWith(path + '/'));
-    if (files.length && !options?.recursive) throw new FileStorageError('目录不为空');
+    const directories = await this.store.directories(this.owner);
+    if (!options?.recursive && (files.length || directories.some(directory => directory.startsWith(path + '/'))))
+      throw new FileStorageError('目录不为空');
     for (const file of files) await this.store.remove(this.owner, file.path);
     await this.store.rmdir(this.owner, path);
   }
@@ -141,7 +143,9 @@ export class UserFilesystem extends MastraFilesystem {
     } catch (error) {
       if (!(error instanceof FileStorageError) || error.status !== 404) throw error;
       if (
-        (await this.store.directories(this.owner)).includes(path) ||
+        (await this.store.directories(this.owner)).some(
+          directory => directory === path || directory.startsWith(path + '/'),
+        ) ||
         (await this.store.list(this.owner)).some(file => file.path.startsWith(path + '/'))
       )
         return {

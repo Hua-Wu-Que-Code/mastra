@@ -122,6 +122,18 @@ test('independent uploads below quota both succeed', async t => {
   assert.equal((await store.summary('alice')).usedBytes, 7);
 });
 
+test('empty nested directories count as existing nonempty parents and remain isolated', async t => {
+  const { store } = await setup(t);
+  const fs = new UserFilesystem(store, 'alice');
+  await fs.mkdir('/drafts/chapters');
+  assert.equal(await fs.exists('/drafts'), true);
+  assert.equal(await new UserFilesystem(store, 'bob').exists('/drafts'), false);
+  await assert.rejects(fs.rmdir('/drafts'), /目录不为空/);
+  assert.equal(await fs.exists('/drafts/chapters'), true);
+  await fs.rmdir('/drafts', { recursive: true });
+  assert.equal(await fs.exists('/drafts'), false);
+});
+
 test('agent copy, move, append and recursive delete share quota and reject escaping paths', async t => {
   const { store } = await setup(t, 20);
   const fs = new UserFilesystem(store, 'alice');

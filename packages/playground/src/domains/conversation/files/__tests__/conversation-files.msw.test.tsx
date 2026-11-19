@@ -57,6 +57,44 @@ describe('Conversation files', () => {
     expect(screen.getByRole('button', { name: 'draft.md' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'cover.png' })).toBeNull();
   });
+  it('includes delivered child artifacts without showing failed deliveries or unrelated files', async () => {
+    server.use(http.get(`${baseUrl}/storage`, () => HttpResponse.json(filesFixture)));
+    show([
+      {
+        id: 'delivery',
+        role: 'assistant',
+        createdAt: new Date('2026-11-18'),
+        content: {
+          format: 2,
+          parts: [
+            {
+              type: 'tool-invocation',
+              toolInvocation: {
+                toolCallId: 'present-success',
+                toolName: 'present',
+                state: 'result',
+                args: { files: [{ path: '/outputs/draft.md' }] },
+                result: { files: [filesFixture.files[1]] },
+              },
+            },
+            {
+              type: 'tool-invocation',
+              toolInvocation: {
+                toolCallId: 'present-failed',
+                toolName: 'present',
+                state: 'result',
+                args: { files: [{ path: filesFixture.files[0].path }] },
+                result: { success: false, error: 'Delivery failed' },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+    expect(await screen.findByRole('button', { name: 'draft.md' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'notes.txt' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'cover.png' })).toBeNull();
+  });
   it('includes older attachments from the full persisted conversation history', async () => {
     const pages: number[] = [];
     server.use(

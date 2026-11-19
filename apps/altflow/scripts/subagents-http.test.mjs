@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import { Hono } from 'hono';
 import { createAltFlowAuth } from '../src/mastra/altflow-auth.ts';
 import { subagentRoutes } from '../src/mastra/routes/subagents.ts';
+import { AccountPreferences } from '../src/mastra/services/account-preferences.ts';
 import { fixture, runOptions, context } from './tool-fixture.mjs';
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function until(check) {
@@ -39,7 +40,16 @@ async function setup(t) {
     secureCookies: false,
   });
   const app = new Hono();
-  for (const route of subagentRoutes(f.tree.runtime, accounts, ['http://studio.test'], () => f.agent))
+  const preferences = new AccountPreferences(`file:${f.dir}/preferences.db`, f.memoryStore);
+  await preferences.init();
+  t.after(() => preferences.close());
+  for (const route of subagentRoutes(
+    f.tree.runtime,
+    accounts,
+    ['http://studio.test'],
+    () => f.agent,
+    actor => preferences.conversationOptions(actor.owner, actor.resourceId, 'creator-agent', actor.root),
+  ))
     app.on(route.method, route.path, route.handler);
   const request = (owner, child, action, headers = {}, root = 'alice-thread') =>
     app.request(`/altflow/subagents?${new URLSearchParams({ root, ...(child ? { child } : {}) })}`, {
@@ -50,8 +60,36 @@ async function setup(t) {
       },
       body: action ? JSON.stringify(action) : undefined,
     });
-  return { ...f, request };
+  return { ...f, request, preferences };
 }
+test('opening a saved tree restores the conversation reasoning level for subsequent children', async t => {
+  const f = await setup(t);
+  await f.preferences.write('alice', 'altflow:alice', {
+    kind: 'thread',
+    id: JSON.stringify(['creator-agent', 'alice-thread']),
+    patch: { modelSettings: { providerOptions: { altflow: { reasoningLevel: 'high' } } } },
+  });
+  assert.equal((await f.request('alice')).status, 200);
+  const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
+  await f.tree.runtime.spawn(actor, { name: 'worker', description: 'Worker', prompt: 'Continue.' });
+  await until(async () => (await f.treeStore.read('alice', actor.root)).children[0]?.state === 'completed');
+  assert.equal((await f.treeStore.read('alice', actor.root)).children[0].reasoningLevel, 'high');
+});
+test('resetting a saved reasoning preference clears the previous tree attachment', async t => {
+  const f = await setup(t);
+  const address = { kind: 'thread', id: JSON.stringify(['creator-agent', 'alice-thread']) };
+  await f.preferences.write('alice', 'altflow:alice', {
+    ...address,
+    patch: { modelSettings: { providerOptions: { altflow: { reasoningLevel: 'high' } } } },
+  });
+  assert.equal((await f.request('alice')).status, 200);
+  await f.preferences.write('alice', 'altflow:alice', { ...address, patch: { modelSettings: null } });
+  assert.equal((await f.request('alice')).status, 200);
+  const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
+  await f.tree.runtime.spawn(actor, { name: 'worker', description: 'Worker', prompt: 'Use defaults.' });
+  await until(async () => (await f.treeStore.read('alice', actor.root)).children[0]?.state === 'completed');
+  assert.equal((await f.treeStore.read('alice', actor.root)).children[0].reasoningLevel, undefined);
+});
 test('tree HTTP exposes actual child messages and usage only to the owning root account', async t => {
   const f = await setup(t);
   const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');

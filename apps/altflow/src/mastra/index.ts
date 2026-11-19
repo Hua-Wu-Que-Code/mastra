@@ -307,22 +307,7 @@ export const mastra = new Mastra({
         accounts,
         accountsOrigins,
         () => creatorAgent,
-        async actor => {
-          const saved = await accountPreferences.read(actor.owner, actor.resourceId, {
-            kind: 'thread',
-            id: JSON.stringify(['creator-agent', actor.root]),
-          });
-          const options = z
-            .object({
-              selection: z.object({ provider: z.string(), model: z.string() }).optional(),
-              modelSettings: z.object({ reasoningLevel: z.string().optional() }).optional(),
-            })
-            .parse(saved.value);
-          return {
-            model: options.selection ? `${options.selection.provider}/${options.selection.model}` : undefined,
-            reasoningLevel: options.modelSettings?.reasoningLevel,
-          };
-        },
+        actor => accountPreferences.conversationOptions(actor.owner, actor.resourceId, 'creator-agent', actor.root),
       ),
       toolCatalogRoute({
         accounts,

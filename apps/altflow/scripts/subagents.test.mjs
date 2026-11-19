@@ -25,6 +25,33 @@ async function until(check, timeout = 5000) {
 const childRequest = body =>
   body.messages.some(m => m.role === 'system' && JSON.stringify(m.content).includes('Your name is worker.'));
 
+test('a child finishing after parent deletion does not recreate the deleted conversation', async t => {
+  const f = await fixture(t);
+  const { context } = await import('./tool-fixture.mjs');
+  await f.agent.generate('Initialize.', runOptions());
+  const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
+  let finish;
+  const completed = new Promise(resolve => {
+    finish = resolve;
+  });
+  let started = false;
+  f.setHandler(async body => {
+    if (!childRequest(body)) return { text: 'Unexpected parent wake.' };
+    started = true;
+    await completed;
+    return { text: 'CHILD-FINISHED-AFTER-DELETE' };
+  });
+  await f.tree.runtime.spawn(actor, { name: 'worker', description: 'Worker', prompt: 'Finish later.' });
+  await until(() => started);
+  await f.memoryStore.deleteThread({ threadId: actor.root });
+  finish();
+  await until(async () => (await f.treeStore.read('alice', actor.root)).children[0]?.state === 'completed');
+  // close drains background completion delivery, including any parent wake.
+  await f.tree.runtime.close();
+  assert.equal(await f.memoryStore.getThreadById({ threadId: actor.root }), null);
+  assert.equal(f.requests.filter(body => !childRequest(body)).length, 1);
+});
+
 test('dynamic background child completes nine tools and notifies the actual parent run', async t => {
   const f = await fixture(t);
   let rootSteps = 0,
