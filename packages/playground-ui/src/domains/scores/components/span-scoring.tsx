@@ -1,5 +1,5 @@
 import type { GetScorerResponse } from '@mastra/client-js';
-import { useTriggerScorer } from '@mastra/react/hooks/scores';
+import type { useTriggerScorer } from '@mastra/react/hooks/scores';
 import { useState } from 'react';
 import { Combobox } from '@/ds/components/Combobox';
 import { DialogAction, DialogBody, DialogCancel, DialogDescription, DialogFooter } from '@/ds/components/Dialog';
@@ -10,16 +10,23 @@ import { IconCircleInfo } from '@/ds/icons/central/IconCircleInfo';
 import { t as studioT, useLocale } from '@/lib/i18n';
 import { toast } from '@/utils/toast';
 
+/** What starts a scorer on a span: the variables of `useTriggerScorer`, so hosts keep the same fetch contract. */
+export type TriggerScorerArgs = Parameters<ReturnType<typeof useTriggerScorer>['mutateAsync']>[0];
+
 export interface SpanScoringProps {
   traceId?: string;
   spanId?: string;
   entityType?: string;
   isTopLevelSpan?: boolean;
+  /** The scorers a host lists (`listScorers`); `undefined` once loaded means they failed to load. */
   scorers?: Record<string, GetScorerResponse>;
   isLoadingScorers?: boolean;
+  /** Starts the picked scorer; resolve once it started, reject when it could not. */
+  onTriggerScorer: (args: TriggerScorerArgs) => Promise<unknown>;
   onSuccess?: () => void;
 }
 
+/** Picks a scorer and starts it on the span through `onTriggerScorer`. Never fetches. */
 export function SpanScoring({
   traceId,
   spanId,
@@ -27,11 +34,12 @@ export function SpanScoring({
   isTopLevelSpan,
   scorers,
   isLoadingScorers,
+  onTriggerScorer,
   onSuccess,
 }: SpanScoringProps) {
   useLocale();
   const [selectedScorer, setSelectedScorer] = useState<string | null>(null);
-  const { mutate: triggerScorer, isPending } = useTriggerScorer();
+  const [isPending, setIsPending] = useState(false);
 
   let scorerList = Object.entries(scorers || {}).flatMap(([key, scorer]) =>
     scorer
@@ -55,20 +63,21 @@ export function SpanScoring({
 
   const isWaiting = isPending || isLoadingScorers;
 
-  const handleStartScoring = () => {
-    if (selectedScorer && traceId) {
-      triggerScorer(
-        { scorerName: selectedScorer, traceId, spanId },
-        {
-          onSuccess: () => {
-            toast.info(studioT('Scorer triggered'), {
-              description: studioT('Results will appear once scoring completes.'),
-            });
-            onSuccess?.();
-          },
-        },
-      );
+  const handleStartScoring = async () => {
+    if (!selectedScorer || !traceId) return;
+    setIsPending(true);
+    try {
+      await onTriggerScorer({ scorerName: selectedScorer, traceId, spanId });
+    } catch {
+      toast.error(studioT('Could not start the scorer. Please try again.'));
+      return;
+    } finally {
+      setIsPending(false);
     }
+    toast.info(studioT('Scorer triggered'), {
+      description: studioT('Results will appear once scoring completes.'),
+    });
+    onSuccess?.();
   };
 
   const selectedScorerDescription = scorerList.find(s => s.id === selectedScorer)?.description || '';

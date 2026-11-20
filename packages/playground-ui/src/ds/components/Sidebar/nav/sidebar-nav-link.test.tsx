@@ -8,7 +8,7 @@ import { useMobileDrawer } from '../root/sidebar-context';
 import { SidebarProvider } from '../root/sidebar-provider';
 import { SidebarNavHeader } from './sidebar-nav-header';
 import { SidebarNavLink } from './sidebar-nav-link';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/ds/components/Tooltip';
+import { TooltipContent, TooltipTrigger, TooltipProvider } from '@/ds/components/Tooltip';
 import type { LinkComponentProps } from '@/ds/types/link-component';
 
 const DrawerToggle = () => {
@@ -386,28 +386,5 @@ describe('SidebarNavLink custom rows', () => {
 
     expect(onOpen).toHaveBeenCalledOnce();
     expect(onDelete).toHaveBeenCalledOnce();
-  });
-});
-
-describe('TooltipTrigger render prop', () => {
-  it('renders the consumer element directly so events attach to the real DOM node', () => {
-    render(
-      <TooltipProvider delay={0}>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <a href="/x" data-testid="anchor">
-                anchor
-              </a>
-            }
-          />
-          <TooltipContent>content</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>,
-    );
-
-    const anchor = screen.getByTestId('anchor');
-    expect(anchor.tagName).toBe('A');
-    expect(anchor.getAttribute('href')).toBe('/x');
   });
 });

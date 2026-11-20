@@ -77,6 +77,7 @@ const invariant =
 const isCopy = text =>
   /[a-zA-Z]/.test(text.replace(/\{\w+\}/g, '').replace(/&(?:nbsp|amp|lt|gt|quot);/g, '')) &&
   !invariant.test(text.trim()) &&
+  !/^\[--[\w-]+:[^\]\r\n]+\]$/.test(text.trim()) &&
   !/^(?:text|bg)-[\w/-]+(?: (?:text|bg)-[\w/-]+)*$/.test(text.trim()) &&
   !/^\s*(?:https?:\/\/|[\w./-]+\.(?:ts|tsx|js|json)|\/?api\/|--|@mastra\/)/.test(text);
 

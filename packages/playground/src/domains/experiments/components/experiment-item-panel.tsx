@@ -10,7 +10,6 @@ import { useExperimentItemPanel } from '@/domains/experiments/context/experiment
 import { useExperimentResultDetailState } from '@/domains/experiments/hooks/use-experiment-result-detail-state';
 
 export interface ExperimentItemPanelProps {
-  withQueryTrace: boolean;
   withFeedback: boolean;
   /** `drawer` (default) for a standalone overlay; `inline` when hosted in the route side panel. */
   variant?: 'drawer' | 'inline';
@@ -20,7 +19,7 @@ export interface ExperimentItemPanelProps {
  * Result panel for the `items/:itemId` child route. As a drawer, keep it mounted so it
  * animates in and out; `currentItemId` drives `open`. Inline, it renders only while an item is open.
  */
-export function ExperimentItemPanel({ withQueryTrace, withFeedback, variant }: ExperimentItemPanelProps) {
+export function ExperimentItemPanel({ withFeedback, variant }: ExperimentItemPanelProps) {
   const studioLocale = useLocale();
   const {
     currentItemId: itemId,
@@ -87,7 +86,6 @@ export function ExperimentItemPanel({ withQueryTrace, withFeedback, variant }: E
       }
       scores={resultScores}
       state={detailState}
-      withQueryTrace={withQueryTrace}
       withFeedback={withFeedback}
       onPrevious={goToPreviousItem}
       onNext={goToNextItem}

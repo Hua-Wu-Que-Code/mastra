@@ -127,6 +127,7 @@ export function SpansExplorerBody({ selection, onSelectionChange, renderPanel, u
       query,
       enabled: !isCapabilitiesLoading,
       rolling: filters.rolling,
+      fixedStart: filters.datePreset === 'custom',
     },
   );
 

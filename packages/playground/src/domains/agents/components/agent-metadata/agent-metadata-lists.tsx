@@ -1,15 +1,17 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import type { GetToolResponse, GetWorkflowResponse } from '@mastra/client-js';
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mastra/playground-ui/components/Tooltip';
+import { AgentMetadataExpandableList } from '@mastra/playground-ui/domains/agents/config/agent-metadata-expandable-list';
+import {
+  AgentMetadataList,
+  AgentMetadataListEmpty,
+  AgentMetadataListItem,
+} from '@mastra/playground-ui/domains/agents/config/agent-metadata-list';
 import { useActivatedSkills } from '@mastra/playground-ui/domains/agents/context/activated-skills-context';
 import { LoadingBadge } from '@mastra/playground-ui/domains/chat/components/loading-badge';
-import { WORKSPACE_TOOLS_PREFIX } from '@mastra/playground-ui/domains/chat/tools/workspace-tool-constants';
 import { useLinkComponent } from '@mastra/playground-ui/lib/framework';
-
-import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useParams } from 'react-router';
-import { AgentMetadataExpandableList } from './agent-metadata-expandable-list';
-import { AgentMetadataList, AgentMetadataListEmpty, AgentMetadataListItem } from './agent-metadata-list';
 import { useScorers } from '@/domains/scores';
 
 const metadataLinkClassName =
@@ -20,7 +22,6 @@ export interface AgentMetadataNetworkListProps {
 }
 
 export const AgentMetadataNetworkList = ({ agents }: AgentMetadataNetworkListProps) => {
-  useLocale();
   const { Link, paths } = useLinkComponent();
 
   if (agents.length === 0) {
@@ -46,7 +47,6 @@ export interface AgentMetadataToolListProps {
 }
 
 export const AgentMetadataToolList = ({ agentId, tools }: AgentMetadataToolListProps) => {
-  useLocale();
   const { Link, paths } = useLinkComponent();
   // A tool opens in a drawer over the conversation you're in, so reading it doesn't leave the thread.
   const { threadId } = useParams();
@@ -77,7 +77,6 @@ export interface AgentMetadataWorkflowListProps {
 }
 
 export const AgentMetadataWorkflowList = ({ workflows }: AgentMetadataWorkflowListProps) => {
-  useLocale();
   const { Link, paths } = useLinkComponent();
 
   if (workflows.length === 0) {
@@ -103,7 +102,6 @@ interface AgentMetadataScorerListProps {
 }
 
 export const AgentMetadataScorerList = ({ entityId, entityType }: AgentMetadataScorerListProps) => {
-  useLocale();
   const { Link, paths } = useLinkComponent();
   const { data: scorers = {}, isLoading } = useScorers();
 
@@ -151,7 +149,6 @@ export interface AgentMetadataSkillListProps {
 }
 
 export const AgentMetadataSkillList = ({ skills, agentId, workspaceId }: AgentMetadataSkillListProps) => {
-  useLocale();
   const { Link, paths } = useLinkComponent();
   const { isSkillActivated } = useActivatedSkills();
 
@@ -201,39 +198,11 @@ export const AgentMetadataSkillList = ({ skills, agentId, workspaceId }: AgentMe
   );
 };
 
-export interface AgentMetadataWorkspaceToolsListProps {
-  tools: string[];
-}
-
-function formatWorkspaceToolName(toolName: string): string {
-  const prefix = `${WORKSPACE_TOOLS_PREFIX}_`;
-  if (toolName.startsWith(prefix)) {
-    return toolName.slice(prefix.length);
-  }
-  return toolName;
-}
-
-export const AgentMetadataWorkspaceToolsList = ({ tools }: AgentMetadataWorkspaceToolsListProps) => {
-  useLocale();
-  if (tools.length === 0) {
-    return <AgentMetadataListEmpty>{studioT('No workspace tools')}</AgentMetadataListEmpty>;
-  }
-
-  return (
-    <AgentMetadataExpandableList
-      items={tools}
-      getKey={tool => tool}
-      renderItem={tool => <Badge>{formatWorkspaceToolName(tool)}</Badge>}
-    />
-  );
-};
-
 export interface AgentMetadataBrowserToolsListProps {
   tools: string[];
 }
 
 export const AgentMetadataBrowserToolsList = ({ tools }: AgentMetadataBrowserToolsListProps) => {
-  useLocale();
   if (tools.length === 0) {
     return <AgentMetadataListEmpty>{studioT('No browser tools')}</AgentMetadataListEmpty>;
   }
@@ -250,7 +219,6 @@ export const AgentMetadataCombinedProcessorList = ({
   inputProcessors,
   outputProcessors,
 }: AgentMetadataCombinedProcessorListProps) => {
-  useLocale();
   const { Link, paths } = useLinkComponent();
 
   if (inputProcessors.length === 0 && outputProcessors.length === 0) {

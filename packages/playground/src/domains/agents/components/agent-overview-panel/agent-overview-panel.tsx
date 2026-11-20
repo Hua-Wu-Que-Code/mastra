@@ -1,9 +1,13 @@
+import { t as studioT } from '@mastra/playground-ui/lib/i18n';
 import { Badge } from '@mastra/playground-ui/components/Badge';
 import { InlineCode } from '@mastra/playground-ui/components/InlineCode';
 import { Notice } from '@mastra/playground-ui/components/Notice';
-import { ScrollArea, ScrollAreaViewport } from '@mastra/playground-ui/components/ScrollArea';
 import { Skeleton } from '@mastra/playground-ui/components/Skeleton';
 import { Txt } from '@mastra/playground-ui/components/Txt';
+import { AgentConfigSurface } from '@mastra/playground-ui/domains/agents/config/agent-config-surface';
+import { AgentMetadataSection } from '@mastra/playground-ui/domains/agents/config/agent-metadata-section';
+import { AgentSystemPrompt } from '@mastra/playground-ui/domains/agents/config/agent-system-prompt';
+import { AgentMetadataWorkspaceToolsList } from '@mastra/playground-ui/domains/agents/config/agent-workspace-tools-list';
 import { useEntityRequestContext } from '@mastra/playground-ui/domains/request-context/hooks/use-entity-request-context';
 import { AgentIcon } from '@mastra/playground-ui/icons/AgentIcon';
 import { IconBox2 } from '@mastra/playground-ui/icons/central/IconBox2';
@@ -16,10 +20,6 @@ import { IconMaintenance } from '@mastra/playground-ui/icons/central/IconMainten
 import { IconSignalTower } from '@mastra/playground-ui/icons/central/IconSignalTower';
 import { IconSparklesTwo } from '@mastra/playground-ui/icons/central/IconSparklesTwo';
 import { WorkflowIcon } from '@mastra/playground-ui/icons/WorkflowIcon';
-
-import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
-import { frameSurfaceStyle } from '@mastra/playground-ui/primitives/raised-surface';
-import { cn } from '@mastra/playground-ui/utils/cn';
 import { toast } from '@mastra/playground-ui/utils/toast';
 import {
   useAgent,
@@ -39,12 +39,9 @@ import {
   AgentMetadataSkillList,
   AgentMetadataToolList,
   AgentMetadataWorkflowList,
-  AgentMetadataWorkspaceToolsList,
 } from '../agent-metadata/agent-metadata-lists';
 import { AgentMetadataModelList } from '../agent-metadata/agent-metadata-model-list';
-import { AgentMetadataSection } from '../agent-metadata/agent-metadata-section';
 import { AgentMemoryConfig } from '../agent-settings/agent-memory-config';
-import { AgentSystemPrompt } from './agent-system-prompt';
 import type { AgentEditFormContextValue } from '@/domains/agents/context/agent-edit-form-context';
 import { useOptionalAgentEditFormContext } from '@/domains/agents/context/agent-edit-form-context';
 import { getEditorOwnership } from '@/domains/agents/utils/editor-ownership';
@@ -56,29 +53,9 @@ export interface AgentOverviewPanelProps {
 }
 
 export function AgentOverviewPanel({ agentId }: AgentOverviewPanelProps) {
-  useLocale();
   const { isCollapsed } = useRouteSidePanel();
 
-  return (
-    <div
-      data-testid="agent-overview-panel"
-      className={cn('grid h-full min-h-0 grid-rows-[auto_1fr] overflow-hidden rounded-studio-frame', frameSurfaceStyle)}
-    >
-      {/* The header route action owns the close control (see AgentDetailHeaderActions). */}
-      <div className="flex h-10 min-h-10 items-center border-b border-border px-4">
-        <Txt as="h2" variant="subheading" tone="ink">
-          {studioT('Config')}
-        </Txt>
-      </div>
-
-      <ScrollArea className="min-h-0" mask={{ top: false }}>
-        <ScrollAreaViewport className="h-full">
-          {/* Skip the sections (and their data fetching) while the panel is collapsed. */}
-          {!isCollapsed && <AgentOverviewSections agentId={agentId} />}
-        </ScrollAreaViewport>
-      </ScrollArea>
-    </div>
-  );
+  return <AgentConfigSurface>{!isCollapsed && <AgentOverviewSections agentId={agentId} />}</AgentConfigSurface>;
 }
 
 type ModelListProps = ComponentProps<typeof AgentMetadataModelList>;
@@ -89,7 +66,6 @@ function EditorOwnedModelList({
   readOnly,
   form,
 }: Pick<ModelListProps, 'modelList' | 'editable' | 'readOnly'> & Pick<AgentEditFormContextValue, 'form'>) {
-  useLocale();
   const formModelList = useWatch({ control: form.control, name: 'modelList' });
 
   const reorderModelList: NonNullable<ModelListProps['reorderModelList']> = async params => {
@@ -141,7 +117,6 @@ function EditorOwnedModelList({
 }
 
 function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
-  useLocale();
   const editFormContext = useOptionalAgentEditFormContext();
   const { data: agent, isLoading } = useAgent({
     agentId: agentId,
@@ -344,7 +319,8 @@ function AgentOverviewSections({ agentId }: AgentOverviewPanelProps) {
           <Notice variant="warning" title={studioT('Read-only')}>
             <Notice.Message>
               {studioT('To edit the system prompt in Altflow, add') + ' '}
-              <InlineCode>@mastra/editor</InlineCode> {' ' + studioT('to your project. See the')}{' '}
+              <InlineCode>@mastra/editor</InlineCode>
+              {' ' + studioT('to your project. See the')}{' '}
               <a
                 href="https://mastra.ai/docs/editor/overview"
                 target="_blank"

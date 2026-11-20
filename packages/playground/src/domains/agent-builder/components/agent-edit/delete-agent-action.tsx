@@ -1,6 +1,6 @@
-import { AlertDialog } from '@mastra/playground-ui/components/AlertDialog';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { DropdownMenu } from '@mastra/playground-ui/components/DropdownMenu';
+import { DeleteAgentConfirmation } from '@mastra/playground-ui/domains/agents/components/delete-agent-confirmation';
 import { TrashIcon } from '@mastra/playground-ui/icons/TrashIcon';
 
 import { t as studioT, useLocale } from '@mastra/playground-ui/lib/i18n';
@@ -64,37 +64,19 @@ const DeleteAgentDialog = ({
   });
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialog.Content data-testid="agent-builder-delete-agent-dialog">
-        <AlertDialog.Header>
-          <AlertDialog.Title>{studioT('Delete agent?')}</AlertDialog.Title>
-          <AlertDialog.Description>
-            {studioT('This permanently deletes "')}
-            {agentName}
-            {studioT('" and removes its conversation history. This cannot be undone.')}
-          </AlertDialog.Description>
-        </AlertDialog.Header>
-        <AlertDialog.Body>
-          <AgentImpactWarnings agentId={agentId} variant="delete" enabled={open} />
-        </AlertDialog.Body>
-        <AlertDialog.Footer>
-          <AlertDialog.Cancel data-testid="agent-builder-delete-agent-cancel" disabled={isPending}>
-            {studioT('Cancel')}
-          </AlertDialog.Cancel>
-          <Button
-            icon={<TrashIcon />}
-            variant="destructive"
-            data-testid="agent-builder-delete-agent-confirm"
-            disabled={isPending || isDependentsLoading}
-            onClick={() => {
-              onConfirm();
-            }}
-          >
-            {isPending ? studioT('Deleting…') : studioT('Delete agent')}
-          </Button>
-        </AlertDialog.Footer>
-      </AlertDialog.Content>
-    </AlertDialog>
+    <DeleteAgentConfirmation
+      open={open}
+      onOpenChange={onOpenChange}
+      description={studioT(
+        'This permanently deletes "{agentName}" and removes its conversation history. This cannot be undone.',
+        { agentName },
+      )}
+      isPending={isPending}
+      isDependentsLoading={isDependentsLoading}
+      onConfirm={onConfirm}
+    >
+      <AgentImpactWarnings agentId={agentId} variant="delete" enabled={open} />
+    </DeleteAgentConfirmation>
   );
 };
 

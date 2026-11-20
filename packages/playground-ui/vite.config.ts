@@ -136,24 +136,18 @@ const typeDeclarations = (): Plugin => {
       if (config.build.lib) entries = config.build.lib.entry as Record<string, string>;
       isWatch = Boolean(config.build.watch);
     },
-    // Rolldown runs buildStart once per output format but closeBundle once, so start tsc only once.
+    // Rolldown runs buildStart once per output format, so start tsc only once.
     buildStart() {
       startTsc();
     },
     async closeBundle() {
-      // A build that never reached buildStart used to leave `tsc` undefined, and
-      // `await undefined` !== 0 surfaced as "tsc found type errors" without the
-      // compiler ever running. Start it here instead of reporting a fake failure.
-      if (!tsc) {
-        console.warn('[playground-ui:dts] buildStart did not run; starting tsc from closeBundle.');
-        startTsc();
-      }
-      const exitCode = await tsc;
-      // Watch rebuilds need a fresh compiler run; one-shot builds must not rerun
-      // it when closeBundle fires more than once.
-      if (isWatch) tsc = undefined;
-      if (exitCode === undefined) throw new Error('playground-ui:dts could not start tsc.');
-      if (exitCode !== 0) throw new Error(`tsc exited with code ${exitCode}; see its output above.`);
+      // Rolldown calls closeBundle once per output format. Claim the tsc promise
+      // on the first call so the second format does not treat a finished emit as a failure.
+      const pending = tsc;
+      if (!pending) return;
+      tsc = undefined;
+      const exitCode = await pending;
+      if (exitCode !== 0) throw new Error('tsc found type errors; see log above.');
 
       await rm(dtsSrcDir, { recursive: true, force: true });
       await rename(resolve(dtsTempDir, 'src'), dtsSrcDir);

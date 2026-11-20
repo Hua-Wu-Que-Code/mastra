@@ -25,15 +25,13 @@
     "zai-org/GLM-5.3-Flash"
   ],
   "reasoning": {
-    "zai-org/GLM-5.3-Flash": [
+    "deepseek-ai/DeepSeek-V4-Flash-0731": [
+      {
+        "type": "toggle"
+      },
       {
         "type": "effort",
         "values": ["low", "high", "max"]
-      }
-    ],
-    "apertus-ai/Apertus-v1.5-8B": [
-      {
-        "type": "toggle"
       }
     ],
     "NVIDIA/NVIDIA-Nemotron-3-Super-120B-A12B": [
@@ -43,15 +41,6 @@
       },
       {
         "type": "budget_tokens"
-      }
-    ],
-    "deepseek-ai/DeepSeek-V4-Flash-0731": [
-      {
-        "type": "toggle"
-      },
-      {
-        "type": "effort",
-        "values": ["low", "high", "max"]
       }
     ],
     "google/gemma-4-31B-it": [
@@ -65,14 +54,6 @@
         "values": ["low", "medium", "high"]
       }
     ],
-    "Qwen/Qwen3.5-35B-A3B-FP8": [
-      {
-        "type": "toggle"
-      },
-      {
-        "type": "budget_tokens"
-      }
-    ],
     "Qwen/Qwen3.8-27B": [
       {
         "type": "toggle"
@@ -83,6 +64,25 @@
       },
       {
         "type": "budget_tokens"
+      }
+    ],
+    "Qwen/Qwen3.5-35B-A3B-FP8": [
+      {
+        "type": "toggle"
+      },
+      {
+        "type": "budget_tokens"
+      }
+    ],
+    "zai-org/GLM-5.3-Flash": [
+      {
+        "type": "effort",
+        "values": ["low", "high", "max"]
+      }
+    ],
+    "apertus-ai/Apertus-v1.5-8B": [
+      {
+        "type": "toggle"
       }
     ]
   }

@@ -132,7 +132,7 @@ import {
   MASTRA_THREAD_ID_KEY,
   MASTRA_VERSIONS_KEY,
 } from '../request-context';
-import { getRequestContextInputSource, getRequestContextInputValues } from '../request-context/input-source';
+import { getRequestContextInputSource } from '../request-context/input-source';
 import type { DeclaredAgentSchedule } from '../schedules/define';
 import type { InferStandardSchemaOutput } from '../schema';
 import { toStandardSchema, standardSchemaToJSONSchema } from '../schema';
@@ -227,11 +227,13 @@ import { detachFullStreamOnEnd } from './durable/observe-full-stream';
 import { createDurableAgentStream } from './durable/stream-adapter';
 import type { AgentSuspendedEventData, DurableAgentStepFinishResult } from './durable/types';
 import { GoalSignalProvider, resolveGoalStore, readObjective, writeObjective, clearObjective } from './goal';
+import { convertInstructionsToString, drainAgentOutput, resolveRunId, successfulAgentOutput } from './helpers';
 import { buildMcpServerGuidance } from './mcp-guidance';
 import { MessageList } from './message-list';
 import type { MessageInput, MessageListInput, UIMessageWithMetadata, MastraDBMessage } from './message-list';
 import { createStoredMessageLoader } from './message-list/memory-message-refs';
 import { modelSpanAttributes } from './model-span-attributes';
+import { validateAgentRequestContext } from './request-context-validation';
 import { buildResumeSpanInput } from './resume-span-input';
 import { AGENT_LEASE_RENEW_INTERVAL_MS, AGENT_LEASE_TTL_MS } from './run-ownership';
 import { SaveQueueManager } from './save-queue';
@@ -2151,37 +2153,6 @@ export class Agent<
   }
 
   /**
-   * Validates the request context against the agent's requestContextSchema.
-   * Throws an error if validation fails.
-   */
-  async #validateRequestContext(requestContext?: RequestContext) {
-    if (this.#requestContextSchema) {
-      const contextValues = getRequestContextInputValues(requestContext);
-      const validation = await this.#requestContextSchema['~standard'].validate(contextValues);
-
-      if (validation.issues) {
-        const errors = validation.issues;
-        const errorMessages = errors
-          .map(e => {
-            const pathStr = e.path?.map((p: any) => (typeof p === 'object' ? p.key : p)).join('.');
-            return `- ${pathStr}: ${e.message}`;
-          })
-          .join('\n');
-        throw new MastraError({
-          id: 'AGENT_REQUEST_CONTEXT_VALIDATION_FAILED',
-          domain: ErrorDomain.AGENT,
-          category: ErrorCategory.USER,
-          text: `Request context validation failed for agent '${this.id}':\n${errorMessages}`,
-          details: {
-            agentId: this.id,
-            agentName: this.name,
-          },
-        });
-      }
-    }
-  }
-
-  /**
    * Extract and forward client observability data from incoming messages.
    *
    * ## How client-side tool observability flows through the system
@@ -3466,7 +3437,7 @@ export class Agent<
     voice?.addTools(wrappedTools as TTools);
 
     const instructions = await this.getInstructions({ requestContext: resolvedRequestContext });
-    voice?.addInstructions(this.#convertInstructionsToString(instructions));
+    voice?.addInstructions(convertInstructionsToString(instructions));
     return voice;
   }
 
@@ -3535,34 +3506,6 @@ export class Agent<
     }
 
     return buildMcpServerGuidance(tools);
-  }
-
-  /**
-   * Helper function to convert agent instructions to string for backward compatibility
-   * Used for legacy methods that expect string instructions (e.g., voice)
-   * @internal
-   */
-  #convertInstructionsToString(instructions: AgentInstructions): string {
-    if (typeof instructions === 'string') {
-      return instructions;
-    }
-
-    if (Array.isArray(instructions)) {
-      // Handle array of messages (strings or objects)
-      return instructions
-        .map(msg => {
-          if (typeof msg === 'string') {
-            return msg;
-          }
-          // Safely extract content from message objects
-          return typeof msg.content === 'string' ? msg.content : '';
-        })
-        .filter(content => content) // Remove empty strings
-        .join('\n\n');
-    }
-
-    // Handle single message object - safely extract content
-    return typeof instructions.content === 'string' ? instructions.content : '';
   }
 
   /**
@@ -3663,7 +3606,7 @@ export class Agent<
         getMostRecentUserMessage: this.getMostRecentUserMessage.bind(this),
         genTitle: this.genTitle.bind(this),
         resolveTitleGenerationConfig: this.resolveTitleGenerationConfig.bind(this),
-        convertInstructionsToString: this.#convertInstructionsToString.bind(this),
+        convertInstructionsToString,
         tracingPolicy: this.#options?.tracingPolicy,
         resolvedVersionId: this.toRawConfig()?.resolvedVersionId as string | undefined,
         _agentNetworkAppend: this._agentNetworkAppend,
@@ -4785,6 +4728,10 @@ export class Agent<
 
   public __setMemory(memory: DynamicArgument<MastraMemory, TRequestContext>) {
     this.#memory = memory;
+  }
+
+  public __setKnowledge(knowledge: Knowledge) {
+    this.#knowledge = knowledge;
   }
 
   public __setPubSub(pubsub: PubSub) {
@@ -6456,7 +6403,7 @@ export class Agent<
                 requestContext: subAgentRequestContext,
               });
               if (agentOwnInstructions) {
-                const ownStr = this.#convertInstructionsToString(agentOwnInstructions);
+                const ownStr = convertInstructionsToString(agentOwnInstructions);
                 if (ownStr) {
                   effectiveInstructions = `${ownStr}\n\n${effectiveInstructions}`;
                 }
@@ -9384,7 +9331,7 @@ export class Agent<
       input: spanInput,
       attributes: {
         conversationId: threadFromArgs?.id,
-        instructions: this.#convertInstructionsToString(instructions),
+        instructions: convertInstructionsToString(instructions),
         ...modelSpanAttributes(resolvedModel),
         ...(startingSignal ? { signal: startingSignal } : {}),
         // @deprecated — use entityVersionId (top-level span context field) instead.
@@ -10161,7 +10108,12 @@ export class Agent<
     this.#extractClientObservability(messages);
 
     // Validate request context if schema is provided
-    await this.#validateRequestContext(options?.requestContext);
+    await validateAgentRequestContext({
+      requestContextSchema: this.#requestContextSchema,
+      requestContext: options?.requestContext,
+      agentId: this.id,
+      agentName: this.name,
+    });
 
     const defaultOptions = await this.getDefaultOptions({
       requestContext: options?.requestContext,
@@ -10220,12 +10172,13 @@ export class Agent<
     // is invisible to signals: a signal sent mid-turn finds an idle thread and wakes a second run that
     // never sees this turn. The wait also reserves the thread for this runId.
     const threadStreamPubSub = this.getPubSub();
-    mergedOptions.runId ??=
+    mergedOptions.runId ??= resolveRunId(undefined, () =>
       this.#mastra?.generateId({
         idType: 'run',
         source: 'agent',
         entityId: this.id,
-      }) ?? globalThis.crypto.randomUUID();
+      }),
+    );
     await agentThreadStreamRuntime.waitForCrossAgentThreadRun(
       this as Agent<any, any, any, any>,
       { ...loopOptions, runId: mergedOptions.runId } as AgentExecutionOptions<any>,
@@ -10296,15 +10249,7 @@ export class Agent<
         threadStreamPubSub,
       );
 
-      const fullOutput = await result.result.getFullOutput();
-
-      const error = fullOutput.error;
-
-      if (error) {
-        throw error;
-      }
-
-      return fullOutput;
+      return await drainAgentOutput(result.result);
     } catch (error) {
       // Release the thread reservation taken by waitForCrossAgentThreadRun so
       // a failed setup does not block subsequent runs on this thread.
@@ -11163,7 +11108,12 @@ export class Agent<
     this.#extractClientObservability(messages);
 
     // Validate request context if schema is provided
-    await this.#validateRequestContext(streamOptions?.requestContext);
+    await validateAgentRequestContext({
+      requestContextSchema: this.#requestContextSchema,
+      requestContext: streamOptions?.requestContext,
+      agentId: this.id,
+      agentName: this.name,
+    });
 
     const defaultOptions = await this.getDefaultOptions({
       requestContext: streamOptions?.requestContext,
@@ -11238,12 +11188,13 @@ export class Agent<
     }
 
     const threadStreamPubSub = this.getPubSub();
-    mergedOptions.runId ??=
+    mergedOptions.runId ??= resolveRunId(undefined, () =>
       this.#mastra?.generateId({
         idType: 'run',
         source: 'agent',
         entityId: this.id,
-      }) ?? globalThis.crypto.randomUUID();
+      }),
+    );
     // The wait also reserves the thread for this runId, so concurrent stream()
     // calls on the same thread serialize instead of racing between this wait
     // and registerRun below.
@@ -11927,13 +11878,7 @@ export class Agent<
       throw error;
     }
 
-    const error = fullOutput.error;
-
-    if (error) {
-      throw error;
-    }
-
-    return fullOutput;
+    return successfulAgentOutput(fullOutput);
   }
 
   /**

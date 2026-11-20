@@ -51,7 +51,7 @@ describe('AssistantTextPartRenderer', () => {
 
     const { container } = render(<AssistantTextPartRenderer part={part} />);
 
-    expect(container).not.toBeNull();
+    expect(container.textContent).toBe('');
   });
 
   it('routes error-status metadata into an error notice', () => {

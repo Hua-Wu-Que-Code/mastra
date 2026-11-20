@@ -25,16 +25,6 @@
         "values": ["none", "high", "max"]
       }
     ],
-    "gemma-4-31b-it": [
-      {
-        "type": "toggle"
-      }
-    ],
-    "gemma-4-26b-a4b-it": [
-      {
-        "type": "toggle"
-      }
-    ],
     "qwen3.5-397b": [
       {
         "type": "toggle"
@@ -56,6 +46,16 @@
       {
         "type": "effort",
         "values": ["none", "low", "high", "max"]
+      }
+    ],
+    "gemma-4-31b-it": [
+      {
+        "type": "toggle"
+      }
+    ],
+    "gemma-4-26b-a4b-it": [
+      {
+        "type": "toggle"
       }
     ]
   }

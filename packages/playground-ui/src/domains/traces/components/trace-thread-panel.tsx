@@ -1,72 +1,43 @@
 import { useState } from 'react';
 import type { FeedbackOptions } from './feedback-options';
-import { ThreadViewByTrace } from '@/domains/traces/components/thread-view-by-trace';
-import { DataPanel } from '@/ds/components/DataPanel';
-import { t as studioT, useLocale } from '@/lib/i18n';
 
-export interface TraceThreadPanelProps {
-  /** Keep the panel mounted and toggle `open` so the drawer animates in and out. */
-  open: boolean;
-  threadId: string;
+import { ThreadViewByTrace } from '@/domains/traces/components/thread-view-by-trace';
+import { TraceThreadPanelView } from '@/domains/traces/components/trace-thread-panel-view';
+import type { TraceThreadPanelViewProps } from '@/domains/traces/components/trace-thread-panel-view';
+
+export interface TraceThreadPanelProps extends Omit<TraceThreadPanelViewProps, 'hasSelectedSpan' | 'children'> {
   withQueryTrace: boolean;
   withFeedback: boolean;
   feedbackOptions?: FeedbackOptions;
   onOpenScore: (traceId: string, scoreId: string) => void;
-  /** Close the thread drawer, revealing the trace panel underneath. */
-  onClose: () => void;
-  /** Sibling-drawer elevation (see `DataPanel`); defaults to 2, above the trace panel. */
-  depth?: 1 | 2 | 3;
-  /** Accessible drawer name; defaults to the thread id. */
-  title?: string;
-  /** Close button label; defaults to "Back to trace" for the stacked drawer. */
-  closeLabel?: string;
 }
 
-/** The full thread in its own drawer, stacked above the trace panel: every turn as traces, opened on the latest one. */
+/**
+ * Studio's full-thread drawer: {@link TraceThreadPanelView} around a {@link ThreadViewByTrace} fed through
+ * the Mastra client. Every turn as traces, opened on the latest one.
+ */
 export function TraceThreadPanel({
-  open,
   threadId,
   withQueryTrace,
   withFeedback,
   feedbackOptions,
   onOpenScore,
-  onClose,
-  depth = 2,
-  title,
-  closeLabel = studioT('Back to trace'),
+  ...props
 }: TraceThreadPanelProps) {
-  useLocale();
   // Like the trace panel: the drawer only takes the full frame while a span detail is open.
   const [hasSelectedSpan, setHasSelectedSpan] = useState(false);
   return (
-    <DataPanel
-      open={open}
-      onClose={onClose}
-      title={title ?? studioT('Thread {value0}', { value0: threadId })}
-      depth={depth}
-      size={hasSelectedSpan ? 'full' : 'wide'}
-    >
-      <DataPanel.Header>
-        <DataPanel.CloseButton onClick={onClose} label={closeLabel} tooltip={closeLabel} />
-        <DataPanel.HeaderContent>
-          <DataPanel.Heading>
-            {studioT('Thread')}
-            <DataPanel.CopyId id={threadId} />
-          </DataPanel.Heading>
-        </DataPanel.HeaderContent>
-      </DataPanel.Header>
-      <div className="min-h-0 flex-1">
-        {threadId ? (
-          <ThreadViewByTrace
-            threadId={threadId}
-            withQueryTrace={withQueryTrace}
-            withFeedback={withFeedback}
-            feedbackOptions={feedbackOptions}
-            onOpenScore={onOpenScore}
-            onSelectedSpanChange={selected => setHasSelectedSpan(selected !== null)}
-          />
-        ) : null}
-      </div>
-    </DataPanel>
+    <TraceThreadPanelView {...props} threadId={threadId} hasSelectedSpan={hasSelectedSpan}>
+      {threadId ? (
+        <ThreadViewByTrace
+          threadId={threadId}
+          withQueryTrace={withQueryTrace}
+          withFeedback={withFeedback}
+          feedbackOptions={feedbackOptions}
+          onOpenScore={onOpenScore}
+          onSelectedSpanChange={selected => setHasSelectedSpan(selected !== null)}
+        />
+      ) : null}
+    </TraceThreadPanelView>
   );
 }

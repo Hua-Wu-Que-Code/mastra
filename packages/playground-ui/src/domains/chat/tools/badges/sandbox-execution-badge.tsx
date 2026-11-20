@@ -97,7 +97,7 @@ export const SandboxExecutionBadge = ({
         <>
           {workspace?.sandbox && (
             <WorkspaceLink
-              href={workspace.id ? `/workspaces/${workspace.id}` : '/workspaces'}
+              workspaceId={workspace.id}
               icon={
                 <span
                   aria-hidden

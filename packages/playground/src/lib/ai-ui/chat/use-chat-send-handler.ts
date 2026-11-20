@@ -18,7 +18,7 @@ import {
   buildMaxStepsStreamErrorMessage,
   buildStreamErrorMessage,
   isMaxStepsFinishChunk,
-} from '@/services/stream-error-message';
+} from '@mastra/playground-ui/domains/agents/chat/stream-error-message';
 
 /**
  * The OM/error stream chunks this hook reacts to are not part of the typed

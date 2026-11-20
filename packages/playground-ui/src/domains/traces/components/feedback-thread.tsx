@@ -34,7 +34,7 @@ import { TrashIcon } from '@/ds/icons/TrashIcon';
 import { t as studioT, useLocale } from '@/lib/i18n';
 import { formatDate } from '@/utils/date-format';
 
-type FeedbackThreadProps = {
+export type FeedbackThreadProps = {
   /**
    * Rows flagged `isPending` are not stored yet: they show "Sending…" and get no actions.
    * Rows with `deleteStatus: 'deleting'` show "Deleting…" and get no actions; `failed` rows are
