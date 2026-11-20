@@ -8,6 +8,21 @@ import type { SignalData } from './signal-data';
 afterEach(() => cleanup());
 
 describe('NotificationSignalNotice', () => {
+  describe('when an expanded sub-agent notification contains a Markdown report', () => {
+    const signal = {
+      type: 'notification',
+      tagName: 'subagent',
+      contents: 'scan-C: Finished.\n\n## Chapters\n\n| Line | Text |\n| --- | --- |\n| 42 | `Chapter 1` |',
+    } satisfies SignalData;
+
+    it('renders the report heading and table', () => {
+      render(<NotificationSignalNotice signal={signal} defaultOpen />);
+
+      expect(screen.getByRole('heading', { name: 'Chapters' })).toBeDefined();
+      expect(screen.getByRole('cell', { name: 'Chapter 1' })).toBeDefined();
+    });
+  });
+
   describe('when the signal contains complete notification metadata', () => {
     const signal = {
       type: 'notification',

@@ -3,9 +3,13 @@ import { openDB } from 'idb';
 import type { DBSchema, IDBPObjectStore } from 'idb';
 import { z } from 'zod';
 
+import { storedFileReferenceSchema } from '@/domains/account/storage-api';
+import type { StoredFileReference } from '@/domains/account/storage-api';
+
 export interface ThreadDraft {
   text: string;
   attachments: ComposerAttachment[];
+  fileReferences?: StoredFileReference[];
 }
 
 const DATABASE = 'mastra-composer-drafts';
@@ -18,6 +22,7 @@ const recordSchema = z.object({
   key: z.string(),
   text: z.string().max(MAX_LENGTH),
   updatedAt: z.number().finite(),
+  fileReferences: z.array(storedFileReferenceSchema).max(20).optional(),
   bytes: z.number().nonnegative().finite().optional(),
   attachments: z
     .array(
@@ -53,6 +58,7 @@ export class DraftLimitError extends Error {}
 const isFresh = (updatedAt: number) => updatedAt <= Date.now() && Date.now() - updatedAt < MAX_AGE;
 const byteSize = (record: DraftRecord) =>
   record.text.length * 2 +
+  (record.fileReferences ?? []).reduce((size, ref) => size + (ref.name.length + ref.path.length) * 2, 0) +
   record.attachments.reduce(
     (total, attachment) => total + attachment.file.size + (attachment.name.length + attachment.contentType.length) * 2,
     0,
@@ -108,6 +114,7 @@ export function readThreadDraft(key: string): Promise<ThreadDraft> {
     const record = parsed.data;
     return {
       text: record.text,
+      ...(record.fileReferences?.length ? { fileReferences: record.fileReferences } : {}),
       attachments: record.attachments.map(({ fileName, lastModified, ...attachment }) => ({
         ...attachment,
         file: new File([attachment.file], fileName, { type: attachment.file.type, lastModified }),
@@ -117,7 +124,7 @@ export function readThreadDraft(key: string): Promise<ThreadDraft> {
 }
 
 async function putDraft(store: DraftStore, key: string, draft: ThreadDraft): Promise<void> {
-  if (!draft.text && draft.attachments.length === 0) {
+  if (!draft.text && draft.attachments.length === 0 && !draft.fileReferences?.length) {
     await store.delete(key);
     return;
   }
@@ -126,6 +133,7 @@ async function putDraft(store: DraftStore, key: string, draft: ThreadDraft): Pro
   const record: DraftRecord = {
     key,
     text: draft.text,
+    ...(draft.fileReferences?.length ? { fileReferences: draft.fileReferences } : {}),
     updatedAt: Date.now(),
     attachments: draft.attachments.map(attachment => ({
       ...attachment,

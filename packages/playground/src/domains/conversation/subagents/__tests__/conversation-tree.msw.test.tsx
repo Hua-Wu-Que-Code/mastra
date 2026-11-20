@@ -86,7 +86,7 @@ describe('Conversation tree', () => {
       expect(screen.getByRole('button', { name: 'Send message' }).hasAttribute('disabled')).toBe(true);
       expect(document.querySelector('[data-slot="composer-box"]')).toBeTruthy();
     });
-    it('renders saved tool arguments and results with the root chat tool card', async () => {
+    it('shows saved tool activity without exposing raw tool arguments or results', async () => {
       server.use(
         http.get(`${baseUrl}/altflow/subagents`, ({ request }) =>
           HttpResponse.json(
@@ -125,9 +125,9 @@ describe('Conversation tree', () => {
       await screen.findByText('Verified sources for the report.');
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
       fireEvent.click(await screen.findByRole('button', { name: 'Tools called' }));
-      fireEvent.click(await screen.findByText('verify_source'));
-      expect(await screen.findByText(/source-42/)).toBeTruthy();
-      expect(await screen.findByText(/CHILD-TOOL-RESULT/)).toBeTruthy();
+      expect(await screen.findByText('verify_source')).toBeTruthy();
+      expect(screen.queryByText(/source-42/)).toBeNull();
+      expect(screen.queryByText(/CHILD-TOOL-RESULT/)).toBeNull();
     });
   });
   describe('when there are no children', () => {

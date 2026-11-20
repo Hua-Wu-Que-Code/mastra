@@ -116,3 +116,15 @@ export function presentProcessTool(toolName: string, input: unknown) {
       return { ...base, label: toolName };
   }
 }
+
+const FILE_OPERATIONS = new Set(['read_file', 'read_document', 'write_file', 'edit_file', 'delete_file', 'file_stat']);
+
+export function presentProcessSummary(toolName: string, input: unknown) {
+  const presentation = presentProcessTool(toolName, undefined);
+  if (!FILE_OPERATIONS.has(canonicalToolName(toolName)) || !input || typeof input !== 'object') {
+    return presentation;
+  }
+  const path = 'path' in input ? input.path : 'file_path' in input ? input.file_path : undefined;
+  const detail = typeof path === 'string' ? path.split(/[\\/]/).filter(Boolean).at(-1) : undefined;
+  return { ...presentation, detail };
+}

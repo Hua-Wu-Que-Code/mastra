@@ -75,3 +75,5 @@ export function useChatAnnotations(): ChatAnnotationsApi {
   if (!value) throw new Error('useChatAnnotations must be used within a ChatAnnotationsProvider');
   return value;
 }
+
+export const useOptionalChatAnnotations = () => useContext(ChatAnnotationsContext);

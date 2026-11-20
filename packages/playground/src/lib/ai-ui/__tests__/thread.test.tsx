@@ -36,10 +36,12 @@ import {
   cancelledUserMessage,
   steeringUserMessage,
 } from './fixtures/signal-run';
+import { AccountContext } from '@/domains/account/account-context';
 import { useAgentSettings } from '@/domains/agents/context/agent-context';
 import { WorkingMemoryProvider } from '@/domains/agents/context/agent-working-memory-context';
 import { BrowserSessionProvider } from '@/domains/agents/context/browser-session-provider';
 import { ThreadPreferencesProvider } from '@/domains/agents/context/thread-preferences-provider';
+import { StudioConfigContext } from '@/domains/configuration/context/studio-config-state';
 import { ThreadInputProvider } from '@/domains/conversation';
 import { server } from '@/test/msw-server';
 
@@ -160,6 +162,7 @@ interface RenderThreadOptions {
   isHistoryLoading?: boolean;
   isLoadingPrevious?: boolean;
   onLoadPrevious?: () => void | Promise<void>;
+  summaryOnly?: boolean;
 }
 
 const renderThreadTree = (initialMessages: MastraDBMessage[], options: RenderThreadOptions = {}) => {
@@ -171,6 +174,7 @@ const renderThreadTree = (initialMessages: MastraDBMessage[], options: RenderThr
     isHistoryLoading,
     isLoadingPrevious,
     onLoadPrevious,
+    summaryOnly,
   } = options;
 
   return (
@@ -194,6 +198,7 @@ const renderThreadTree = (initialMessages: MastraDBMessage[], options: RenderThr
             isHistoryLoading={isHistoryLoading}
             isLoadingPrevious={isLoadingPrevious}
             onLoadPrevious={onLoadPrevious}
+            summaryOnly={summaryOnly}
           />
         </ChatProvider>
       </ThreadInputProvider>
@@ -1710,6 +1715,76 @@ const taskCook: TaskItem = {
   activeForm: 'Cooking meal',
 };
 
+describe('Workspace file references', () => {
+  it('adds an existing file by name and sends its storage reference without uploading again', async () => {
+    const captured: Captured[] = [];
+    server.use(
+      ...baseHandlers(),
+      http.get(BASE_URL + '/storage', () =>
+        HttpResponse.json({
+          quotaBytes: 100,
+          reservedBytes: 0,
+          usedBytes: 8,
+          files: [
+            {
+              name: '人物设定.md',
+              path: '/drafts/人物设定.md',
+              size: 8,
+              mimeType: 'text/markdown',
+              source: 'generated',
+              updatedAt: '2026-01-01T10:00:00Z',
+            },
+          ],
+        }),
+      ),
+      http.get(BASE_URL + '/storage/changes', () => HttpResponse.json([])),
+      http.post(BASE_URL + '/api/agents/agent-1/send-message', async ({ request }) => {
+        captured.push({ url: request.url, body: await captureBody(request) });
+        return HttpResponse.json(acceptedSignalMessage);
+      }),
+    );
+    await act(async () => {
+      render(
+        <Wrapper threadId="thread-1">
+          <StudioConfigContext.Provider
+            value={{ baseUrl: BASE_URL, headers: {}, isLoading: false, setConfig: () => {} }}
+          >
+            <AccountContext.Provider
+              value={{
+                user: { id: 'alice', name: 'Alice', role: 'creator' },
+                resourceId: 'altflow:alice',
+                permissions: ['agents:execute'],
+              }}
+            >
+              <ThreadInputProvider>
+                <ChatProvider
+                  agentId="agent-1"
+                  threadId="thread-1"
+                  modelVersion={v2Agent.modelVersion}
+                  initialMessages={[]}
+                  supportsMemory
+                  settings={{ modelSettings: { chatWithLegacyStream: false } }}
+                >
+                  <Thread agentId="agent-1" threadId="thread-1" hasModelList workspaceFiles />
+                </ChatProvider>
+              </ThreadInputProvider>
+            </AccountContext.Provider>
+          </StudioConfigContext.Provider>
+        </Wrapper>,
+      );
+    });
+    const input = screen.getByPlaceholderText('Enter your message');
+    fireEvent.change(input, { target: { value: '请参考 @人物' } });
+    const result = await screen.findByRole('button', { name: '人物设定.md' });
+    fireEvent.click(result);
+    expect(screen.getByText('@人物设定.md')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await waitFor(() => expect(captured).toHaveLength(1));
+    expect(JSON.stringify(captured[0].body)).toContain('[@人物设定.md](/storage/download?path=%2Fdrafts%2F');
+    expect(JSON.stringify(captured[0].body)).toContain('请参考');
+  });
+});
+
 describe('Thread annotations', () => {
   const REPLY = 'Open rows drop the frame and keep a subtle rounded hover.';
   const history = () => [userMessage('Which table style should we use?'), assistantMessage(REPLY)];
@@ -2171,40 +2246,39 @@ describe('Conversation process and accounting', () => {
         http.get(`${BASE_URL}/api/observability/traces/measured-run`, () => HttpResponse.json(measuredTrace)),
       );
     });
-    it('shows the actual turn duration and lets the reader expand its reasoning', async () => {
+    it('shows the actual turn duration and lets the reader expand its reasoning in the detailed view', async () => {
       renderThread(measuredConversation);
       expect(await screen.findByText('Completed, took 3s')).toBeDefined();
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      fireEvent.click(within(screen.getByRole('group', { name: 'Work details: 1 steps' })).getByRole('button'));
       fireEvent.click(screen.getByRole('button', { name: /^Reasoning/ }));
       expect(screen.getByRole('button', { name: /^Reasoning/ }).getAttribute('aria-expanded')).toBe('true');
       expect(screen.getAllByText('Compare the available tools.').length).toBeGreaterThan(0);
     });
-    it('shows all process rows in order with DSH artwork and independent disclosures', async () => {
-      const { container } = renderThread(processConversation);
+    it('shows tool activities without making the underlying reasoning or tool payloads visible', async () => {
+      const { container } = renderThread(processConversation, { summaryOnly: true });
       await screen.findByText('Completed, took 3s');
       fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      const work = screen.getByRole('group', { name: 'Work details: 3 steps' });
+      fireEvent.click(within(work).getByRole('button'));
       const rows = Array.from(container.querySelectorAll('[data-process-row]'));
       expect(rows.map(row => row.getAttribute('data-process-label'))).toEqual([
         'Files read, tools called, commands executed',
-        'Reasoning',
         'Read',
-        'Reasoning',
         'Load skill',
         'Run command',
       ]);
-      expect(container.querySelector('svg[data-dsh-icon="think-outline"]')).toBeTruthy();
       expect(container.querySelector('svg[data-dsh-icon="browse-outline"]')).toBeTruthy();
       expect(container.querySelector('svg[data-dsh-icon="api-outline"]')).toBeTruthy();
-      expect(screen.getByText('/workspace/README.md')).toBeDefined();
-      expect(screen.getByText('dsh-doc')).toBeDefined();
-      expect(screen.getByText('Check the working tree')).toBeDefined();
-      expect(screen.queryByText('Project documentation.')).toBeNull();
-      fireEvent.click(screen.getByRole('button', { name: 'Read' }));
-      expect(await screen.findByText('Project documentation.')).toBeDefined();
-      fireEvent.click(screen.getAllByRole('button', { name: 'Reasoning' })[0]);
-      expect(await screen.findByText('Then inspect the implementation.')).toBeDefined();
-      fireEvent.click(screen.getByRole('button', { name: 'Run command' }));
-      expect(await screen.findByText('Clean working tree.')).toBeDefined();
+      expect(screen.getByText('README.md')).toBeDefined();
+      expect(within(work).getAllByRole('button')).toHaveLength(1);
+      expect(
+        screen.queryByText(
+          /\/workspace\/|Project documentation|dsh-doc|Skill instructions|git status|Clean working tree/,
+        ),
+      ).toBeNull();
+      expect(screen.queryByText(/Read the project first|Then inspect the implementation/)).toBeNull();
+      expect(screen.getByText('I can help write your story.')).toBeDefined();
     });
     it('shows a single turn total and the provider breakdown without double counting spans', async () => {
       renderThread(measuredConversation);
@@ -2267,11 +2341,17 @@ describe('Conversation process and accounting', () => {
       await waitFor(() => expect(screen.queryByRole('meter')).toBeNull());
     });
     it('uses the selected reasoning route limit and keeps unknown route readings available', async () => {
-      server.use(http.get(`${BASE_URL}/api/agents/providers`, () => HttpResponse.json(measuredProviders)));
-      localStorage.setItem(
-        'mastra-thread-preferences-["display-agent","display-thread"]',
-        JSON.stringify({
-          modelSettings: { providerOptions: { altflow: { reasoningLevel: 'high' } } },
+      let saved = {
+        value: { modelSettings: { providerOptions: { altflow: { reasoningLevel: 'high' } } } },
+        revision: 1,
+      };
+      server.use(
+        http.get(`${BASE_URL}/api/agents/providers`, () => HttpResponse.json(measuredProviders)),
+        http.get(`${BASE_URL}/account-preferences`, () => HttpResponse.json(saved)),
+        http.post(`${BASE_URL}/account-preferences`, async ({ request }) => {
+          const { patch } = (await request.json()) as { patch: Partial<typeof saved.value> };
+          saved = { value: { ...saved.value, ...patch }, revision: saved.revision + 1 };
+          return HttpResponse.json(saved);
         }),
       );
       render(

@@ -9,7 +9,7 @@ import { splitMessageAttachments } from '../attachments/split-message-attachment
 import { TurnUsage } from '../metrics/turn-usage';
 import { chatContentStyle } from '../preferences/chat-content-style';
 import { useChatPreferences } from '../preferences/chat-preferences-context';
-import { presentedParts, workBlocks } from '../preferences/work-details';
+import { isFoldableWorkPart, presentedParts, workBlocks } from '../preferences/work-details';
 import { WorkDetailsBlock } from '../preferences/work-details-block';
 import { useWorkDetails } from '../preferences/work-details-state';
 import { AssistantMessageActions, DatasetSaveAction } from '@/domains/chat';
@@ -356,9 +356,7 @@ export const MessageRow = memo(function MessageRow({
       contentStyle={contentStyle}
       hidden={hiddenWork || rootProps.hidden}
       data-work-hidden={hiddenWork || undefined}
-      data-work-details={
-        workDetails && parts.some(part => part.type === 'reasoning' || isToolPart(part)) ? '' : undefined
-      }
+      data-work-details={workDetails && parts.some(part => isFoldableWorkPart(part, toolContext)) ? '' : undefined}
       from="assistant"
       className={className}
       data-message-id={message.id}

@@ -21,7 +21,7 @@ export const conversation: MastraDBMessage[] = [
           toolInvocation: {
             toolCallId: 'read-1',
             toolName: 'read_file',
-            args: { path: 'story.txt' },
+            args: { path: '/uploads/private-attachment/story.txt', offset: 771, limit: 26 },
             state: 'result',
             result: 'A story draft',
           },
@@ -33,7 +33,7 @@ export const conversation: MastraDBMessage[] = [
 ];
 
 export const failedConversation: MastraDBMessage[] = [
-  ...conversation,
+  ...conversation.filter(message => message.role === 'user'),
   {
     id: 'failure',
     role: 'assistant',
@@ -52,6 +52,72 @@ export const failedConversation: MastraDBMessage[] = [
           },
         },
       ],
+    },
+  },
+];
+
+export const failedConversationWithNotifications: MastraDBMessage[] = [
+  ...failedConversation,
+  {
+    id: 'live-notification',
+    role: 'assistant',
+    createdAt: new Date(),
+    content: {
+      format: 2,
+      parts: [
+        {
+          type: 'data-signal',
+          data: { type: 'notification', tagName: 'subagent', contents: 'Scan A completed.' },
+        },
+        {
+          type: 'data-signal',
+          data: { type: 'notification', tagName: 'external', contents: 'External event received.' },
+        },
+      ],
+    },
+  },
+  {
+    id: 'saved-notification',
+    role: 'signal',
+    createdAt: new Date(),
+    content: {
+      format: 2,
+      metadata: { signal: { type: 'notification', tagName: 'subagent' } },
+      parts: [{ type: 'text', text: 'Scan B completed.' }],
+    },
+  },
+  ...conversation
+    .filter(message => message.role === 'assistant')
+    .map(message => ({
+      ...message,
+      content: { ...message.content, parts: message.content.parts.slice(-1) },
+    })),
+  {
+    id: 'stream-error-with-notifications',
+    role: 'assistant',
+    createdAt: new Date(),
+    content: {
+      format: 2,
+      metadata: { status: 'error' },
+      parts: [{ type: 'text', text: 'The model request failed.' }],
+    },
+  },
+];
+
+export const failedRunConversation: MastraDBMessage[] = [
+  ...conversation.map(message =>
+    message.role === 'assistant'
+      ? { ...message, content: { ...message.content, parts: message.content.parts.slice(0, -1) } }
+      : message,
+  ),
+  {
+    id: 'stream-error',
+    role: 'assistant',
+    createdAt: new Date(),
+    content: {
+      format: 2,
+      metadata: { status: 'error' },
+      parts: [{ type: 'text', text: 'The model request failed.' }],
     },
   },
 ];

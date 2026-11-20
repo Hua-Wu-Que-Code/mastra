@@ -100,3 +100,30 @@ export async function readStoredFile(target: Target, file: StoredFile, signal?: 
   }
   return new Blob(chunks, { type: file.mimeType });
 }
+
+export const storedFileReferenceSchema = storedFileSchema.pick({ path: true, name: true });
+export type StoredFileReference = z.infer<typeof storedFileReferenceSchema>;
+
+const fileChangeSchema = z.object({
+  turn: z.string(),
+  path: z.string(),
+  name: z.string(),
+  kind: z.enum(['added', 'modified', 'deleted']),
+  hasDiff: z.boolean(),
+});
+
+export async function getTurnFileChanges(target: Target, thread: string, signal?: AbortSignal) {
+  const response = await storageRequest(target, '/changes', { signal }, { thread });
+  return z.array(fileChangeSchema).parse(await response.json());
+}
+
+export async function getTurnFileDiff(
+  target: Target,
+  thread: string,
+  turn: string,
+  path: string,
+  signal?: AbortSignal,
+) {
+  const response = await storageRequest(target, '/changes', { signal }, { thread, turn, path });
+  return z.object({ before: z.string().nullable(), after: z.string().nullable() }).parse(await response.json());
+}

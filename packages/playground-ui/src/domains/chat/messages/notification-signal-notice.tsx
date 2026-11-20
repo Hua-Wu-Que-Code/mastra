@@ -2,6 +2,7 @@ import { formatSignalValue, getMcpEventSignalInfo, getNotificationMetadata, sign
 import type { McpEventSignalInfo, SignalData } from './signal-data';
 import { NotificationActivity } from '@/ds/components/ai/activity';
 import { Badge } from '@/ds/components/Badge';
+import { MarkdownRenderer } from '@/ds/components/MarkdownRenderer/markdown-renderer';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/ds/components/Tooltip/tooltip';
 import { t as studioT, useLocale } from '@/lib/i18n';
 
@@ -54,6 +55,11 @@ export const NotificationSignalNotice = ({ signal, defaultOpen }: NotificationSi
     <NotificationActivity
       label={mcpEvent ? getMcpEventTitle(mcpEvent) : getNotificationTitle(signal)}
       message={text}
+      messageBody={
+        !mcpEvent && signal.tagName === 'subagent' && text ? (
+          <MarkdownRenderer className="text-caption">{text}</MarkdownRenderer>
+        ) : undefined
+      }
       priority={priority}
       status={status}
       pending={pending}

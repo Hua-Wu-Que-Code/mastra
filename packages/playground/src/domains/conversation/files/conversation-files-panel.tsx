@@ -1,9 +1,10 @@
 import { Button } from '@mastra/playground-ui/components/Button';
+import { Tabs, Tab, TabList, TabContent } from '@mastra/playground-ui/components/Tabs';
 import { Txt } from '@mastra/playground-ui/components/Txt';
-import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
 import { IconArrowRotateClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateClockwise';
 import { t, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useQuery } from '@tanstack/react-query';
+import { File, FileImage, FileSpreadsheet, FileText } from 'lucide-react';
 import { ConversationFilePreview } from './conversation-file-preview';
 import { ConversationFileTree } from './conversation-file-tree';
 import { useConversationFilePaths } from './use-conversation-file-paths';
@@ -13,12 +14,18 @@ import { useStudioConfig } from '@/domains/configuration/context/studio-config-s
 
 export function ConversationFilesPanel({
   selectedPath,
+  openPaths = [],
+  scrollPositions,
+  onClose,
   onSelect,
   agentId,
   threadId,
   requestContext,
 }: {
   selectedPath?: string;
+  openPaths?: string[];
+  scrollPositions?: Map<string, number>;
+  onClose?: (path: string) => void;
   onSelect: (path: string | undefined) => void;
   agentId?: string;
   threadId?: string;
@@ -35,7 +42,8 @@ export function ConversationFilesPanel({
     refetchInterval: 10_000,
   });
   const files = (storage.data?.files ?? []).filter(file => paths.includes(file.path));
-  const selected = files.find(file => file.path === selectedPath);
+  const tree = 'file-tree';
+  const tabs = openPaths.length ? openPaths : selectedPath ? [selectedPath] : [];
   return (
     <aside aria-label={t('Files and artifacts')} className="bg-surface1 flex h-full min-h-0 flex-col">
       <div className="flex justify-end px-3 pt-2">
@@ -69,18 +77,36 @@ export function ConversationFilesPanel({
         <Txt tone="muted" className="p-4">
           {t('Loading...')}
         </Txt>
-      ) : selected ? (
-        <ConversationFilePreview key={selected.path} file={selected} onBack={() => onSelect(undefined)} />
-      ) : selectedPath ? (
-        <div className="space-y-3 p-4">
-          <Txt tone="muted">{t('This file is no longer available.')}</Txt>
-          <Button size="sm" icon={<IconArrowLeft />} onClick={() => onSelect(undefined)}>
-            {t('Back to files')}
-          </Button>
-        </div>
       ) : (
-        <>
-          <div className="min-h-0 flex-1 overflow-auto px-3 pb-4">
+        <Tabs
+          className="flex min-h-0 flex-1 flex-col"
+          defaultTab={tree}
+          value={selectedPath ?? tree}
+          onValueChange={path => onSelect(path === tree ? undefined : path)}
+        >
+          {tabs.length > 0 && (
+            <TabList className="mx-3 shrink-0">
+              <Tab value={tree}>{t('Files')}</Tab>
+              {tabs.map(path => {
+                const file = files.find(item => item.path === path);
+                const name = file?.name ?? path.split('/').at(-1);
+                const FileIcon = file?.mimeType.startsWith('image/')
+                  ? FileImage
+                  : /\.(xlsx?|ods|csv)$/i.test(name ?? '')
+                    ? FileSpreadsheet
+                    : /\.(pdf|md|txt|docx?)$/i.test(name ?? '')
+                      ? FileText
+                      : File;
+                return (
+                  <Tab key={path} value={path} onClose={() => onClose?.(path)} tooltip={name}>
+                    <FileIcon size={14} aria-hidden="true" />
+                    <span className="max-w-28 truncate">{name}</span>
+                  </Tab>
+                );
+              })}
+            </TabList>
+          )}
+          <TabContent value={tree} flush keepMounted className="min-h-0 flex-1 px-3 pb-4">
             {files.length ? (
               <ConversationFileTree files={files} onSelect={onSelect} />
             ) : (
@@ -88,8 +114,26 @@ export function ConversationFilesPanel({
                 {t('No files found.')}
               </Txt>
             )}
-          </div>
-        </>
+          </TabContent>
+          {tabs.map(path => {
+            const file = files.find(item => item.path === path);
+            return (
+              <TabContent key={path} value={path} flush keepMounted className="min-h-0 flex-1">
+                {file ? (
+                  <ConversationFilePreview
+                    file={file}
+                    scrollPositions={scrollPositions}
+                    onBack={() => onSelect(undefined)}
+                  />
+                ) : (
+                  <Txt tone="muted" className="p-4">
+                    {t('This file is no longer available.')}
+                  </Txt>
+                )}
+              </TabContent>
+            );
+          })}
+        </Tabs>
       )}
     </aside>
   );

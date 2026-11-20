@@ -1,7 +1,8 @@
 import { useMastraClient } from '@mastra/react';
-import { Download, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { Download, Eye, FileText } from 'lucide-react';
+import { useContext, useState } from 'react';
 import { z } from 'zod';
+import { ChatOpenFileContext } from '../context/chat-context';
 import { Button } from '@/ds/components/Button';
 import { Txt } from '@/ds/components/Txt';
 import { Icon } from '@/ds/icons/Icon';
@@ -20,6 +21,7 @@ const outputSchema = z.object({ files: z.array(fileSchema).min(1).max(8) });
 
 function PresentedFileCard({ file }: { file: z.infer<typeof fileSchema> }) {
   const client = useMastraClient();
+  const openFile = useContext(ChatOpenFileContext);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const download = async () => {
@@ -60,9 +62,9 @@ function PresentedFileCard({ file }: { file: z.infer<typeof fileSchema> }) {
         ? `${(file.size / 1024).toFixed(1)} KB`
         : `${(file.size / 1024 / 1024).toFixed(1)} MB`;
   return (
-    <div className={cn(messageSurfaceStyle, 'max-w-full w-80 px-3 py-2.5')}>
+    <div className={cn(messageSurfaceStyle, 'w-full min-w-0 px-3 py-2.5')}>
       <div className="flex min-w-0 items-center gap-2.5">
-        <Icon size="md" className="text-muted-foreground shrink-0">
+        <Icon size="md" className="shrink-0 text-muted-foreground">
           <FileText aria-hidden="true" />
         </Icon>
         <div className="min-w-0 flex-1">
@@ -73,6 +75,16 @@ function PresentedFileCard({ file }: { file: z.infer<typeof fileSchema> }) {
             {size}
           </Txt>
         </div>
+        {openFile && (
+          <Button
+            variant="ghost"
+            size="icon-md"
+            aria-label={t('Preview {name}', { name: file.name })}
+            onClick={() => openFile(file.path)}
+          >
+            <Eye />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon-md"
@@ -99,13 +111,22 @@ function PresentedFileCard({ file }: { file: z.infer<typeof fileSchema> }) {
 
 export function PresentTool({ output }: { output: unknown }) {
   useLocale();
+  const [expanded, setExpanded] = useState(false);
   const result = outputSchema.safeParse(output);
   if (!result.success) return null;
+  const { files } = result.data;
   return (
-    <div className="flex flex-wrap gap-2" aria-label={t('Delivered files')}>
-      {result.data.files.map(file => (
-        <PresentedFileCard key={file.path} file={file} />
-      ))}
-    </div>
+    <section aria-label={t('Delivered files')} className="@container min-w-0 space-y-2">
+      <div className={cn('grid gap-2', files.length > 1 && '@min-[34rem]:grid-cols-2')}>
+        {(expanded ? files : files.slice(0, 4)).map(file => (
+          <PresentedFileCard key={file.path} file={file} />
+        ))}
+      </div>
+      {files.length > 4 && (
+        <Button variant="ghost" size="sm" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>
+          {expanded ? t('Show fewer files') : t('Show {count} more files', { count: files.length - 4 })}
+        </Button>
+      )}
+    </section>
   );
 }

@@ -37,9 +37,11 @@ import { AccountPreferences } from './services/account-preferences';
 import { ConversationProjects } from './services/conversation-projects';
 import { UserDeliveryService } from './services/delivery';
 import { OfficeReader } from './services/office';
+import { turnFileChangesProcessor } from './services/turn-file-changes';
 import { createAgentTree } from './subagents/agents';
 import { SubagentStore } from './subagents/store';
 import { createCreatorTools } from './tools';
+import { conversationToolPolicy } from './tools/conversation-policy';
 import { createDocumentTools } from './tools/read-document';
 import { UserStorage } from './user-storage';
 import { userStorageRoutes } from './user-storage-routes';
@@ -211,12 +213,14 @@ const creatorMemory = new HistoryMemory({
 const disabledRecallMemory = new DisabledRecallMemory({ storage, options: { generateTitle: true } });
 const sessionClient = createClient({ url: `file:${previewPath('src/mastra/public/preview.db')}` });
 const documents = createDocumentTools(new OfficeReader(userFiles));
+const toolPolicy = conversationToolPolicy();
+const turnFileChanges = turnFileChangesProcessor();
 const creatorToolBundle = createCreatorTools({
   countText,
   sessionSearch: new LibSQLSessionSearch(sessionClient),
   delivery: new UserDeliveryService(userFiles),
 });
-const privateWorkspace = createPrivateWorkspace(userFiles, previewPath('workspace/skills'));
+const privateWorkspace = createPrivateWorkspace(userFiles, storage);
 const subagentStore = new SubagentStore(`file:${previewPath('data/subagents.db')}`);
 await subagentStore.init();
 const childMemory = new HistoryMemory({
@@ -247,7 +251,7 @@ const agentTree = createAgentTree({
     );
   },
   childConfig: {
-    inputProcessors: [contextCompaction, documents.processor],
+    inputProcessors: [documents.processor, turnFileChanges, toolPolicy, contextCompaction],
     outputProcessors: [contextCompaction],
     errorProcessors: [contextCompaction],
     workspace: ({ user }) => (user?.id ? privateWorkspace(user.id) : undefined),
@@ -296,7 +300,14 @@ const creatorAgent = new Agent({
   // Server auth supplies library access; do not grant every caller ownership.
   scopes: ({ scopes }) => scopes,
   memory: accountMemory(accountPreferences, creatorMemory, disabledRecallMemory),
-  inputProcessors: [new TaskStateProcessor(), contextCompaction, agentTree.processor, documents.processor],
+  inputProcessors: [
+    new TaskStateProcessor(),
+    agentTree.processor,
+    documents.processor,
+    turnFileChanges,
+    toolPolicy,
+    contextCompaction,
+  ],
   outputProcessors: [contextCompaction],
   errorProcessors: [contextCompaction],
   tools: creatorTools,
@@ -359,7 +370,11 @@ export const mastra = new Mastra({
         workspace: privateWorkspace,
         providerConfigured: creatorToolBundle.providerConfigured,
       }),
-      ...userStorageRoutes(userFiles, accounts.authenticate, accountsOrigins),
+      ...userStorageRoutes(userFiles, accounts.authenticate, accountsOrigins, async (user, threadId) => {
+        const { resourceId } = accounts.session(user);
+        const thread = await projectMemory.getThreadById({ threadId, resourceId });
+        return thread?.resourceId === resourceId;
+      }),
       ...conversationProjectRoutes(conversationProjects, accounts, accountsOrigins),
       ...accountPreferenceRoutes(accountPreferences, accounts, accountsOrigins),
       ...KNOWLEDGE_ROUTES,

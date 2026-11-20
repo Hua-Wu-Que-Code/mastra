@@ -1,10 +1,14 @@
 import { useMcpAppTools } from '@mastra/react/hooks/mcps';
 import { useCallback, useContext, useMemo } from 'react';
+import { presentProcessSummary } from '../preferences/process-presentation';
+import { ProcessRow } from '../preferences/process-row';
+import { useWorkDetails } from '../preferences/work-details-state';
 import { AgentBadgeWrapper } from './badges/agent-badge-wrapper';
 import { FileTreeBadge } from './badges/file-tree-badge';
 import { KnowledgeToolBadge, knowledgeCard } from './badges/knowledge-tool-badge';
 import { DeferredMcpInputRequest, ForegroundMcpInputRequest } from './badges/mcp-input-request-badge';
 import { SandboxExecutionBadge } from './badges/sandbox-execution-badge';
+import { ToolApprovalBadge } from './badges/tool-approval-badge';
 import { ToolBadge } from './badges/tool-badge';
 import { useDeferredInputRequest } from './badges/use-deferred-input-request';
 import { useWorkflowStream, WorkflowBadge } from './badges/workflow-badge';
@@ -91,6 +95,7 @@ export const ToolCardInner = ({
   readOnly = false,
 }: ToolCardProps) => {
   const { data: mcpAppTools } = useMcpAppTools();
+  const summaryOnly = useWorkDetails()?.summaryOnly;
   const send = useChatSend();
   const chatAgent = useContext(ChatAgentContext);
   const { isRunning } = useChatRunning();
@@ -146,6 +151,49 @@ export const ToolCardInner = ({
   );
 
   function renderKind() {
+    if (summaryOnly) {
+      if (kind === 'hidden' || kind === 'observation') return null;
+      const hasUserCard =
+        kind === 'present' ||
+        (kind === 'ask_user' && !readOnly) ||
+        kind === 'submit_plan' ||
+        kind === 'connect_prompt' ||
+        kind === 'mcp_app';
+      if (!hasUserCard) {
+        const { icon: Icon, label, detail } = presentProcessSummary(toolName, input);
+        const question = kind === 'mcp_input_request' ? suspendedMcpInputRequest(metadata, toolCallId) : undefined;
+        if (toolApprovalMetadata || question) {
+          return (
+            <>
+              <ToolApprovalBadge
+                approval={{
+                  toolName,
+                  toolCallId,
+                  toolApprovalMetadata,
+                  isNetwork,
+                  isGenerateMode: metadata?.mode === 'generate',
+                  toolCalled: toolCalled ?? isSettledState(state),
+                }}
+                icon={<Icon aria-hidden />}
+                title={label}
+                detail={detail}
+                status={status}
+              />
+              {question && (
+                <ForegroundMcpInputRequest
+                  key={question.requestedAt ?? question.createdAt}
+                  toolCallId={toolCallId}
+                  payload={question}
+                  readOnly={readOnly}
+                  isNetwork={isNetwork}
+                />
+              )}
+            </>
+          );
+        }
+        return <ProcessRow icon={<Icon aria-hidden />} label={label} detail={detail} status={status} />;
+      }
+    }
     switch (kind) {
       case 'hidden':
         return null;
@@ -341,23 +389,25 @@ export const ToolCardInner = ({
 
     return (
       <>
-        <ToolBadge
-          toolName={toolName}
-          args={input}
-          result={output ?? errorText}
-          toolOutput={output?.toolOutput || []}
-          metadata={metadata}
-          toolCallId={toolCallId}
-          toolApprovalMetadata={toolApprovalMetadata}
-          suspendPayload={suspendedToolMetadata?.suspendPayload}
-          isNetwork={isNetwork}
-          toolCalled={toolCalled}
-          status={status}
-          backgroundTaskId={backgroundTaskId}
-          backgroundTaskStatus={backgroundTaskStatus}
-          mcpInputRequest={deferredRequest?.payload}
-        />
-        <ToolResultMedia modelOutput={modelOutput} />
+        {!summaryOnly && (
+          <ToolBadge
+            toolName={toolName}
+            args={input}
+            result={output ?? errorText}
+            toolOutput={output?.toolOutput || []}
+            metadata={metadata}
+            toolCallId={toolCallId}
+            toolApprovalMetadata={toolApprovalMetadata}
+            suspendPayload={suspendedToolMetadata?.suspendPayload}
+            isNetwork={isNetwork}
+            toolCalled={toolCalled}
+            status={status}
+            backgroundTaskId={backgroundTaskId}
+            backgroundTaskStatus={backgroundTaskStatus}
+            mcpInputRequest={deferredRequest?.payload}
+          />
+        )}
+        {!summaryOnly && <ToolResultMedia modelOutput={modelOutput} />}
         {mcpAppInfo && output !== undefined && (
           <McpAppToolResult
             appInfo={mcpAppInfo}

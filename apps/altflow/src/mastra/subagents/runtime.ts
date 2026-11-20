@@ -440,6 +440,8 @@ export class SubagentRuntime {
           : `Original task: ${child.prompt}\nContinue from the saved conversation. Check completed work before repeating actions. Read new messages from your collaborators.`;
       const stream = await agent.stream(prompt, {
         requestContext: childContext(actor),
+        // The child view reads stored messages while the agent is still running.
+        savePerStep: true,
         memory: { thread: id, resource: childResource(actor) },
         abortSignal: controller.signal,
         onStepFinish: async step => {

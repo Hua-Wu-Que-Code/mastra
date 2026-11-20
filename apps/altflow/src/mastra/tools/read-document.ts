@@ -50,8 +50,46 @@ export function createDocumentTools(reader: OfficeReader) {
     inputSchema,
     execute: async (input, context) => readBody(input, toolIdentity(context).userId, context?.abortSignal),
   });
+  const path = z.string().min(1).max(2048);
+  const sheet = z.string().max(240).optional();
+  const convert = createTool({
+    id: 'office_convert',
+    description:
+      'Convert a document, workbook, or presentation in the private workspace. CSV conversion accepts an exact sheet name. Deliver the output paths with present.',
+    inputSchema: z.object({
+      path,
+      format: z.enum(['pdf', 'docx', 'odt', 'txt', 'xlsx', 'ods', 'csv', 'pptx', 'odp']),
+      sheet,
+    }),
+    execute: async ({ path, ...options }, context) =>
+      reader.produce(toolIdentity(context).userId, path, 'convert', options, context?.abortSignal),
+  });
+  const render = createTool({
+    id: 'office_render',
+    description:
+      'Render up to eight document pages, slides, or worksheet views as PNG. Open a rendered PNG with the workspace file reader to inspect the layout. Pass one-based page numbers or, for a workbook, a sheet name and optional A1 range. Deliver the output paths with present.',
+    inputSchema: z.object({
+      path,
+      pages: z.array(z.number().int().positive()).min(1).max(8).optional(),
+      sheet,
+      range: z
+        .string()
+        .regex(/^\$?[A-Z]{1,3}\$?[1-9]\d{0,6}:\$?[A-Z]{1,3}\$?[1-9]\d{0,6}$/i)
+        .optional(),
+      dpi: z.number().int().min(24).max(192).optional(),
+    }),
+    execute: async ({ path, ...options }, context) =>
+      reader.produce(toolIdentity(context).userId, path, 'render', options, context?.abortSignal),
+  });
+  const recalculate = createTool({
+    id: 'office_recalculate',
+    description: 'Recalculate workbook formulas in a separate XLSX or ODS file. Deliver the output path with present.',
+    inputSchema: z.object({ path, format: z.enum(['xlsx', 'ods']).optional() }),
+    execute: async ({ path, ...options }, context) =>
+      reader.produce(toolIdentity(context).userId, path, 'recalculate', options, context?.abortSignal),
+  });
   return {
-    tools: { read_document: read },
+    tools: { read_document: read, office_convert: convert, office_render: render, office_recalculate: recalculate },
     processor: {
       id: 'altflow-office-reader',
       processInputStep(args: ProcessInputStepArgs) {

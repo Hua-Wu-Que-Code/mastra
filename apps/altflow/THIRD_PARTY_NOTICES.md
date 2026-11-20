@@ -2,6 +2,7 @@
 
 DeepSeek Harness execution-policy design and activation-slot reservation adapted from
 packages/subagent/subagent/src/{index,activation}.ts and packages/core/agent-loop/src/constants.ts.
+Also adapted conversation tool activation, repeat reminders, oversized tool results, and per-turn workspace comparison patterns.
 Upstream: https://github.com/deepseek-ai/deepseek-harness
 
 MIT License

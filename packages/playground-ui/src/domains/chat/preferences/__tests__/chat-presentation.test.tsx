@@ -17,10 +17,12 @@ import {
   conversation,
   conversationWithBookkeeping,
   failedConversation,
+  failedConversationWithNotifications,
+  failedRunConversation,
 } from './fixtures/conversation';
 import { server } from '@/test/msw-server';
 
-function tree({ running = false, latest = true, scope = 'alice', messages = conversation } = {}) {
+function tree({ running = false, latest = true, scope = 'alice', messages = conversation, summaryOnly = false } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return (
     <MastraReactProvider baseUrl="http://localhost:4111">
@@ -40,7 +42,7 @@ function tree({ running = false, latest = true, scope = 'alice', messages = conv
             <ChatPreferencesSettings />
             <EditorPreferencesSettings />
             <div data-testid="conversation">
-              <WorkDetails messages={messages} running={running} latest={latest}>
+              <WorkDetails messages={messages} running={running} latest={latest} summaryOnly={summaryOnly}>
                 <WorkDetailsToggle />
                 {messages.map(message => (
                   <MessageRow key={message.id} message={message} />
@@ -75,6 +77,28 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('Chat presentation', () => {
+  describe('when the conversation shows activity summaries only', () => {
+    it('shows only the file name after opening details for a saved answer', async () => {
+      render(tree({ summaryOnly: true }));
+      fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      fireEvent.click(within(screen.getByRole('group', { name: 'Work details: 1 steps' })).getByRole('button'));
+
+      expect(await screen.findByText('story.txt')).toBeDefined();
+      expect(screen.queryByRole('button', { name: 'Read' })).toBeNull();
+      expect(screen.queryByText(/Compare the two characters|private-attachment|offset|A story draft/)).toBeNull();
+      expect(screen.getByText('The final story begins here.')).toBeDefined();
+    });
+
+    it('keeps reasoning and tool payloads out of fully expanded live activity', async () => {
+      render(tree({ summaryOnly: true, running: true }));
+      await choose('Work details', 'Fully expanded');
+
+      expect(await screen.findByText('story.txt')).toBeDefined();
+      expect(screen.queryByRole('button', { name: 'Read' })).toBeNull();
+      expect(screen.queryByText(/Compare the two characters|private-attachment|offset|A story draft/)).toBeNull();
+    });
+  });
+
   describe('whole-turn control geometry (DSH TurnProcessNodeView)', () => {
     it('is 33px tall at the body size with an 8px pad and a hairline rule', () => {
       render(tree());
@@ -209,20 +233,67 @@ describe('Chat presentation', () => {
       expect(screen.queryByRole('combobox', { name: 'Replies when collapsed' })).toBeNull();
     });
   });
-  describe('when a tool fails or waits for approval', () => {
-    it('keeps the failure outside folded work groups', async () => {
-      render(tree({ messages: failedConversation }));
-      await choose('Work details', 'Compact');
-      expect(screen.queryByRole('button', { name: 'Show work details' })).toBeNull();
-      expect(screen.getByRole('group', { name: 'Reasoning' })).toBeDefined();
+  describe('when a run fails before its final reply', () => {
+    it('lets the user reopen and fold the work while keeping the error visible', () => {
+      render(tree({ messages: failedRunConversation, summaryOnly: true }));
+      const control = screen.getByRole('button', { name: 'Show work details' });
+      expect(control.textContent).toContain('Failed');
+      expect(screen.getByText('The model request failed.')).toBeDefined();
+      expect(screen.queryByText('I will check the material first.')).toBeNull();
+      expect(screen.queryByRole('group', { name: 'Work details: 1 steps' })).toBeNull();
+
+      fireEvent.click(control);
+      const work = screen.getByRole('group', { name: 'Work details: 1 steps' });
+      fireEvent.click(within(work).getByRole('button'));
+      expect(screen.getByText('story.txt')).toBeDefined();
       expect(screen.getByText('I will check the material first.')).toBeDefined();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Hide work details' }));
+      expect(screen.queryByText('story.txt')).toBeNull();
+      expect(screen.getByText('The model request failed.')).toBeDefined();
     });
-    it('keeps the approval action accessible', async () => {
-      render(tree({ messages: approvalConversation }));
-      await choose('Work details', 'Compact');
-      expect(screen.getByRole('button', { name: /Approve/ })).toBeDefined();
-      expect(screen.queryByRole('button', { name: 'Show work details' })).toBeNull();
+  });
+  describe('when the only activity is a failed tool call', () => {
+    it('lets the reader open the failed tool call from the collapsed turn', () => {
+      render(tree({ messages: failedConversation }));
+      const control = screen.getByRole('button', { name: 'Show work details' });
+      expect(control.textContent).toContain('Failed');
+      expect(screen.queryByRole('button', { name: /Read/ })).toBeNull();
+      fireEvent.click(control);
+      expect(screen.getByRole('button', { name: /Read/ })).toBeDefined();
     });
+  });
+  describe('when a failed turn includes tool activity and subagent notifications', () => {
+    it('folds failed tools and both forms of subagent notifications without hiding the reply or error', () => {
+      render(tree({ messages: failedConversationWithNotifications }));
+      expect(screen.queryByRole('button', { name: /Read/ })).toBeNull();
+      expect(screen.queryByText('Scan A completed.')).toBeNull();
+      expect(screen.queryByText('Scan B completed.')).toBeNull();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show work details' }));
+      expect(screen.getByRole('button', { name: /Read/ })).toBeDefined();
+      expect(screen.getByText('Scan A completed.')).toBeDefined();
+      expect(screen.getByText('Scan B completed.')).toBeDefined();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Hide work details' }));
+      expect(screen.queryByRole('button', { name: /Read/ })).toBeNull();
+      expect(screen.queryByText('Scan A completed.')).toBeNull();
+      expect(screen.queryByText('Scan B completed.')).toBeNull();
+      expect(screen.getByText('External event received.')).toBeDefined();
+      expect(screen.getByText('The final story begins here.')).toBeDefined();
+      expect(screen.getByText('The model request failed.')).toBeDefined();
+    });
+  });
+  describe('when a tool waits for approval', () => {
+    it.each([false, true])(
+      'keeps the approval action accessible with activity summaries set to %s',
+      async summaryOnly => {
+        render(tree({ messages: approvalConversation, summaryOnly }));
+        await choose('Work details', 'Compact');
+        expect(screen.getByRole('button', { name: /Approve/ })).toBeDefined();
+        expect(screen.queryByRole('button', { name: 'Show work details' })).toBeNull();
+      },
+    );
   });
   describe('when compact mode is selected during a run', () => {
     it('groups reasoning and tool details without hiding replies', async () => {

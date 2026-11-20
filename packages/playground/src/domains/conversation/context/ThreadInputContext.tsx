@@ -33,9 +33,14 @@ export const ThreadInputProvider = ({
     setMemoryDrafts(previous => {
       const current = previous.get(key) ?? EMPTY_DRAFT;
       const draft = typeof value === 'function' ? value(current) : value;
-      if (draft.text === current.text && draft.attachments === current.attachments) return previous;
+      if (
+        draft.text === current.text &&
+        draft.attachments === current.attachments &&
+        draft.fileReferences === current.fileReferences
+      )
+        return previous;
       const next = new Map(previous);
-      if (!draft.text && draft.attachments.length === 0) next.delete(key);
+      if (!draft.text && draft.attachments.length === 0 && !draft.fileReferences?.length) next.delete(key);
       else next.set(key, draft);
       return next;
     });

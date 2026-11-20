@@ -45,6 +45,9 @@ export const isSignalData = (value: unknown): value is SignalData => {
   return value.type === 'notification' || value.type === 'state' || value.type === 'reactive';
 };
 
+export const isSubagentNotification = (signal: SignalData): boolean =>
+  signal.type === 'notification' && signal.tagName === 'subagent';
+
 const getSignalMetadata = (message: MastraDBMessage): Record<string, unknown> | undefined => {
   const signal = message.content.metadata?.signal;
   return isRecord(signal) ? signal : undefined;

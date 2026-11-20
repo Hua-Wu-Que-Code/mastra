@@ -4,6 +4,14 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createClient } from '@libsql/client';
 import type { Client, Transaction, Row } from '@libsql/client';
 import type OSS from 'ali-oss';
+import {
+  fileChangeSummary,
+  recordTurnFile,
+  snapshotLimit,
+  textSnapshot,
+  trackTurnFiles,
+  turnChangesSchema,
+} from './services/turn-file-changes';
 
 export const USER_STORAGE_QUOTA = 512 * 1024 * 1024;
 export class FileStorageError extends Error {
@@ -80,6 +88,7 @@ export class UserStorage {
       CREATE TABLE IF NOT EXISTS file_garbage (object_key TEXT PRIMARY KEY, owner TEXT NOT NULL, created INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS user_directories (owner TEXT NOT NULL, path TEXT NOT NULL, PRIMARY KEY(owner,path));
     `);
+    await this.db.executeMultiple(turnChangesSchema);
     await this.recover();
   }
   close() {
@@ -206,6 +215,7 @@ export class UserStorage {
         args: [id, owner, path, objectKey, row ? field(row, 'object_key') : null, reserved, 'write', Date.now()],
       });
       return {
+        oldRow: row,
         oldKey: row ? field(row, 'object_key') : undefined,
         oldUpdated: row ? new Date(field(row, 'updated')).getTime() : 0,
       };
@@ -213,6 +223,8 @@ export class UserStorage {
     if (previous.duplicate) return previous.duplicate;
     const mime = options.mimeType ?? mimeFor(path);
     const updated = new Date(Math.max(Date.now(), (previous.oldUpdated ?? 0) + 1)).toISOString();
+    const before = await this.fileVersion(owner, path, previous.oldRow);
+    const after = { digest, text: textSnapshot(path, data) };
     try {
       await this.client.put(objectKey, data, { mime, headers: { 'x-oss-object-acl': 'private' } });
       await this.transaction(async tx => {
@@ -225,6 +237,7 @@ export class UserStorage {
             sql: 'INSERT OR IGNORE INTO file_garbage VALUES (?,?,?)',
             args: [previous.oldKey, owner, Date.now()],
           });
+        await recordTurnFile(tx, owner, path, before, after);
         await tx.execute({ sql: 'DELETE FROM file_operations WHERE id=?', args: [id] });
       });
     } catch (error) {
@@ -277,6 +290,7 @@ export class UserStorage {
       });
       return row;
     });
+    const before = await this.fileVersion(owner, path, row);
     // Never release quota while the object still exists.
     try {
       await this.client.delete(field(row, 'object_key'));
@@ -291,6 +305,7 @@ export class UserStorage {
         sql: 'DELETE FROM user_files WHERE owner=? AND path=?',
         args: [owner, path],
       });
+      await recordTurnFile(tx, owner, path, before, null);
       await tx.execute({ sql: 'DELETE FROM file_operations WHERE id=?', args: [id] });
     });
   }
@@ -330,6 +345,15 @@ export class UserStorage {
         })
       ).rows[0];
       if (target && !overwrite) throw new FileStorageError('同名文件已存在', 409);
+      if (trackTurnFiles.getStore()?.owner === owner) {
+        const [beforeSource, beforeTarget, afterTarget] = await Promise.all([
+          this.fileVersion(owner, src, source),
+          this.fileVersion(owner, dest, target),
+          this.fileVersion(owner, dest, source),
+        ]);
+        await recordTurnFile(tx, owner, src, beforeSource, null);
+        await recordTurnFile(tx, owner, dest, beforeTarget, afterTarget);
+      }
       await tx.execute({
         sql: 'DELETE FROM user_files WHERE owner=? AND path=?',
         args: [owner, dest],
@@ -363,6 +387,47 @@ export class UserStorage {
       });
     });
   }
+  async turnChanges(owner: string, thread: string) {
+    const result = await this.db.execute({
+      sql: `SELECT turn,path,before_digest,after_digest,before_text IS NOT NULL AS has_before,
+        after_text IS NOT NULL AS has_after FROM turn_file_changes
+        WHERE owner=? AND thread=? AND before_digest IS NOT after_digest ORDER BY updated DESC LIMIT 500`,
+      args: [owner, thread],
+    });
+    return result.rows.map(row => ({
+      turn: field(row, 'turn'),
+      ...fileChangeSummary(
+        field(row, 'path'),
+        row.before_digest,
+        row.after_digest,
+        row.has_before ? '' : null,
+        row.has_after ? '' : null,
+      ),
+    }));
+  }
+
+  async turnDiff(owner: string, thread: string, turn: string, path: string) {
+    const result = await this.db.execute({
+      sql: `SELECT before_digest,after_digest,before_text,after_text FROM turn_file_changes
+        WHERE owner=? AND thread=? AND turn=? AND path=? AND before_digest IS NOT after_digest`,
+      args: [owner, thread, turn, filePath(path)],
+    });
+    const row = result.rows[0];
+    if (!row) throw new FileStorageError('文件变更不存在', 404);
+    return { before: row.before_text, after: row.after_text };
+  }
+
+  private async fileVersion(owner: string, path: string, row: Row | undefined) {
+    if (!row || trackTurnFiles.getStore()?.owner !== owner) return null;
+    let text = null;
+    if (/\.(md|markdown|txt)$/i.test(path) && Number(row.size) <= snapshotLimit) {
+      // Immutable object keys are reserved by the active operation.
+      const object = await this.client.get(field(row, 'object_key')).catch(() => undefined);
+      if (object) text = textSnapshot(path, Buffer.from(object.content));
+    }
+    return { digest: field(row, 'digest'), text };
+  }
+
   private async collectGarbage(key: string) {
     try {
       await this.client.delete(key);

@@ -11,7 +11,7 @@ import { Agent } from '@mastra/core/agent';
 import { Mastra } from '@mastra/core/mastra';
 import { RequestContext, MASTRA_RESOURCE_ID_KEY, MASTRA_NORMALIZED_USER_KEY } from '@mastra/core/request-context';
 import { createTool, TaskStateProcessor } from '@mastra/core/tools';
-import { createWorkspaceTools, createSkillTools } from '@mastra/core/workspace';
+import { createWorkspaceTools, createSkillTools, publishSkillFromSource } from '@mastra/core/workspace';
 import { LibSQLStore } from '@mastra/libsql';
 import { Memory } from '@mastra/memory';
 import { z } from 'zod';
@@ -129,6 +129,51 @@ test('shared skill sources cannot read host paths or escaping symlinks', async t
   await assert.rejects(source.readFile('escape'), /outside/);
 });
 
+test('private workspaces load the active public skill snapshot from LibSQL', async t => {
+  const f = await fixture(t);
+  const skillsPath = join(f.dir, 'shared');
+  const markdown = join(skillsPath, 'style-guide', 'SKILL.md');
+  await mkdir(join(skillsPath, 'style-guide'), { recursive: true });
+  const writeSkill = body =>
+    writeFile(markdown, `---\nname: style-guide\ndescription: Editorial guide\n---\n${body}\n`);
+  await writeSkill('First published instruction');
+  const source = new SharedSkillSource(skillsPath);
+  const [skills, blobs] = await Promise.all([f.storage.getStore('skills'), f.storage.getStore('blobs')]);
+  const snapshot = async () => {
+    const { snapshot, tree, files } = await publishSkillFromSource(source, 'style-guide', blobs);
+    return { ...snapshot, tree, files };
+  };
+  const first = await snapshot();
+  await skills.create({ skill: { id: 'style-guide', visibility: 'public', ...first } });
+  const published = await skills.getLatestVersion('style-guide');
+  await skills.update({ id: 'style-guide', activeVersionId: published.id });
+
+  await writeSkill('Unpublished instruction');
+  const draft = await snapshot();
+  await skills.update({ id: 'style-guide', tree: draft.tree, files: draft.files });
+  const latest = await skills.getLatestVersion('style-guide');
+  await skills.create({ skill: { ...draft, id: 'draft-only', name: 'draft-only', visibility: 'public' } });
+  await skills.create({ skill: { ...draft, id: 'private-only', name: 'private-only', visibility: 'private' } });
+  const privateVersion = await skills.getLatestVersion('private-only');
+  await skills.update({ id: 'private-only', activeVersionId: privateVersion.id });
+  await rm(skillsPath, { recursive: true });
+
+  const files = new UserStorage({ client: {}, databaseUrl: `file:${join(f.dir, 'skills-user-files.db')}` });
+  await files.init();
+  t.after(() => files.close());
+  const resolveWorkspace = createPrivateWorkspace(files, f.storage);
+  const alice = await resolveWorkspace('alice');
+  assert.deepEqual(
+    (await alice.skills.list()).map(skill => skill.name),
+    ['style-guide'],
+  );
+  assert.match((await alice.skills.get('style-guide')).instructions, /First published instruction/);
+  await skills.update({ id: 'style-guide', activeVersionId: latest.id });
+  const bob = await resolveWorkspace('bob');
+  assert.match((await bob.skills.get('style-guide')).instructions, /Unpublished instruction/);
+  assert.match((await alice.skills.get('style-guide')).instructions, /First published instruction/);
+});
+
 test('authenticated tool catalog exposes real runtime capabilities, not scheduled tools or an execution bypass', async t => {
   const { Hono } = await import('hono');
   const { serve } = await import('@hono/node-server');
@@ -169,15 +214,13 @@ test('authenticated tool catalog exposes real runtime capabilities, not schedule
     scopes: {},
     tools: true,
   });
-  const skillsPath = join(f.dir, 'catalog-skills');
-  await mkdir(skillsPath);
   const files = new UserStorage({
     client: {},
     databaseUrl: `file:${join(f.dir, 'catalog-files.db')}`,
   });
   await files.init();
   t.after(() => files.close());
-  const privateWorkspace = createPrivateWorkspace(files, skillsPath);
+  const privateWorkspace = createPrivateWorkspace(files, f.storage);
   const route = toolCatalogRoute({
     accounts,
     origins: ['http://localhost:5174'],

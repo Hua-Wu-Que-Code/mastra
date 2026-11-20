@@ -83,13 +83,23 @@ export function createThreadDraftState(initialKey?: string) {
     }
     const previous = snapshot.draft;
     const next = typeof value === 'function' ? value(previous) : value;
-    if (next.text === previous.text && next.attachments === previous.attachments) return;
+    if (
+      next.text === previous.text &&
+      next.attachments === previous.attachments &&
+      next.fileReferences === previous.fileReferences
+    )
+      return;
     dirty = storageKey !== undefined;
     snapshot = { draft: next, status: { ...snapshot.status, saving: dirty } };
     notify();
     if (!dirty) return;
     // File changes and submission clears should not wait for the typing debounce.
-    if (!next.text || next.attachments !== previous.attachments || listeners.size === 0) {
+    if (
+      !next.text ||
+      next.attachments !== previous.attachments ||
+      next.fileReferences !== previous.fileReferences ||
+      listeners.size === 0
+    ) {
       flush();
     } else {
       clearTimeout(debounceTimer);

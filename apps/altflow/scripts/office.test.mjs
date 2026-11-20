@@ -77,3 +77,26 @@ test('PDF body text uses the same authenticated storage', async t => {
   await store.write('alice', '/body.pdf', await readFile(output));
   assert.match(await new OfficeReader(store).read('alice', '/body.pdf'), /松树边的蓝色风筝/);
 });
+
+test('DSH converts real Office files, renders a page to PNG and recalculates a workbook', async t => {
+  const { store } = await setup(t);
+  const word = await readFile(new URL('./fixtures/office/body.docx', import.meta.url));
+  const workbook = await readFile(new URL('./fixtures/office/body.xlsx', import.meta.url));
+  await store.write('alice', '/body.docx', word);
+  await store.write('alice', '/body.xlsx', workbook);
+  const reader = new OfficeReader(store);
+  const converted = await reader.produce('alice', '/body.docx', 'convert', { format: 'pdf' });
+  assert.equal(converted.files[0].mimeType, 'application/pdf');
+  assert.equal((await store.read('alice', converted.files[0].path)).subarray(0, 4).toString(), '%PDF');
+  const rendered = await reader.produce('alice', '/body.docx', 'render', { pages: [1] });
+  assert.equal(rendered.files.length, 1);
+  assert.deepEqual(
+    (await store.read('alice', rendered.files[0].path)).subarray(0, 8),
+    Buffer.from('89504e470d0a1a0a', 'hex'),
+  );
+  const recalculated = await reader.produce('alice', '/body.xlsx', 'recalculate', {});
+  assert.match(recalculated.files[0].name, /recalculated\.xlsx$/);
+  assert.match(await reader.read('alice', recalculated.files[0].path), /Office/);
+  assert.deepEqual(await store.read('alice', '/body.xlsx'), workbook);
+  await assert.rejects(reader.produce('bob', '/body.docx', 'convert', { format: 'pdf' }), /不存在/);
+});

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { getReasoningContent } from '../messages/reasoning-content';
 import { isToolPart, readToolPart } from '../messages/renderers/tool-part';
 import { isSettledState } from '../tools/tool-card-kind';
-import { presentProcessTool } from './process-presentation';
+import { presentProcessSummary, presentProcessTool } from './process-presentation';
 import { ProcessRow } from './process-row';
 import { useWorkDetails } from './work-details-state';
 import { DshThink } from '@/ds/icons/dsh/DshThink';
@@ -22,13 +22,14 @@ export function WorkDetailsBlock({ parts, children }: { parts: MessageFactoryPar
   });
   const fields = active ? (isToolPart(active) ? readToolPart(active) : undefined) : tools.at(-1);
   const running = Boolean(active);
-  const live = fields && presentProcessTool(fields.toolName, fields.input);
+  const presentTool = presentation.summaryOnly ? presentProcessSummary : presentProcessTool;
+  const live = fields && presentTool(fields.toolName, fields.input);
   const categories = new Map<string, { count: number; done: string }>();
   const seen = new Set<string>();
   for (const tool of tools) {
     if (tool.toolCallId && seen.has(tool.toolCallId)) continue;
     if (tool.toolCallId) seen.add(tool.toolCallId);
-    const item = presentProcessTool(tool.toolName, tool.input);
+    const item = presentTool(tool.toolName, tool.input);
     categories.set(item.kind, { count: (categories.get(item.kind)?.count ?? 0) + 1, done: item.done });
   }
   const ranked = [...categories.values()].sort((a, b) => b.count - a.count);

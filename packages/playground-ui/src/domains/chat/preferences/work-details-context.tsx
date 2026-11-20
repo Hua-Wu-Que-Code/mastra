@@ -3,12 +3,13 @@ import { useMcpAppTools } from '@mastra/react/hooks/mcps';
 import { useContext, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { isToolPart, readToolPart } from '../messages/renderers/tool-part';
+import { isSubagentNotification, toReactiveSignalData } from '../messages/signal-data';
 import { useTurnMetrics } from '../metrics/chat-metrics-context';
 import { runDurationLabel } from '../metrics/run-duration';
 import { isSettledState } from '../tools/tool-card-kind';
 import { chatContentStyle } from './chat-content-style';
 import { useChatPreferences } from './chat-preferences-context';
-import { canFoldWork, finalReply, isWorkPart } from './work-details';
+import { canFoldWork, finalReply, isFoldableWorkPart } from './work-details';
 import type { WorkDetailsPresentation } from './work-details';
 import { WorkDetailsContext, WorkDetailsControlContext } from './work-details-state';
 import { DshChevronDown } from '@/ds/icons/dsh/DshChevronDown';
@@ -25,11 +26,14 @@ export function WorkDetails({
   messages,
   running,
   latest,
+  summaryOnly = false,
   children,
 }: {
   messages: MastraDBMessage[];
   running: boolean;
   latest: boolean;
+  /** Show activity labels without disclosing model reasoning or tool payloads. */
+  summaryOnly?: boolean;
   children: ReactNode;
 }) {
   useLocale();
@@ -40,22 +44,41 @@ export function WorkDetails({
   const [focusWithinWork, setFocusWithinWork] = useState(false);
   const [keepActiveLayout, setKeepActiveLayout] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
-  const count = messages.reduce(
-    (total, message) =>
-      total +
-      message.content.parts.filter(
-        part => message.role === 'assistant' && isWorkPart(part, { metadata: message.content.metadata, mcpAppTools }),
-      ).length,
-    0,
-  );
+  const hasWork = messages.some(message => {
+    if (message.role === 'signal') return isSubagentNotification(toReactiveSignalData(message));
+    if (message.role !== 'assistant') return false;
+    return message.content.parts.some(
+      part =>
+        (!summaryOnly || part.type !== 'reasoning') &&
+        isFoldableWorkPart(part, { metadata: message.content.metadata, mcpAppTools }),
+    );
+  });
   const deferred = latest && preferences.collapseTiming === 'next-input';
-  const safeToFold = canFoldWork(messages, { mcpAppTools });
-  const answer = finalReply(messages);
-  const foldable = preferences.workDetails !== 'verbose' && count > 0 && safeToFold && (running || Boolean(answer));
+  const lastRun = metrics.at(-1);
+  const tools = messages.flatMap(message =>
+    message.content.parts.flatMap(part => (isToolPart(part) ? [readToolPart(part)] : [])),
+  );
+  const failed =
+    tools.some(tool => tool.state === 'output-error' || tool.backgroundTaskStatus === 'failed') ||
+    messages.some(
+      message =>
+        message.content.metadata?.status === 'error' || message.content.parts.some(part => part.type === 'error'),
+    ) ||
+    ['error', 'failed'].includes(lastRun?.outcome ?? '');
+  const finishedWithFailure = !running && failed;
+  // A terminal failure can fold the activity even if a tool never settled.
+  const safeToFold = finishedWithFailure || canFoldWork(messages, { mcpAppTools });
+  const answer = finalReply(messages, { hideProgressWithoutReply: finishedWithFailure });
+  const foldable =
+    preferences.workDetails !== 'verbose' &&
+    hasWork &&
+    safeToFold &&
+    (running || Boolean(answer) || finishedWithFailure);
   const automaticallyExpanded = running || deferred || focusWithinWork;
   const expanded = !foldable || (manual?.mode === preferences.workDetails ? manual.expanded : automaticallyExpanded);
   const historical = !running && !deferred && !keepActiveLayout;
   const presentation: WorkDetailsPresentation = {
+    summaryOnly,
     collapsed: !expanded,
     metrics,
     lastAssistantId: messages.findLast(message => message.role === 'assistant')?.id,
@@ -71,20 +94,12 @@ export function WorkDetails({
   };
 
   const hasAssistant = messages.some(message => message.role === 'assistant');
-  const lastRun = metrics.at(-1);
   const firstRun = metrics.at(0);
   const elapsed =
     firstRun?.startedAt !== undefined && lastRun?.endedAt !== undefined
       ? lastRun.endedAt - firstRun.startedAt
       : undefined;
-  const tools = messages.flatMap(message =>
-    message.content.parts.flatMap(part => (isToolPart(part) ? [readToolPart(part)] : [])),
-  );
   const unfinished = tools.some(tool => !isSettledState(tool.state) || tool.backgroundTaskStatus === 'running');
-  const failed =
-    tools.some(tool => tool.state === 'output-error' || tool.backgroundTaskStatus === 'failed') ||
-    messages.some(message => message.content.metadata?.status === 'error') ||
-    ['error', 'failed'].includes(lastRun?.outcome ?? '');
   const stopped =
     messages.some(message => message.content.metadata?.status === 'aborted') ||
     lastRun?.outcome === 'aborted' ||

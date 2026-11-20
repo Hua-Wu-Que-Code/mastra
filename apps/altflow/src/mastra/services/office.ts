@@ -1,11 +1,37 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 import { extname, join } from 'node:path';
 import { createConverter } from '@deepseek-ai/libreoffice-kit';
 import { FileStorageError } from '../user-storage';
 import type { UserStorage } from '../user-storage';
 
 export const isOfficeDocument = (path: string) => /\.(docx?|odt|xlsx?|ods|pptx?|odp|pdf)$/i.test(path);
+
+const mimeTypes: Record<string, string> = {
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.txt': 'text/plain',
+  '.csv': 'text/csv',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  '.odt': 'application/vnd.oasis.opendocument.text',
+  '.ods': 'application/vnd.oasis.opendocument.spreadsheet',
+  '.odp': 'application/vnd.oasis.opendocument.presentation',
+};
+const officeMimeType = (extension: string) => mimeTypes[extension] ?? 'application/octet-stream';
+
+function officeConverter() {
+  return createConverter({
+    timeoutMs: 60_000,
+    maxInputBytes: 50 * 1024 * 1024,
+    maxOutputBytes: 100 * 1024 * 1024,
+    maxImageResolution: 192,
+    maxArchiveEntries: 10_000,
+    maxUncompressedBytes: 250 * 1024 * 1024,
+  });
+}
 
 /** Uses DSH's office-kit engine and private-snapshot lifecycle, with its deployment limits.
  * Reference: deepseek-harness/packages/document/office-kit/src/index.ts, runOperation.
@@ -17,32 +43,12 @@ export class OfficeReader {
   constructor(private readonly storage: UserStorage) {}
 
   async read(owner: string, path: string, signal?: AbortSignal): Promise<string> {
-    signal?.throwIfAborted();
-    if (!isOfficeDocument(path)) throw new FileStorageError('不支持的文档格式');
-    const info = await this.storage.info(owner, path);
-    if (info.size > 50 * 1024 * 1024) throw new FileStorageError('Office 文档超过 50 MB 读取上限', 413);
-    await this.acquire(signal);
-    let directory: string | undefined;
-    try {
-      const bytes = await this.storage.read(owner, path);
-      signal?.throwIfAborted();
-      if (bytes.length > 50 * 1024 * 1024) throw new FileStorageError('Office 文档超过 50 MB 读取上限', 413);
-      directory = await mkdtemp(join(tmpdir(), 'altflow-office-kit-'));
-      const extension = extname(path).toLowerCase();
-      const inputPath = join(directory, `source${extension}`);
-      await writeFile(inputPath, bytes, { flag: 'wx', mode: 0o600, signal });
+    return this.withSnapshot(owner, path, signal, async ({ inputPath, extension, directory, bytes }) => {
       // Writer's text export preserves full flowing text without PDF pagination loss.
       const writer = /\.(docx?|odt)$/.test(extension);
       const outputPath = join(directory, writer ? 'body.txt' : 'body.pdf');
       if (extension !== '.pdf') {
-        const converter = await createConverter({
-          timeoutMs: 60_000,
-          maxInputBytes: 50 * 1024 * 1024,
-          maxOutputBytes: 100 * 1024 * 1024,
-          maxImageResolution: 192,
-          maxArchiveEntries: 10_000,
-          maxUncompressedBytes: 250 * 1024 * 1024,
-        });
+        const converter = await officeConverter();
         try {
           await converter.convert({ inputPath, outputPath }, signal);
         } finally {
@@ -77,6 +83,98 @@ export class OfficeReader {
         signal?.removeEventListener('abort', abort);
         await loading.destroy();
       }
+    });
+  }
+
+  async produce(
+    owner: string,
+    path: string,
+    operation: 'convert' | 'render' | 'recalculate',
+    options: { format?: string; pages?: number[]; sheet?: string; range?: string; dpi?: number },
+    signal?: AbortSignal,
+  ) {
+    return this.withSnapshot(owner, path, signal, async ({ inputPath, directory, name, extension }) => {
+      const converter = await officeConverter();
+      const outputRoot = '/outputs/office/' + randomUUID();
+      const stem = name.slice(0, -extension.length).slice(0, 160);
+      const pending: { local: string; path: string }[] = [];
+      const written: string[] = [];
+      try {
+        if (operation === 'render') {
+          const result = await converter.renderImages(
+            {
+              inputPath,
+              outputDir: join(directory, 'pages'),
+              pages: options.pages,
+              sheet: options.sheet,
+              range: options.range,
+              dpi: options.dpi ?? 120,
+              maxPages: 8,
+              maxPixels: 4_000_000,
+              maxDimension: 4096,
+            },
+            signal,
+          );
+          for (const image of result.images) {
+            pending.push({ local: image.path, path: outputRoot + '/' + stem + '-' + image.index + '.png' });
+          }
+        } else {
+          const format = options.format ?? (operation === 'recalculate' && extension === '.ods' ? 'ods' : 'xlsx');
+          const outputPath = join(directory, 'result.' + format);
+          if (operation === 'recalculate') await converter.recalculate({ inputPath, outputPath }, signal);
+          else await converter.convert({ inputPath, outputPath, sheet: options.sheet }, signal);
+          pending.push({
+            local: outputPath,
+            path: outputRoot + '/' + stem + (operation === 'recalculate' ? '-recalculated' : '') + '.' + format,
+          });
+        }
+        const files = [];
+        for (const file of pending) {
+          signal?.throwIfAborted();
+          const stored = await this.storage.write(owner, file.path, await readFile(file.local), {
+            overwrite: false,
+            mimeType: officeMimeType(extname(file.path)),
+          });
+          written.push(stored.path);
+          files.push(stored);
+        }
+        return { files };
+      } catch (error) {
+        await Promise.allSettled(written.map(path => this.storage.remove(owner, path)));
+        throw error;
+      } finally {
+        await converter.dispose();
+      }
+    });
+  }
+
+  private async withSnapshot<T>(
+    owner: string,
+    path: string,
+    signal: AbortSignal | undefined,
+    run: (snapshot: {
+      inputPath: string;
+      extension: string;
+      directory: string;
+      bytes: Buffer;
+      name: string;
+    }) => Promise<T>,
+  ): Promise<T> {
+    signal?.throwIfAborted();
+    if (!isOfficeDocument(path)) throw new FileStorageError('不支持的文档格式');
+    const info = await this.storage.info(owner, path);
+    if (info.size > 50 * 1024 * 1024) throw new FileStorageError('Office 文档超过 50 MB 读取上限', 413);
+    await this.acquire(signal);
+    let directory: string | undefined;
+    try {
+      const bytes = await this.storage.read(owner, path);
+      signal?.throwIfAborted();
+      if (bytes.length > 50 * 1024 * 1024) throw new FileStorageError('Office 文档超过 50 MB 读取上限', 413);
+      directory = await mkdtemp(join(tmpdir(), 'altflow-office-kit-'));
+      const extension = extname(info.name).toLowerCase();
+      const inputPath = join(directory, `source${extension}`);
+      await writeFile(inputPath, bytes, { flag: 'wx', mode: 0o600, signal });
+      return await run({ inputPath, extension, directory, bytes, name: info.name });
     } finally {
       try {
         if (directory) await rm(directory, { recursive: true, force: true });

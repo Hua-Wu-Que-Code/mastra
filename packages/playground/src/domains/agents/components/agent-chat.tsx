@@ -93,6 +93,8 @@ export const AgentChat = ({
       suggestedPrompts={suggestedPrompts}
       hasModelList={Boolean(modelList)}
       hideModelSwitcher={hideModelSwitcher}
+      summaryOnly
+      workspaceFiles={Boolean(workspaceScope)}
       isHistoryLoading={isMessagesLoading}
       onLoadPrevious={hasNextPage ? loadOlderMessages : undefined}
       isLoadingPrevious={isFetchingNextPage}

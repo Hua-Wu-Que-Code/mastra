@@ -2,12 +2,19 @@ import type { MastraDBMessage } from '@mastra/core/agent/message-list';
 import type { MessageFactoryPart } from '@mastra/react/ui';
 import { messageTextKind } from '../messages/renderers/message-text-kind';
 import { isToolPart, readToolPart } from '../messages/renderers/tool-part';
+import { isSignalData, isSubagentNotification } from '../messages/signal-data';
 import type { RunMetrics } from '../metrics/chat-metrics';
 import { isHiddenTool, isSettledState } from '../tools/tool-card-kind';
 import type { ToolCardContext } from '../tools/tool-card-kind';
 import { foldsIntoGroup } from '../tools/tool-groups';
 
-export function isWorkPart(part: MessageFactoryPart, context: ToolCardContext): boolean {
+export function isFoldableWorkPart(part: MessageFactoryPart, context: ToolCardContext): boolean {
+  if (part.type === 'reasoning') return true;
+  if (part.type === 'data-signal') return isSignalData(part.data) && isSubagentNotification(part.data);
+  return isToolPart(part) && foldsIntoGroup(part, context);
+}
+
+function isGroupedWorkPart(part: MessageFactoryPart, context: ToolCardContext): boolean {
   if (part.type === 'reasoning') return true;
   if (!isToolPart(part)) return false;
   const fields = readToolPart(part);
@@ -34,7 +41,7 @@ export function canFoldWork(messages: MastraDBMessage[], context: ToolCardContex
   });
 }
 
-export function finalReply(messages: MastraDBMessage[]) {
+export function finalReply(messages: MastraDBMessage[], { hideProgressWithoutReply = false } = {}) {
   for (const message of messages.toReversed()) {
     if (message.role !== 'assistant') continue;
     // Mastra can store several steps in one assistant message. Everything after
@@ -51,12 +58,15 @@ export function finalReply(messages: MastraDBMessage[]) {
     );
     if (start >= 0) return { messageId: message.id, start };
     // A trailing tool step has no final answer yet. Never use an earlier progress update as the answer.
-    if (boundary >= 0) return undefined;
+    if (boundary >= 0) {
+      return hideProgressWithoutReply ? { messageId: message.id, start: message.content.parts.length } : undefined;
+    }
   }
   return undefined;
 }
 
 export interface WorkDetailsPresentation {
+  summaryOnly?: boolean;
   collapsed: boolean;
   metrics?: RunMetrics[];
   lastAssistantId?: string;
@@ -72,9 +82,12 @@ export function presentedParts(
   presentation: WorkDetailsPresentation | undefined,
   context: ToolCardContext,
 ) {
-  if (!presentation?.collapsed || message.role !== 'assistant') return message.content.parts;
+  if (!presentation || message.role !== 'assistant' || (!presentation.collapsed && !presentation.summaryOnly))
+    return message.content.parts;
   return message.content.parts.filter((part, index) => {
-    if (isWorkPart(part, context)) return false;
+    if (presentation.summaryOnly && part.type === 'reasoning') return false;
+    if (!presentation.collapsed) return true;
+    if (isFoldableWorkPart(part, context)) return false;
     if (part.type !== 'text' || !presentation.hideIntermediateReplies || !presentation.finalReply) return true;
     if (messageTextKind(part.text, message.content.metadata) !== 'prose') return true;
     return message.id === presentation.finalReply.messageId && index >= presentation.finalReply.start;
@@ -85,7 +98,7 @@ export function presentedParts(
 export function workBlocks(parts: MastraDBMessage['content']['parts'], context: ToolCardContext) {
   const blocks: { key: number; work: boolean; parts: MastraDBMessage['content']['parts'] }[] = [];
   for (const [index, part] of parts.entries()) {
-    const work = isWorkPart(part, context);
+    const work = isGroupedWorkPart(part, context);
     const previous = blocks.at(-1);
     if (previous && previous.work === work) previous.parts.push(part);
     else blocks.push({ key: index, work, parts: [part] });

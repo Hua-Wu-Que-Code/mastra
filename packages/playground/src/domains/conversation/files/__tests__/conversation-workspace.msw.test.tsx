@@ -1,10 +1,11 @@
+import { ComposerAnnotations } from '@mastra/playground-ui/components/ai/annotations';
 import { ChatMessagesContext } from '@mastra/playground-ui/domains/chat/context/chat-context';
 import { MastraReactProvider } from '@mastra/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ConversationWorkspace } from '../conversation-workspace';
 import { fileMessages, filesFixture } from './fixtures/files';
 import { StudioConfigContext } from '@/domains/configuration/context/studio-config-state';
@@ -12,6 +13,8 @@ import { server } from '@/test/msw-server';
 
 const baseUrl = 'http://localhost:4111';
 afterEach(() => {
+  document.getSelection()?.removeAllRanges();
+  vi.restoreAllMocks();
   cleanup();
   localStorage.clear();
 });
@@ -40,6 +43,7 @@ function show(scope = 'thread-a') {
                   Download draft
                 </a>
                 <div>Chat content</div>
+                <ComposerAnnotations showExcerpt />
               </ConversationWorkspace>
             </ChatMessagesContext.Provider>
           </MastraReactProvider>
@@ -107,4 +111,47 @@ describe('Conversation workspace', () => {
     view.rerender(view.workspace('thread-a'));
     expect(await screen.findByRole('heading', { name: 'Generated draft' })).toBeTruthy();
   });
+});
+
+it('keeps two previews mounted and restores the original preview on switch', async () => {
+  server.use(
+    http.get('http://localhost:4111/storage', () => HttpResponse.json(filesFixture)),
+    http.get('http://localhost:4111/storage/download', ({ request }) => {
+      const path = new URL(request.url).searchParams.get('path');
+      return HttpResponse.text(path?.endsWith('.md') ? '# Opening scene' : 'Unquoted notes');
+    }),
+  );
+  show();
+  fireEvent.click(await screen.findByRole('button', { name: 'draft.md' }));
+  const heading = await screen.findByRole('heading', { name: 'Opening scene' });
+  fireEvent.click(screen.getByRole('tab', { name: 'Files', exact: true }));
+  fireEvent.click(await screen.findByRole('button', { name: 'notes.txt' }));
+  expect(await screen.findByText('Unquoted notes')).toBeTruthy();
+  fireEvent.click(screen.getByRole('tab', { name: 'draft.md' }));
+  expect(await screen.findByRole('heading', { name: 'Opening scene' })).toBe(heading);
+});
+
+it('quotes text selected in a file preview and lets the composer remove it', async () => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 900, 640));
+  vi.spyOn(Range.prototype, 'getClientRects').mockReturnValue(
+    Object.assign([new DOMRect(50, 120, 60, 18)], { item: () => null }),
+  );
+  handlers();
+  show();
+  fireEvent.click(await screen.findByRole('button', { name: 'draft.md' }));
+  const heading = await screen.findByRole('heading', { name: 'Generated draft' });
+  const selected = heading.firstChild;
+  if (!(selected instanceof Text)) throw new Error('The preview heading has no text');
+  fireEvent.pointerDown(heading);
+  const range = document.createRange();
+  range.setStart(selected, 0);
+  range.setEnd(selected, 'Generated'.length);
+  document.getSelection()?.removeAllRanges();
+  document.getSelection()?.addRange(range);
+  fireEvent.pointerUp(heading);
+  fireEvent.click(await screen.findByRole('button', { name: 'Add to chat' }));
+  const excerpt = await screen.findByRole('button', { name: 'Generated', exact: true });
+  fireEvent.click(excerpt);
+  fireEvent.click(await screen.findByRole('button', { name: 'Remove annotation 1' }));
+  expect(screen.queryByRole('button', { name: 'Generated', exact: true })).toBeNull();
 });

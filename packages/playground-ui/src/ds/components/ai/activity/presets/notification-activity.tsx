@@ -11,6 +11,8 @@ import { t as studioT, useLocale } from '@/lib/i18n';
 export interface NotificationActivityProps {
   label: string;
   message: string;
+  /** Optional formatted body. The message still supplies the text preview. */
+  messageBody?: ReactNode;
   state?: string;
   icon?: ReactNode;
   priority?: string;
@@ -33,6 +35,7 @@ const priorityBadgeVariants: Partial<Record<string, BadgeVariant>> = {
 export function NotificationActivity({
   label,
   message,
+  messageBody,
   state = 'notification',
   icon,
   priority,
@@ -44,7 +47,7 @@ export function NotificationActivity({
   messageLabel,
 }: NotificationActivityProps) {
   useLocale();
-  const lineHoldsMessage = messagePreviewShowsAll(message) && !messageLabel;
+  const lineHoldsMessage = messagePreviewShowsAll(message) && !messageLabel && !messageBody;
   const hasBadges = Boolean(priority || status || pending || extraBadges);
 
   return (
@@ -77,11 +80,12 @@ export function NotificationActivity({
               {messageLabel}
             </Txt>
           )}
-          {message && (
-            <Txt variant="caption" className="break-words whitespace-pre-wrap">
-              {message}
-            </Txt>
-          )}
+          {messageBody ??
+            (message && (
+              <Txt variant="caption" className="break-words whitespace-pre-wrap">
+                {message}
+              </Txt>
+            ))}
           {link && <NotificationLink link={link} message={message} />}
         </div>
       )}

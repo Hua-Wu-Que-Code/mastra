@@ -95,3 +95,5 @@ export const useChatTasks = (): TaskItem[] => useContext(ChatTasksContext).tasks
 
 /** Known files in this conversation; display names without changing tool paths. */
 export const ChatFilePathsContext = createContext<readonly string[]>([]);
+
+export const ChatOpenFileContext = createContext<((path: string) => void) | undefined>(undefined);

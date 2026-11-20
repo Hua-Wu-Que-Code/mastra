@@ -131,6 +131,35 @@ test('tree HTTP exposes actual child messages and usage only to the owning root 
   );
   assert.equal((await f.request('alice', id)).headers.get('Cache-Control'), 'no-store');
 });
+test('opening a running child shows completed tool steps before its final reply', async t => {
+  const f = await setup(t);
+  const actor = await f.tree.runtime.actor(context('alice'), 'alice-thread');
+  const { promise: finalReply, resolve: finish } = Promise.withResolvers();
+  let steps = 0;
+  f.setHandler(async body => {
+    if (!JSON.stringify(body.messages).includes('Your name is worker')) return { text: 'Received' };
+    if (++steps === 1) return { calls: [{ name: 'countText', args: { text: 'chapter outline' } }] };
+    await finalReply;
+    return { text: 'CHAPTER-SCAN-COMPLETE' };
+  });
+  try {
+    await f.tree.runtime.spawn(actor, { name: 'worker', description: 'Scan chapters', prompt: 'Scan chapters.' });
+    await until(() => steps === 2);
+    const id = (await f.treeStore.read('alice', 'alice-thread')).children[0].id;
+    const response = await f.request('alice', id);
+    assert.equal(response.status, 200);
+    const snapshot = await response.json();
+    assert.equal(snapshot.children[0].state, 'running');
+    assert.ok(
+      snapshot.messages.some(message =>
+        message.tools.some(tool => tool.name === 'countText' && tool.state === 'result'),
+      ),
+    );
+    assert.ok(snapshot.messages.every(message => message.text !== 'CHAPTER-SCAN-COMPLETE'));
+  } finally {
+    finish();
+  }
+});
 test('child HTTP continuation works with teamwork off and remains ownership checked and CSRF protected', async t => {
   const f = await setup(t);
   f.setTeamEnabled(false);

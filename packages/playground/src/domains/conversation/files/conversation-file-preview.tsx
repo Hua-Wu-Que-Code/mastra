@@ -1,25 +1,41 @@
+import {
+  AnnotationSelectionToolbar,
+  useOptionalChatAnnotations,
+} from '@mastra/playground-ui/components/ai/annotations';
 import { Button } from '@mastra/playground-ui/components/Button';
 import { MarkdownRenderer } from '@mastra/playground-ui/components/MarkdownRenderer';
 import { Txt } from '@mastra/playground-ui/components/Txt';
 import { IconArrowLeft } from '@mastra/playground-ui/icons/central/IconArrowLeft';
+import { IconArrowRotateClockwise } from '@mastra/playground-ui/icons/central/IconArrowRotateClockwise';
 import { IconCloudDownload } from '@mastra/playground-ui/icons/central/IconCloudDownload';
 import { t, useLocale } from '@mastra/playground-ui/lib/i18n';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useLayoutEffect, useRef } from 'react';
 import { ConversationBinaryPreview } from './conversation-binary-preview';
 import { useAccount } from '@/domains/account/account-context';
 import { FILE_PREVIEW_LIMIT, downloadStoredFile, readStoredFile } from '@/domains/account/storage-api';
 import type { StoredFile } from '@/domains/account/storage-api';
 import { useStudioConfig } from '@/domains/configuration/context/studio-config-state';
 
-export function ConversationFilePreview({ file, onBack }: { file: StoredFile; onBack: () => void }) {
+export function ConversationFilePreview({
+  file,
+  onBack,
+  scrollPositions,
+}: {
+  file: StoredFile;
+  onBack: () => void;
+  scrollPositions?: Map<string, number>;
+}) {
   useLocale();
   const target = useStudioConfig();
+  const annotation = useOptionalChatAnnotations();
+  const contentRef = useRef<HTMLDivElement>(null);
   const account = useAccount();
   const image = /^image\/(png|jpeg|gif|webp|avif)$/.test(file.mimeType);
   const pdf = file.mimeType === 'application/pdf';
   const text =
     file.mimeType.startsWith('text/') ||
-    /\.(md|mdx|txt|json|ya?ml|csv|log|[cm]?[jt]sx?|py|go|rs|sh|sql|css|xml|svg)$/i.test(file.name) ||
+    /\.(md|markdown|mdx|txt|json|ya?ml|csv|log|[cm]?[jt]sx?|py|go|rs|sh|sql|css|xml|svg)$/i.test(file.name) ||
     file.mimeType === 'application/json';
   const tooLarge = file.size > FILE_PREVIEW_LIMIT;
   const preview = useQuery({
@@ -40,6 +56,11 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
     gcTime: 0,
     retry: false,
   });
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content || !preview.data) return;
+    content.scrollTop = scrollPositions?.get(file.path) ?? 0;
+  }, [file.path, preview.data, scrollPositions]);
   const download = useMutation({ mutationFn: () => downloadStoredFile(target, file) });
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -50,6 +71,17 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
         <Txt variant="label" className="min-w-0 flex-1 truncate" title={file.name}>
           {file.name}
         </Txt>
+        {preview.isEnabled && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t('Refresh files')}
+            disabled={preview.isFetching}
+            onClick={() => void preview.refetch()}
+          >
+            <IconArrowRotateClockwise />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon-sm"
@@ -65,7 +97,11 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
           {download.error.message}
         </Txt>
       )}
-      <div className="min-h-0 flex-1 overflow-auto p-4">
+      <div
+        ref={contentRef}
+        onScroll={event => scrollPositions?.set(file.path, event.currentTarget.scrollTop)}
+        className="min-h-0 flex-1 overflow-auto p-4"
+      >
         {tooLarge ? (
           <Txt tone="muted">{t('This file is too large to preview. Download it to view.')}</Txt>
         ) : !text && !image && !pdf ? (
@@ -80,15 +116,18 @@ export function ConversationFilePreview({ file, onBack }: { file: StoredFile; on
             </Button>
           </div>
         ) : preview.data?.text !== undefined ? (
-          /\.md$/i.test(file.name) || file.mimeType === 'text/markdown' ? (
-            <MarkdownRenderer>{preview.data.text}</MarkdownRenderer>
-          ) : (
-            <pre className="font-mono text-label break-words whitespace-pre-wrap">{preview.data.text}</pre>
-          )
+          <div data-slot="message-content">
+            {/\.(md|markdown|mdx)$/i.test(file.name) || file.mimeType === 'text/markdown' ? (
+              <MarkdownRenderer>{preview.data.text}</MarkdownRenderer>
+            ) : (
+              <pre className="font-mono text-label break-words whitespace-pre-wrap">{preview.data.text}</pre>
+            )}
+          </div>
         ) : preview.data?.blob ? (
           <ConversationBinaryPreview key={preview.dataUpdatedAt} blob={preview.data.blob} name={file.name} pdf={pdf} />
         ) : null}
       </div>
+      {annotation && <AnnotationSelectionToolbar containerRef={contentRef} onAnnotate={annotation.addAnnotation} />}
     </div>
   );
 }

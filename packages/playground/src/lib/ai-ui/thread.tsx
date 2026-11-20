@@ -5,6 +5,7 @@ import {
   formatAnnotatedMessage,
   TranscriptAnnotations,
   useChatAnnotations,
+  useOptionalChatAnnotations,
 } from '@mastra/playground-ui/components/ai/annotations';
 import type { ChatAnnotation } from '@mastra/playground-ui/components/ai/annotations';
 import { ArrivalScope } from '@mastra/playground-ui/components/Arrival';
@@ -48,7 +49,7 @@ import { useSpeechRecognition } from '@mastra/react';
 import { useReadAloud } from '@mastra/react/hooks/voice';
 import type { MessageFactoryPart } from '@mastra/react/ui';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { AttachFileMenu } from './attachments/attach-file-menu';
@@ -63,15 +64,28 @@ import { MarkdownComposerInput } from './components/markdown-composer-input';
 import { useComposerAutofocus } from './hooks/use-composer-autofocus';
 import { SuggestedPromptList } from './suggested-prompt-list';
 import { TaskPanel } from './task-panel';
+import type { StoredFileReference } from '@/domains/account/storage-api';
 import { BrowserThumbnail, useBrowserSession } from '@/domains/agents';
 import { AgentChannelsCard } from '@/domains/agents/components/agent-channels/agent-channels-card';
 import { ChatMessagesLoadingSkeleton } from '@/domains/agents/components/agent-loading-skeletons';
 import { ComposerModelSwitcher, ComposerModelWarning } from '@/domains/agents/components/composer-model-switcher';
 import { usePermissions } from '@/domains/auth/hooks/use-permissions';
 import { useThreadInput } from '@/domains/conversation';
+import {
+  ComposerFileReferenceList,
+  FileReferenceSuggestions,
+} from '@/domains/conversation/files/composer-file-references';
+import {
+  formatFileReferences,
+  referenceAt,
+  useFileReferenceSuggestions,
+} from '@/domains/conversation/files/file-reference-helpers';
+import { TurnFileChanges } from '@/domains/conversation/files/turn-file-changes';
+import { useTurnFileChanges } from '@/domains/conversation/files/use-turn-file-changes';
 import { startViewTransition } from '@/lib/routing';
 
 const EMPTY_SUGGESTED_PROMPTS: string[] = [];
+const EMPTY_REFERENCES: StoredFileReference[] = [];
 
 /**
  * Detects whether the last assistant message has a part that is actively
@@ -117,6 +131,8 @@ export interface ThreadProps {
   suggestedPrompts?: string[];
   hasModelList?: boolean;
   hideModelSwitcher?: boolean;
+  summaryOnly?: boolean;
+  workspaceFiles?: boolean;
   /**
    * True while the thread history is being fetched for the first time. The skeleton
    * only replaces the welcome screen; live messages that arrive earlier take precedence.
@@ -136,6 +152,8 @@ const ThreadContent = ({
   suggestedPrompts,
   hasModelList,
   hideModelSwitcher,
+  summaryOnly,
+  workspaceFiles = false,
   isHistoryLoading,
   onLoadPrevious,
   isLoadingPrevious,
@@ -149,6 +167,7 @@ const ThreadContent = ({
 
   const messages = useChatMessages();
   const { isRunning } = useChatRunning();
+  const fileChanges = useTurnFileChanges(threadId, workspaceFiles, isRunning);
   const [requestContext] = useEntityRequestContext('agent', agentId ?? '');
   const {
     isSpeaking,
@@ -248,6 +267,8 @@ const ThreadContent = ({
                   <ArrivalScope>
                     {turnGroups.map((group, index) => {
                       const isLiveTurn = index === turnGroups.length - 1;
+                      const turnId = group.entries.find(entry => entry.role === 'user')?.id;
+                      const changes = turnId ? fileChanges.data?.filter(change => change.turn === turnId) : undefined;
                       const firstAssistantIndex = group.entries.findIndex(entry => entry.role === 'assistant');
                       const lastAssistant = [...group.entries].reverse().find(entry => entry.role === 'assistant');
                       // The first turn opens at the top already; room under it would only add empty scroll.
@@ -259,7 +280,12 @@ const ThreadContent = ({
                           holdsRoom={holdsRoom}
                           className="gap-4"
                         >
-                          <WorkDetails messages={group.entries} running={isLiveTurn && isRunning} latest={isLiveTurn}>
+                          <WorkDetails
+                            messages={group.entries}
+                            running={isLiveTurn && isRunning}
+                            latest={isLiveTurn}
+                            summaryOnly={summaryOnly}
+                          >
                             {group.entries.map((message, messageIndex) => (
                               <Fragment key={getClientMessageKey(message)}>
                                 {messageIndex === firstAssistantIndex && <WorkDetailsToggle />}
@@ -298,6 +324,7 @@ const ThreadContent = ({
                               <PendingIndicator className="animate-in delay-300 duration-200 fade-in-0 fill-mode-backwards" />
                             )}
                           </WorkDetails>
+                          {threadId && changes?.length ? <TurnFileChanges thread={threadId} changes={changes} /> : null}
                         </ChatShell.Turn>
                       );
                     })}
@@ -336,6 +363,7 @@ const ThreadContent = ({
                     hasModelList={hasModelList}
                     hideModelSwitcher={hideModelSwitcher}
                     composerPlaceholder={composerPlaceholder}
+                    workspaceFiles={workspaceFiles}
                   />
                 </div>
                 {!landingShown && <ConversationStats />}
@@ -352,13 +380,18 @@ const ThreadContent = ({
 };
 
 export const Thread = (props: ThreadProps) => {
+  const annotation = useOptionalChatAnnotations();
   const messages = useChatMessages();
   const { isRunning } = useChatRunning();
   return (
     <ChatMetricsProvider messages={messages} running={isRunning} agentId={props.agentId} threadId={props.threadId}>
-      <ChatAnnotationsProvider>
+      {annotation ? (
         <ThreadContent {...props} />
-      </ChatAnnotationsProvider>
+      ) : (
+        <ChatAnnotationsProvider>
+          <ThreadContent {...props} />
+        </ChatAnnotationsProvider>
+      )}
     </ChatMetricsProvider>
   );
 };
@@ -385,6 +418,7 @@ interface AgentComposerProps {
   hasModelList?: boolean;
   hideModelSwitcher?: boolean;
   composerPlaceholder?: string;
+  workspaceFiles: boolean;
 }
 
 const AgentComposer = ({
@@ -393,10 +427,49 @@ const AgentComposer = ({
   hasModelList,
   hideModelSwitcher,
   composerPlaceholder,
+  workspaceFiles,
 }: AgentComposerProps) => {
   useLocale();
-  const { threadInput: text, setThreadInput, updateDraft, draftStatus } = useThreadInput(threadId);
+  const { threadInput: text, setThreadInput, updateDraft, draft, draftStatus } = useThreadInput(threadId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const markdownFocus = useRef<(() => void) | undefined>(undefined);
+  const setMarkdownFocus = useCallback((next: (() => void) | undefined) => {
+    markdownFocus.current = next;
+  }, []);
+  const [cursor, setCursor] = useState(0);
+  const [dismissedToken, setDismissedToken] = useState('');
+  const [referenceIndex, setReferenceIndex] = useState(0);
+  const refs = workspaceFiles ? (draft?.fileReferences ?? EMPTY_REFERENCES) : EMPTY_REFERENCES;
+  const token = workspaceFiles && updateDraft ? referenceAt(text, cursor) : undefined;
+  const tokenKey = token ? [token.start, token.query].join(':') : '';
+  const showSuggestions = Boolean(token && tokenKey !== dismissedToken && refs.length < 20);
+  const suggestions = useFileReferenceSuggestions(showSuggestions ? token?.query : undefined, workspaceFiles);
+  const updateCursor = (position: number) => {
+    setCursor(position);
+    setDismissedToken('');
+    setReferenceIndex(0);
+  };
+  const selectReference = (file: StoredFileReference) => {
+    if (!token || !updateDraft) return;
+    updateDraft(current => ({
+      ...current,
+      text: current.text === text ? text.slice(0, token.start) + text.slice(token.end) : current.text,
+      fileReferences: current.fileReferences?.some(ref => ref.path === file.path)
+        ? current.fileReferences
+        : [...(current.fileReferences ?? []), { name: file.name, path: file.path }],
+    }));
+    setCursor(token.start);
+    setDismissedToken(tokenKey);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      requestAnimationFrame(() => textareaRef.current?.setSelectionRange(token.start, token.start));
+    } else markdownFocus.current?.();
+  };
+  const removeReference = (path: string) =>
+    updateDraft?.(current => ({
+      ...current,
+      fileReferences: current.fileReferences?.filter(file => file.path !== path),
+    }));
   const { annotations, takeAnnotations, restoreAnnotations } = useChatAnnotations();
   const preparing = useRef(false);
   const lifetime = useRef(0);
@@ -417,7 +490,7 @@ const AgentComposer = ({
   const inputDisabled = !canExecuteAgent || Boolean(draftStatus?.restoring);
   useComposerAutofocus(textareaRef, { threadId, disabled: inputDisabled || !preferences.plainText });
 
-  const isEmpty = text.trim().length === 0 && attachments.length === 0 && annotations.length === 0;
+  const isEmpty = text.trim().length === 0 && attachments.length === 0 && annotations.length === 0 && refs.length === 0;
   const sendBlocked = isRunning && !canSendWhileStreaming;
   const showModelSwitcher = Boolean(agentId && !hasModelList && !hideModelSwitcher);
   const shownError = submitError || draftStatus?.error;
@@ -427,6 +500,26 @@ const AgentComposer = ({
 
   const onComposerKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.defaultPrevented || event.nativeEvent.isComposing || event.keyCode === 229) return;
+    if (showSuggestions) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setDismissedToken(tokenKey);
+        return;
+      }
+      if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && suggestions.files.length) {
+        event.preventDefault();
+        const delta = event.key === 'ArrowDown' ? 1 : -1;
+        setReferenceIndex(index => (index + delta + suggestions.files.length) % suggestions.files.length);
+        return;
+      }
+      const file = suggestions.files[Math.min(referenceIndex, suggestions.files.length - 1)];
+      if (event.key === 'Enter' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && file) {
+        event.preventDefault();
+        event.stopPropagation();
+        selectReference(file);
+        return;
+      }
+    }
     if (event.key !== 'Enter' || event.altKey || sendBlocked) return;
     const modifier = event.metaKey || event.ctrlKey;
     if (preferences.sendShortcut === 'enter' ? event.shiftKey : !modifier) return;
@@ -457,6 +550,7 @@ const AgentComposer = ({
     preparing.current = true;
     const currentLifetime = lifetime.current;
     const submittedAttachments = attachments;
+    const submittedPaths = new Set(refs.map(file => file.path));
     const submittedIds = new Set(submittedAttachments.map(attachment => attachment.id));
     // A message the server can't have stored goes back in the composer, before anything typed since.
     const withSubmittedText = (typed: string) => [text, typed].filter(Boolean).join('\n\n');
@@ -467,6 +561,9 @@ const AgentComposer = ({
         updateDraft(previous => ({
           text: withSubmittedText(previous.text),
           attachments: [...submittedAttachments, ...previous.attachments],
+          fileReferences: refs.length
+            ? [...refs, ...(previous.fileReferences ?? []).filter(file => !submittedPaths.has(file.path))]
+            : previous.fileReferences,
         }));
       else {
         setThreadInput(withSubmittedText);
@@ -483,6 +580,7 @@ const AgentComposer = ({
         updateDraft(previous => ({
           text: previous.text === text ? '' : previous.text,
           attachments: previous.attachments.filter(attachment => !submittedIds.has(attachment.id)),
+          fileReferences: previous.fileReferences?.filter(file => !submittedPaths.has(file.path)),
         }));
       else {
         setThreadInput('');
@@ -490,7 +588,7 @@ const AgentComposer = ({
       }
       const sentAnnotations = takeAnnotations();
       setSendPulseKey(k => k + 1);
-      const message = formatAnnotatedMessage(text, sentAnnotations);
+      const message = formatFileReferences(formatAnnotatedMessage(text, sentAnnotations), refs);
       void Promise.resolve(send({ message, attachments: coreUserMessages, deliveryMode })).then(delivered => {
         if (delivered === false) restoreSubmission(sentAnnotations);
       });
@@ -527,10 +625,19 @@ const AgentComposer = ({
             void submit();
           }}
         >
+          {showSuggestions && !inputDisabled && (
+            <FileReferenceSuggestions
+              files={suggestions.files}
+              index={referenceIndex}
+              pending={suggestions.pending}
+              onSelect={selectReference}
+            />
+          )}
           <ComposerRing busy={isRunning}>
             <ComposerBox sendingPulseKey={sendPulseKey}>
-              <ComposerAnnotations />
+              <ComposerAnnotations showExcerpt={workspaceFiles} />
               <ChatComposerAttachments />
+              <ComposerFileReferenceList files={refs} onRemove={removeReference} />
               {preferences.plainText ? (
                 <ComposerInput
                   ref={textareaRef}
@@ -538,6 +645,12 @@ const AgentComposer = ({
                   placeholder={placeholder}
                   onChange={event => {
                     setThreadInput(event.target.value);
+                    updateCursor(event.target.selectionEnd);
+                  }}
+                  onClick={event => updateCursor(event.currentTarget.selectionEnd)}
+                  onKeyUp={event => {
+                    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key))
+                      updateCursor(event.currentTarget.selectionEnd);
                   }}
                   onKeyDown={onComposerKeyDown}
                   disabled={inputDisabled}
@@ -546,6 +659,8 @@ const AgentComposer = ({
                 <MarkdownComposerInput
                   value={text}
                   onChange={setThreadInput}
+                  onCursorChange={updateCursor}
+                  focusRef={setMarkdownFocus}
                   placeholder={placeholder}
                   disabled={inputDisabled}
                   threadId={threadId}

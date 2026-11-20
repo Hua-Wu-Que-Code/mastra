@@ -39,12 +39,13 @@ export function userStorageRoutes(
   store: UserStorage,
   authenticate: (request: Request) => Promise<AltFlowUser | null>,
   origins: string[],
+  canReadThread?: (user: AltFlowUser, threadId: string) => Promise<boolean>,
 ) {
   // Custom routes share Go-backed authentication and validate Origin for cookie writes.
   const route = (
     path: string,
     method: 'GET' | 'POST' | 'DELETE',
-    action: (request: Request, owner: string) => Promise<Response>,
+    action: (request: Request, owner: string, user: AltFlowUser) => Promise<Response>,
   ) =>
     registerApiRoute(path, {
       method,
@@ -56,7 +57,7 @@ export function userStorageRoutes(
           const origin = c.req.header('origin');
           if ((origin && !origins.includes(origin)) || (method !== 'GET' && !c.req.header('authorization') && !origin))
             return c.json({ error: '不允许的请求来源' }, 403);
-          const response = await action(c.req.raw, user.id);
+          const response = await action(c.req.raw, user.id, user);
           response.headers.set('Cache-Control', 'no-store');
           response.headers.set('X-Content-Type-Options', 'nosniff');
           return response;
@@ -72,6 +73,19 @@ export function userStorageRoutes(
     route('/storage', 'GET', async (_, owner) =>
       Response.json({ ...(await store.summary(owner)), files: await store.list(owner) }),
     ),
+    route('/storage/changes', 'GET', async (request, owner, user) => {
+      const { thread, turn, path } = z
+        .object({
+          thread: z.string().min(1).max(200),
+          turn: z.string().min(1).max(200).optional(),
+          path: z.string().min(1).max(1024).optional(),
+        })
+        .parse(Object.fromEntries(new URL(request.url).searchParams));
+      if (!canReadThread || !(await canReadThread(user, thread))) throw new FileStorageError('会话不存在', 404);
+      if (turn && path) return Response.json(await store.turnDiff(owner, thread, turn, path));
+      if (turn || path) throw new FileStorageError('文件参数无效');
+      return Response.json(await store.turnChanges(owner, thread));
+    }),
     route('/storage/upload', 'POST', async (request, owner) => {
       const params = uploadParams.parse(Object.fromEntries(new URL(request.url).searchParams));
       const file = await store.write(

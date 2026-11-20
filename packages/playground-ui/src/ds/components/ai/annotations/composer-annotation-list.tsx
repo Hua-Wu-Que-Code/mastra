@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 export interface ComposerAnnotationListProps {
   annotations: readonly ChatAnnotation[];
   onRemove: (id: string) => void;
+  showExcerpt?: boolean;
 }
 
 function revealSource({ source }: ChatAnnotation): boolean {
@@ -26,16 +27,23 @@ function revealSource({ source }: ChatAnnotation): boolean {
   return true;
 }
 
-export function ComposerAnnotationList({ annotations, onRemove }: ComposerAnnotationListProps) {
+export function ComposerAnnotationList({ annotations, onRemove, showExcerpt }: ComposerAnnotationListProps) {
   useLocale();
   const [open, setOpen] = useState(false);
 
   return (
     <div data-slot="composer-annotations" className="flex px-2 pt-2">
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger type="button" size="sm">
+        <PopoverTrigger type="button" size="sm" className="max-w-full min-w-0">
           <IconOpenQuote1 aria-hidden="true" />
-          {pluralize(annotations.length, 'annotation')}
+          {showExcerpt ? (
+            <>
+              <span className="max-w-72 truncate">{annotations[0]?.text}</span>
+              {annotations.length > 1 && <span className="shrink-0">+{annotations.length - 1}</span>}
+            </>
+          ) : (
+            pluralize(annotations.length, 'annotation')
+          )}
         </PopoverTrigger>
         <PopoverContent
           align="start"

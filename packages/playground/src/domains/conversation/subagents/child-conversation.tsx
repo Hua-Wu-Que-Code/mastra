@@ -103,6 +103,7 @@ export function ChildConversation({ root, id, child }: { root: string; id: strin
                     {turns.map((turn, index) => (
                       <div key={turn.key} className="flex flex-col gap-4">
                         <WorkDetails
+                          summaryOnly
                           messages={turn.entries}
                           running={Boolean(active) && index === turns.length - 1}
                           latest={index === turns.length - 1}

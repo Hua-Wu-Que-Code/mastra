@@ -9,6 +9,8 @@ export function MarkdownComposerInput({
   disabled,
   threadId,
   onKeyDown,
+  onCursorChange,
+  focusRef,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -16,6 +18,8 @@ export function MarkdownComposerInput({
   disabled: boolean;
   threadId?: string;
   onKeyDown: KeyboardEventHandler<HTMLElement>;
+  onCursorChange?: (position: number) => void;
+  focusRef?: (focus: (() => void) | undefined) => void;
 }) {
   const ref = useRef<ComponentRef<typeof CodeEditor>>(null);
   useEffect(() => {
@@ -24,11 +28,26 @@ export function MarkdownComposerInput({
     view.focus();
     view.dispatch({ selection: { anchor: view.state.doc.length } });
   }, [threadId, disabled]);
+  useEffect(() => {
+    focusRef?.(() => ref.current?.view?.focus());
+    return () => focusRef?.(undefined);
+  }, [focusRef]);
+  const reportCursor = () => {
+    const position = ref.current?.view?.state.selection.main.head;
+    if (position !== undefined) onCursorChange?.(position);
+  };
   return (
     <CodeEditor
       ref={ref}
       value={value}
-      onChange={onChange}
+      onChange={next => {
+        onChange(next);
+        reportCursor();
+      }}
+      onKeyUp={event => {
+        if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) reportCursor();
+      }}
+      onMouseUp={reportCursor}
       language="markdown"
       font="body"
       variant="inline"
